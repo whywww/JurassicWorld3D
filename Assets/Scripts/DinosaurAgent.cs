@@ -11,14 +11,23 @@ namespace JurassicWorld
             Approaching
         }
 
-        public Camera ViewCamera { get; set; }
-        public string DisplayName { get; set; } = "恐龙";
-        public float MovementHeight { get; set; }
-        public float ViewFocusHeight { get; set; } = 2.5f;
-        public float VisualYaw { get; set; }
-        public float WalkSpeed { get; set; } = 1.15f;
-        public float ApproachSpeed { get; set; } = 2.8f;
-        public float MoveAnimationGroundSpeed { get; set; } = 1.15f;
+        [SerializeField] private Camera viewCamera;
+        [SerializeField] private string displayName = "恐龙";
+        [SerializeField] private float movementHeight;
+        [SerializeField] private float viewFocusHeight = 2.5f;
+        [SerializeField] private float visualYaw;
+        [SerializeField] private float walkSpeed = 1.15f;
+        [SerializeField] private float approachSpeed = 2.8f;
+        [SerializeField] private float moveAnimationGroundSpeed = 1.15f;
+
+        public Camera ViewCamera => viewCamera;
+        public string DisplayName => displayName;
+        public float MovementHeight => movementHeight;
+        public float ViewFocusHeight => viewFocusHeight;
+        public float VisualYaw => visualYaw;
+        public float WalkSpeed => walkSpeed;
+        public float ApproachSpeed => approachSpeed;
+        public float MoveAnimationGroundSpeed => moveAnimationGroundSpeed;
         public DinosaurState CurrentState { get; private set; } = DinosaurState.Idle;
         public bool HasBeenSummoned { get; private set; }
 

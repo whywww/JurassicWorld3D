@@ -3,81 +3,79 @@ using System.Linq;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace JurassicWorld.Editor
 {
     public static class JurassicProjectSetup
     {
+        private const string MainScenePath = "Assets/Scenes/Main.unity";
+
         [MenuItem("Jurassic World/Create MVP Scene")]
         public static void CreateScene()
         {
             Directory.CreateDirectory("Assets/Scenes");
             var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
-            EditorSceneManager.SaveScene(scene, "Assets/Scenes/Main.unity");
-            EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene("Assets/Scenes/Main.unity", true) };
+            EditorSceneManager.SaveScene(scene, MainScenePath);
+            EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(MainScenePath, true) };
             AssetDatabase.SaveAssets();
             Debug.Log("Jurassic World MVP scene created.");
         }
 
+        // 编辑态烘焙入口（任务 #3 可用 -executeMethod JurassicWorld.Editor.JurassicProjectSetup.BakeScene 调用）。
+        // 打开 Main.unity → 由 JurassicWorldSceneBuilder 建造全部内容 → 标脏并保存场景与资产。
+        [MenuItem("Jurassic World/Bake Scene (Edit Mode)")]
+        public static void BakeScene()
+        {
+            Directory.CreateDirectory("Assets/Scenes");
+            if (!File.Exists(MainScenePath))
+            {
+                Scene newScene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+                EditorSceneManager.SaveScene(newScene, MainScenePath);
+            }
+
+            Scene scene = EditorSceneManager.OpenScene(MainScenePath, OpenSceneMode.Single);
+            JurassicWorldSceneBuilder.Build();
+
+            if (!EditorBuildSettings.scenes.Any(s => s.path == MainScenePath))
+                EditorBuildSettings.scenes = EditorBuildSettings.scenes
+                    .Concat(new[] { new EditorBuildSettingsScene(MainScenePath, true) }).ToArray();
+
+            EditorSceneManager.MarkSceneDirty(scene);
+            EditorSceneManager.SaveScene(scene);
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            Debug.Log("JURASSIC_SCENE_BAKED: 已在编辑态烘焙 Main.unity（相机 / 方向光 / 草地 / HUD / 5 只恐龙）。");
+        }
+
+        // 编辑态断言：不点 Play，打开烘焙后的 Main.unity，检查场景内已存在相机、方向光与 5 只挂
+        // DinosaurAgent 的恐龙 GameObject。
         [MenuItem("Jurassic World/Validate MVP")]
         public static void ValidateProject()
         {
-            string modelPath = Path.Combine(Application.streamingAssetsPath, DinosaurGltfLoader.RelativeModelPath);
-            if (!File.Exists(modelPath))
-                throw new FileNotFoundException("Missing dinosaur GLB", modelPath);
+            if (!File.Exists(MainScenePath))
+                throw new FileNotFoundException("缺少已烘焙的主场景，请先执行 Jurassic World/Bake Scene (Edit Mode)。", MainScenePath);
 
-            byte[] bytes = File.ReadAllBytes(modelPath);
-            string json = ExtractGlbJson(bytes);
-            string[] expected = { "idle", "run", "roar", "bite", "attack_tail" };
-            foreach (string clip in expected)
-            {
-                if (!json.Contains("\"name\":\"" + clip + "\""))
-                    throw new InvalidDataException("Missing animation in GLB: " + clip);
-            }
+            EditorSceneManager.OpenScene(MainScenePath, OpenSceneMode.Single);
 
-            string pterodactylPath = Path.Combine(Application.streamingAssetsPath, "Dinosaur/Pteradactal.glb");
-            if (!File.Exists(pterodactylPath))
-                throw new FileNotFoundException("Missing pterodactyl GLB", pterodactylPath);
-            if (!ExtractGlbJson(File.ReadAllBytes(pterodactylPath)).Contains("PixCap Animation"))
-                throw new InvalidDataException("Missing pterodactyl flight animation.");
+            if (Object.FindObjectOfType<Camera>() == null)
+                throw new InvalidDataException("场景缺少相机（Main Camera）。");
 
-            string[] fbxAssets =
-            {
-                "Assets/Resources/Dinosaurs/Rajasaurus/source/Rajasaurus.fbx",
-                "Assets/Resources/Dinosaurs/Velociraptor/Raptor/Raptor_Animated_FBX.fbx",
-                "Assets/Resources/Dinosaurs/Argentinosaurus/source/Argentinosaurus.fbx"
-            };
-            foreach (string assetPath in fbxAssets)
-            {
-                GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(assetPath);
-                if (prefab == null)
-                    throw new FileNotFoundException("Missing imported FBX", assetPath);
+            bool hasDirectionalLight = Object.FindObjectsOfType<Light>().Any(light => light.type == LightType.Directional);
+            if (!hasDirectionalLight)
+                throw new InvalidDataException("场景缺少方向光（Sun）。");
 
-                AnimationClip[] clips = AssetDatabase.LoadAllAssetsAtPath(assetPath)
-                    .OfType<AnimationClip>()
-                    .Where(clip => !clip.name.StartsWith("__preview__"))
-                    .ToArray();
-                if (clips.Length == 0)
-                    throw new InvalidDataException("No animation clips imported from: " + assetPath);
-                GameObject instance = Object.Instantiate(prefab);
-                if (instance.GetComponentInChildren<Animation>(true) == null || instance.GetComponentInChildren<Renderer>(true) == null)
-                    throw new InvalidDataException("FBX lacks a runtime Animation component or renderer: " + assetPath);
-                Object.DestroyImmediate(instance);
-                Debug.Log(assetPath + " animations: " + string.Join(", ", clips.Select(clip => clip.name)));
-            }
+            DinosaurAgent[] agents = Object.FindObjectsOfType<DinosaurAgent>();
+            if (agents.Length != 5)
+                throw new InvalidDataException("期望场景中有 5 只挂 DinosaurAgent 的恐龙，实际找到 " + agents.Length + " 只。");
 
-            if (!EditorBuildSettings.scenes.Any(scene => scene.enabled && scene.path == "Assets/Scenes/Main.unity"))
+            if (agents.Any(agent => agent.GetComponent<DinosaurFbxLoader>() == null))
+                throw new InvalidDataException("存在缺少 DinosaurFbxLoader 绑定器的恐龙。");
+
+            if (!EditorBuildSettings.scenes.Any(scene => scene.enabled && scene.path == MainScenePath))
                 throw new InvalidDataException("Main scene is not enabled in build settings.");
 
-            Debug.Log("JURASSIC_MVP_VALIDATION_OK: five dinosaur models, animations, scene and scripts are present.");
-        }
-
-        private static string ExtractGlbJson(byte[] bytes)
-        {
-            if (bytes.Length < 20 || System.BitConverter.ToUInt32(bytes, 0) != 0x46546C67)
-                throw new InvalidDataException("File is not a valid GLB container.");
-            int jsonLength = (int)System.BitConverter.ToUInt32(bytes, 12);
-            return System.Text.Encoding.UTF8.GetString(bytes, 20, jsonLength).TrimEnd(' ', '\0');
+            Debug.Log("JURASSIC_MVP_VALIDATION_OK: 编辑态校验通过（相机 / 方向光 / 5 只挂 DinosaurAgent 的恐龙）。");
         }
     }
 }

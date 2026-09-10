@@ -3,68 +3,28 @@ using UnityEngine.UI;
 
 namespace JurassicWorld
 {
+    // 信息卡现在是场景预置对象：Canvas / Background / Text 层级由 JurassicWorldSceneBuilder 在编辑态
+    // 烘焙好，并通过 [SerializeField] 引用挂上（字体使用可序列化的内置字体资产，不再用不可序列化的
+    // Font.CreateDynamicFontFromOSFont）。运行行为保持不变：LateUpdate 朝向相机 + 按条件淡入淡出。
     public sealed class DinosaurInfoCard : MonoBehaviour
     {
-        private Camera viewCamera;
-        private DinosaurAgent agent;
-        private CanvasGroup canvasGroup;
+        [SerializeField] private Camera viewCamera;
+        [SerializeField] private DinosaurAgent agent;
+        [SerializeField] private CanvasGroup canvasGroup;
+        [SerializeField] private Text descriptionText;
 
-        public static DinosaurInfoCard Create(Transform dinosaur, Camera camera, DinosaurAgent dinosaurAgent, string description, Vector3 localPosition, float scale = 0.012f)
+        private void Awake()
         {
-            var root = new GameObject("Dinosaur Info Card", typeof(RectTransform), typeof(Canvas), typeof(CanvasGroup));
-            root.transform.SetParent(dinosaur, false);
-            root.transform.localPosition = localPosition;
-            root.transform.localScale = Vector3.one * scale;
-
-            Canvas canvas = root.GetComponent<Canvas>();
-            canvas.renderMode = RenderMode.WorldSpace;
-            canvas.sortingOrder = 20;
-            RectTransform rect = root.GetComponent<RectTransform>();
-            rect.sizeDelta = new Vector2(420f, 245f);
-
-            var background = new GameObject("Background", typeof(RectTransform), typeof(Image));
-            background.transform.SetParent(root.transform, false);
-            RectTransform bgRect = background.GetComponent<RectTransform>();
-            bgRect.anchorMin = Vector2.zero;
-            bgRect.anchorMax = Vector2.one;
-            bgRect.offsetMin = Vector2.zero;
-            bgRect.offsetMax = Vector2.zero;
-            background.GetComponent<Image>().color = new Color(0.035f, 0.075f, 0.055f, 0.92f);
-
-            Text text = CreateText(background.transform);
-            text.text = description;
-
-            DinosaurInfoCard card = root.AddComponent<DinosaurInfoCard>();
-            card.viewCamera = camera;
-            card.agent = dinosaurAgent;
-            card.canvasGroup = root.GetComponent<CanvasGroup>();
-            card.canvasGroup.alpha = 0f;
-            card.canvasGroup.blocksRaycasts = false;
-            return card;
-        }
-
-        private static Text CreateText(Transform parent)
-        {
-            var textObject = new GameObject("Text", typeof(RectTransform), typeof(Text));
-            textObject.transform.SetParent(parent, false);
-            RectTransform rect = textObject.GetComponent<RectTransform>();
-            rect.anchorMin = Vector2.zero;
-            rect.anchorMax = Vector2.one;
-            rect.offsetMin = new Vector2(24f, 18f);
-            rect.offsetMax = new Vector2(-24f, -18f);
-            Text text = textObject.GetComponent<Text>();
-            text.font = Font.CreateDynamicFontFromOSFont(new[] { "Microsoft YaHei", "Arial" }, 24);
-            text.fontSize = 24;
-            text.color = new Color(0.93f, 0.96f, 0.84f);
-            text.alignment = TextAnchor.MiddleLeft;
-            text.horizontalOverflow = HorizontalWrapMode.Wrap;
-            text.verticalOverflow = VerticalWrapMode.Overflow;
-            return text;
+            if (canvasGroup != null)
+            {
+                canvasGroup.alpha = 0f;
+                canvasGroup.blocksRaycasts = false;
+            }
         }
 
         private void LateUpdate()
         {
-            if (viewCamera == null)
+            if (viewCamera == null || agent == null || canvasGroup == null)
                 return;
 
             transform.rotation = Quaternion.LookRotation(transform.position - viewCamera.transform.position, Vector3.up);
