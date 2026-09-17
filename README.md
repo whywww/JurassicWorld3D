@@ -19,6 +19,42 @@ Unity 版本：`2022.3.62f3c1`。场景包含霸王龙、胜王龙、伶盗龙�
 
 恐龙会在静止与随机巡游之间切换。召唤后，视野中的恐龙会转向相机并沿固定路线穿过观察者，到达相机后方后恢复自由活动。信息卡会在召唤对象进入画面中央时淡入，离开主要视野后隐藏。
 
+## 环境系统
+
+### 资产依赖
+
+- **Nature Starter Kit 2**（免费 Asset Store 包）是本项目的环境资产来源，包含树木 Prefab、草地 Details、天空盒材质。首次克隆仓库后**必须**从 Unity Asset Store 手动导入到 `Assets/NatureStarterKit2/`，否则 Bake 会自动跳过植被播种，仅生成光秃 Terrain。
+- 导入完成后，`Assets/Editor/NatureStarterKitLocator.cs` 会自动定位所需 Prefab 与材质；若路径变更需在 Locator 中更新常量。
+
+### Terrain 架构
+
+- 场景使用 **200m × 200m** 的 Unity Terrain（替代原 Plane），资产持久化到 `Assets/Terrain/JurassicTerrain.asset`，Bake 幂等。
+- **核心活动区**（中央约 100m × 100m，即恐龙与相机的活动范围）heightmap 固定为 0，视觉与物理上均完全平坦。
+- **外围区域**允许轻微起伏（≤ 2m），用于遮挡地图边界并营造远景层次。
+- 地表铺设单一 `TerrainLayer`（草地 Albedo + Normal），Tiling 约 4m，避免大面积纹理拉伸。
+
+### 植被三通道
+
+| 通道 | 用途 | 渲染方式 |
+|------|------|----------|
+| Terrain Trees (`TreePrototype`) | 中大型乔木、外围疏林 | Terrain 内置树渲染器，支持 LOD 与 Billboard |
+| Terrain Details (`DetailPrototype`) | 草地、小灌木、地表覆盖 | GPU Instancing（`terrain.drawInstanced = true`） |
+| 普通 Prefab | 大型岩石、构图植物、地标 | 常规 MeshRenderer，手工摆放 |
+
+- 首次 Bake 时 `JurassicWorldSceneBuilder` 会**自动播种**（Seeded Random，可复现），仅在 `TerrainData.treeInstanceCount == 0 && detailPrototype 全部为空` 时触发。
+- 播种后用户可通过 Unity **Terrain Tools > Paint Trees / Paint Details** 手动微调；再次 Bake **不会覆盖**已有实例，只重建恐龙、相机、光照等动态内容。
+- 强制重播种：手动清空 TerrainData 的 Trees/Details 后再次 Bake。
+
+### 运行期依赖（Y=0 硬编码）
+
+以下运行期脚本假定恐龙与相机所在的核心活动区 Terrain heightmap = 0（World Y = 0）：
+
+- `DinosaurAgent.MoveTowards` — 每帧将根节点 Y 强制钉在 `MovementHeight`（=0）。
+- `SmoothExplorerCamera.Update` — 相机位置 Clamp ±47m 且 `y = 3`。
+- `DinosaurFootLock.Start` — 一次性采样脚底 Y 作为地面基准。
+
+因此**禁止**在核心活动区引入地形起伏。若后续需要真正的地形高度支持，必须同步改造这三个脚本，改为 `Terrain.SampleHeight()` 每帧或每 N 米重采样，具体迁移方案见架构备忘。
+
 ## 验收清单
 
 - Console 没有 C# 编译错误或模型加载错误。

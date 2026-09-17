@@ -11,11 +11,11 @@ namespace JurassicWorld
         [SerializeField] private Text errorText;
         [SerializeField] private Text statusText;
         [SerializeField] private Text helpText;
-        [SerializeField] private int expectedDinosaurCount = 5;
+        [SerializeField] private int expectedDinosaurCount = 2;
 
         private static Text errorTextRef;
         private static Text statusTextRef;
-        private static int expectedCountRef = 5;
+        private static int expectedCountRef = 2;
         private static int loadedCount;
 
         private void Awake()
@@ -41,8 +41,10 @@ namespace JurassicWorld
         public static void ReportLoaded(string displayName)
         {
             loadedCount++;
+            // 就绪文案只报数量、不再硬编码恐龙名字：名字清单的唯一来源是
+            // JurassicWorldSceneBuilder.CreateTemplates()，此处重复一份会在增删恐龙时失同步。
             ShowStatus(loadedCount >= expectedCountRef
-                ? expectedCountRef + " 种恐龙已就绪：霸王龙 / 胜王龙 / 伶盗龙 / 阿根廷龙 / 风神翼龙"
+                ? expectedCountRef + " 种恐龙已就绪"
                 : "已加载 " + loadedCount + "/" + expectedCountRef + "：" + displayName);
         }
     }
