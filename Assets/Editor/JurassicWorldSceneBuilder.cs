@@ -61,6 +61,8 @@ namespace JurassicWorld.Editor
             BuildScatterPrefabs();
             BuildHud(uiFont);
             BuildDinosaurs(camera, uiFont);
+            // Phase 2: five authored, overlapping vegetation islands in the central clearing.
+            VegetationIslandSeeder.Seed();
             // Dense Jungle Phase 1：可开关的通道 debug 标注（纯场景线段，不动 TerrainData / 植被 Pass）。
             BuildMovementCorridorDebug();
         }
