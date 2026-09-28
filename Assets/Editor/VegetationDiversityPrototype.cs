@@ -387,7 +387,8 @@ namespace JurassicWorld.Editor
 
         private static void MakePrefab(string name, int number)
         {
-            string path = Prepared + "/" + name + (name == "IslandTree02" ? "_LODs" : "") + ".fbx";
+            bool hasLods = name == "IslandTree02" || name.StartsWith("FabTree_");
+            string path = Prepared + "/" + name + (hasLods ? "_LODs" : "") + ".fbx";
             GameObject model = AssetDatabase.LoadAssetAtPath<GameObject>(path);
             if (model == null) throw new FileNotFoundException("Prepared FBX missing", path);
             var root = new GameObject(name);
@@ -407,8 +408,10 @@ namespace JurassicWorld.Editor
             }
             foreach (Collider collider in root.GetComponentsInChildren<Collider>(true))
                 UnityEngine.Object.DestroyImmediate(collider);
-            if (name == "IslandTree02")
+            if (hasLods)
             {
+                foreach (LODGroup importedGroup in body.GetComponentsInChildren<LODGroup>(true))
+                    UnityEngine.Object.DestroyImmediate(importedGroup);
                 Renderer[] lodRenderers = new Renderer[3];
                 foreach (Renderer renderer in body.GetComponentsInChildren<Renderer>(true))
                     for (int i = 0; i < 3; i++)
@@ -417,8 +420,8 @@ namespace JurassicWorld.Editor
                 LODGroup group = root.AddComponent<LODGroup>();
                 group.SetLODs(new[]
                 {
-                    new LOD(0.38f, new[] { lodRenderers[0] }),
-                    new LOD(0.14f, new[] { lodRenderers[1] }),
+                    new LOD(name == "IslandTree02" ? 0.38f : 0.32f, new[] { lodRenderers[0] }),
+                    new LOD(name == "IslandTree02" ? 0.14f : 0.10f, new[] { lodRenderers[1] }),
                     new LOD(0.025f, new[] { lodRenderers[2] }),
                 });
                 group.RecalculateBounds();

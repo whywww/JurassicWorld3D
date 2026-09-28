@@ -1,0 +1,179 @@
+path,source_width,source_height,imported_width,imported_height,standalone_max_size,graphics_format,compression,mipmaps,ui_or_sprite,runtime_memory_bytes,source_file_bytes
+"Assets/Materials/NatureSkyPanorama.tga",2048,2048,2048,2048,2048,"R8G8B8_SRGB","Uncompressed",False,False,12583592,12582956
+"Assets/Resources/Dinosaurs/Velociraptor/Raptor/Textures/Raptor_Normal.png",2048,2048,2048,2048,2048,"RGBA_DXT5_UNorm","Compressed",True,False,5593112,2726182
+"Assets/Resources/Dinosaurs/Velociraptor/Raptor/Textures/Raptor_NormalDetailed.png",2048,2048,2048,2048,2048,"RGBA_DXT5_UNorm","Compressed",True,False,5593112,4761408
+"Assets/Textures/PolyHaven/DeadTreeTrunk02_Smoothness.png",2048,2048,2048,2048,2048,"RGBA_DXT5_UNorm","Compressed",True,False,5593112,2312917
+"Assets/Textures/PolyHaven/Fern02_AlbedoCutout.png",2048,2048,2048,2048,2048,"RGBA_DXT5_SRGB","Compressed",True,False,5593112,2215651
+"Assets/Textures/PolyHaven/Fern02_Normal.exr",4096,4096,2048,2048,2048,"RGBA_DXT5_UNorm","Compressed",True,False,5593112,10330145
+"Assets/Textures/PolyHaven/Fern02_Smoothness.png",2048,2048,2048,2048,2048,"RGBA_DXT5_UNorm","Compressed",True,False,5593112,833414
+"Assets/Textures/PolyHaven/RockMossSet01_Smoothness.png",2048,2048,2048,2048,2048,"RGBA_DXT5_UNorm","Compressed",True,False,5593112,1546107
+"Assets/Textures/PolyHaven/TreeStump01_Smoothness.png",2048,2048,2048,2048,2048,"RGBA_DXT5_UNorm","Compressed",True,False,5593112,2422378
+"Assets/ThirdParty/PolyHaven/DeadTreeTrunk02/textures/dead_tree_trunk_02_nor_gl_4k.exr",4096,4096,2048,2048,2048,"RGBA_DXT5_UNorm","Compressed",True,False,5593112,39843477
+"Assets/ThirdParty/PolyHaven/DeadTreeTrunk02/textures/dead_tree_trunk_02_rough_4k.exr",4096,4096,2048,2048,2048,"RGB_BC6H_UFloat","Compressed",True,False,5593112,5840712
+"Assets/ThirdParty/PolyHaven/Fern02/textures/fern_02_nor_gl_4k.exr",4096,4096,2048,2048,2048,"RGB_BC6H_UFloat","Compressed",True,False,5593112,10330145
+"Assets/ThirdParty/PolyHaven/Fern02/textures/fern_02_rough_4k.exr",4096,4096,2048,2048,2048,"RGB_BC6H_UFloat","Compressed",True,False,5593112,2986520
+"Assets/ThirdParty/PolyHaven/RockMossSet01/textures/rock_moss_set_01_nor_gl_4k.exr",4096,4096,2048,2048,2048,"RGBA_DXT5_UNorm","Compressed",True,False,5593112,28116152
+"Assets/ThirdParty/PolyHaven/TreeStump01/textures/tree_stump_01_nor_gl_4k.exr",4096,4096,2048,2048,2048,"RGBA_DXT5_UNorm","Compressed",True,False,5593112,30857604
+"Assets/ThirdParty/PolyHaven/TreeStump01/textures/tree_stump_01_rough_4k.exr",4096,4096,2048,2048,2048,"RGB_BC6H_UFloat","Compressed",True,False,5593112,11396204
+"Assets/NatureStarterKit2/Textures/ground01.psd",2048,2048,2048,2048,2048,"RGBA_DXT1_SRGB","Compressed",True,False,2796896,20617030
+"Assets/NatureStarterKit2/Textures/ground01.tga",2048,2048,2048,2048,2048,"RGBA_DXT1_SRGB","Compressed",True,False,2796896,12582956
+"Assets/NatureStarterKit2/Textures/ground02.tga",2048,2048,2048,2048,2048,"RGBA_DXT1_SRGB","Compressed",True,False,2796896,12582956
+"Assets/NatureStarterKit2/Textures/ground03.psd",2048,2048,2048,2048,2048,"RGBA_DXT1_SRGB","Compressed",True,False,2796896,22723506
+"Assets/NatureStarterKit2/Textures/ground03.tga",2048,2048,2048,2048,2048,"RGBA_DXT1_SRGB","Compressed",True,False,2796896,12582956
+"Assets/NatureStarterKit2/Textures/sky.psd",2048,2048,2048,2048,2048,"RGBA_DXT1_SRGB","Compressed",True,False,2796896,11597753
+"Assets/Resources/Dinosaurs/Argentinosaurus/textures/AlbedoMap.png",2048,2048,2048,2048,2048,"RGBA_DXT1_SRGB","Compressed",True,False,2796896,5814512
+"Assets/Resources/Dinosaurs/Argentinosaurus/textures/AmbientOcclutionMap.png",2048,2048,2048,2048,2048,"RGBA_DXT1_SRGB","Compressed",True,False,2796896,2388647
+"Assets/Resources/Dinosaurs/Argentinosaurus/textures/image.png",2048,2048,2048,2048,2048,"RGBA_DXT1_SRGB","Compressed",True,False,2796896,6162084
+"Assets/Resources/Dinosaurs/Argentinosaurus/textures/MetelicMap.png",2048,2048,2048,2048,2048,"RGBA_DXT1_SRGB","Compressed",True,False,2796896,4241922
+"Assets/Resources/Dinosaurs/Argentinosaurus/textures/RoughnessMap.png",2048,2048,2048,2048,2048,"RGBA_DXT1_SRGB","Compressed",True,False,2796896,2727544
+"Assets/Resources/Dinosaurs/Rajasaurus/textures/AlbedoMap.jpg",2048,2048,2048,2048,2048,"RGBA_DXT1_SRGB","Compressed",True,False,2796896,666950
+"Assets/Resources/Dinosaurs/Rajasaurus/textures/AmbientOcclusionMap.png",2048,2048,2048,2048,2048,"RGBA_DXT1_SRGB","Compressed",True,False,2796896,2722944
+"Assets/Resources/Dinosaurs/Rajasaurus/textures/image.jpg",4096,4096,2048,2048,2048,"RGBA_DXT1_SRGB","Compressed",True,False,2796896,4051260
+"Assets/Resources/Dinosaurs/Rajasaurus/textures/MetelicMap.png",2048,2048,2048,2048,2048,"RGBA_DXT1_SRGB","Compressed",True,False,2796896,3633410
+"Assets/Resources/Dinosaurs/Velociraptor/Raptor/Textures/Raptor_AO.png",2048,2048,2048,2048,2048,"RGBA_DXT1_SRGB","Compressed",True,False,2796896,16813658
+"Assets/Resources/Dinosaurs/Velociraptor/Raptor/Textures/Raptor_PatternA_Albedo.png",2048,2048,2048,2048,2048,"RGBA_DXT1_SRGB","Compressed",True,False,2796896,1954541
+"Assets/Resources/Dinosaurs/Velociraptor/Raptor/Textures/Raptor_PatternB_Albedo.png",2048,2048,2048,2048,2048,"RGBA_DXT1_SRGB","Compressed",True,False,2796896,1811053
+"Assets/Resources/Dinosaurs/Velociraptor/Raptor/Textures/Raptor_PatternC_Albedo.png",2048,2048,2048,2048,2048,"RGBA_DXT1_SRGB","Compressed",True,False,2796896,2028082
+"Assets/Resources/Dinosaurs/Velociraptor/Raptor/Textures/Raptor_PatternD_Albedo.png",2048,2048,2048,2048,2048,"RGBA_DXT1_SRGB","Compressed",True,False,2796896,1853144
+"Assets/Resources/Dinosaurs/Velociraptor/Raptor/Textures/Raptor_PatternE_Albedo.png",2048,2048,2048,2048,2048,"RGBA_DXT1_SRGB","Compressed",True,False,2796896,1055802
+"Assets/Resources/Dinosaurs/Velociraptor/Raptor/Textures/Raptor_Scales_AlbedoA.png",2048,2048,2048,2048,2048,"RGBA_DXT1_SRGB","Compressed",True,False,2796896,2426868
+"Assets/ThirdParty/PolyHaven/DeadTreeTrunk02/textures/dead_tree_trunk_02_diff_4k.jpg",4096,4096,2048,2048,2048,"RGBA_DXT1_SRGB","Compressed",True,False,2796896,12850600
+"Assets/ThirdParty/PolyHaven/Fern02/textures/fern_02_alpha_4k.png",4096,4096,2048,2048,2048,"RGBA_DXT1_SRGB","Compressed",True,False,2796896,470827
+"Assets/ThirdParty/PolyHaven/Fern02/textures/fern_02_diff_4k.jpg",4096,4096,2048,2048,2048,"RGBA_DXT1_SRGB","Compressed",True,False,2796896,3025392
+"Assets/ThirdParty/PolyHaven/RockMossSet01/textures/rock_moss_set_01_diff_4k.jpg",4096,4096,2048,2048,2048,"RGBA_DXT1_SRGB","Compressed",True,False,2796896,2530683
+"Assets/ThirdParty/PolyHaven/RockMossSet01/textures/rock_moss_set_01_rough_4k.jpg",4096,4096,2048,2048,2048,"RGBA_DXT1_SRGB","Compressed",True,False,2796896,1021159
+"Assets/ThirdParty/PolyHaven/TreeStump01/textures/tree_stump_01_diff_4k.jpg",4096,4096,2048,2048,2048,"RGBA_DXT1_SRGB","Compressed",True,False,2796896,9987244
+"Assets/ThirdParty/VegetationDiversity/Source/SketchfabBananaTree/textures/pgfhf_2K_Roughness.jpg",2048,2048,2048,2048,2048,"RGBA_DXT1_SRGB","Compressed",True,False,2796896,458715
+"Assets/ThirdParty/VegetationDiversity/Source/SketchfabBananaTree/textures/pgfhf_2K_Translucency.jpg",2048,2048,2048,2048,2048,"RGBA_DXT1_SRGB","Compressed",True,False,2796896,935739
+"Assets/ThirdParty/VegetationDiversity/Source/SketchfabBananaTree/textures/sdbcdah_2K_AO.jpg",2048,2048,2048,2048,2048,"RGBA_DXT1_SRGB","Compressed",True,False,2796896,399692
+"Assets/ThirdParty/VegetationDiversity/Source/SketchfabBananaTree/textures/sdbcdah_2K_Roughness.jpg",2048,2048,2048,2048,2048,"RGBA_DXT1_SRGB","Compressed",True,False,2796896,460363
+"Assets/ThirdParty/VegetationDiversity/Source/SketchfabBananaTree/textures/sdbcdah_2K_Translucency.jpg",2048,2048,2048,2048,2048,"RGBA_DXT1_SRGB","Compressed",True,False,2796896,353050
+"Assets/ThirdParty/VegetationDiversity/Source/SketchfabBananaTree/textures/tiglajzdy_2K_AO.jpg",2048,2048,2048,2048,2048,"RGBA_DXT1_SRGB","Compressed",True,False,2796896,1210554
+"Assets/ThirdParty/VegetationDiversity/Source/SketchfabBananaTree/textures/tiglajzdy_2K_Roughness.jpg",2048,2048,2048,2048,2048,"RGBA_DXT1_SRGB","Compressed",True,False,2796896,591260
+"Assets/NatureStarterKit2/Nature/bush01_Textures/diffuse.png",1024,1024,1024,1024,2048,"RGBA_DXT5_SRGB","Compressed",True,False,1398808,364485
+"Assets/NatureStarterKit2/Nature/bush01_Textures/normal_specular.png",1024,1024,1024,1024,2048,"RGBA_DXT5_SRGB","Compressed",True,False,1398808,21934
+"Assets/NatureStarterKit2/Nature/bush01_Textures/translucency_gloss.png",1024,1024,1024,1024,2048,"RGBA_DXT5_SRGB","Compressed",True,False,1398808,21924
+"Assets/NatureStarterKit2/Nature/bush02_Textures/diffuse.png",1024,1024,1024,1024,2048,"RGBA_DXT5_SRGB","Compressed",True,False,1398808,388248
+"Assets/NatureStarterKit2/Nature/bush02_Textures/normal_specular.png",1024,1024,1024,1024,2048,"RGBA_DXT5_SRGB","Compressed",True,False,1398808,21934
+"Assets/NatureStarterKit2/Nature/bush02_Textures/translucency_gloss.png",1024,1024,1024,1024,2048,"RGBA_DXT5_SRGB","Compressed",True,False,1398808,21924
+"Assets/NatureStarterKit2/Nature/bush03_Textures/diffuse.png",1024,1024,1024,1024,2048,"RGBA_DXT5_SRGB","Compressed",True,False,1398808,375553
+"Assets/NatureStarterKit2/Nature/bush03_Textures/normal_specular.png",1024,1024,1024,1024,2048,"RGBA_DXT5_SRGB","Compressed",True,False,1398808,21934
+"Assets/NatureStarterKit2/Nature/bush03_Textures/translucency_gloss.png",1024,1024,1024,1024,2048,"RGBA_DXT5_SRGB","Compressed",True,False,1398808,21924
+"Assets/NatureStarterKit2/Nature/bush04_Textures/diffuse.png",1024,1024,1024,1024,2048,"RGBA_DXT5_SRGB","Compressed",True,False,1398808,367008
+"Assets/NatureStarterKit2/Nature/bush04_Textures/normal_specular.png",1024,1024,1024,1024,2048,"RGBA_DXT5_SRGB","Compressed",True,False,1398808,21934
+"Assets/NatureStarterKit2/Nature/bush04_Textures/translucency_gloss.png",1024,1024,1024,1024,2048,"RGBA_DXT5_SRGB","Compressed",True,False,1398808,21924
+"Assets/NatureStarterKit2/Nature/bush05_Textures/diffuse.png",1024,1024,1024,1024,2048,"RGBA_DXT5_SRGB","Compressed",True,False,1398808,377938
+"Assets/NatureStarterKit2/Nature/bush05_Textures/normal_specular.png",1024,1024,1024,1024,2048,"RGBA_DXT5_SRGB","Compressed",True,False,1398808,21934
+"Assets/NatureStarterKit2/Nature/bush05_Textures/translucency_gloss.png",1024,1024,1024,1024,2048,"RGBA_DXT5_SRGB","Compressed",True,False,1398808,21924
+"Assets/NatureStarterKit2/Nature/bush06_Textures/diffuse.png",1024,1024,1024,1024,2048,"RGBA_DXT5_SRGB","Compressed",True,False,1398808,367008
+"Assets/NatureStarterKit2/Nature/bush06_Textures/normal_specular.png",1024,1024,1024,1024,2048,"RGBA_DXT5_SRGB","Compressed",True,False,1398808,21934
+"Assets/NatureStarterKit2/Nature/bush06_Textures/translucency_gloss.png",1024,1024,1024,1024,2048,"RGBA_DXT5_SRGB","Compressed",True,False,1398808,21924
+"Assets/NatureStarterKit2/Nature/tree01_Textures/diffuse.png",1024,1024,1024,1024,2048,"RGBA_DXT5_SRGB","Compressed",True,False,1398808,473147
+"Assets/NatureStarterKit2/Nature/tree01_Textures/normal_specular.png",1024,1024,1024,1024,2048,"RGBA_DXT5_SRGB","Compressed",True,False,1398808,21934
+"Assets/NatureStarterKit2/Nature/tree01_Textures/translucency_gloss.png",1024,1024,1024,1024,2048,"RGBA_DXT5_SRGB","Compressed",True,False,1398808,21924
+"Assets/NatureStarterKit2/Nature/tree02_Textures/diffuse.png",1024,1024,1024,1024,2048,"RGBA_DXT5_SRGB","Compressed",True,False,1398808,473147
+"Assets/NatureStarterKit2/Nature/tree02_Textures/normal_specular.png",1024,1024,1024,1024,2048,"RGBA_DXT5_SRGB","Compressed",True,False,1398808,21934
+"Assets/NatureStarterKit2/Nature/tree02_Textures/translucency_gloss.png",1024,1024,1024,1024,2048,"RGBA_DXT5_SRGB","Compressed",True,False,1398808,21924
+"Assets/NatureStarterKit2/Nature/tree03_Textures/diffuse.png",1024,1024,1024,1024,2048,"RGBA_DXT5_SRGB","Compressed",True,False,1398808,473147
+"Assets/NatureStarterKit2/Nature/tree03_Textures/normal_specular.png",1024,1024,1024,1024,2048,"RGBA_DXT5_SRGB","Compressed",True,False,1398808,21934
+"Assets/NatureStarterKit2/Nature/tree03_Textures/translucency_gloss.png",1024,1024,1024,1024,2048,"RGBA_DXT5_SRGB","Compressed",True,False,1398808,21924
+"Assets/NatureStarterKit2/Nature/tree04_Textures/diffuse.png",1024,1024,1024,1024,2048,"RGBA_DXT5_SRGB","Compressed",True,False,1398808,473147
+"Assets/NatureStarterKit2/Nature/tree04_Textures/normal_specular.png",1024,1024,1024,1024,2048,"RGBA_DXT5_SRGB","Compressed",True,False,1398808,21934
+"Assets/NatureStarterKit2/Nature/tree04_Textures/translucency_gloss.png",1024,1024,1024,1024,2048,"RGBA_DXT5_SRGB","Compressed",True,False,1398808,21924
+"Assets/NatureStarterKit2/Textures/branch01.tga",2048,2048,1024,1024,1024,"RGBA_DXT5_SRGB","Compressed",True,False,1398808,7885317
+"Assets/NatureStarterKit2/Textures/bush01.tga",2048,2048,1024,1024,1024,"RGBA_DXT5_SRGB","Compressed",True,False,1398808,16777260
+"Assets/Resources/Dinosaurs/TRex/source/T-Rex.fbm/trexNorm.jpg",1024,1024,1024,1024,2048,"RGBA_DXT5_UNorm","Compressed",True,False,1398808,185296
+"Assets/Resources/Dinosaurs/TRex/textures/trexNormal.jpeg",1024,1024,1024,1024,2048,"RGBA_DXT5_UNorm","Compressed",True,False,1398808,185122
+"Assets/Resources/Dinosaurs/Velociraptor/Raptor/Textures/Other_Normal 1K.png",1024,1024,1024,1024,2048,"RGBA_DXT5_UNorm","Compressed",True,False,1398808,120344
+"Assets/ThirdParty/VegetationDiversity/PolyHaven/IslandTree02/textures/island_tree_02_branches_nor_gl_1k.png",1024,1024,1024,1024,1024,"RGBA_DXT5_UNorm","Compressed",True,False,1398808,5400459
+"Assets/ThirdParty/VegetationDiversity/PolyHaven/IslandTree02/textures/island_tree_02_leaves_diff_1k.png",1024,1024,1024,1024,1024,"RGBA_DXT5_SRGB","Compressed",True,False,1398808,1638916
+"Assets/ThirdParty/VegetationDiversity/PolyHaven/IslandTree02/textures/island_tree_02_leaves_nor_gl_1k.png",1024,1024,1024,1024,1024,"RGBA_DXT5_UNorm","Compressed",True,False,1398808,2886859
+"Assets/ThirdParty/VegetationDiversity/PolyHaven/IslandTree02/textures/island_tree_02_nor_gl_1k.exr",1024,1024,1024,1024,1024,"RGBA_DXT5_UNorm","Compressed",True,False,1398808,2353279
+"Assets/ThirdParty/VegetationDiversity/PolyHaven/PachiraAquatica01/textures/pachira_aquatica_01_bark_nor_gl_1k.png",1024,1024,1024,1024,1024,"RGBA_DXT5_UNorm","Compressed",True,False,1398808,3764086
+"Assets/ThirdParty/VegetationDiversity/PolyHaven/PachiraAquatica01/textures/pachira_aquatica_01_leaves_nor_gl_1k.png",1024,1024,1024,1024,1024,"RGBA_DXT5_UNorm","Compressed",True,False,1398808,3250605
+"Assets/ThirdParty/VegetationDiversity/Source/FabDesktopTrees60/T_Trees60_Leaf.png",2048,2048,1024,1024,1024,"RGBA_DXT5_SRGB","Compressed",True,False,1398808,2284839
+"Assets/ThirdParty/VegetationDiversity/Source/FabDesktopTrees60/T_Trees60_Trunk_normal.png",2048,2048,1024,1024,1024,"RGBA_DXT5_UNorm","Compressed",True,False,1398808,3496968
+"Assets/ThirdParty/VegetationDiversity/Source/SketchfabBananaTree/textures/pgfhf_2K_Normal.jpg",2048,2048,1024,1024,1024,"RGBA_DXT5_UNorm","Compressed",True,False,1398808,597983
+"Assets/ThirdParty/VegetationDiversity/Source/SketchfabBananaTree/textures/sdbcdah_2K_Normal.jpg",2048,2048,1024,1024,1024,"RGBA_DXT5_UNorm","Compressed",True,False,1398808,1122455
+"Assets/ThirdParty/VegetationDiversity/Source/SketchfabBananaTree/textures/tiglajzdy_2K_Normal.jpg",2048,2048,1024,1024,1024,"RGBA_DXT5_UNorm","Compressed",True,False,1398808,5312155
+"Assets/ThirdParty/VegetationDiversity/Source/SketchfabPalmTrees/textures/PalmLeaf_2.png",2048,2048,1024,1024,1024,"RGBA_DXT5_SRGB","Compressed",True,False,1398808,845163
+"Assets/ThirdParty/VegetationDiversity/Source/SketchfabPalmTrees/textures/PalmLeaf_3.png",2048,2048,1024,1024,1024,"RGBA_DXT5_SRGB","Compressed",True,False,1398808,930983
+"Assets/ThirdParty/VegetationDiversity/Source/SketchfabPalmTrees/textures/PalmLeaf_4.png",2048,2048,1024,1024,1024,"RGBA_DXT5_SRGB","Compressed",True,False,1398808,940117
+"Assets/ThirdParty/VegetationDiversity/Source/SketchfabBananaTree/textures/sl0no0p_2K_AO.jpg",2048,1024,2048,1024,2048,"RGBA_DXT1_SRGB","Compressed",True,False,1398800,552242
+"Assets/ThirdParty/VegetationDiversity/Source/SketchfabBananaTree/textures/sl0no0p_2K_Roughness.jpg",2048,1024,2048,1024,2048,"RGBA_DXT1_SRGB","Compressed",True,False,1398800,565519
+"Assets/ThirdParty/VegetationDiversity/Source/SketchfabBananaTree/textures/sl0no0p_2K_Translucency.jpg",2048,1024,2048,1024,2048,"RGBA_DXT1_SRGB","Compressed",True,False,1398800,814882
+"Assets/ThirdParty/VegetationDiversity/Source/SketchfabBananaTree/textures/sl0no0p_2K_Normal.jpg",2048,1024,1024,512,1024,"RGBA_DXT5_UNorm","Compressed",True,False,699768,854997
+"Assets/ThirdParty/VegetationDiversity/Source/SketchfabBananaTree/textures/slpmfhp_2K_AO.jpg",2048,512,2048,512,2048,"RGBA_DXT1_SRGB","Compressed",True,False,699760,207691
+"Assets/ThirdParty/VegetationDiversity/Source/SketchfabBananaTree/textures/slpmfhp_2K_Roughness.jpg",2048,512,2048,512,2048,"RGBA_DXT1_SRGB","Compressed",True,False,699760,221847
+"Assets/ThirdParty/VegetationDiversity/Source/SketchfabBananaTree/textures/slpmfhp_2K_Translucency.jpg",2048,512,2048,512,2048,"RGBA_DXT1_SRGB","Compressed",True,False,699760,340238
+"Assets/Resources/Dinosaurs/TRex/source/T-Rex.fbm/trexDiff.jpg",1024,1024,1024,1024,2048,"RGBA_DXT1_SRGB","Compressed",True,False,699744,193612
+"Assets/Resources/Dinosaurs/TRex/textures/trexDiff.jpeg",1024,1024,1024,1024,2048,"RGBA_DXT1_SRGB","Compressed",True,False,699744,193438
+"Assets/Resources/Dinosaurs/Velociraptor/Raptor/Textures/Other_Albedo.png",1024,1024,1024,1024,2048,"RGBA_DXT1_SRGB","Compressed",True,False,699744,1729384
+"Assets/Resources/Dinosaurs/Velociraptor/Raptor/Textures/Other_Albedo2 1K.png",1024,1024,1024,1024,2048,"RGBA_DXT1_SRGB","Compressed",True,False,699744,8403289
+"Assets/ThirdParty/VegetationDiversity/PolyHaven/IslandTree02/textures/island_tree_02_branches_diff_1k.png",1024,1024,1024,1024,1024,"RGBA_DXT1_SRGB","Compressed",True,False,699744,5300342
+"Assets/ThirdParty/VegetationDiversity/PolyHaven/IslandTree02/textures/island_tree_02_diff_1k.jpg",1024,1024,1024,1024,1024,"RGBA_DXT1_SRGB","Compressed",True,False,699744,738738
+"Assets/ThirdParty/VegetationDiversity/PolyHaven/IslandTree02/textures/island_tree_02_leaves_alpha_1k.png",1024,1024,1024,1024,1024,"RGBA_DXT1_SRGB","Compressed",True,False,699744,57438
+"Assets/ThirdParty/VegetationDiversity/PolyHaven/PachiraAquatica01/textures/pachira_aquatica_01_bark_diff_1k.png",1024,1024,1024,1024,1024,"RGBA_DXT1_SRGB","Compressed",True,False,699744,3685483
+"Assets/ThirdParty/VegetationDiversity/PolyHaven/PachiraAquatica01/textures/pachira_aquatica_01_leaves_alpha_1k.png",1024,1024,1024,1024,1024,"RGBA_DXT1_SRGB","Compressed",True,False,699744,68381
+"Assets/ThirdParty/VegetationDiversity/PolyHaven/PachiraAquatica01/textures/pachira_aquatica_01_leaves_diff_1k.png",1024,1024,1024,1024,1024,"RGBA_DXT1_SRGB","Compressed",True,False,699744,2501917
+"Assets/ThirdParty/VegetationDiversity/Source/FabDesktopTrees60/T_Trees60_Trunk.png",2048,2048,1024,1024,1024,"RGBA_DXT1_SRGB","Compressed",True,False,699744,9500325
+"Assets/ThirdParty/VegetationDiversity/Source/SketchfabBananaTree/textures/pgfhf_2K_Albedo.jpg",2048,2048,1024,1024,1024,"RGBA_DXT1_SRGB","Compressed",True,False,699744,457793
+"Assets/ThirdParty/VegetationDiversity/Source/SketchfabBananaTree/textures/pgfhf_2K_Opacity.jpg",2048,2048,1024,1024,1024,"RGBA_DXT1_SRGB","Compressed",True,False,699744,152725
+"Assets/ThirdParty/VegetationDiversity/Source/SketchfabBananaTree/textures/sdbcdah_2K_Albedo.jpg",2048,2048,1024,1024,1024,"RGBA_DXT1_SRGB","Compressed",True,False,699744,708223
+"Assets/ThirdParty/VegetationDiversity/Source/SketchfabBananaTree/textures/sdbcdah_2K_Opacity.jpg",2048,2048,1024,1024,1024,"RGBA_DXT1_SRGB","Compressed",True,False,699744,382907
+"Assets/ThirdParty/VegetationDiversity/Source/SketchfabBananaTree/textures/tiglajzdy_2K_Albedo.jpg",2048,2048,1024,1024,1024,"RGBA_DXT1_SRGB","Compressed",True,False,699744,3491480
+"Assets/ThirdParty/VegetationDiversity/Source/SketchfabPalmTrees/textures/Bark_1_Bake1_pbr_diffuse.jpg",2048,2048,1024,1024,1024,"RGBA_DXT1_SRGB","Compressed",True,False,699744,364714
+"Assets/ThirdParty/VegetationDiversity/Source/SketchfabPalmTrees/textures/Bark_2_Bake1_pbr_diffuse.jpg",2048,2048,1024,1024,1024,"RGBA_DXT1_SRGB","Compressed",True,False,699744,389842
+"Assets/ThirdParty/VegetationDiversity/Source/SketchfabPalmTrees/textures/Bark_3_Bake1_pbr_diffuse.jpg",2048,2048,1024,1024,1024,"RGBA_DXT1_SRGB","Compressed",True,False,699744,309968
+"Assets/ThirdParty/VegetationDiversity/Source/SketchfabPalmTrees/textures/Bark_4_Bake1_pbr_diffuse.jpg",2048,2048,1024,1024,1024,"RGBA_DXT1_SRGB","Compressed",True,False,699744,482537
+"Assets/ThirdParty/VegetationDiversity/Source/SketchfabBananaTree/textures/slpmfhp_2K_Normal.jpg",2048,512,1024,256,1024,"RGBA_DXT5_UNorm","Compressed",True,False,350264,315837
+"Assets/NatureStarterKit2/Standard Assets/Effects/TessellationShaders/Textures/CliffNormals.png",512,512,512,512,1024,"RGBA_DXT5_UNorm","Compressed",True,False,350232,552190
+"Assets/NatureStarterKit2/Textures/bark01.tga",512,1024,512,1024,2048,"RGBA_DXT1_SRGB","Compressed",True,False,350224,692235
+"Assets/NatureStarterKit2/Textures/bark02.tga",512,1024,512,1024,2048,"RGBA_DXT1_SRGB","Compressed",True,False,350224,602790
+"Assets/ThirdParty/VegetationDiversity/Source/SketchfabBananaTree/textures/sl0no0p_2K_Albedo.jpg",2048,1024,1024,512,1024,"RGBA_DXT1_SRGB","Compressed",True,False,350224,841637
+"Assets/ThirdParty/VegetationDiversity/Source/SketchfabBananaTree/textures/sl0no0p_2K_Opacity.jpg",2048,1024,1024,512,1024,"RGBA_DXT1_SRGB","Compressed",True,False,350224,121510
+"Assets/NatureStarterKit2/Standard Assets/Effects/TessellationShaders/Textures/CliffHeight.png",512,512,512,512,1024,"54","Uncompressed",True,False,350205,173397
+"Assets/NatureStarterKit2/Textures/grass01.tga",1024,1024,256,256,256,"R8G8B8A8_SRGB","Uncompressed",True,False,350204,4194348
+"Assets/NatureStarterKit2/Textures/grass02.tga",1024,1024,256,256,256,"R8G8B8A8_SRGB","Uncompressed",True,False,350204,2365628
+"Assets/NatureStarterKit2/Standard Assets/Effects/ImageEffects/Textures/NoiseEffectGrain.png",256,256,256,256,1024,"R8G8B8_SRGB","Uncompressed",True,False,262823,128100
+"Assets/ThirdParty/VegetationDiversity/Source/SketchfabBananaTree/textures/slpmfhp_2K_Albedo.jpg",2048,512,1024,256,1024,"RGBA_DXT1_SRGB","Compressed",True,False,175472,297259
+"Assets/ThirdParty/VegetationDiversity/Source/SketchfabBananaTree/textures/slpmfhp_2K_Opacity.jpg",2048,512,1024,256,1024,"RGBA_DXT1_SRGB","Compressed",True,False,175472,70870
+"Assets/NatureStarterKit2/Standard Assets/Effects/ImageEffects/Textures/NoiseEffectScratch.png",512,512,512,512,1024,"RGBA_DXT1_SRGB","Compressed",True,False,175456,2996
+"Assets/Resources/Dinosaurs/Quetzalcoatlus/textures/b48.png",512,512,512,512,2048,"RGBA_DXT1_SRGB","Compressed",True,False,175456,274701
+"Assets/ThirdParty/VegetationDiversity/Source/SketchfabPalmTrees/textures/internal_ground_ao_texture.jpeg",512,512,512,512,2048,"RGBA_DXT1_SRGB","Compressed",True,False,175456,8901
+"Assets/NatureStarterKit2/Standard Assets/Effects/GlassRefraction/Textures/GlassStainedAlbedo.tif",256,256,256,256,256,"RGBA_DXT5_SRGB","Compressed",True,False,88088,377814
+"Assets/NatureStarterKit2/Standard Assets/Effects/GlassRefraction/Textures/GlassStainedNormals.tif",256,256,256,256,512,"RGBA_DXT5_UNorm","Compressed",True,False,88088,636536
+"Assets/NatureStarterKit2/Standard Assets/Effects/LightCookies/Textures/FlashlightCookie.tif",256,256,256,256,1024,"RGBA_DXT5_SRGB","Compressed",True,False,88088,87648
+"Assets/NatureStarterKit2/Standard Assets/Effects/LightCookies/Textures/FlashlightIrregularCookie.tif",256,256,256,256,1024,"RGBA_DXT5_SRGB","Compressed",True,False,88088,70356
+"Assets/NatureStarterKit2/Standard Assets/Effects/LightCookies/Textures/LightHardCookie.psd",256,256,256,256,512,"RGBA_DXT5_SRGB","Compressed",True,False,88088,31756
+"Assets/NatureStarterKit2/Standard Assets/Effects/LightCookies/Textures/LightSquareCookie.psd",256,256,256,256,512,"RGBA_DXT5_SRGB","Compressed",True,False,88088,312446
+"Assets/NatureStarterKit2/Standard Assets/Effects/LightFlares/Textures/Flare50mm.psd",256,512,256,512,512,"RGBA_DXT1_SRGB","Compressed",True,False,88080,330753
+"Assets/NatureStarterKit2/Standard Assets/Effects/LightCookies/Textures/LightSoftCookie.tif",256,256,256,256,1024,"RGBA_DXT1_UNorm","Compressed",True,False,44384,41796
+"Assets/NatureStarterKit2/Standard Assets/Effects/ImageEffects/Textures/VignetteMask.png",128,128,128,128,1024,"RGBA_DXT5_SRGB","Compressed",True,False,22552,6381
+"Assets/NatureStarterKit2/Standard Assets/Effects/LightFlares/Textures/FlareStar.psd",128,256,128,256,256,"RGBA_DXT1_SRGB","Compressed",True,False,22544,45349
+"Assets/NatureStarterKit2/Standard Assets/Effects/Projectors/Textures/Shadow.psd",256,256,64,64,64,"R8G8B8A8_SRGB","Uncompressed",True,False,22524,124452
+"Assets/NatureStarterKit2/Standard Assets/Effects/Projectors/Textures/Light.psd",256,256,64,64,64,"R8G8B8_SRGB","Uncompressed",True,False,17063,142962
+"Assets/NatureStarterKit2/Standard Assets/Effects/ImageEffects/Textures/ContrastEnhanced3D16.png",256,16,256,16,2048,"R8G8B8_SRGB","Uncompressed",False,False,12968,2935
+"Assets/NatureStarterKit2/Standard Assets/Effects/ImageEffects/Textures/MotionBlurJitter.png",64,64,64,64,1024,"R8G8B8_SRGB","Uncompressed",False,False,12968,14549
+"Assets/NatureStarterKit2/Standard Assets/Effects/ImageEffects/Textures/Neutral3D16.png",256,16,256,16,2048,"R8G8B8_SRGB","Uncompressed",False,False,12968,2848
+"Assets/NatureStarterKit2/Standard Assets/Effects/ImageEffects/Textures/Noise.png",64,64,64,64,64,"R8G8B8_SRGB","Uncompressed",False,False,12968,14549
+"Assets/NatureStarterKit2/Standard Assets/Effects/ImageEffects/Textures/RandomVectors.png",64,64,64,64,1024,"R8G8B8_SRGB","Uncompressed",False,False,12968,14549
+"Assets/NatureStarterKit2/Nature/bush01_Textures/shadow.png",1024,1024,128,128,128,"RGBA_DXT1_SRGB","Compressed",True,False,11616,154769
+"Assets/NatureStarterKit2/Nature/bush02_Textures/shadow.png",1024,1024,128,128,128,"RGBA_DXT1_SRGB","Compressed",True,False,11616,154769
+"Assets/NatureStarterKit2/Nature/bush03_Textures/shadow.png",1024,1024,128,128,128,"RGBA_DXT1_SRGB","Compressed",True,False,11616,154769
+"Assets/NatureStarterKit2/Nature/bush04_Textures/shadow.png",1024,1024,128,128,128,"RGBA_DXT1_SRGB","Compressed",True,False,11616,154769
+"Assets/NatureStarterKit2/Nature/bush05_Textures/shadow.png",1024,1024,128,128,128,"RGBA_DXT1_SRGB","Compressed",True,False,11616,154769
+"Assets/NatureStarterKit2/Nature/bush06_Textures/shadow.png",1024,1024,128,128,128,"RGBA_DXT1_SRGB","Compressed",True,False,11616,154769
+"Assets/NatureStarterKit2/Nature/tree01_Textures/shadow.png",1024,1024,128,128,128,"RGBA_DXT1_SRGB","Compressed",True,False,11616,140632
+"Assets/NatureStarterKit2/Nature/tree02_Textures/shadow.png",1024,1024,128,128,128,"RGBA_DXT1_SRGB","Compressed",True,False,11616,140632
+"Assets/NatureStarterKit2/Nature/tree03_Textures/shadow.png",1024,1024,128,128,128,"RGBA_DXT1_SRGB","Compressed",True,False,11616,140632
+"Assets/NatureStarterKit2/Nature/tree04_Textures/shadow.png",1024,1024,128,128,128,"RGBA_DXT1_SRGB","Compressed",True,False,11616,140632
+"Assets/NatureStarterKit2/Standard Assets/Effects/Projectors/Textures/Grid.psd",128,128,128,128,256,"RGBA_DXT1_SRGB","Compressed",True,False,11616,23702
+"Assets/NatureStarterKit2/Standard Assets/Effects/ImageEffects/Textures/HexShape.psd",512,512,64,64,64,"RGBA_DXT5_SRGB","Compressed",True,False,6168,478144
+"Assets/NatureStarterKit2/Standard Assets/Effects/ImageEffects/Textures/SphereShape.psd",512,512,64,64,64,"RGBA_DXT5_SRGB","Compressed",True,False,6168,492716
+"Assets/NatureStarterKit2/Standard Assets/Effects/ImageEffects/Textures/NoiseAndGrain.png",64,64,64,64,64,"RGBA_DXT5_UNorm","Compressed",False,False,4776,5734
+"Assets/UI/RoundedCardBg.png",64,64,64,64,2048,"RGBA_DXT5_SRGB","Compressed",False,True,4776,584
+"Assets/NatureStarterKit2/Standard Assets/Effects/Projectors/Textures/Falloff.psd",256,8,256,8,256,"54","Uncompressed",True,False,3431,22526
+"Assets/NatureStarterKit2/Standard Assets/Effects/ToonShading/Textures/UtilToonGradient.png",256,2,256,2,1024,"R8G8B8_SRGB","Uncompressed",False,False,2216,185
+"Assets/NatureStarterKit2/Standard Assets/Effects/ImageEffects/Textures/grayscale ramp.png",256,1,256,1,1024,"R8G8B8_SRGB","Uncompressed",True,False,2213,77
+"Assets/NatureStarterKit2/Standard Assets/Effects/ImageEffects/Textures/color correction ramp.png",256,1,256,1,1024,"R8G8B8_UNorm","Uncompressed",False,False,1448,77

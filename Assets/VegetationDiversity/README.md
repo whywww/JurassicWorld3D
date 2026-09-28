@@ -1,18 +1,20 @@
-# Vegetation Diversity Prototype
+# Vegetation Diversity: Phase 2 Full Layout
 
-Open `Assets/Scenes/Main.unity`. The prototype is the root object **Vegetation Diversity Prototype (X -15..15, Z 60..90)** at the north edge of the initial camera view. Toggle that root in the Hierarchy to compare the existing forest with the new tree mix. The existing 15 Terrain trees in this 30 × 30 m region are unchanged; the root adds 11 trees and four understory plants.
+Open `Assets/Scenes/Main.unity`. The full layout is the root object **Phase 2 Biome Vegetation**. It adds 30 vegetation groups, 60 trees, and 180 fern/bush instances across the playable area. Autumn Fab trees are placed west of x=-20, tropical coconut palms and broadleaf trees east of x=20, and green Nature Starter Kit trees form the central transition. ForestSeeder and TerrainData tree seeding remain unchanged.
 
-Tree forms in the patch: four existing Nature Starter Kit 2 trees, three Fab broadleaf shapes, two Sketchfab palms, and one optimized Poly Haven island tree. Banana and Pachira add the broad-leaf understory. The original tree share is 15 / 26 = 57.7%.
+The scene includes the previously reviewed 15-group layout plus 15 added groups to fill more of the player exploration area. The saved first-stage scene is `Tools/VegetationDiversity/Checkpoints/Main_Phase2_Stage1Review.unity`; the pre-Phase-2 scene is `Tools/VegetationDiversity/Checkpoints/Main_BeforePhase2.unity`.
 
 The Sketchfab Banana Tree source is supplied as `Palm.fbx`. Its bark vertices are widened 1.7× in the prepared `BananaTree.fbx` so the trunk remains visible at the prototype's 3.1–3.3 m scene scale. Leaves, UVs, and bark material remain from the source. Regenerate it with `prepare_models.py banana <source Palm.fbx> <prepared BananaTree.fbx>` if needed.
 
 Editor commands under **Jurassic World > Vegetation Diversity**:
 
 - **Prepare Assets** refreshes the Built-in RP materials and prefabs from the prepared FBX files.
-- **Build Prototype** replaces only this scene root. It does not write TerrainData or change ForestSeeder.
-- **Validate Prototype** checks tree types, counts, old-tree share, route clearance, materials, and the hero LOD group.
-- **Measure Render Cost** compares offscreen camera render CPU time with the root off and on; it does not save a scene change.
+- **Build Phase 2 Full Layout** replaces this scene root idempotently and re-registers scene-tree trunk avoidance.
+- **Validate Phase 2 Full Layout** checks 30 groups, 60 tree trunks, biome placement, all six route loops and turns, existing island saplings and central rocks, runtime obstacle registration, and palm LODs.
+- **Measure Phase 2 Render Cost** compares offscreen 1280×720 CPU render submission with the root off and on, and reports mesh/texture memory. It does not measure GPU frame time.
 
-`Jurassic World > Bake Scene` rebuilds `Main.unity` from scratch and removes this standalone root. Run **Build Prototype** afterward to restore the same layout. The branch `codex/vegetation-diversity-prototype` starts from the unmodified project state and serves as the rollback checkpoint.
+`Jurassic World > Bake Scene` regenerates the full layout after terrain, rocks, and central islands are rebuilt. The bake hook does not add trees to TerrainData or alter ForestSeeder.
 
-The current version is ready for the user's visual check in Unity. No visual acceptance screenshots were generated.
+The visual review rejected orange alpha fringes and broad banana-like leaves in the downloaded Sketchfab palm textures. The scene uses project-generated pinnate coconut palms (`Assets/VegetationDiversity/GeneratedPalms`) with opaque green leaflets, connected midribs, visible tapered trunks, and three geometry LODs. The downloaded Sketchfab files remain archived as source assets but are no longer used by the scene.
+
+The final 1280×720 offscreen comparison with all repeated Fab trees on three LODs reported 3.15 ms baseline vs 4.74 ms with the vegetation root active (+1.59 ms CPU render submission), 339,529 unique mesh LOD triangles, 53.4 MiB mesh memory, and 38.0 MiB texture memory. GPU frame time was not measured in batch mode; inspect it on the target machine in Unity's Game view.

@@ -63,6 +63,8 @@ namespace JurassicWorld.Editor
             BuildDinosaurs(camera, uiFont);
             // Phase 2: five authored, overlapping vegetation islands in the central clearing.
             VegetationIslandSeeder.Seed();
+            // The reviewed Phase 2 biome pass is regenerated after a full scene Bake.
+            Phase2VegetationSeeder.Seed();
             // Dense Jungle Phase 1：可开关的通道 debug 标注（纯场景线段，不动 TerrainData / 植被 Pass）。
             BuildMovementCorridorDebug();
         }

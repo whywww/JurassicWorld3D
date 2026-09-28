@@ -497,12 +497,10 @@ namespace JurassicWorld
             warnedMissingTerrainData = false;
 
             TreeInstance[] instances = terrainData.treeInstances;
-            if (instances == null || instances.Length == 0)
-                return;
 
             Vector3 origin = terrain.transform.position;
             Vector3 size = terrainData.size;
-            for (int i = 0; i < instances.Length; i++)
+            for (int i = 0; instances != null && i < instances.Length; i++)
             {
                 TreeInstance instance = instances[i];
                 // Unity 用负 widthScale 标记「已被擦除」的树实例，这类实例不渲染，也不应参与碰撞。
@@ -518,6 +516,15 @@ namespace JurassicWorld
                 float worldX = origin.x + instance.position.x * size.x;
                 float worldZ = origin.z + instance.position.z * size.z;
                 Insert(worldX, worldZ, radius);
+            }
+
+            // Authored scene trees use the same swept-circle movement queries as Terrain trees.
+            // The marker stores a world-space radius, so prefab scale is already accounted for.
+            foreach (SceneTreeObstacle marker in Object.FindObjectsOfType<SceneTreeObstacle>())
+            {
+                if (!marker.isActiveAndEnabled || marker.Radius <= 0f) continue;
+                Vector3 position = marker.transform.position;
+                Insert(position.x, position.z, marker.Radius);
             }
         }
 
