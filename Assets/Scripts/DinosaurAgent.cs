@@ -206,6 +206,7 @@ namespace JurassicWorld
         // 漫步的权威进度。逐帧沿弧长推进，避免「先直走、再投影」在 S 弯上反复跳动。
         private float routeArc;
         private float targetArc;
+        private float walkRemaining;
         /// <summary>岔口换轨的候选路线缓冲（单个岔口最多 4 条路，避免每次判定分配数组）。</summary>
         private readonly int[] junctionRouteBuffer = new int[8];
         private Vector3 target;
@@ -261,7 +262,6 @@ namespace JurassicWorld
             // 分配车道 + 派生独立随机流：必须先于 BeginIdle（BeginIdle 要用 random 取 Idle 计时）。
             AssignLane();
             random = new System.Random(WanderSeedBase + laneIndex * WanderSeedStride);
-            travelSign = random.NextDouble() < 0.5 ? 1 : -1;   // 首段朝向也随机（种子跨运行可复现）
             MovementCorridor.ProjectToCorridor(routeIndex,
                 new Vector2(transform.position.x, transform.position.z), out routeArc, out _);
             BeginIdle();
@@ -373,7 +373,7 @@ namespace JurassicWorld
                     if (!MoveTowards(target, WalkSpeed))
                     {
                         stateTimer -= Time.deltaTime;
-                        if (stateTimer <= 0f || FlatDistance(transform.position, target) < 0.5f)
+                        if (stateTimer <= 0f || walkRemaining <= 0.05f)
                             BeginIdle();
                     }
                     break;
@@ -455,18 +455,17 @@ namespace JurassicWorld
         {
             routeIndex = route >= 0 && route < MovementCorridor.RouteCount ? route : MovementCorridor.MainRoute;
 
-            // ① 横向贴车道（LaneLateral 与漫步目标同源 ⇒ 出生点 = 车道上的点，恒在边界净距内）。
+            // 出生点与朝向都直接取闭合中心线，绝无横向车道偏移。
             MovementCorridor.ProjectToCorridor(routeIndex, xz, out float arc, out _);
             routeArc = arc;
             targetArc = arc;
-            Vector2 laneXZ = MovementCorridor.ClampLateral(
-                routeIndex, arc, LaneLateral(routeIndex, arc, laneBias), LaneEdgeMargin);
+            Vector2 laneXZ = MovementCorridor.PointAt(routeIndex, arc);
             spawnPoint = new Vector3(laneXZ.x, MovementHeight, laneXZ.y);
 
             // ② 朝向沿行进方向：root = LookRotation(切线×travelSign) × Euler(-VisualYaw)（与 MoveTowards
             //    的 desiredRotation 同式）⇒ GetVisualForward() 恰好等于车道前进方向，第一步就贴线走。
-            MovementCorridor.GetSampleAt(routeIndex, arc, out _, out Vector2 tangent, out _, out _);
-            Vector2 heading = tangent * travelSign;
+            MovementCorridor.GetSampleAt(routeIndex, arc, out _, out Vector2 tangent);
+            Vector2 heading = tangent;
             Quaternion rootRotation = Quaternion.LookRotation(
                 new Vector3(heading.x, 0f, heading.y), Vector3.up) * Quaternion.Euler(0f, -VisualYaw, 0f);
             transform.SetPositionAndRotation(spawnPoint, rootRotation);
@@ -660,31 +659,11 @@ namespace JurassicWorld
         /// </summary>
         private Vector3 ComputeWanderTarget()
         {
-            Vector2 current = new Vector2(transform.position.x, transform.position.z);
-            // 新目标意味着让路/绕行状态结束（见 HandlePeerBlocked）：清掉落点来源标记。
             targetIsYieldTarget = false;
-            float centerDistance = routeArc;
-
             float step = Range(WanderStepDistanceMin, WanderStepDistance);
-
-            // 方向持久化：只在路线端点翻转，途中不随机掉头（见方法注释）。
-            float routeLength = MovementCorridor.Length(routeIndex);
-            if (centerDistance <= 0.5f)
-                travelSign = 1;
-            else if (centerDistance >= routeLength - 0.5f)
-                travelSign = -1;
-
-            float targetDistance = Mathf.Clamp(
-                centerDistance + travelSign * step, 0f, routeLength);
-            targetArc = targetDistance;
-
-            // 横向：**固定车道**（LaneLateralAt），Phase 1.1c 起零横向抖动 —— 固定轨迹。
-            // 车道间距 = LaneBiasScale ×（全宽 − 2×LaneEdgeMargin）≥ 7.65m 恒 > 6.5m 互斥半径，
-            // 同路线两只恐龙恒不互阻；「路径不一样」由路线/车道/方向/走停时机保证（见 LaneJitter 移除注释）。
-            float lane = LaneLateralAt(targetDistance);
-            Vector2 targetXZ = MovementCorridor.ClampLateral(
-                routeIndex, targetDistance, lane, LaneEdgeMargin);
-
+            walkRemaining = step;
+            targetArc = Mathf.Repeat(routeArc + step, MovementCorridor.Length(routeIndex));
+            Vector2 targetXZ = MovementCorridor.PointAt(routeIndex, targetArc);
             return new Vector3(targetXZ.x, MovementHeight, targetXZ.y);
         }
 
@@ -883,49 +862,26 @@ namespace JurassicWorld
             return false;
         }
 
-        // RandomWalk 只修改路线弧长。朝向追随切线；未转正时先原地转身，避免侧滑。
+        // 行走时位置和朝向同时沿闭合中心线推进；Idle 或受阻时均不旋转。
         private bool MoveAlongCorridor(float speed)
         {
-            float remaining = targetArc - routeArc;
-            if (Mathf.Abs(remaining) < 0.03f)
+            float step = Mathf.Min(walkRemaining, speed * Time.deltaTime);
+            if (step <= 1e-5f)
                 return false;
 
-            float directionSign = Mathf.Sign(remaining);
-            float nextArc = Mathf.MoveTowards(routeArc, targetArc, speed * Time.deltaTime);
-            float lane = LaneLateralAt(nextArc);
-            Vector2 nextXZ = MovementCorridor.PointAt(routeIndex, nextArc, lane);
-            MovementCorridor.GetSampleAt(routeIndex, nextArc, out _, out Vector2 tangent, out _, out _);
-            Vector2 heading = tangent * directionSign;
-            Quaternion desiredRotation = Quaternion.LookRotation(
-                new Vector3(heading.x, 0f, heading.y), Vector3.up) * Quaternion.Euler(0f, -VisualYaw, 0f);
-            float turnRate = Mathf.Lerp(MinimumTurnRate, MaximumTurnRate,
-                Mathf.InverseLerp(0.7f, 5.5f, speed));
-            transform.rotation = Quaternion.RotateTowards(
-                transform.rotation, desiredRotation, turnRate * Time.deltaTime);
-            Vector3 forward = GetVisualForward();
-            if (Vector2.Dot(new Vector2(forward.x, forward.z), heading) < 0.82f)
-            {
-                // 端点掉头约需数秒；转身期间不消耗本轮行走时长。
-                stateTimer = Mathf.Max(stateTimer, 4f);
-                PlayClip(idleClip);
-                return false;
-            }
+            float nextArc = Mathf.Repeat(routeArc + step, MovementCorridor.Length(routeIndex));
+            Vector2 nextXZ = MovementCorridor.PointAt(routeIndex, nextArc);
 
             DinosaurAgent blocker = FindBlockingPeer(nextXZ);
             if (blocker != null)
             {
                 blockedTime += Time.deltaTime;
-                stateTimer = Mathf.Max(stateTimer, 4f);
                 PlayClip(idleClip);
-                // 低优先级者先退；若对方长时间仍不动，高优先级者也退，防止双向等待。
-                if (!HasRightOfWay(blocker) || blockedTime > 4f)
+                if (blockedTime > BlockedEscalationSeconds)
                 {
-                    travelSign = -travelSign;
-                    targetArc = Mathf.Clamp(routeArc + travelSign * 10f, 0f, MovementCorridor.Length(routeIndex));
-                    Vector2 retreat = MovementCorridor.PointAt(routeIndex, targetArc, LaneLateralAt(targetArc));
-                    target = new Vector3(retreat.x, MovementHeight, retreat.y);
-                    stateTimer = Mathf.Max(stateTimer, 4f);
-                    blockedTime = 0f;
+                    Debug.LogWarning($"[DinosaurAgent] {displayName} 在闭合中心线 {routeIndex} 被同伴阻挡。", this);
+                    BeginIdle();
+                    return true;
                 }
                 return false;
             }
@@ -943,8 +899,13 @@ namespace JurassicWorld
                 return false;
             }
 
+            MovementCorridor.GetSampleAt(routeIndex, nextArc, out _, out Vector2 tangent);
+            Quaternion rotation = Quaternion.LookRotation(
+                new Vector3(tangent.x, 0f, tangent.y), Vector3.up)
+                * Quaternion.Euler(0f, -VisualYaw, 0f);
+            transform.SetPositionAndRotation(new Vector3(nextXZ.x, MovementHeight, nextXZ.y), rotation);
             routeArc = nextArc;
-            transform.position = new Vector3(nextXZ.x, MovementHeight, nextXZ.y);
+            walkRemaining -= step;
             blockedTime = 0f;
             PlayMovementClip(speed);
             return false;

@@ -13,6 +13,7 @@ namespace JurassicWorld.Editor
         private const double ProbeSeconds = 25.0;
         private static DinosaurAgent[] agents;
         private static Vector3[] previous;
+        private static Quaternion[] previousRotation;
         private static float[] travelled;
         private static int[] assignedRoutes;
         private static double started;
@@ -20,6 +21,8 @@ namespace JurassicWorld.Editor
         private static float minPeerClearance = float.MaxValue;
         private static int blockedSamples;
         private static int stuckWarnings;
+        private static int stationaryTurns;
+        private static int movingTurns;
 
         static DenseJunglePhase1Probe()
         {
@@ -69,17 +72,21 @@ namespace JurassicWorld.Editor
                 if (EditorApplication.timeSinceStartup - started < 2.0) return;
                 agents = Object.FindObjectsOfType<DinosaurAgent>();
                 previous = new Vector3[agents.Length];
+                previousRotation = new Quaternion[agents.Length];
                 travelled = new float[agents.Length];
                 assignedRoutes = new int[agents.Length];
                 for (int i = 0; i < agents.Length; i++)
                 {
                     previous[i] = agents[i].transform.position;
+                    previousRotation[i] = agents[i].transform.rotation;
                     assignedRoutes[i] = agents[i].RouteIndex;
                 }
                 maxLaneError = 0f;
                 minPeerClearance = float.MaxValue;
                 blockedSamples = 0;
                 stuckWarnings = 0;
+                stationaryTurns = 0;
+                movingTurns = 0;
                 started = EditorApplication.timeSinceStartup;
                 return;
             }
@@ -90,11 +97,15 @@ namespace JurassicWorld.Editor
                 if (agent == null) continue;
                 Vector3 world = agent.transform.position;
                 Vector2 xz = new Vector2(world.x, world.z);
-                travelled[i] += Vector2.Distance(xz, new Vector2(previous[i].x, previous[i].z));
+                float moved = Vector2.Distance(xz, new Vector2(previous[i].x, previous[i].z));
+                float turned = Quaternion.Angle(previousRotation[i], agent.transform.rotation);
+                travelled[i] += moved;
+                if (moved < 0.001f && turned > 0.1f) stationaryTurns++;
+                if (moved > 0.001f && turned > 0.1f) movingTurns++;
                 previous[i] = world;
+                previousRotation[i] = agent.transform.rotation;
                 float arc = agent.RouteArc;
-                Vector2 lane = MovementCorridor.PointAt(agent.RouteIndex, arc,
-                    DinosaurAgent.LaneLateral(agent.RouteIndex, arc, agent.LaneBias));
+                Vector2 lane = MovementCorridor.PointAt(agent.RouteIndex, arc);
                 maxLaneError = Mathf.Max(maxLaneError, Vector2.Distance(xz, lane));
                 if (TerrainTreeObstacleRegistry.IsBlocked(xz, agent.TreeAvoidRadius)) blockedSamples++;
             }
@@ -109,14 +120,16 @@ namespace JurassicWorld.Editor
 
             bool passed = agents.Length == 2 && assignedRoutes[0] != assignedRoutes[1]
                 && maxLaneError < 0.05f && minPeerClearance > 0f
-                && blockedSamples == 0 && stuckWarnings == 0;
+                && blockedSamples == 0 && stuckWarnings == 0
+                && stationaryTurns == 0 && movingTurns > 0;
             for (int i = 0; i < travelled.Length; i++)
                 passed &= travelled[i] > 12f;
 
             Debug.Log($"DENSE_JUNGLE_PHASE1_PLAY_{(passed ? "OK" : "FAIL")}: " +
                 $"routes={string.Join(",", assignedRoutes)}, travelled={string.Join(",", travelled)}, " +
                 $"maxLaneError={maxLaneError:F2}m, minPeerClearance={minPeerClearance:F2}m, " +
-                $"treeBlockedSamples={blockedSamples}, stuckWarnings={stuckWarnings}");
+                $"treeBlockedSamples={blockedSamples}, stuckWarnings={stuckWarnings}, " +
+                $"stationaryTurns={stationaryTurns}, movingTurns={movingTurns}");
             SessionState.SetBool(PassedKey, passed);
             Time.timeScale = 1f;
             EditorApplication.isPlaying = false;

@@ -621,7 +621,7 @@ namespace JurassicWorld.Editor
         /// 控制、重 Bake 不会重跑，放循环里等于没生效；放 ForestSeeder 之后则首焙/重焙都覆盖，
         /// 且 ForestSeeder 对中央段「按值原样写回」⇒ 已推开的树不会被它下一次比对打回。
         /// 只横移、不增删、不消费任何随机流 ⇒ 其余散布物逐字节一致；返回被推开的树数（0 = 已净空）。
-        /// 侵入判据与 ValidateProject ⑦ 完全一致（含弧长须在 [0, Length] 内）。
+        /// 净空按两条闭合中心线与树干实际缩放计算。
         /// </summary>
         internal static int NudgeTreesOutOfCorridors(Terrain terrain, TerrainData data)
         {
@@ -645,7 +645,7 @@ namespace JurassicWorld.Editor
                     ti.position.x * size.x, ti.position.y * size.y, ti.position.z * size.z));
                 float wx = world.x;
                 float wz = world.z;
-                NudgeOutOfCorridors(ref wx, ref wz, i);
+                NudgeOutOfCorridors(ref wx, ref wz, i, ti.widthScale);
                 if (Mathf.Approximately(wx, world.x) && Mathf.Approximately(wz, world.z))
                     continue;
 
@@ -662,7 +662,7 @@ namespace JurassicWorld.Editor
             if (changed)
             {
                 data.SetTreeInstances(instances, false);
-                Debug.Log($"[SceneBuilder] 轨迹净空：把 {movedCount} 棵树推出 MovementCorridor 净空带（半宽 + {MovementCorridor.CorridorTreeClearVerge}m）。");
+                Debug.Log($"[SceneBuilder] 轨迹净空：把 {movedCount} 棵树推出中心线安全距离。");
             }
             else
             {
@@ -672,16 +672,9 @@ namespace JurassicWorld.Editor
         }
 
         /// <summary>
-        /// 把世界 XZ 点推出全部 4 条 MovementCorridor 路线的**轨迹净空带**
-        /// （该弧长处所在侧半宽 + <see cref="MovementCorridor.CorridorTreeClearVerge"/>，再加 0.3m 富余）。
-        ///
-        /// 侵入判定与 ValidateProject ⑦ 完全同判据（ProjectUnclamped + 弧长须在 [0, Length] 内，
-        /// 路线端帽之外不计）。推出 = 沿该弧长处的左法线横向平移、弧长不变（树只横移不沿路滑）；
-        /// 横跨多条路线的树可能第一轮推出后落进另一条的带内 ⇒ 最多迭代 4 轮直到四条都不侵入。
-        /// 恰压中心线（|lateral| 极小）时按树序号奇偶定侧，保证确定性、同批树不全挤同一侧。
-        /// 调用时机：见 <see cref="NudgeTreesOutOfCorridors"/>（Bake 内 ForestSeeder 之后的实例级 pass）。
+        /// 把树沿闭合中心线法线移到安全距离外；必要时迭代避开另一条路线。
         /// </summary>
-        private static void NudgeOutOfCorridors(ref float wx, ref float wz, int treeIndex)
+        private static void NudgeOutOfCorridors(ref float wx, ref float wz, int treeIndex, float treeScale)
         {
             var point = new Vector2(wx, wz);
             for (int pass = 0; pass < 4; pass++)
@@ -689,20 +682,18 @@ namespace JurassicWorld.Editor
                 bool moved = false;
                 for (int route = 0; route < MovementCorridor.RouteCount; route++)
                 {
-                    MovementCorridor.ProjectUnclamped(route, point, out float arc, out float lateral);
-                    if (arc < 0f || arc > MovementCorridor.Length(route))
-                        continue;
-
-                    MovementCorridor.GetSampleAt(route, arc, out _, out _, out float halfLeft, out float halfRight);
-                    float limit = (lateral >= 0f ? halfLeft : halfRight)
-                        + MovementCorridor.CorridorTreeClearVerge;
+                    MovementCorridor.ProjectToCorridor(route, point, out float arc, out float lateral);
+                    MovementCorridor.GetSampleAt(route, arc, out Vector2 center, out Vector2 tangent);
+                    float limit = Mathf.Max(MovementCorridor.CenterlineTreeClearance,
+                        DinosaurAgent.TreeAvoidRadiusCap + 0.7f * treeScale + 0.3f);
                     if (Mathf.Abs(lateral) >= limit)
                         continue;
 
                     float side = Mathf.Abs(lateral) < 0.05f
                         ? ((treeIndex & 1) == 0 ? 1f : -1f)
                         : Mathf.Sign(lateral);
-                    point = MovementCorridor.PointAt(route, arc, side * (limit + 0.3f));
+                    Vector2 normal = new Vector2(-tangent.y, tangent.x);
+                    point = center + normal * side * (limit + 0.3f);
                     moved = true;
                 }
                 if (!moved)

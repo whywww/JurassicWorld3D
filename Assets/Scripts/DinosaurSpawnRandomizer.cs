@@ -176,8 +176,7 @@ namespace JurassicWorld
             for (int sample = 0; sample < MovementCorridor.SampleCount(route); sample++)
             {
                 float arc = MovementCorridor.GetSample(route, sample).Distance;
-                Vector2 candidate = MovementCorridor.PointAt(route, arc,
-                    DinosaurAgent.LaneLateral(route, arc, agent.LaneBias));
+                Vector2 candidate = MovementCorridor.PointAt(route, arc);
                 if (IsSpawnSafe(candidate, radius, treeAvoidRadius, hasCamera, cameraXZ,
                         propPositions, propRadii, placedPositions, placedRadii))
                 {
@@ -213,9 +212,7 @@ namespace JurassicWorld
         private static Vector2 SampleCorridorCandidate(DinosaurAgent agent, int route, System.Random random)
         {
             float distance = (float)random.NextDouble() * MovementCorridor.Length(route);
-            float lateral = DinosaurAgent.LaneLateral(route, distance, agent.LaneBias);
-
-            return MovementCorridor.PointAt(route, distance, lateral);
+            return MovementCorridor.PointAt(route, distance);
         }
 
         /// <summary>候选点是否侵入任一圆（距离² &lt; (radiusWithMargin + circleRadius)²，与运行期互斥判定同语义）。</summary>

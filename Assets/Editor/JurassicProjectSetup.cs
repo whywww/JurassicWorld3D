@@ -225,173 +225,87 @@ namespace JurassicWorld.Editor
 
             Debug.Log($"[Validate] 四边界：{WorldBounds.Describe()}");
 
-            // ─── Dense Jungle Phase 1 → 1.1：恐龙移动通道**网络**（MovementCorridor）几何不变量 ───
-            // 通道网络是后续「密集丛林 + 遮挡节奏」的唯一地基：几何一旦漂移（越出活动包络 / 掉进森林 /
-            // 退化成直线 / 变宽成草坪 / 支路不再分叉汇合），后面每个阶段都会在错误的底子上叠加，
-            // 故此处直接报错。Phase 1.1 起 ①②③③b④⑤⑦ 对**每条路线**分别断言，
-            // 再叠加网络级 ⑥（分叉/汇合）、⑧（在册支路的角色几何）、⑨（标注根）。
-            // Phase 1.1d 起在册 = 主干 + 前景（中景/林缘停用、数据保留，见 MovementCorridor 注释）。
-            if (MovementCorridor.RouteCount != MovementCorridor.MinRouteCount)
-                throw new InvalidDataException(
-                    $"Phase 1 必须恰有 {MovementCorridor.MinRouteCount} 条通道，当前 {MovementCorridor.RouteCount} 条。");
+            // 两条独立闭合中心线：几何、净空与场景标记同时验收。
+            float Cross(Vector2 u, Vector2 v) => u.x * v.y - u.y * v.x;
+            if (MovementCorridor.RouteCount != 2)
+                throw new InvalidDataException("Phase 1 必须恰有两条中心线。");
 
-            // ③b 的输入：场内最宽一对恐龙互斥半径之和（所有路线面对同一对恐龙，提到循环外算一次）。
             float widestPairRadius = 0f;
             for (int i = 0; i < agents.Length; i++)
-            {
                 for (int j = i + 1; j < agents.Length; j++)
                     widestPairRadius = Mathf.Max(widestPairRadius, agents[i].CollisionRadius + agents[j].CollisionRadius);
-            }
-
-            const float CorridorEndInset = 10f;
+            Collider[] solidObstacles = Object.FindObjectsOfType<Collider>()
+                .Where(c => c.enabled && !c.isTrigger && !(c is TerrainCollider) &&
+                    c.GetComponentInParent<DinosaurAgent>() == null).ToArray();
 
             for (int route = 0; route < MovementCorridor.RouteCount; route++)
             {
                 string routeName = MovementCorridor.GetRouteName(route);
-                MovementCorridor.CorridorMetrics corridorMetrics = MovementCorridor.Measure(route);
-                Rect corridorOuter = corridorMetrics.OuterBounds;
+                MovementCorridor.CorridorMetrics metrics = MovementCorridor.Measure(route);
+                Rect bounds = metrics.CenterlineBounds;
+                if (bounds.xMin < activityBounds.xMin || bounds.xMax > activityBounds.xMax ||
+                    bounds.yMin < activityBounds.yMin || bounds.yMax > activityBounds.yMax)
+                    throw new InvalidDataException($"路线「{routeName}」超出恐龙活动区域。");
+                if (bounds.xMin < ForestSeeder.CoreMinX || bounds.xMax > ForestSeeder.CoreMaxX ||
+                    bounds.yMin < ForestSeeder.CoreMinZ || bounds.yMax > ForestSeeder.CoreMaxZ)
+                    throw new InvalidDataException($"路线「{routeName}」超出森林核心区域。");
+                if (metrics.SwingX < MovementCorridor.MinSwingMeters)
+                    throw new InvalidDataException($"路线「{routeName}」横向摆幅不足。");
+                if (metrics.SeamGap > 0.8f || metrics.SeamTurnDegrees > 15f || MovementCorridor.TurnRadius < 3.5f)
+                    throw new InvalidDataException($"路线「{routeName}」闭合接头或回转半径不合格。");
 
-                // ① 该路线（AABB ⊇ 全部边界点）⊆ 恐龙活动包络：恐龙沿路线走到哪儿都合法。
-                if (corridorOuter.xMin < activityBounds.xMin - 1e-3f || corridorOuter.xMax > activityBounds.xMax + 1e-3f ||
-                    corridorOuter.yMin < activityBounds.yMin - 1e-3f || corridorOuter.yMax > activityBounds.yMax + 1e-3f)
-                    throw new InvalidDataException(
-                        $"路线「{routeName}」x[{corridorOuter.xMin:F1},{corridorOuter.xMax:F1}] z[{corridorOuter.yMin:F1},{corridorOuter.yMax:F1}] " +
-                        $"越出恐龙活动包络 x[{activityBounds.xMin:F0},{activityBounds.xMax:F0}] z[{activityBounds.yMin:F0},{activityBounds.yMax:F0}]：" +
-                        "恐龙会走到未被植被安全边界覆盖的区域（外侧可能起伏/密林）。请回改该路线的控制点。");
-
-                // ② 该路线 ⊆ ForestSeeder 核心矩形 ⇒ 路线内零外围森林树（可行走路线不被整棵森林树堵死）。
-                float coreMinX = ForestSeeder.CoreMinX, coreMaxX = ForestSeeder.CoreMaxX;
-                float coreMinZ = ForestSeeder.CoreMinZ, coreMaxZ = ForestSeeder.CoreMaxZ;
-                if (corridorOuter.xMin < coreMinX || corridorOuter.xMax > coreMaxX ||
-                    corridorOuter.yMin < coreMinZ || corridorOuter.yMax > coreMaxZ)
-                    throw new InvalidDataException(
-                        $"路线「{routeName}」x[{corridorOuter.xMin:F1},{corridorOuter.xMax:F1}] z[{corridorOuter.yMin:F1},{corridorOuter.yMax:F1}] " +
-                        $"越出森林核心矩形 x[{coreMinX:F0},{coreMaxX:F0}] z[{coreMinZ:F0},{coreMaxZ:F0}]：" +
-                        "路线内会出现外围森林树（prototypeIndex ≥ 中央段基线），恐龙路线会被高密度树群堵死。请回改该路线的控制点。");
-
-                // ③ 全宽区间：「约开放区宽度 1/3 的狭窄通道」。过窄夹死霸王龙，过宽退回大草坪。
-                if (corridorMetrics.MinFullWidthSeen < MovementCorridor.MinFullWidth - 1e-3f ||
-                    corridorMetrics.MaxFullWidthSeen > MovementCorridor.MaxFullWidth + 1e-3f)
-                    throw new InvalidDataException(
-                        $"路线「{routeName}」全宽 {corridorMetrics.MinFullWidthSeen:F1}–{corridorMetrics.MaxFullWidthSeen:F1}m " +
-                        $"超出允许区间 [{MovementCorridor.MinFullWidth}, {MovementCorridor.MaxFullWidth}]m：" +
-                        "过窄会让霸王龙（treeAvoidRadius 2.5m）在两侧有树时被夹死，过宽则做不出遮挡。请回改该路线半宽数组。");
-
-                // ③b 车道容量：每只恐龙 Awake 时分到一条固定车道（DinosaurAgent.AssignLane），两条最外侧
-                // 车道的横向间距 = LaneBiasScale ×（该路线全宽 − 2×LaneEdgeMargin）。该间距必须 ≥ 场内最宽
-                // 一对恐龙的互斥半径之和，否则「分道对会」在最窄处也过不去，会车让行逻辑长期顶死
-                // （用户报告的「撞上后一动不动」）。两只恐龙时等价于「任意一对可对会」；多于两只时为
-                // 最外侧车道的必要条件，其余拥堵由 HandlePeerBlocked 的先行权/让路兜底。
-                float minUsableWidth = corridorMetrics.MinFullWidthSeen - 2f * DinosaurAgent.LaneEdgeMargin;
-                float minLaneSeparation = DinosaurAgent.LaneBiasScale * minUsableWidth;
-                if (agents.Length > 1 && minLaneSeparation < widestPairRadius)
-                    throw new InvalidDataException(
-                        $"路线「{routeName}」最窄处全宽 {corridorMetrics.MinFullWidthSeen:F1}m 时两条最外车道仅相距 " +
-                        $"{minLaneSeparation:F1}m < 最宽一对恐龙互斥半径之和 {widestPairRadius:F1}m：" +
-                        $"（= {DinosaurAgent.LaneBiasScale} ×（{corridorMetrics.MinFullWidthSeen:F1} − 2×{DinosaurAgent.LaneEdgeMargin}））" +
-                        "最窄段两只恐龙仍会挤进彼此互斥圆，会车让行逻辑会长期顶死。请加宽该路线半宽数组或调小车道常量。");
-
-                // ④ 形状：必须是「轻微 S」而非直线、且左右不对称（禁镜像）。
-                if (corridorMetrics.SwingX < MovementCorridor.MinSwingMeters)
-                    throw new InvalidDataException(
-                        $"路线「{routeName}」横向摆幅 {corridorMetrics.SwingX:F1}m < {MovementCorridor.MinSwingMeters}m：" +
-                        "路线退化成近似直线，恐龙朝向不再随路径变化。请加大该路线控制点的横向起伏。");
-                if (corridorMetrics.MaxAsymmetry < MovementCorridor.MinAsymmetryMeters)
-                    throw new InvalidDataException(
-                        $"路线「{routeName}」最大左右半宽差 {corridorMetrics.MaxAsymmetry:F2}m < {MovementCorridor.MinAsymmetryMeters}m：" +
-                        "左右边界完全对称，失去「局部宽窄不一 + 不对称」的走道观感。请错开该路线的左右半宽数组。");
-
-                // ⑤ 不贯穿场地：两端必须收在草地内部（距核心矩形边界留余量），否则等于开一条贯穿全场的视线通道。
-                // 注意不能用 ForestSeeder.DistanceToCoreRect —— 矩形【内部】恒返回 0，此处要的是「到最近边的内缩量」。
-                Vector2 routeStart = MovementCorridor.GetSample(route, 0).Position;
-                Vector2 routeEnd = MovementCorridor.GetSample(route, MovementCorridor.SampleCount(route) - 1).Position;
-                float startInset = EdgeInset(routeStart, coreMinX, coreMaxX, coreMinZ, coreMaxZ);
-                float endInset = EdgeInset(routeEnd, coreMinX, coreMaxX, coreMinZ, coreMaxZ);
-                if (startInset < CorridorEndInset || endInset < CorridorEndInset)
-                    throw new InvalidDataException(
-                        $"路线「{routeName}」端点距核心矩形边界仅 {startInset:F1}m / {endInset:F1}m（要求 ≥ {CorridorEndInset}m）：" +
-                        "路线贯穿到场地边缘会形成一眼看穿的裸带。请把首尾控制点往草地内部收。");
-
-                // ⑦【硬门】轨迹净空带内零树 —— 用户要求「轨迹上不要有障碍物」（Phase 1.1c）。
-                // 侵入 = 树中心在路线内（未钳制投影、弧长 ∈ [0, Length]，端帽之外不计）且
-                // |横向| < 所在侧半宽 + MovementCorridor.CorridorTreeClearVerge（1.8m）——
-                // 即最外车道（LaneBiasScale×(half−1)≈4.7m）+ treeAvoidRadius 2.5 + 树干0.9 的
-                // 滑移/阻挡半径覆盖不到的范围。SceneBuilder.SeedTrees.NudgeOutOfCorridors 已在播种时
-                // 把侵入者沿法线横推出带外（只横移、不改随机流），此处复核；任何残留都判失败。
-                // 必须用未钳制投影：ProjectToCorridor 会把弧长钳进 [0, Length]，端帽之外、恰好与路线中线
-                // 共线的树会得到一个虚假的「横向贴近」值（历史 bug：端点外 25m 的树被计入）。
-                int blockingTreeCount = 0;
-                string blockingTreeList = "";
-                foreach (TreeInstance ti in treeInstances)
+                int count = MovementCorridor.SampleCount(route);
+                for (int i = 0; i < count; i++)
                 {
-                    Vector3 world = terrain.transform.TransformPoint(new Vector3(
-                        ti.position.x * terrainSize.x, ti.position.y * terrainSize.y, ti.position.z * terrainSize.z));
-                    MovementCorridor.ProjectUnclamped(route, new Vector2(world.x, world.z), out float arc, out float lateral);
-                    if (arc < 0f || arc > MovementCorridor.Length(route))
-                        continue;   // 在路线两端之外：不属于该路线段
-                    MovementCorridor.GetSampleAt(route, arc, out _, out _, out float halfLeft, out float halfRight);
-                    float limit = (lateral >= 0f ? halfLeft : halfRight) + MovementCorridor.CorridorTreeClearVerge;
-                    if (Mathf.Abs(lateral) < limit)
+                    MovementCorridor.CorridorSample sample = MovementCorridor.GetSample(route, i);
+                    if (TerrainTreeObstacleRegistry.IsBlocked(sample.Position, DinosaurAgent.TreeAvoidRadiusCap))
+                        throw new InvalidDataException($"路线「{routeName}」弧长 {sample.Distance:F1}m 被树干阻挡。");
+                    foreach (Collider obstacle in solidObstacles)
                     {
-                        blockingTreeCount++;
-                        if (blockingTreeCount <= 8)
-                            blockingTreeList += $" ({world.x:F1},{world.z:F1}) 横向 {lateral:F1}m / 限 {limit:F1}m";
+                        Bounds b = obstacle.bounds;
+                        Vector3 nearest = b.ClosestPoint(new Vector3(sample.Position.x, b.center.y, sample.Position.y));
+                        float dx = nearest.x - sample.Position.x;
+                        float dz = nearest.z - sample.Position.y;
+                        if (dx * dx + dz * dz < DinosaurAgent.TreeAvoidRadiusCap * DinosaurAgent.TreeAvoidRadiusCap)
+                            throw new InvalidDataException($"路线「{routeName}」弧长 {sample.Distance:F1}m 被实体 {obstacle.name} 阻挡。");
+                    }
+                    for (int j = i + 2; j < count; j++)
+                    {
+                        if (i == 0 && j == count - 1) continue;
+                        Vector2 a = sample.Position;
+                        Vector2 b = MovementCorridor.GetSample(route, (i + 1) % count).Position;
+                        Vector2 c = MovementCorridor.GetSample(route, j).Position;
+                        Vector2 d = MovementCorridor.GetSample(route, (j + 1) % count).Position;
+                        float abC = Cross(b - a, c - a), abD = Cross(b - a, d - a);
+                        float cdA = Cross(d - c, a - c), cdB = Cross(d - c, b - c);
+                        if (abC * abD < -1e-6f && cdA * cdB < -1e-6f)
+                            throw new InvalidDataException($"路线「{routeName}」中心线自交。");
                     }
                 }
-                if (blockingTreeCount > 0)
-                    throw new InvalidDataException(
-                        $"路线「{routeName}」轨迹净空带内有 {blockingTreeCount} 棵树：{blockingTreeList}" +
-                        $"……（净空 = 所在侧半宽 + {MovementCorridor.CorridorTreeClearVerge}m）。" +
-                        "恐龙会贴树滑行/卡死。请重新执行 Bake Scene（SeedTrees 会自动把侵入者横推出去），" +
-                        "若重 Bake 后仍报错则是 ForestSeeder 等后续 pass 引入的树，需回改其分布。");
 
-                // 与运行期同一棵树注册表逐点复核三条可能车道；中心净空断言无法覆盖异常大的树干缩放。
-                float maxTreeAvoidRadius = agents.Max(agent => Mathf.Min(agent.CollisionRadius, DinosaurAgent.TreeAvoidRadiusCap));
-                for (int sample = 0; sample < MovementCorridor.SampleCount(route); sample++)
+                foreach (TreeInstance tree in treeInstances)
                 {
-                    float arc = MovementCorridor.GetSample(route, sample).Distance;
-                    foreach (float bias in new[] { -DinosaurAgent.LaneBiasScale, 0f, DinosaurAgent.LaneBiasScale })
-                    {
-                        Vector2 lanePoint = MovementCorridor.PointAt(route, arc, DinosaurAgent.LaneLateral(route, arc, bias));
-                        if (TerrainTreeObstacleRegistry.IsBlocked(lanePoint, maxTreeAvoidRadius))
-                            throw new InvalidDataException(
-                                $"路线「{routeName}」弧长 {arc:F1}m 的车道点 ({lanePoint.x:F1},{lanePoint.y:F1}) 被树干阻挡。");
-                    }
+                    Vector3 world = terrain.transform.TransformPoint(new Vector3(
+                        tree.position.x * terrainSize.x, tree.position.y * terrainSize.y, tree.position.z * terrainSize.z));
+                    MovementCorridor.ProjectToCorridor(route, new Vector2(world.x, world.z), out _, out float lateral);
+                    float limit = Mathf.Max(MovementCorridor.CenterlineTreeClearance,
+                        DinosaurAgent.TreeAvoidRadiusCap + 0.7f * tree.widthScale + 0.3f);
+                    if (Mathf.Abs(lateral) < limit - 0.01f)
+                        throw new InvalidDataException($"路线「{routeName}」中心线附近有树 ({world.x:F1},{world.z:F1})。");
                 }
             }
 
-            // 两条路线沿途独立。验收最小中心线间距，保证即使恐龙随机选线、
-            // 在最靠内侧的车道上迎面经过，也不会侵入双方互斥圆。
             float minimumRouteSeparation = float.MaxValue;
-            for (int i = 0; i < MovementCorridor.SampleCount(MovementCorridor.MainRoute); i++)
+            for (int i = 0; i < MovementCorridor.SampleCount(0); i++)
                 minimumRouteSeparation = Mathf.Min(minimumRouteSeparation, MovementCorridor.MinDistanceToRoute(
-                    MovementCorridor.GetSample(MovementCorridor.MainRoute, i).Position,
-                    MovementCorridor.ForegroundRoute));
-            const float MaximumLaneReach = 5.5f;
-            if (minimumRouteSeparation - 2f * MaximumLaneReach < widestPairRadius)
-                throw new InvalidDataException(
-                    $"两条路线最近中心线仅相距 {minimumRouteSeparation:F1}m，内侧车道可能相撞：" +
-                    $"要求中心线间距 ≥ {widestPairRadius + 2f * MaximumLaneReach:F1}m。");
+                    MovementCorridor.GetSample(0, i).Position, 1));
+            if (minimumRouteSeparation < widestPairRadius + 1f)
+                throw new InvalidDataException($"两条中心线最近仅 {minimumRouteSeparation:F1}m，恐龙可能相撞。");
 
-            // ⑨ 场景 debug 标注根存在（可开关可视化交付物，每条路线一组线段）。
             GameObject corridorRoot = GameObject.Find(MovementCorridorDebug.RootNodeName);
-            if (corridorRoot == null)
-                throw new InvalidDataException(
-                    $"场景缺少 \"{MovementCorridorDebug.RootNodeName}\" 根节点（通道 debug 标注）：" +
-                    "请重新执行 Bake Scene (Edit Mode)。");
-            MovementCorridorDebug corridorDebug = corridorRoot.GetComponent<MovementCorridorDebug>();
-            if (corridorDebug == null)
-                throw new InvalidDataException(
-                    $"\"{MovementCorridorDebug.RootNodeName}\" 缺少 MovementCorridorDebug 组件，请重新执行 Bake Scene (Edit Mode)。");
-
-            Debug.Log($"[Validate] {MovementCorridor.Describe()}");
-            Debug.Log($"[Validate] 双通道断言：{MovementCorridor.RouteCount} 条路线全部 ⊆ 活动包络 ✓ / ⊆ 森林核心矩形 ✓ / " +
-                      $"全宽 ∈ [{MovementCorridor.MinFullWidth},{MovementCorridor.MaxFullWidth}]m ✓ / 分道对会容量 ✓ / " +
-                      $"摆幅 ≥ {MovementCorridor.MinSwingMeters}m ✓ / 端点内缩 ≥ {CorridorEndInset}m ✓ / " +
-                      $"两线最小间距 {minimumRouteSeparation:F1}m ✓ / " +
-                      $"轨迹净空带（半宽+{MovementCorridor.CorridorTreeClearVerge}m）0 棵树 ✓；" +
-                      $"标注 \"{MovementCorridorDebug.RootNodeName}\" showMarkers={corridorDebug.ShowMarkers}（运行期 F3 可切换）。");
-
+            if (corridorRoot == null || corridorRoot.GetComponent<MovementCorridorDebug>() == null)
+                throw new InvalidDataException("场景缺少可开关的 MovementCorridorDebug 标记；请重新 Bake Scene。");
+            Debug.Log($"[Validate] 两条闭合中心线合格；最小间距 {minimumRouteSeparation:F1}m，树木净空、接头与 F3 标记合格。 {MovementCorridor.Describe()}");
             // ─── Understory Pass 验证（几何安全不变量 + 视觉梯度 + 资产门控状态） ───
             int understoryEntityCount = 0;
             int bushLayerCount = 0;
