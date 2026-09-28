@@ -13,13 +13,17 @@ namespace JurassicWorld
         [SerializeField] private float eyeHeight = 1.7f;   // 人眼视高（米）：由 JurassicWorldSceneBuilder.BuildCamera 通过反射写入
         // 玩家行为级碰撞半径（米）：可贴近树干观察，但不能穿过树心。
         private const float PlayerCollisionRadius = 0.45f;
-        // 漫游可达区钳制（米）：依赖 Terrain 核心平坦活动区，地形扩大时需参数化。
-        private const float TravelLimit = 47f;
+        // 漫游可达区：唯一来源 = WorldBounds.PlayerExplorationBounds（x∈[-78,78]、z∈[-78,88]）。
+        // 西/东/南三侧 = 恐龙活动包络外扩 8m（玩家可走下平坦区、踩上外围过渡带缓坡），北侧止于北林线 88。
+        // 因为可达区已越出地形平坦区，相机 Y 必须采样地形高度（见下方 SampleGroundHeight）——
+        // 这是原代码 NOTE 预留的「扩大地图」迁移，取代原先硬编码 eyeHeight 的前提（平坦区 heightmap 恒 0）。
         private Vector3 velocity;
         private Vector3 previousMousePosition;
         private float travelYaw;
         private float yaw;
         private float pitch;
+        private Terrain groundTerrain;          // Start 缓存（Terrain.activeTerrain）；null 时回退固定眼高
+        private bool warnedMissingTerrain;      // 「无地形」警告只输出一次
         // Blocker 1 防御：SlideMove 不变量违反（理论不可达）只警告一次
         private bool warnedSlideInvariant;
 
@@ -31,6 +35,7 @@ namespace JurassicWorld
             // 相机移动同样是纯 Transform 位移（无 Rigidbody），树干阻挡走行为级几何查询：
             // 惰性构建地形树障碍注册表（恐龙侧已构建时为一次 InstanceID 比较，开销可忽略）。
             TerrainTreeObstacleRegistry.EnsureInitialized();
+            groundTerrain = Terrain.activeTerrain;
         }
 
         private void Update()
@@ -56,9 +61,9 @@ namespace JurassicWorld
             Vector2 currentXZ = new Vector2(transform.position.x, transform.position.z);
             Vector2 desiredXZ = new Vector2(desiredPosition.x, desiredPosition.z);
 
-            // 2. 先将期望点钳制到 ±TravelLimit（凸集：起点在界内 + 期望点在界内 → 线段全程在界内）
-            desiredXZ.x = Mathf.Clamp(desiredXZ.x, -TravelLimit, TravelLimit);
-            desiredXZ.y = Mathf.Clamp(desiredXZ.y, -TravelLimit, TravelLimit);
+            // 2. 先将期望点钳制到玩家可探索矩形（WorldBounds.PlayerExplorationXZ；
+            //    凸集：起点在界内 + 期望点在界内 → 线段全程在界内）
+            desiredXZ = WorldBounds.ClampToPlayerExploration(desiredXZ);
 
             // 3. 扫掠滑移：SlideMove 返回值必在界内且不在树内（不变量）
             Vector2 slidXZ = TerrainTreeObstacleRegistry.SlideMove(
@@ -68,7 +73,7 @@ namespace JurassicWorld
             if (!warnedSlideInvariant)
             {
                 bool blocked = TerrainTreeObstacleRegistry.IsBlocked(slidXZ, PlayerCollisionRadius);
-                bool outOfBounds = Mathf.Abs(slidXZ.x) > TravelLimit || Mathf.Abs(slidXZ.y) > TravelLimit;
+                bool outOfBounds = !WorldBounds.ContainsPlayer(slidXZ);
                 if (blocked || outOfBounds)
                 {
                     warnedSlideInvariant = true;
@@ -77,9 +82,11 @@ namespace JurassicWorld
                 }
             }
 
-            // 5. 赋值最终位置：y = eyeHeight（人眼视高 1.7m，依赖 Terrain 核心活动区 heightmap=0）
-            // NOTE: 引入地形起伏或扩大地图时需参数化 eyeHeight 并采样 Terrain 高度。
-            transform.position = new Vector3(slidXZ.x, eyeHeight, slidXZ.y);
+            // 5. 赋值最终位置：y = 地形高度 + eyeHeight。
+            // 可达区已越出地形平坦区（西/东/南外扩 8m），外围过渡带地面不再恒为 0 —— 必须采样地形高度，
+            // 否则相机在起伏处会悬空或钻地。Terrain.SampleHeight 返回世界 Y（本场景地形 GO 的 y = 0，
+            // 故与 transform.position.y + GetInterpolatedHeight 等价）。
+            transform.position = new Vector3(slidXZ.x, SampleGroundHeight(slidXZ) + eyeHeight, slidXZ.y);
 
             // ─── 鼠标视角 ───
             if (Input.GetMouseButtonDown(1))
@@ -100,6 +107,25 @@ namespace JurassicWorld
             }
 
             transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.Euler(pitch, yaw, 0f), 1f - Mathf.Exp(-10f * Time.deltaTime));
+        }
+
+        /// <summary>
+        /// 采样 XZ 处的地形高度（米，世界 Y）。无地形时回退 0（= 原硬编码行为）并只告警一次。
+        /// 地形引用在 Start 缓存（与 TerrainTreeObstacleRegistry 同一惰性范式），运行期零查找开销。
+        /// </summary>
+        private float SampleGroundHeight(Vector2 xz)
+        {
+            if (groundTerrain == null)
+            {
+                if (!warnedMissingTerrain)
+                {
+                    warnedMissingTerrain = true;
+                    Debug.LogWarning("[SmoothExplorerCamera] 场景无 Terrain，相机视高回退为固定 eyeHeight：" +
+                                     "外围起伏处可能悬空 / 钻地。");
+                }
+                return 0f;
+            }
+            return groundTerrain.SampleHeight(new Vector3(xz.x, 0f, xz.y));
         }
     }
 }

@@ -20,10 +20,13 @@ namespace JurassicWorld.Editor
     /// 绝不触碰：树实例、heightmap / splat、其他 Pass 的根与原型对象、任何运行时脚本
     /// （含 DinosaurSpawnRandomizer —— 碰撞规避完全靠下述几何不变量，不靠运行时避让）。
     ///
-    /// 安全缓冲不变量（几何隔离）：
-    ///  恐龙漫步包络 ⊆ 平坦矩形 x∈[-70,70]、z∈[-70,90]（DinosaurSpawnRandomizer 的采样契约）；
-    ///  所有中大型实体道具（rock / hero bush / log / stump）位于平坦矩形 + DinoSafetyBuffer(7.5m) 之外，
-    ///  故与恐龙零接触；buffer 内 bush detail 密度恒 0（终态硬钳制），只允许 grass detail 等低矮非碰撞植被。
+    /// 安全缓冲不变量（几何隔离，**以恐龙活动包络为准，不再以地形平坦区为准**）：
+    ///  恐龙漫步包络 ⊆ DinosaurActivityBounds（WorldBounds.DinosaurActivityXZ，由 DinosaurSpawnRandomizer 的
+    ///  采样矩形 ⊕ DinosaurAgent.WanderRadius 推导；当前数值 x∈[-70,70]、z∈[-70,90]，与地形平坦区恰好同值，
+    ///  但两者是**独立概念**——地形平坦区一改不再牵动本类）；
+    ///  所有中大型实体道具（rock / hero bush / log / stump）位于活动包络 + DinoSafetyBuffer(7.5m) 之外，
+    ///  故与恐龙零接触；低矮无碰撞的 bush / fern detail 层改由 VisualVegetationZones 梯度控制：
+    ///  仅 R0 开阔空地（活动包络内缩 50m）内恒 0，从活动包络外缘起单调加密到林缘（见 WorldBounds.LowVegGate01）。
     ///
     /// 回滚契约（EnableUnderstoryPass=false + 重 Bake = 恢复至 Ground Pass 完成后的 Detail 状态）：
     ///  (a) 整根删除 "Understory Pass"；
@@ -61,15 +64,28 @@ namespace JurassicWorld.Editor
 
         // --- 根节点 ---
         internal const string RootNodeName = "Understory Pass";
-        private const string RocksNodeName = "Rocks";
-        private const string VegetationNodeName = "Vegetation";
-        private const string DeadwoodNodeName = "Deadwood";
+        internal const string RocksNodeName = "Rocks";
+        internal const string VegetationNodeName = "Vegetation";
+        internal const string DeadwoodNodeName = "Deadwood";
+
+        // --- 视觉梯度（VisualVegetationZones）---
+        // 低矮无碰撞植被（bush/fern detail）的门由 WorldBounds.LowVegGate01 按「到恐龙活动包络的带符号距离」
+        // 给出：空地(≤ -ClearingInset) 0 → 活动包络外缘(LowVegEdgeLevel) 0.35 稀疏 → NearForestOuter 19.5m 外 1.0。
+        // 取值刻意与旧 ramp（Clamp01((dFlat-7.5)/12)，19.5m 外饱和）在饱和点对齐 ⇒ sd ≥ 19.5 的区域逐格不变。
+
+        // 内侧 fern 独立簇流（salt +4）：专供 R1/R2（活动包络外缘 + 玩家过渡带）。
+        // 既有 +2 簇流（BuildFernField）保持原样 = 森林 fern（R3/R4），两流互不干扰、各自独立可验证。
+        private const int FernInnerBandSalt = UnderstoryRandomSeed + 4;
+        private const int FernInnerClusterCount = 160;
+        private const float FernInnerBandOuter = WorldBounds.PlayerTransitionOuter; // 8m：过渡带外沿
+        private const float FernInnerClusterRadiusMin = 1.2f, FernInnerClusterRadiusMax = 3.0f;
 
         // --- 密度（bush 分区 / cluster 化）---
-        private const float BushRampWidth = 12f;               // 缓冲外密度爬升带宽度（米）：0 → 全值
+        private const float BushRampWidth = 12f;               // 旧密度爬升带宽（米）：现仅用于「梯度门饱和点自检」——
+                                                               // WorldBounds.NearForestOuter 必须 == DinoSafetyBuffer + 本值
         private const int EdgeBushMin = 2, EdgeBushMax = 6;    // 林缘重点带（高频团块）
         private const int ForestBushMin = 2, ForestBushMax = 5; // 林内斑块（Fern 到位前的底层过渡覆盖）
-        private const float ForestEdgeDepth = 18f;             // 到核心矩形距离 < 此值视为林缘带
+        internal const float ForestEdgeDepth = 18f;             // 到核心矩形距离 < 此值视为林缘带（ValidateProject ⑧ 角色断言引用）
         private const float WallInset = 12f;                   // 地形边缘密林墙判定宽度（米）
         private const float WallBushFloor = 5f;                // 密林墙内 bush 密度下限
 
@@ -105,6 +121,9 @@ namespace JurassicWorld.Editor
         private const int FernPerClusterMin = 4, FernPerClusterMax = 10;
         private const float FernClusterRadiusMin = 1.5f, FernClusterRadiusMax = 4f;
 
+        /// <summary>fern 变体分配的独立固定 salt（与既有 +7/+11/+100/+200/+900 等 salt 互不冲突）。</summary>
+        private const int FernVariantSalt = UnderstoryRandomSeed + 900;
+
         // --- Deadwood（资产门控：Assets/Vegetation/Deadwood 无合格 prefab 时 no-op）---
         private const int LogCountMin = 6, LogCountMax = 8;
         private const int StumpCountMin = 3, StumpCountMax = 5;
@@ -115,6 +134,29 @@ namespace JurassicWorld.Editor
 
         /// <summary>调试岩石开关只读视图（属性读取避免常量折叠的不可达代码告警；ValidateProject 也会据此告警）。</summary>
         internal static bool DebugProceduralRocksOn => DebugProceduralRocks;
+
+        // --- 非破坏性 Preview 倍数（editor-only；正式 Bake 恒为 1）---
+        /// <summary>
+        /// 仅由 JurassicWorld.Editor.PolyHavenPassPreview 设置的【非破坏性 Preview】倍数（默认 1）。
+        /// >1 时按【确定性前缀】缩小岩石簇 / fern 簇 / deadwood 数量，用于小规模 Preview；
+        /// 正式 Full Bake 恒为 1，行为与未引入本字段时逐字节一致。
+        ///
+        /// 刻意【不】改动任何分布常量、也【不】改变随机契约：前缀语义下「前 K 项」的随机序列
+        /// 与生产序列的前 K 项完全相同，且各子系统各持独立 System.Random 实例，互不干扰。
+        /// </summary>
+        internal static int PreviewScale = 1;
+
+        /// <summary>按 PreviewScale 折算数量（前缀预算）：PreviewScale &lt;= 1 时原样返回。</summary>
+        private static int PreviewBudget(int productionCount)
+        {
+            return PreviewScale <= 1 ? productionCount : Mathf.Max(1, productionCount / PreviewScale);
+        }
+
+        // --- 最近一次 fern 铺设的守恒量（进程内传递，供 PolyHavenPassPreview 独立断言 sum(variants) == total target）---
+        internal static long LastFernTotalTarget;
+        internal static long LastFernAssigned;
+        internal static int LastFernVariantCount;
+        internal static readonly List<long> LastFernVariantSums = new List<long>();
 
         // --- 环境模型 ---
         private const int InfluenceRes = 128;  // 影响场网格分辨率（128² ≈ 1.57m/格）
@@ -163,6 +205,16 @@ namespace JurassicWorld.Editor
             Debug.Log($"[UnderstorySeeder] 启动（seed={UnderstoryRandomSeed}, buffer={DinoSafetyBuffer}m）：" +
                       $"bush 层 {bushLayers.Count} 个 / grass 层 {(grassLayer >= 0 ? grassLayer.ToString() : "未识别")} / " +
                       $"岩石簇 {rockClusters.Count} 个（hero {Mathf.Min(HeroRockCount, rockClusters.Count)}）/ 树干锚点 {trunkAnchors.Count} 个。");
+
+            // 四边界定义（与 ProductionAcceptance 报告共用 WorldBounds.Describe 的同一份措辞，避免两侧漂移）
+            Debug.Log($"[WorldBounds] {WorldBounds.Describe()}");
+
+            // 梯度门自检：门的饱和点必须 == 旧硬钳制线 + 旧爬升带宽，否则 sd ≥ 饱和点的区域不再逐格不变
+            if (!Mathf.Approximately(WorldBounds.NearForestOuter, DinoSafetyBuffer + BushRampWidth))
+                Debug.LogWarning($"[UnderstorySeeder] 梯度门饱和点 {WorldBounds.NearForestOuter}m ≠ DinoSafetyBuffer({DinoSafetyBuffer}) + " +
+                                 $"BushRampWidth({BushRampWidth})：sd ≥ 饱和点的区域将与旧 Bake 不再逐格一致（「0 变化」预测失效，需重评估）。");
+
+            LogShowcaseRing();
 
             // 4) 统一密度场计算 + 逐层幂等写回
             PaintDetailLayers(data, model, bushLayers, grassLayer);
@@ -293,6 +345,48 @@ namespace JurassicWorld.Editor
             string path = AssetDatabase.GetAssetPath(p.prototype);
             return !string.IsNullOrEmpty(path) &&
                    path.StartsWith(UnderstoryAssetLocator.FernFolder + "/", StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>自有 fern 原型的对外只读视图（供 JurassicProjectSetup.ValidateProject 断言，避免常量折叠）。</summary>
+        internal static bool IsOwnedFernPrototype(DetailPrototype p) => IsOwnedFernProto(p);
+
+        /// <summary>
+        /// 自有 fern 原型的目标渲染模式。**刻意用 VertexLit 而非 Grass**：Grass 走 Unity 内置 waving-grass
+        /// detail shader，其风位移是【整株水平平移】——2026-09-22 `DetailMotionProbe` 同一帧受控渲染实测：
+        /// 位移由 `TerrainData.wavingGrass*` 驱动（置 0 → 蕨类像素 71% 变化），`WindZone` 只贡献 2%；
+        /// 且蕨类连通块的"底部接触边界像素"与"顶部像素"受影响比例 81.2% vs 79.4% ⇒ 连根部一起被推走，
+        /// 0.3m 高的蕨类被推 0.2m 量级 ⇒ 观感"蕨类根部一直左右移动"。VertexLit 按 Unity 文档"不随风移动"，
+        /// 且该模式走原型 prefab 的材质（本项目自有双面 Cutout shader）→ 叶尖轻摆由该 shader 的
+        /// `_FernSway`（位移 ∝ 归一化局部高度²，根部 y≤0 位移恒为 0）承担。
+        /// 注意：此值与 minWidth/density 等一样只烘进 TerrainData，改动后必须重 Bake 才生效。
+        /// </summary>
+        internal static DetailRenderMode FernRenderModeTarget => DetailRenderMode.VertexLit;
+
+        /// <summary>构造自有 fern 原型（唯一构造点：追加与规格修正共用，避免两处漂移）。</summary>
+        private static DetailPrototype BuildFernPrototype(GameObject fern) => new DetailPrototype
+        {
+            usePrototypeMesh = true,
+            prototype = fern,
+            renderMode = FernRenderModeTarget,
+            healthyColor = new Color(0.30f, 0.62f, 0.22f),
+            dryColor = new Color(0.52f, 0.58f, 0.24f),
+            minWidth = 0.8f,
+            maxWidth = 1.6f,
+            minHeight = 0.8f,
+            maxHeight = 1.6f,
+            noiseSpread = 0.2f,
+            density = 1 // CoverageMode 下的实例数倍率基准（InstanceCountMode 下无副作用；整数字面量兼容 int/float 声明）
+        };
+
+        /// <summary>现有自有原型是否已符合目标规格（含 renderMode —— 历史产物可能是 Grass，必须能自愈重写）。</summary>
+        private static bool FernPrototypeMatchesSpec(DetailPrototype existing, GameObject fern)
+        {
+            if (existing == null)
+                return false;
+            return existing.usePrototypeMesh
+                && existing.prototype == fern
+                && existing.renderMode == FernRenderModeTarget
+                && existing.density > 0f;
         }
 
         private static int[] FlattenLayer(TerrainData data, int res, int layerIdx)
@@ -426,6 +520,194 @@ namespace JurassicWorld.Editor
             return anchors;
         }
 
+        // ================================================================ 展示环（近林带可见性布局）
+        //
+        // 存在理由：实体道具（rock / log / stump）必须位于恐龙活动包络 + DinoSafetyBuffer 之外，而该环带正好是
+        // ForestSeeder 的全密度林区 —— 道具被树冠与树干挡死，玩家在可达边界（WorldBounds.PlayerExplorationXZ，
+        // 西/东/南 = 活动包络外扩 8m）看不到任何一块。因此把「展示用」道具集中到紧贴缓冲外侧的近林带
+        // （12.5–20m），并让 ForestSeeder 按同一份布局在林缘让出「清空圆 + 指向草地的视线通道」，
+        // 玩家站在边界正对缺口即可看见。
+        //
+        // 契约：BuildShowcaseRing() 是纯函数（只依赖固定常量与数学，不读 TerrainData），ForestSeeder（更早运行）
+        // 与 UnderstorySeeder 各自调用得到逐字段相同的结果；InShowcaseClearance 只做几何判定，不消费随机数。
+
+        /// <summary>展示环道具种类。</summary>
+        internal enum ShowcaseKind
+        {
+            Rock = 0,
+            Log = 1,
+            Stump = 2
+        }
+
+        /// <summary>展示环中的一个道具位（字段跨 Bake 逐字段稳定）。</summary>
+        internal struct ShowcaseSpot
+        {
+            public Vector2 Center;      // 世界 XZ
+            public ShowcaseKind Kind;
+            public float AzimuthDeg;    // 自正北 +z 顺时针（倒木据此横置 = 正面朝向草地）
+            public float FlatDistance;  // 到平坦矩形的距离（米，恒 ≥ ClusterCenterMinDistance）
+        }
+
+        /// <summary>近林带外沿（距平坦矩形，米）：展示道具一律落在 [ClusterCenterMinDistance, 此值]。</summary>
+        private const float ShowcaseBandOuter = 20f;
+
+        /// <summary>近林带外沿的对外只读视图（供 JurassicProjectSetup.ValidateProject 断言，避免常量折叠）。</summary>
+        internal static float ShowcaseBandOuterMeters => ShowcaseBandOuter;
+
+        /// <summary>展示道具周围的清空半径（米）：此圆内的森林树被让开，道具不被树冠吞没。</summary>
+        internal const float ShowcaseClearRadius = 7f;
+
+        /// <summary>视线通道半宽（米）：从道具指向平坦矩形的通道，保证从可行走区能望见。</summary>
+        internal const float ShowcaseLaneHalfWidth = 3.5f;
+
+        /// <summary>视线通道向矩形内侧额外延伸的长度（米）：覆盖 x∈[65,70] 的第一排树，玩家站在边界即可直视。</summary>
+        private const float ShowcaseLaneInwardExtension = 8f;
+
+        /// <summary>
+        /// 展示位距地形边界的最小距离（米）= `ForestSeeder.WallInset - 2`：边界密林墙（WallInset 内强制 0.92
+        /// 密度以遮挡地平线）里放展示道具等于白放；而 ForestSeeder 的清空判定同样只在 WallInset 外侧生效，
+        /// 贴着墙沿的位最多损失不足 2m 通道，视线基本通透。北侧（平坦矩形 z 上界 90 → 地形边 100）只有 10m
+        /// 可用，本约束下天然没有展示位 —— 该方向几何上放不下（缓冲 12.5m > 10m）。
+        /// </summary>
+        private const float ShowcaseBorderMargin = ForestSeeder.WallInset - 2f;
+
+        private const int ShowcaseLogCount = 3;
+        private const int ShowcaseStumpCount = 2;
+
+        private static List<ShowcaseSpot> showcaseRingCache;
+
+        /// <summary>展示环布局（进程内缓存；纯常量派生，跨 Bake 稳定）。</summary>
+        internal static List<ShowcaseSpot> BuildShowcaseRing()
+        {
+            if (showcaseRingCache != null)
+                return showcaseRingCache;
+
+            var random = new System.Random(UnderstoryRandomSeed);
+            var spots = new List<ShowcaseSpot>();
+            Vector2 flatCenter = FlatRectCenterWorld();
+
+            // (a) 岩石簇心：360° 扇区（扇区中心 ± 15° jitter），距平坦矩形 12.5–20m
+            for (int i = 0; i < HeroRockCount; i++)
+            {
+                float azimuth = i * (360f / HeroRockCount) + ((float)random.NextDouble() * 2f - 1f) * 15f;
+                float targetDist = ClusterCenterMinDistance
+                                 + (float)random.NextDouble() * (ShowcaseBandOuter - ClusterCenterMinDistance);
+                AddShowcaseSpot(spots, flatCenter, azimuth, targetDist, ShowcaseKind.Rock, RockClusterMinGap);
+            }
+
+            // (b) 倒木 / 树桩：错开岩石扇区（+18° 起步、按 120°/180° 间隔），与已有位保持 min-gap
+            for (int i = 0; i < ShowcaseLogCount; i++)
+            {
+                float azimuth = 18f + i * (360f / ShowcaseLogCount) + ((float)random.NextDouble() * 2f - 1f) * 10f;
+                float targetDist = ClusterCenterMinDistance + 1f + (float)random.NextDouble() * 4f;
+                AddShowcaseSpot(spots, flatCenter, azimuth, targetDist, ShowcaseKind.Log, RockClusterMinGap);
+            }
+            for (int i = 0; i < ShowcaseStumpCount; i++)
+            {
+                float azimuth = 54f + i * (360f / ShowcaseStumpCount) + ((float)random.NextDouble() * 2f - 1f) * 10f;
+                float targetDist = ClusterCenterMinDistance + 2f + (float)random.NextDouble() * 4f;
+                AddShowcaseSpot(spots, flatCenter, azimuth, targetDist, ShowcaseKind.Stump, RockClusterMinGap);
+            }
+
+            showcaseRingCache = spots;
+            return spots;
+        }
+
+        /// <summary>沿 azimuth 求「距平坦矩形 = targetDist」的点，通过北侧窄带 / min-gap 检验后入列。</summary>
+        private static void AddShowcaseSpot(List<ShowcaseSpot> spots, Vector2 flatCenter, float azimuth,
+            float targetDist, ShowcaseKind kind, float minGap)
+        {
+            Vector2 dir = new Vector2(Mathf.Sin(azimuth * Mathf.Deg2Rad), Mathf.Cos(azimuth * Mathf.Deg2Rad));
+            Vector2 center = ClampToTerrain(PointAtFlatDistance(flatCenter, dir, targetDist), 3f);
+            float flatDistance = DistanceToDinosaurActivity(center.x, center.y);
+
+            // 北侧窄带（平坦矩形 z 上界 90 → 地形边 100）放不下时跳过该方位
+            if (flatDistance < ClusterCenterMinDistance)
+                return;
+
+            // 边界密林墙（ForestSeeder 在此强制 0.92 密度以遮挡地平线）内不放展示道具：放进去等于白放
+            float borderDistance = Mathf.Min(TerrainSize / 2f - Mathf.Abs(center.x), TerrainSize / 2f - Mathf.Abs(center.y));
+            if (borderDistance < ShowcaseBorderMargin)
+                return;
+
+            foreach (ShowcaseSpot existing in spots)
+                if (Vector2.Distance(existing.Center, center) < minGap)
+                    return;
+
+            spots.Add(new ShowcaseSpot
+            {
+                Center = center,
+                Kind = kind,
+                AzimuthDeg = azimuth,
+                FlatDistance = flatDistance
+            });
+        }
+
+        /// <summary>
+        /// 点是否落在某个展示位的「清空圆 ∩ 视线通道」内（供 ForestSeeder 让开森林树）。
+        /// 纯几何判定：不消费随机数、不读 TerrainData。
+        /// </summary>
+        internal static bool InShowcaseClearance(Vector2 p)
+        {
+            foreach (ShowcaseSpot spot in BuildShowcaseRing())
+            {
+                if (Vector2.Distance(p, spot.Center) <= ShowcaseClearRadius)
+                    return true;
+                if (DistanceToSegment(p, spot.Center, ShowcaseLaneEnd(spot)) < ShowcaseLaneHalfWidth)
+                    return true;
+            }
+            return false;
+        }
+
+        /// <summary>视线通道终点：平坦矩形上距该展示位最近的点，再向矩形内侧延伸 ShowcaseLaneInwardExtension。</summary>
+        private static Vector2 ShowcaseLaneEnd(ShowcaseSpot spot)
+        {
+            GetFlatRectWorld(out float minX, out float maxX, out float minZ, out float maxZ);
+            var nearest = new Vector2(Mathf.Clamp(spot.Center.x, minX, maxX), Mathf.Clamp(spot.Center.y, minZ, maxZ));
+            Vector2 inward = nearest - spot.Center;
+            float length = inward.magnitude;
+            if (length < 1e-3f)
+                return nearest;
+            return nearest + inward / length * ShowcaseLaneInwardExtension;
+        }
+
+        /// <summary>点到线段的最短距离（米）。</summary>
+        private static float DistanceToSegment(Vector2 p, Vector2 a, Vector2 b)
+        {
+            Vector2 ab = b - a;
+            float denom = ab.sqrMagnitude;
+            if (denom < 1e-6f)
+                return Vector2.Distance(p, a);
+            float t = Mathf.Clamp01(Vector2.Dot(p - a, ab) / denom);
+            return Vector2.Distance(p, a + ab * t);
+        }
+
+        /// <summary>展示环日志：构成与距平坦矩形区间（可见性取证）。</summary>
+        private static void LogShowcaseRing()
+        {
+            List<ShowcaseSpot> spots = BuildShowcaseRing();
+            if (spots.Count == 0)
+            {
+                Debug.LogWarning("[UnderstorySeeder] 展示环为空（北侧窄带放不下？）——近林带将没有可见道具。");
+                return;
+            }
+
+            int rocks = 0, logs = 0, stumps = 0;
+            float minDist = float.MaxValue, maxDist = 0f;
+            foreach (ShowcaseSpot spot in spots)
+            {
+                if (spot.Kind == ShowcaseKind.Rock) rocks++;
+                else if (spot.Kind == ShowcaseKind.Log) logs++;
+                else stumps++;
+                minDist = Mathf.Min(minDist, spot.FlatDistance);
+                maxDist = Mathf.Max(maxDist, spot.FlatDistance);
+            }
+
+            Debug.Log($"[UnderstorySeeder] 展示环：{spots.Count} 个近林带道具位（岩石 {rocks} / 倒木 {logs} / 树桩 {stumps}），" +
+                      $"距平坦矩形 {minDist:F1}–{maxDist:F1}m（目标 {ClusterCenterMinDistance:F1}–{ShowcaseBandOuter:F1}m）；" +
+                      $"清空半径 {ShowcaseClearRadius:F1}m + 视线通道半宽 {ShowcaseLaneHalfWidth:F1}m（ForestSeeder 按同一布局让开树）。");
+        }
+
         // ================================================================ 岩石簇分布（与资产门控解耦：无论是否有 prefab 都确定性执行）
 
         private struct RockMember
@@ -443,37 +725,20 @@ namespace JurassicWorld.Editor
 
         /// <summary>
         /// 生成岩石簇分布（纯确定性；仅使用固定 RNG + 几何查询，不依赖任何资产）：
-        /// (a) hero 锚石环带：围绕平坦矩形的 360° 方位分层（10 扇区 × jitter），距矩形 = 簇心最小距离 + 0..26m；
-        /// (b) 其余簇：加权拒绝采样（Poisson min-gap）：林缘/坡脚高、远林低、通道内显著降低、泥边不额外处理。
+        /// (a) hero 锚石 = 展示环岩石位（近林带，距矩形 12.5–20m；ForestSeeder 按同一布局让开森林树 → 玩家可见）；
+        /// (b) 其余簇：加权拒绝采样（Poisson min-gap）：近林带优先、林缘/坡脚高、远林低、通道内显著降低。
         /// 所有簇心距平坦矩形 ≥ ClusterCenterMinDistance（含成员偏移后仍 ≥ buffer + extra）。
         /// </summary>
         private static List<RockCluster> GenerateRockClusters(TerrainData data)
         {
             var random = new System.Random(UnderstoryRandomSeed);
             var clusters = new List<RockCluster>();
-            Vector2 flatCenter = FlatRectCenterWorld();
 
-            int heroCount = Mathf.Min(HeroRockCount, RockClusterCount);
-            for (int i = 0; i < heroCount; i++)
+            foreach (ShowcaseSpot spot in BuildShowcaseRing())
             {
-                // 方位分层：扇区中心 + ±15° jitter（角度约定：0°=+z 北，顺时针向 +x，与 ForestSeeder.ChannelAzimuths 一致）
-                float sectorCenter = i * (360f / heroCount);
-                float jitter = ((float)random.NextDouble() * 2f - 1f) * 15f;
-                float angle = (sectorCenter + jitter) * Mathf.Deg2Rad;
-                Vector2 dir = new Vector2(Mathf.Sin(angle), Mathf.Cos(angle));
-                float targetDist = ClusterCenterMinDistance + (float)random.NextDouble() * 26f;
-
-                Vector2 center = ClampToTerrain(PointAtFlatDistance(flatCenter, dir, targetDist), 3f);
-                if (DistanceToFlatRectWorld(center.x, center.y) < ClusterCenterMinDistance)
-                    continue; // 北侧窄带（平坦矩形 z 上界 90 → 地形边 100）无空间时跳过该扇区
-
-                bool tooClose = false;
-                foreach (RockCluster c in clusters)
-                    if (Vector2.Distance(c.Center, center) < RockClusterMinGap) { tooClose = true; break; }
-                if (tooClose)
+                if (spot.Kind != ShowcaseKind.Rock)
                     continue;
-
-                clusters.Add(BuildClusterMembers(random, center, true));
+                clusters.Add(BuildClusterMembers(random, spot.Center, true));
             }
 
             // (b) 其余簇：加权拒绝采样
@@ -481,8 +746,9 @@ namespace JurassicWorld.Editor
             {
                 float wx = (float)(random.NextDouble() * 194.0 - 97.0);
                 float wz = (float)(random.NextDouble() * 194.0 - 97.0);
+                float flatDist = DistanceToDinosaurActivity(wx, wz);
 
-                if (DistanceToFlatRectWorld(wx, wz) < ClusterCenterMinDistance)
+                if (flatDist < ClusterCenterMinDistance)
                     continue;
 
                 bool tooClose = false;
@@ -495,6 +761,7 @@ namespace JurassicWorld.Editor
                 float weight = 0.35f;
                 weight += 0.45f * Mathf.Clamp01(1f - coreDist / 30f);         // 林缘高
                 weight += 0.30f * FootWeight(data, wx, wz);                   // 坡脚高
+                weight *= NearBandWeight(flatDist);                           // 近林带优先（可见性）
                 if (coreDist > 60f) weight *= 0.45f;                          // 远林低
                 if (ChannelMask01(wx, wz) > 0f) weight *= 0.25f;              // 通道内显著降低
                 if (random.NextDouble() >= weight)
@@ -533,7 +800,7 @@ namespace JurassicWorld.Editor
             {
                 float mid = (lo + hi) * 0.5f;
                 Vector2 p = origin + dir * mid;
-                if (DistanceToFlatRectWorld(p.x, p.y) < targetDist)
+                if (DistanceToDinosaurActivity(p.x, p.y) < targetDist)
                     lo = mid;
                 else
                     hi = mid;
@@ -554,6 +821,18 @@ namespace JurassicWorld.Editor
             if (s0 > 0.15f)
                 return 0f;
             return Mathf.Clamp01((sN - s0) / 0.10f);
+        }
+
+        /// <summary>
+        /// 近林带权重：12.5–26m（可达边界外 12.5m 起、可见）小幅加权，26–45m 线性衰减到 0.30。
+        /// 平坦矩形占据地形中心，可接受候选本身只落在 ≤≈30m 的窄环内，故此处只做"靠外缘少放"的层次修正。
+        /// </summary>
+        private static float NearBandWeight(float flatDistance)
+        {
+            const float near = 26f, far = 45f;
+            if (flatDistance <= near)
+                return 1.15f;
+            return Mathf.Lerp(1.15f, 0.30f, Mathf.Clamp01((flatDistance - near) / (far - near)));
         }
 
         // ================================================================ Boost 网格（邻域增强）
@@ -619,6 +898,17 @@ namespace JurassicWorld.Editor
             return FindBushDetailLayerIndicesInternal(data).ToArray();
         }
 
+        /// <summary>fern 层索引（供 ValidateProject 做「R0 空地内 fern 密度恒 0」抽样断言）。</summary>
+        internal static int[] FindFernDetailLayerIndices(TerrainData data)
+        {
+            var result = new List<int>();
+            DetailPrototype[] protos = data.detailPrototypes ?? Array.Empty<DetailPrototype>();
+            for (int i = 0; i < protos.Length; i++)
+                if (IsOwnedFernProto(protos[i]))
+                    result.Add(i);
+            return result.ToArray();
+        }
+
         /// <summary>grass01 层索引（billboard 层，GroundPass 所有权键 = grass01 纹理引用）；未找到返回 -1。</summary>
         private static int FindGrass01LayerIndex(TerrainData data)
         {
@@ -674,14 +964,16 @@ namespace JurassicWorld.Editor
                 float wx = (float)x / res * TerrainSize - TerrainSize / 2f;
                 float wz = (float)z / res * TerrainSize - TerrainSize / 2f;
 
-                float dFlat = DistanceToFlatRectWorld(wx, wz);
+                float sdAct = SignedDistanceToDinosaurActivity(wx, wz);
+                float dAct = Mathf.Max(sdAct, 0f); // 无符号距离（与旧 dFlat 逐位相同：两矩形数值一致）
                 float coreDist = ForestSeeder.DistanceToCoreRect(wx, wz);
                 float treeNear = SampleGrid(model.TreeNear, wx, wz);
                 float soil = SampleGrid(model.Soil, wx, wz);
                 float channel = ChannelMask01(wx, wz);
 
-                // ---- bush：缓冲硬禁 → ramp 起步 → 林缘高频团块 / 林内低频斑块（全按 cluster 噪声聚簇化）----
-                float ramp = Mathf.Clamp01((dFlat - DinoSafetyBuffer) / BushRampWidth);
+                // ---- bush：视觉梯度门（空地 0 → 活动包络外缘稀疏 → 林缘饱和）→ 团块化 ----
+                // 门取代旧的「buffer 硬禁 + ramp」两步：不再以地形平坦区为安全边界，只以 R0 空地为禁止域。
+                float lowVegGate = LowVegGate01(sdAct);
                 bool inEdgeZone = coreDist < ForestEdgeDepth;
                 float clumpNoise = inEdgeZone
                     ? Mathf.PerlinNoise(wx * 0.13f + 31.7f, wz * 0.13f + 12.9f)  // 林缘：高频（≈8m 特征）
@@ -693,7 +985,7 @@ namespace JurassicWorld.Editor
                 float borderDist = Mathf.Min(TerrainSize / 2f - Mathf.Abs(wx), TerrainSize / 2f - Mathf.Abs(wz));
                 if (borderDist < WallInset)
                     baseBush = Mathf.Max(baseBush, WallBushFloor); // 地形边缘密林墙
-                float b = baseBush * ramp;
+                float b = baseBush * lowVegGate;
                 b *= 1f - TrailVegetationReduction * channel;
                 b *= 1f - MudVegetationReduction * soil;
                 b += SampleGrid(model.BushBoost, wx, wz);
@@ -703,13 +995,14 @@ namespace JurassicWorld.Editor
                     bushActiveCells++;
 
                 // ---- grass：平坦矩形内连续 2-4；外缘斑驳 1-3（带缝隙）；林内 0-2（树冠下减少）----
+                // 注意：此处必须用【无符号】距离 —— 若改用带符号距离，矩形内变负会让 Max(...) 结果偏高而误改草层。
                 float patch = Mathf.PerlinNoise(wx * 0.10f + 15.7f, wz * 0.10f + 23.3f);  // 斑块（≈10m）
                 float micro = Mathf.PerlinNoise(wx * 0.33f + 41.2f, wz * 0.33f + 8.6f);  // 细碎缝隙（≈3m）
-                float openness = dFlat <= 0.001f
+                float openness = dAct <= 0.001f
                     ? 0f
-                    : Mathf.Clamp01(Mathf.Max(dFlat / EdgeGrassBand, treeNear));
+                    : Mathf.Clamp01(Mathf.Max(dAct / EdgeGrassBand, treeNear));
                 float g = Mathf.Lerp(2.6f + 1.4f * patch, 0.7f, openness);
-                if (dFlat > 0.001f)
+                if (dAct > 0.001f)
                 {
                     float gap = Smoothstep(Mathf.Clamp01((micro - 0.34f) / 0.22f));
                     g *= Mathf.Lerp(0.22f, 1f, gap); // 林缘/林内带缝隙
@@ -748,8 +1041,9 @@ namespace JurassicWorld.Editor
                     float wz = (float)z / res * TerrainSize - TerrainSize / 2f;
                     float v = bushField[x, z] * share
                               * (0.75f + 0.5f * Hash01(x, z, UnderstoryRandomSeed + 100 + layerIdx));
-                    if (DistanceToFlatRectWorld(wx, wz) < DinoSafetyBuffer)
-                        v = 0f; // 终态硬钳制：buffer 内 bush 密度恒 0
+                    if (SignedDistanceToDinosaurActivity(wx, wz) <= -WorldBounds.ClearingInset)
+                        v = 0f; // 终态硬钳制：R0 开阔空地内 bush 密度恒 0
+                                //（门已乘过一次，此处防 boost 网格 / hash 抖动在空地内越界加值）
                     density[x, z] = Mathf.Clamp(Mathf.RoundToInt(v), 0, BushMaxDensity);
                 }
                 int diff = WriteLayerIfChanged(data, layerIdx, density);
@@ -842,7 +1136,9 @@ namespace JurassicWorld.Editor
             int placed = 0;
             int skippedInsideBuffer = 0;
 
-            for (int ci = 0; ci < clusters.Count; ci++)
+            // Preview 前缀：只实例化前 PreviewBudget 个簇（hero 簇位于列表最前，故预览仍含 hero 岩石）。
+            int clusterBudget = PreviewBudget(clusters.Count);
+            for (int ci = 0; ci < clusters.Count && ci < clusterBudget; ci++)
             {
                 RockCluster cluster = clusters[ci];
                 foreach (RockMember member in cluster.Members)
@@ -851,7 +1147,7 @@ namespace JurassicWorld.Editor
                     float wz = cluster.Center.y + member.Offset.y;
 
                     // 防御性成员级检查：簇心余量已保证不触发；保留以避免未来常量下调破坏安全不变量
-                    if (DistanceToFlatRectWorld(wx, wz) < DinoSafetyBuffer + PlacementExtraMargin)
+                    if (DistanceToDinosaurActivity(wx, wz) < DinoSafetyBuffer + PlacementExtraMargin)
                     {
                         skippedInsideBuffer++;
                         continue;
@@ -865,7 +1161,7 @@ namespace JurassicWorld.Editor
                     float tiltZ = (float)random.NextDouble() * 10f - 5f;
                     float scale = member.Tier == 2 ? 1.6f + (float)random.NextDouble() * 0.6f
                                 : member.Tier == 1 ? 1.0f + (float)random.NextDouble() * 0.4f
-                                : 0.35f + (float)random.NextDouble() * 0.35f;
+                                : 0.55f + (float)random.NextDouble() * 0.40f; // 小石下限 0.35→0.55：15m 外原来几乎不可见
                     float sink = Mathf.Lerp(RockSinkRatioMin, RockSinkRatioMax, (float)random.NextDouble()) * scale * 0.5f;
 
                     GameObject rock;
@@ -908,7 +1204,7 @@ namespace JurassicWorld.Editor
                 Debug.LogWarning($"[UnderstorySeeder] [DEBUG ONLY] 程序化 Sphere 岩石 {placed} 个已生成（仅限分布验证；" +
                                  "确认后请恢复 DebugProceduralRocks=false 并重 Bake；ValidateProject 会对此告警）。");
             else
-                Debug.Log($"[UnderstorySeeder] 岩石簇实例化：{clusters.Count} 簇 / {placed} 个（{rockPrefabs.Length} 种 prefab）" +
+                Debug.Log($"[UnderstorySeeder] 岩石簇实例化：{(clusterBudget < clusters.Count ? $"{clusterBudget}/{clusters.Count}" : clusters.Count.ToString())} 簇 / {placed} 个（{rockPrefabs.Length} 种 prefab）" +
                           (skippedInsideBuffer > 0 ? $"，{skippedInsideBuffer} 个成员因缓冲越界跳过" : "") + "。");
             return placed;
         }
@@ -940,7 +1236,7 @@ namespace JurassicWorld.Editor
                 float wz = (float)(random.NextDouble() * 194.0 - 97.0);
                 Vector2 candidate = new Vector2(wx, wz);
 
-                if (DistanceToFlatRectWorld(wx, wz) < ClusterCenterMinDistance)
+                if (DistanceToDinosaurActivity(wx, wz) < ClusterCenterMinDistance)
                     continue;
 
                 bool tooClose = false;
@@ -985,7 +1281,7 @@ namespace JurassicWorld.Editor
                     float yaw = (float)random.NextDouble() * 360f;
 
                     // 簇内成员可能越入缓冲内侧：实体不变量优先，越界点放弃（RNG 已消费，保持确定性）
-                    if (DistanceToFlatRectWorld(wx, wz) < DinoSafetyBuffer + PlacementExtraMargin)
+                    if (DistanceToDinosaurActivity(wx, wz) < DinoSafetyBuffer + PlacementExtraMargin)
                         continue;
 
                     float nx = (wx + TerrainSize / 2f) / TerrainSize;
@@ -1090,21 +1386,23 @@ namespace JurassicWorld.Editor
                 if (IsOwnedFernProto(protos[i]))
                     fernIdx.Add(i);
 
-            bool alreadyNormalized = fernIdx.Count == fernPrefabs.Length;
-            if (alreadyNormalized)
+            // 规格比对："有没有"之外还要"规格对不对" —— renderMode/density 等字段只烘进 TerrainData，
+            // 只改代码不重写原型时历史产物会静默沿用旧值（已踩过：Grass→VertexLit 修复在旧 TerrainData 上不生效）。
+            bool specsMatch = fernIdx.Count == fernPrefabs.Length;
+            if (specsMatch)
             {
                 for (int i = 0; i < fernPrefabs.Length; i++)
                 {
-                    if (protos[fernIdx[i]].prototype != fernPrefabs[i])
+                    if (!FernPrototypeMatchesSpec(protos[fernIdx[i]], fernPrefabs[i]))
                     {
-                        alreadyNormalized = false;
+                        specsMatch = false;
                         break;
                     }
                 }
             }
 
             int fernStart;
-            if (alreadyNormalized)
+            if (specsMatch)
             {
                 fernStart = fernIdx[0];
             }
@@ -1126,21 +1424,7 @@ namespace JurassicWorld.Editor
                 }
                 int keptCount = kept.Count;
                 foreach (GameObject fern in fernPrefabs)
-                {
-                    kept.Add(new DetailPrototype
-                    {
-                        usePrototypeMesh = true,
-                        prototype = fern,
-                        renderMode = DetailRenderMode.Grass,
-                        healthyColor = new Color(0.30f, 0.62f, 0.22f),
-                        dryColor = new Color(0.52f, 0.58f, 0.24f),
-                        minWidth = 0.8f,
-                        maxWidth = 1.6f,
-                        minHeight = 0.8f,
-                        maxHeight = 1.6f,
-                        noiseSpread = 0.2f
-                    });
-                }
+                    kept.Add(BuildFernPrototype(fern));
                 data.detailPrototypes = kept.ToArray(); // setter 可能清空 detail 数据
 
                 int resAfter = data.detailResolution;
@@ -1161,32 +1445,72 @@ namespace JurassicWorld.Editor
                 }
 
                 fernStart = keptCount;
-                Debug.Log($"[UnderstorySeeder] fern 原型块追加于 index={fernStart}（{fernPrefabs.Length} 个 prefab）。");
+                Debug.Log($"[UnderstorySeeder] fern 原型块{(fernIdx.Count > 0 ? "重建（规格不符，已按目标 renderMode/密度重写）" : "追加")}于 " +
+                          $"index={fernStart}（{fernPrefabs.Length} 个 prefab，renderMode={FernRenderModeTarget}）。");
             }
 
-            // 按簇绘制密度（确定性流 +2；同密度场写所有 fern 层，逐层 hash 抖动）
+            // fernField[x,z] = 该 cell 的 Fern【总密度】（不是每层密度）。把这个整数总量确定性拆分给各 variant 层：
+            // 逐 unit 用 Hash01 + 独立固定 salt 选 variant，故每个 cell 严格满足
+            // densityA + densityB + ... == target，Σ(variant Σdensity) == Σ target 恒成立。
+            // 关键性质：Fern 总数量只由 fernField 决定，【新增 fern prefab 不会线性抬高总植被密度】。
+            // 不额外消费 System.Random，Fern cluster 的随机流不受影响。
+            // 两个独立来源取 max：
+            //  (1) 既有森林 fern（R3 林缘 / R4 密林）：+2 流，采样判据与分布**逐格不变**；
+            //  (2) 新增内侧 fern（R1 活动包络外缘 / R2 玩家过渡带）：+4 流，见 BuildFernInnerBand。
+            // fern 至此与「实体安全边界」彻底解耦：唯一禁止域是 R0 开阔空地（低矮无碰撞植被允许进入恐龙外缘）。
             float[,] fernField = BuildFernField(model, res);
-            int changedLayers = 0;
-            for (int i = 0; i < fernPrefabs.Length; i++)
+            float[,] fernInnerField = BuildFernInnerBand(model, res);
+            int variantCount = fernPrefabs.Length;
+            var variantDensity = new int[variantCount][,];
+            for (int i = 0; i < variantCount; i++)
+                variantDensity[i] = new int[res, res];
+
+            long totalTarget = 0;
+            for (int z = 0; z < res; z++)
+            for (int x = 0; x < res; x++)
             {
-                int layerIdx = fernStart + i;
-                int[,] density = new int[res, res];
+                float wx = (float)x / res * TerrainSize - TerrainSize / 2f;
+                float wz = (float)z / res * TerrainSize - TerrainSize / 2f;
+                float v = Mathf.Max(fernField[x, z], fernInnerField[x, z]);
+                if (SignedDistanceToDinosaurActivity(wx, wz) <= -WorldBounds.ClearingInset)
+                    v = 0f; // 低矮 fern 的唯一禁止域 = R0 开阔空地（不再以实体 buffer 为界）
+                int target = Mathf.Clamp(Mathf.RoundToInt(v), 0, FernPerClusterMax);
+                if (target <= 0)
+                    continue;
+
+                totalTarget += target;
+                for (int k = 0; k < target; k++)
+                {
+                    int variant = Mathf.Clamp(
+                        Mathf.FloorToInt(Hash01(x, z, FernVariantSalt + k * 7919) * variantCount),
+                        0, variantCount - 1);
+                    variantDensity[variant][x, z]++;
+                }
+            }
+
+            int changedLayers = 0;
+            long layerSum = 0;
+            LastFernVariantSums.Clear();
+            for (int i = 0; i < variantCount; i++)
+            {
+                long variantSum = 0;
                 for (int z = 0; z < res; z++)
                 for (int x = 0; x < res; x++)
-                {
-                    float wx = (float)x / res * TerrainSize - TerrainSize / 2f;
-                    float wz = (float)z / res * TerrainSize - TerrainSize / 2f;
-                    float v = fernField[x, z]
-                              * (0.7f + 0.6f * Hash01(x, z, UnderstoryRandomSeed + 200 + i));
-                    if (DistanceToFlatRectWorld(wx, wz) < DinoSafetyBuffer)
-                        v = 0f; // 与实体同规：活动区 + 缓冲外才允许 fern
-                    density[x, z] = Mathf.Clamp(Mathf.RoundToInt(v), 0, FernPerClusterMax);
-                }
-                if (WriteLayerIfChanged(data, layerIdx, density) > 0)
+                    variantSum += variantDensity[i][x, z];
+                layerSum += variantSum;
+                LastFernVariantSums.Add(variantSum);
+                if (WriteLayerIfChanged(data, fernStart + i, variantDensity[i]) > 0)
                     changedLayers++;
             }
 
-            Debug.Log($"[UnderstorySeeder] fern 铺设：{fernPrefabs.Length} 层（层 {fernStart}..{fernStart + fernPrefabs.Length - 1}），" +
+            LastFernTotalTarget = totalTarget;
+            LastFernAssigned = layerSum;
+            LastFernVariantCount = variantCount;
+
+            Debug.Log($"[UnderstorySeeder] fern 铺设：{variantCount} 层（层 {fernStart}..{fernStart + variantCount - 1}），" +
+                      $"总目标密度 Σ={totalTarget}，各 variant Σ密度和={layerSum}" +
+                      $"（守恒 {(layerSum == totalTarget ? "OK" : "FAILED")}），" +
+                      $"逐层 Σdensity=[{string.Join(",", LastFernVariantSums)}]，" +
                       $"{(changedLayers > 0 ? $"写回 {changedLayers} 层" : "与现有一致跳过")}。");
             return fernPrefabs.Length;
         }
@@ -1197,13 +1521,15 @@ namespace JurassicWorld.Editor
             var field = new float[res, res];
             var random = new System.Random(UnderstoryRandomSeed + 2);
             int attemptsCap = FernClusterCount * 40;
+            // Preview 前缀：只铺前 PreviewBudget 个簇——前 K 个簇的随机序列与生产序列前 K 项一致。
+            int clusterBudget = PreviewBudget(FernClusterCount);
             int clustersPlaced = 0;
-            for (int attempt = 0; attempt < attemptsCap && clustersPlaced < FernClusterCount; attempt++)
+            for (int attempt = 0; attempt < attemptsCap && clustersPlaced < clusterBudget; attempt++)
             {
                 float wx = (float)(random.NextDouble() * 196.0 - 98.0);
                 float wz = (float)(random.NextDouble() * 196.0 - 98.0);
 
-                if (DistanceToFlatRectWorld(wx, wz) < DinoSafetyBuffer)
+                if (DistanceToDinosaurActivity(wx, wz) < DinoSafetyBuffer)
                     continue;
                 if (ChannelMask01(wx, wz) > 0f)
                     continue; // 林下蕨类同样避开视觉通道
@@ -1224,7 +1550,52 @@ namespace JurassicWorld.Editor
                 clustersPlaced++;
             }
 
-            Debug.Log($"[UnderstorySeeder] fern 簇分布：{clustersPlaced}/{FernClusterCount} 个簇（林内高密度 / 林缘混合 / mud 抑制）。");
+            Debug.Log($"[UnderstorySeeder] fern 簇分布：{clustersPlaced}/{(clusterBudget < FernClusterCount ? $"{clusterBudget}（Preview {PreviewScale}×）" : FernClusterCount.ToString())} 个簇（林内高密度 / 林缘混合 / mud 抑制）。");
+            return field;
+        }
+
+        /// <summary>
+        /// 内侧 fern 密度场（R1 活动包络外缘 + R2 玩家过渡带）—— 低矮无碰撞植被进入恐龙活动区外缘的载体。
+        /// 独立固定流（FernInnerBandSalt = +4，与 +2 森林 fern 流、+1 hero 灌木、+3 deadwood 完全隔离）：
+        /// 既有森林 fern 分布逐格不变。采样域 = 到活动包络的带符号距离 ∈ (-ClearingInset, FernInnerBandOuter]，
+        /// 权重与单簇密度都 ∝ LowVegGate01（越靠外越密 = 连续梯度），避视觉通道、受 mud 抑制。
+        /// </summary>
+        private static float[,] BuildFernInnerBand(EnvironmentModel model, int res)
+        {
+            var field = new float[res, res];
+            var random = new System.Random(FernInnerBandSalt);
+            int attemptsCap = FernInnerClusterCount * 40;
+            // Preview 前缀：只铺前 PreviewBudget 个簇——前 K 个簇的随机序列与生产序列前 K 项一致。
+            int clusterBudget = PreviewBudget(FernInnerClusterCount);
+            int clustersPlaced = 0;
+            for (int attempt = 0; attempt < attemptsCap && clustersPlaced < clusterBudget; attempt++)
+            {
+                float wx = (float)(random.NextDouble() * 196.0 - 98.0);
+                float wz = (float)(random.NextDouble() * 196.0 - 98.0);
+
+                float sd = SignedDistanceToDinosaurActivity(wx, wz);
+                if (sd <= -WorldBounds.ClearingInset || sd > FernInnerBandOuter)
+                    continue; // 只允许 R1/R2：空地之外、玩家过渡带之内
+                if (ChannelMask01(wx, wz) > 0f)
+                    continue; // 与森林 fern 同规：避开视觉通道
+
+                float gate = LowVegGate01(sd);
+                float soil = SampleGrid(model.Soil, wx, wz);
+                float weight = 0.10f + 0.55f * gate;                  // 越靠外越密（连续梯度）
+                weight *= 1f - MudVegetationReduction * soil;          // mud 抑制
+                if (random.NextDouble() >= weight)
+                    continue;
+
+                float perCluster = random.Next(FernPerClusterMin, FernPerClusterMax + 1);
+                float radius = FernInnerClusterRadiusMin
+                             + (float)random.NextDouble() * (FernInnerClusterRadiusMax - FernInnerClusterRadiusMin);
+                // 单簇密度同样按 gate 衰减（活动包络外缘最稀疏），避免过渡带出现密集斑块
+                StampFernCluster(field, res, wx, wz, radius, perCluster * Mathf.Max(gate, 0.25f));
+                clustersPlaced++;
+            }
+
+            Debug.Log($"[UnderstorySeeder] fern 内侧带（R1/R2）：{clustersPlaced}/{(clusterBudget < FernInnerClusterCount ? $"{clusterBudget}（Preview {PreviewScale}×）" : FernInnerClusterCount.ToString())} 个簇" +
+                      $"（活动包络外缘 → 玩家过渡带递增；独立流 salt={FernInnerBandSalt}）。");
             return field;
         }
 
@@ -1252,8 +1623,9 @@ namespace JurassicWorld.Editor
 
         /// <summary>
         /// 倒木/树桩门控：Assets/Vegetation/Deadwood 无合格 prefab → no-op（仅日志提示目录）。
-        /// 有资产 → 森林内部/林缘放置 6-8 倒木 + 3-5 树桩：近树冠/林缘加权、避通道、平坦矩形+缓冲外、
-        /// min-gap 12m、贴地+轻微沉入（0.12-0.3m）、随机朝向、静态合批、默认零 Collider（独立流 +3）。
+        /// 有资产 → 先落展示环近林带固定位（3 倒木 + 2 树桩，森林已按同一布局让开空隙 → 玩家可见），
+        /// 再按「近树冠/林缘加权、避通道、平坦矩形+缓冲外、min-gap 12m」补足到 6-8 倒木 + 3-5 树桩；
+        /// 贴地 + 轻微沉入（0.12-0.3m）、随机朝向（展示位横置朝向草地）、静态合批、默认零 Collider（独立流 +3）。
         /// 返回放置总数（0 = no-op）。
         /// </summary>
         private static int ApplyDeadwoodGate(TerrainData data, Transform terrainTransform, GameObject parent,
@@ -1278,31 +1650,65 @@ namespace JurassicWorld.Editor
             var placedCenters = new List<Vector2>();
             int placed = 0;
 
-            placed += PlaceDeadwoodBatch(data, terrainTransform, parent, model, random, logs,
-                random.Next(LogCountMin, LogCountMax + 1), false, placedCenters, rockClusters);
-            placed += PlaceDeadwoodBatch(data, terrainTransform, parent, model, random, stumps,
-                random.Next(StumpCountMin, StumpCountMax + 1), true, placedCenters, rockClusters);
+            // 展示环位优先落地（近林带、森林已按同一布局让开空隙）→ 玩家从可达边界可见
+            List<ShowcaseSpot> ring = BuildShowcaseRing();
+            List<ShowcaseSpot> logSpots = SelectShowcaseSpots(ring, ShowcaseKind.Log);
+            List<ShowcaseSpot> stumpSpots = SelectShowcaseSpots(ring, ShowcaseKind.Stump);
 
-            Debug.Log($"[UnderstorySeeder] deadwood 放置：{placed} 个（倒木/树桩；森林内部与林缘、避通道、" +
-                      $"平坦矩形+{DinoSafetyBuffer}m 外）。");
+            placed += PlaceDeadwoodBatch(data, terrainTransform, parent, model, random, logs,
+                PreviewBudget(random.Next(LogCountMin, LogCountMax + 1)), false, placedCenters, rockClusters, logSpots);
+            placed += PlaceDeadwoodBatch(data, terrainTransform, parent, model, random, stumps,
+                PreviewBudget(random.Next(StumpCountMin, StumpCountMax + 1)), true, placedCenters, rockClusters, stumpSpots);
+
+            Debug.Log($"[UnderstorySeeder] deadwood 放置：{placed} 个（倒木/树桩；其中近林带展示位 {logSpots.Count} 倒木 + {stumpSpots.Count} 树桩；" +
+                      $"其余分布于森林内部与林缘、避通道、平坦矩形+{DinoSafetyBuffer}m 外）{(PreviewScale > 1 ? $"【Preview {PreviewScale}× 缩减】" : "")}。");
             return placed;
         }
 
+        /// <summary>展示环中指定种类的道具位（顺序即稳定契约）。</summary>
+        private static List<ShowcaseSpot> SelectShowcaseSpots(List<ShowcaseSpot> ring, ShowcaseKind kind)
+        {
+            var list = new List<ShowcaseSpot>();
+            foreach (ShowcaseSpot spot in ring)
+                if (spot.Kind == kind)
+                    list.Add(spot);
+            return list;
+        }
+
+        /// <summary>
+        /// 放置一批倒木 / 树桩：先落展示环固定位（近林带），再按加权拒绝采样补足剩余数量。
+        /// </summary>
         private static int PlaceDeadwoodBatch(TerrainData data, Transform terrainTransform, GameObject parent,
             EnvironmentModel model, System.Random random, GameObject[] prefabs, int targetCount, bool isStump,
-            List<Vector2> placedCenters, List<RockCluster> rockClusters)
+            List<Vector2> placedCenters, List<RockCluster> rockClusters, List<ShowcaseSpot> showcaseSpots)
         {
             if (prefabs.Length == 0 || targetCount <= 0)
                 return 0;
 
             int placed = 0;
+
+            // 1) 展示位优先
+            for (int i = 0; i < showcaseSpots.Count && placed < targetCount; i++)
+            {
+                Vector2 center = showcaseSpots[i].Center;
+                // 防御性检查：BuildShowcaseRing 已保证在缓冲外；保留以防未来常量下调破坏安全不变量
+                if (DistanceToDinosaurActivity(center.x, center.y) < DinoSafetyBuffer + PlacementExtraMargin)
+                    continue;
+
+                PlaceDeadwood(data, terrainTransform, parent, random, prefabs, isStump, center,
+                    showcaseSpots[i].AzimuthDeg, placed);
+                placedCenters.Add(center);
+                placed++;
+            }
+
+            // 2) 其余：加权拒绝采样
             const int attemptsCap = 800;
             for (int attempt = 0; attempt < attemptsCap && placed < targetCount; attempt++)
             {
                 float wx = (float)(random.NextDouble() * 194.0 - 97.0);
                 float wz = (float)(random.NextDouble() * 194.0 - 97.0);
 
-                if (DistanceToFlatRectWorld(wx, wz) < DinoSafetyBuffer + PlacementExtraMargin)
+                if (DistanceToDinosaurActivity(wx, wz) < DinoSafetyBuffer + PlacementExtraMargin)
                     continue;
                 if (ChannelMask01(wx, wz) > 0f)
                     continue;
@@ -1327,41 +1733,68 @@ namespace JurassicWorld.Editor
                 if (random.NextDouble() >= Mathf.Clamp01(weight))
                     continue;
 
-                GameObject prefab = prefabs[(int)(random.NextDouble() * prefabs.Length)];
-                float sink = Mathf.Lerp(0.12f, 0.30f, (float)random.NextDouble());
-                float scale = isStump
-                    ? 0.8f + (float)random.NextDouble() * 0.6f
-                    : 0.9f + (float)random.NextDouble() * 0.7f;
-                float yaw = (float)random.NextDouble() * 360f;
-                float tilt = isStump ? 0f : (float)random.NextDouble() * 6f - 3f;
-
-                float nx = (wx + TerrainSize / 2f) / TerrainSize;
-                float nz = (wz + TerrainSize / 2f) / TerrainSize;
-                float groundY = terrainTransform.position.y + data.GetInterpolatedHeight(nx, nz);
-
-                GameObject item = (GameObject)PrefabUtility.InstantiatePrefab(prefab, parent.transform);
-                item.name = (isStump ? "Stump_" : "FallenLog_") + placed.ToString("D2");
-                item.transform.position = new Vector3(wx, groundY - sink, wz);
-                item.transform.rotation = Quaternion.Euler(tilt, yaw, tilt * 0.5f);
-                item.transform.localScale = Vector3.one * scale;
-
-                if (!AddColliderForDeadwood)
-                {
-                    foreach (Collider col in item.GetComponentsInChildren<Collider>(true))
-                        UnityEngine.Object.DestroyImmediate(col);
-                }
-
-                GameObjectUtility.SetStaticEditorFlags(item, StaticEditorFlags.BatchingStatic);
+                PlaceDeadwood(data, terrainTransform, parent, random, prefabs, isStump, candidate, float.NaN, placed);
                 placedCenters.Add(candidate);
                 placed++;
             }
             return placed;
         }
 
+        /// <summary>
+        /// 实例化单个倒木 / 树桩：贴地 + 轻微沉入（0.12–0.30m）、随机缩放、静态合批、默认零 Collider。
+        /// broadsideYawDeg 有效时按该方位角横置（±12° 抖动，倒木长轴垂直于视线 = 正面朝向草地），否则自由朝向。
+        /// </summary>
+        private static void PlaceDeadwood(TerrainData data, Transform terrainTransform, GameObject parent,
+            System.Random random, GameObject[] prefabs, bool isStump, Vector2 center, float broadsideYawDeg, int ordinal)
+        {
+            GameObject prefab = prefabs[(int)(random.NextDouble() * prefabs.Length)];
+            float sink = Mathf.Lerp(0.12f, 0.30f, (float)random.NextDouble());
+            float scale = isStump
+                ? 0.8f + (float)random.NextDouble() * 0.6f
+                : 0.9f + (float)random.NextDouble() * 0.7f;
+            float yawRoll = (float)random.NextDouble();
+            float yaw = float.IsNaN(broadsideYawDeg)
+                ? yawRoll * 360f
+                : broadsideYawDeg + (yawRoll * 2f - 1f) * 12f;
+            float tilt = isStump ? 0f : (float)random.NextDouble() * 6f - 3f;
+
+            float nx = (center.x + TerrainSize / 2f) / TerrainSize;
+            float nz = (center.y + TerrainSize / 2f) / TerrainSize;
+            float groundY = terrainTransform.position.y + data.GetInterpolatedHeight(nx, nz);
+
+            GameObject item = (GameObject)PrefabUtility.InstantiatePrefab(prefab, parent.transform);
+            item.name = (isStump ? "Stump_" : "FallenLog_") + ordinal.ToString("D2");
+            item.transform.position = new Vector3(center.x, groundY - sink, center.y);
+            item.transform.rotation = Quaternion.Euler(tilt, yaw, tilt * 0.5f);
+            item.transform.localScale = Vector3.one * scale;
+
+            if (!AddColliderForDeadwood)
+            {
+                foreach (Collider col in item.GetComponentsInChildren<Collider>(true))
+                    UnityEngine.Object.DestroyImmediate(col);
+            }
+
+            GameObjectUtility.SetStaticEditorFlags(item, StaticEditorFlags.BatchingStatic);
+        }
+
         // ================================================================ 几何 / 数学辅助
 
-        /// <summary>到平坦矩形（x∈[-70,70]、z∈[-70,90]）的最短距离（米，世界坐标；矩形内为 0）。
-        /// 平坦矩形世界坐标由 TerrainEnvironmentSeeder.Flat* 常量（归一化）换算，播种侧/校验侧同源。</summary>
+        /// <summary>到恐龙活动包络（WorldBounds.DinosaurActivityBounds）的最短距离（米，矩形内为 0）。
+        /// **所有实体落位 / 安全阈值判定一律用本函数**（不再用地形平坦区）。</summary>
+        internal static float DistanceToDinosaurActivity(float worldX, float worldZ) =>
+            WorldBounds.DistanceToDinosaurActivity(worldX, worldZ);
+
+        /// <summary>到恐龙活动包络的带符号距离（米，内为负）：低矮植被梯度门的唯一轴心。</summary>
+        internal static float SignedDistanceToDinosaurActivity(float worldX, float worldZ) =>
+            WorldBounds.SignedDistanceToDinosaurActivity(worldX, worldZ);
+
+        /// <summary>低矮无碰撞植被（bush/fern）的分布门（0..1，见 WorldBounds.LowVegGate01）。</summary>
+        internal static float LowVegGate01(float signedDistanceToDinosaurActivity) =>
+            WorldBounds.LowVegGate01(signedDistanceToDinosaurActivity);
+
+        /// <summary>到地形平坦矩形（x∈[-70,70]、z∈[-70,90]）的最短距离（米，世界坐标；矩形内为 0）。
+        /// 仅供**几何锚点**使用（展示环的射线/二分定位）：平坦矩形与恐龙活动包络当前数值相同，
+        /// 故锚点等价；任何**安全/落位判定**都必须用 DistanceToDinosaurActivity。</summary>
         internal static float DistanceToFlatRectWorld(float worldX, float worldZ)
         {
             GetFlatRectWorld(out float minX, out float maxX, out float minZ, out float maxZ);

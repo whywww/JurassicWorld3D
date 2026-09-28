@@ -28,9 +28,13 @@ namespace JurassicWorld.Editor
 
         // --- Heightmap ---
         private const float HeightEqualTol = 2e-4f;
-        // 平坦矩形归一化边界（internal：UnderstorySeeder 安全缓冲几何换算与校验同源引用）
-        internal const float FlatMinX = 0.15f, FlatMaxX = 0.85f;
-        internal const float FlatMinZ = 0.15f, FlatMaxZ = 0.95f;
+        // 平坦矩形归一化边界（internal：UnderstorySeeder 安全缓冲几何换算与校验同源引用）。
+        // 唯一数值来源 = WorldBounds（runtime 程序集）：此处只做转发，故 heightmap 数学逐位不变，
+        // 且「地形平坦区」不再与「恐龙活动包络」「植被安全边界」共用一份定义。
+        internal const float FlatMinX = WorldBounds.TerrainFlatMinXNorm;
+        internal const float FlatMaxX = WorldBounds.TerrainFlatMaxXNorm;
+        internal const float FlatMinZ = WorldBounds.TerrainFlatMinZNorm;
+        internal const float FlatMaxZ = WorldBounds.TerrainFlatMaxZNorm;
         private const float TransitionWidth = 0.15f;
         private const float HillAmplitude = 0.2f;
 
@@ -49,15 +53,9 @@ namespace JurassicWorld.Editor
         private const float CoreMudPatchSoftness = 0.18f;  // 阈值软过渡宽度（斑块边缘渐变）
         private const float CoreMudPatchOffsetX = 12.7f, CoreMudPatchOffsetZ = 7.9f; // 独立偏移，避开与 a/b 同源走向
 
-        // --- Rocks ---
-        private const string RockRootName = "Ground Pass Rocks";
-        private const int RockCount = 24;
-        private const int RockAttempts = 400;
-        private const string RockMaterialPath = "Assets/Materials/RockNatural.mat";
-
         // --- Terrain size (must match SceneBuilder) ---
-        // （internal：UnderstorySeeder 世界坐标换算同源引用）
-        internal const float TerrainSize = 200f;
+        // （internal：UnderstorySeeder 世界坐标换算同源引用；数值来源 = WorldBounds）
+        internal const float TerrainSize = WorldBounds.TerrainSize;
 
         // ------------------------------------------------------------------ Phase 1 入口
 
@@ -134,9 +132,11 @@ namespace JurassicWorld.Editor
 
             PaintGroundLayers(data);
             PaintOwnedDetails(data);
-            ScatterRocks(data, terrainTransform);
 
-            Debug.Log($"[GroundPass] PopulateGround 完成：4 layers, owned detail, {RockCount} rocks (seed={GroundPassRandomSeed}).");
+            // 岩石散布已退役：外围岩石由 UnderstorySeeder 的资产门控 cluster 分布独占（Assets/Vegetation/Rocks
+            // 下的 PolyHaven prefab）。原 ScatterRocks 的程序化 Sphere 属 debug 占位，已整体移除
+            // （`Ground Pass Rocks` root 不再创建；DinosaurSpawnRandomizer 对缺失 root 静默跳过）。
+            Debug.Log($"[GroundPass] PopulateGround 完成：4 layers, owned detail（岩石散布已退役，交由 Understory cluster 分布）。");
         }
 
         // ------------------------------------------------------------------ 私有辅助：PaintGroundLayers
@@ -158,7 +158,9 @@ namespace JurassicWorld.Editor
             // Slots 1-3: load or create
             TerrainLayer slot1 = EnsureTerrainLayer("Ground02Layer", "ground02", new Vector2(6f, 6f), slot0);
             TerrainLayer slot2 = EnsureTerrainLayer("Ground03Layer", "ground03", new Vector2(5f, 5f), slot0);
-            TerrainLayer slot3 = EnsureTerrainLayer("DryGrassLayer", "grass02", new Vector2(3f, 3f), slot0);
+            // 必须用有色贴图：NSk2 的 grass01/grass02/bush01/bark* 是灰度图（给「灰度贴图 + 顶点色/
+            // healthy-dry 着色」的网格与 billboard 用），当地表 diffuse 会渲染成一片无纹理浅白。
+            TerrainLayer slot3 = EnsureTerrainLayer("DryGrassLayer", "ground02", new Vector2(3f, 3f), slot0);
 
             TerrainLayer[] targetLayers = new[] { slot0, slot1, slot2, slot3 };
 
@@ -222,15 +224,29 @@ namespace JurassicWorld.Editor
         {
             string path = TerrainLayerFolder + "/" + assetName + ".terrainlayer";
             TerrainLayer layer = AssetDatabase.LoadAssetAtPath<TerrainLayer>(path);
-            if (layer != null) return layer; // reuse existing, don't modify
-
-            layer = new TerrainLayer();
-            layer.tileSize = tileSize;
-            layer.tileOffset = Vector2.zero;
 
             Texture2D tex = NatureStarterKitLocator.FindGroundTexture(textureToken);
             if (tex == null && fallbackSlot0 != null)
                 tex = fallbackSlot0.diffuseTexture; // fallback to slot0's diffuse
+
+            if (layer != null)
+            {
+                // 已存在：tileSize/tileOffset 保持原样（不修既有字段）；但 diffuse 必须校验并修复 ——
+                // 历史产物可能指向灰度/错误贴图（例如 DryGrassLayer 曾指向灰度斜坡图 grass02.tga，
+                // 使林地渲染成无纹理浅白）。逐项比对，一致即跳过，保证重复 Bake 不产生无谓改写。
+                if (tex != null && layer.diffuseTexture != tex)
+                {
+                    Texture2D previous = layer.diffuseTexture;
+                    layer.diffuseTexture = tex;
+                    EditorUtility.SetDirty(layer);
+                    Debug.Log($"[GroundPass] {path}: diffuse 修正为 {tex.name}（原先 {(previous != null ? previous.name : "null")}）。");
+                }
+                return layer;
+            }
+
+            layer = new TerrainLayer();
+            layer.tileSize = tileSize;
+            layer.tileOffset = Vector2.zero;
 
             if (tex != null)
                 layer.diffuseTexture = tex;
@@ -299,6 +315,7 @@ namespace JurassicWorld.Editor
                     minHeight = 0.4f,
                     maxHeight = 1.0f,
                     noiseSpread = 0.2f,
+                    density = 1, // CoverageMode 下的实例数倍率基准（InstanceCountMode 下无副作用；整数字面量兼容 int/float 声明）
                     usePrototypeMesh = false
                 };
 
@@ -370,76 +387,14 @@ namespace JurassicWorld.Editor
             Debug.Log($"[GroundPass] owned detail (index={ownedIdx}) 密度写入完成，分辨率 {detailRes}×{detailRes}。");
         }
 
-        // ------------------------------------------------------------------ 私有辅助：ScatterRocks
-
-        private static void ScatterRocks(TerrainData data, Transform terrainTransform)
-        {
-            // Find or create dedicated root
-            GameObject root = GameObject.Find(RockRootName);
-            if (root == null)
-                root = new GameObject(RockRootName);
-
-            // Destroy only direct children of our root
-            for (int i = root.transform.childCount - 1; i >= 0; i--)
-                UnityEngine.Object.DestroyImmediate(root.transform.GetChild(i).gameObject);
-
-            var random = new System.Random(GroundPassRandomSeed);
-            Material rockMat = AssetDatabase.LoadAssetAtPath<Material>(RockMaterialPath);
-
-            int placed = 0;
-            for (int attempt = 0; attempt < RockAttempts && placed < RockCount; attempt++)
-            {
-                float wx = (float)(random.NextDouble() * 190.0 - 95.0);
-                float wz = (float)(random.NextDouble() * 190.0 - 95.0);
-
-                // Normalized coordinates for terrain queries
-                float nx = (wx + TerrainSize / 2f) / TerrainSize;
-                float nz = (wz + TerrainSize / 2f) / TerrainSize;
-
-                // Accept condition: distance to flat rect world boundary >= 3m
-                float dNorm = DistanceToFlatRect(nx, nz);
-                float dWorld = dNorm * TerrainSize; // convert normalized distance to world meters
-                if (dWorld < 3f) continue;
-
-                // Read FINAL heightmap for Y
-                float y = terrainTransform.position.y + data.GetInterpolatedHeight(nx, nz) + 0.3f;
-
-                var rock = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-                rock.name = "GroundRock_" + placed.ToString("D2");
-                rock.transform.SetParent(root.transform);
-                rock.transform.position = new Vector3(wx, y, wz);
-                rock.transform.localScale = new Vector3(
-                    2.5f + (float)random.NextDouble() * 2f,
-                    0.8f + (float)random.NextDouble() * 0.6f,
-                    2.0f + (float)random.NextDouble() * 1.5f);
-                rock.transform.rotation = Quaternion.Euler(
-                    (float)random.NextDouble() * 15f,
-                    (float)random.NextDouble() * 360f,
-                    (float)random.NextDouble() * 10f);
-
-                if (rockMat != null)
-                    rock.GetComponent<Renderer>().sharedMaterial = rockMat;
-
-                Collider col = rock.GetComponent<Collider>();
-                if (col != null) UnityEngine.Object.DestroyImmediate(col);
-
-                GameObjectUtility.SetStaticEditorFlags(rock, StaticEditorFlags.BatchingStatic);
-                placed++;
-            }
-
-            Debug.Log($"[GroundPass] 岩石散布完成：{placed}/{RockCount} 个（种子 {GroundPassRandomSeed}）。");
-        }
-
         // ------------------------------------------------------------------ 私有辅助：CleanupOwnedArtifacts（回滚）
 
         private static void CleanupOwnedArtifacts(TerrainData data)
         {
-            // 1. Destroy rock root and children
-            GameObject root = GameObject.Find(RockRootName);
-            if (root != null)
-                UnityEngine.Object.DestroyImmediate(root);
+            // 岩石散布已退役：`Ground Pass Rocks` root 不再创建，故此处无需清理
+            // （若旧场景/旧烘焙残留该 root，属历史产物，重 Bake 时由 Understory Pass 一并处理）。
 
-            // 2. Remove owned detail prototype by reference key
+            // Remove owned detail prototype by reference key
             Texture2D grass01 = NatureStarterKitLocator.FindGroundTexture("grass01");
             if (grass01 == null || data == null)
             {

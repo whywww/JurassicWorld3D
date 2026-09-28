@@ -514,7 +514,7 @@ namespace JurassicWorld
                     continue;
 
                 // TreeInstance.position 是 0-1 归一化地形坐标；只取 XZ 平面，
-                // Y 由各脚本自行钉死（恐龙 MovementHeight、相机 eyeHeight），不参与碰撞。
+                // Y 由各脚本自行决定（恐龙恒为 MovementHeight、相机 = 地形高 + eyeHeight），不参与碰撞。
                 float worldX = origin.x + instance.position.x * size.x;
                 float worldZ = origin.z + instance.position.z * size.z;
                 Insert(worldX, worldZ, radius);

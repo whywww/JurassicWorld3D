@@ -44,6 +44,10 @@ namespace JurassicWorld.Editor
         {
             ClearActiveScene();
             DeleteLegacyEnvironmentAssets();
+            // HQ 资产铸造（幂等）：确保 Assets/Vegetation/{Ferns,Rocks,Deadwood} 下的 project-owned
+            // material / prefab 就绪，使 UnderstorySeeder 的三个资产门控在本次 Bake 生效。
+            // 必须早于 BuildTerrain（后者内部会跑 UnderstorySeeder.Seed）；资产已存在时为纯读操作。
+            PolyHavenAssetIntegration.EnsureAssets();
             Font uiFont = LoadBuiltinFont();
             Camera camera = BuildCamera();
             BuildLighting();
@@ -57,6 +61,23 @@ namespace JurassicWorld.Editor
             BuildScatterPrefabs();
             BuildHud(uiFont);
             BuildDinosaurs(camera, uiFont);
+            // Dense Jungle Phase 1：可开关的通道 debug 标注（纯场景线段，不动 TerrainData / 植被 Pass）。
+            BuildMovementCorridorDebug();
+        }
+
+        // ---------------------------------------------------------------- 通道 debug 标注（Phase 1）
+
+        /// <summary>
+        /// 创建 MovementCorridorDebug 根节点（Dense Jungle Phase 1 的通道标注）。
+        /// 标注几何全部由运行期按 MovementCorridor 程序化生成，本方法只负责「放一个挂了组件的根」，
+        /// 并把显示开关按烘焙态契约写入（showMarkers 字段名是跨脚本契约，禁止改名）。
+        /// 阶段结束后：把 MovementCorridorDebug.ShowMarkersDefault 置 false 重 Bake 即整体关闭。
+        /// </summary>
+        private static void BuildMovementCorridorDebug()
+        {
+            var root = new GameObject(MovementCorridorDebug.RootNodeName);
+            var corridorDebug = root.AddComponent<MovementCorridorDebug>();
+            SetField(corridorDebug, "showMarkers", MovementCorridorDebug.ShowMarkersDefault);
         }
 
         // ---------------------------------------------------------------- 场景清理
@@ -291,6 +312,9 @@ namespace JurassicWorld.Editor
                 data.SetHeights(0, 0, GenerateHeightmap());
             }
 
+            // detail 层语义归一化必须早于任何 detail 数据写回（SeedDetails / GroundPass / Understory）
+            EnsureDetailInstanceCountMode(data);
+
             // 环境 Pass 阶段 1：确定性 heightmap 重建 + 原生 snap 贴地（heightmap 为所有后续放置的基础数据）
             TerrainEnvironmentSeeder.PrepareTerrain(data);
 
@@ -334,6 +358,9 @@ namespace JurassicWorld.Editor
             terrain.treeMaximumFullLODCount = 130;
             terrain.detailObjectDistance = 80f;
             terrain.detailObjectDensity = 0.6f;
+
+            // detail 风力（Grass 渲染模式的 fern / bush 网格 + 草 billboard 共用）：压到"轻微摆动"
+            ApplyDetailWindSettings(data);
             terrain.reflectionProbeUsage = UnityEngine.Rendering.ReflectionProbeUsage.Off;
             terrain.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
 
@@ -349,6 +376,11 @@ namespace JurassicWorld.Editor
             // 不触碰 firstTimeSeed 门、SeedTrees、SeedDetails、BuildScatterPrefabs、spawnXZ。
             ForestSeeder.Seed(data);
 
+            // 轨迹净空（Phase 1.1c，必须在 ForestSeeder 之后）：把落在 MovementCorridor 净空带内的
+            // 地形树横推出去 ——「轨迹上不要有障碍物」。放 SeedTrees 里无效（firstTimeSeed 门重焙不跑）；
+            // ForestSeeder 对中央段按值原样写回，已推开的树不会被打回。幂等：已净空时零写入。
+            NudgeTreesOutOfCorridors(terrain, data);
+
             // 环境 Pass 阶段 2：4 层 alphamap + owned detail + 专属岩石群（读最终 heightmap）
             TerrainEnvironmentSeeder.PopulateGround(data, terrainGO.transform);
 
@@ -361,6 +393,67 @@ namespace JurassicWorld.Editor
             AssetDatabase.SaveAssets();
             Debug.Log("[SceneBuilder] Terrain 构建完成（200m×200m，drawInstanced=true）。");
             return true;
+        }
+
+        /// <summary>
+        /// 把 TerrainData 的 detail 散布模式归一化为 InstanceCountMode（detail map 每格 = 实例数）。
+        ///
+        /// 为什么必须显式归一化：Unity 2021.2+ 的 TerrainData 带 Detail Scatter Mode，
+        /// `new TerrainData()` 取 CoverageMode —— 该模式下 map 值被解释为"覆盖比例"，
+        /// 实例数改由 DetailPrototype.density（相对原型尺寸）推导。本项目所有 DetailPrototype
+        /// 都由 `new DetailPrototype{...}` 构造，语义是"每格实例数"（SeedDetails 随机 2-6 基线、
+        /// PaintDetailLayers 逐层写 0-8、验收侧 approxInstances = Σdensity × detailObjectDensity），
+        /// 模式不匹配时会出现"GetDetailLayer 读回密度非 0，但一个 detail 都不画"的静默失效。
+        ///
+        /// 幂等：已是目标模式时只打印日志，不写任何数据；必须在任何 detail 写回之前调用。
+        /// </summary>
+        private static void EnsureDetailInstanceCountMode(TerrainData data)
+        {
+            DetailScatterMode before = data.detailScatterMode;
+            if (before != DetailScatterMode.InstanceCountMode)
+                data.SetDetailScatterMode(DetailScatterMode.InstanceCountMode);
+
+            Debug.Log($"[SceneBuilder] detailScatterMode: {before} → {data.detailScatterMode}" +
+                      "（detail 层语义 = 每格实例数，与播种/回滚/验收口径同源）。");
+        }
+
+        // detail 风力目标值（绝对值，保证幂等；Unity 默认草风力是按"草叶"尺度调的）
+        private const float DetailWindStrength = 0.20f;
+        private const float DetailWindAmount = 0.30f;
+
+        /// <summary>detail 风力目标值的对外只读视图（供 JurassicProjectSetup.ValidateProject 断言）。</summary>
+        internal static float DetailWindStrengthTarget => DetailWindStrength;
+        internal static float DetailWindAmountTarget => DetailWindAmount;
+
+        /// <summary>
+        /// 压低地形 detail 的风动振幅，保留轻微摆动。
+        ///
+        /// 症状：Understory 蕨类（Fern02，`DetailRenderMode.Grass`）在场景里"整株左右平移滑动"。
+        /// Grass 模式会随风移动（Unity 文档：VertexLit 模式不随风移动），而 Terrain Settings 的
+        /// *Wind Settings for Grass* 默认值是按草叶尺度调的 —— 套在 0.3-0.5m 高的蕨类网格上，
+        /// 整株被推着来回滑移而非叶尖摆动。已排除枢轴嫌疑：Fern02_A 网格 y ∈ [-0.029, 0.258]，
+        /// 枢轴距根部仅 2.9cm；也排除缩放/位置抖动（无脚本逐帧改动实例）。
+        ///
+        /// 处理：只把 wavingGrassStrength / wavingGrassAmount 写成固定目标值（绝对值 → 幂等，
+        /// 重复 Bake 不会连乘衰减），保留 Grass 渲染模式与 WindZone（树冠摆动不变）。
+        /// 若仍嫌大：再降这两个常量；最后一档才是把 fern 原型改 `DetailRenderMode.VertexLit`（完全静止）。
+        /// </summary>
+        private static void ApplyDetailWindSettings(TerrainData data)
+        {
+            float strengthBefore = data.wavingGrassStrength;
+            float amountBefore = data.wavingGrassAmount;
+            bool changed = !Mathf.Approximately(strengthBefore, DetailWindStrength)
+                        || !Mathf.Approximately(amountBefore, DetailWindAmount);
+
+            if (changed)
+            {
+                data.wavingGrassStrength = DetailWindStrength;
+                data.wavingGrassAmount = DetailWindAmount;
+            }
+
+            Debug.Log($"[SceneBuilder] detail 风力（wavingGrass）: strength {strengthBefore:F3} → {data.wavingGrassStrength:F3}、" +
+                      $"amount {amountBefore:F3} → {data.wavingGrassAmount:F3}（speed {data.wavingGrassSpeed:F3} 不动）、" +
+                      $"WindZone 不动" + (changed ? "。" : "（与现有一致，跳过写入）。"));
         }
 
         private static float[,] GenerateHeightmap()
@@ -522,6 +615,103 @@ namespace JurassicWorld.Editor
             Debug.Log($"[SceneBuilder] Paint Trees: 播种 {instances.Count} 棵树（{treePrefabs.Length} 种 TreePrototype）。");
         }
 
+        /// <summary>
+        /// 轨迹净空 pass（Phase 1.1c，幂等）：把**落在任一路线净空带内**的地形树沿法线横推到带外，
+        /// 由 BakeScene 在 ForestSeeder.Seed 之后无条件调用 —— SeedTrees 受 firstTimeSeed 幂等门
+        /// 控制、重 Bake 不会重跑，放循环里等于没生效；放 ForestSeeder 之后则首焙/重焙都覆盖，
+        /// 且 ForestSeeder 对中央段「按值原样写回」⇒ 已推开的树不会被它下一次比对打回。
+        /// 只横移、不增删、不消费任何随机流 ⇒ 其余散布物逐字节一致；返回被推开的树数（0 = 已净空）。
+        /// 侵入判据与 ValidateProject ⑦ 完全一致（含弧长须在 [0, Length] 内）。
+        /// </summary>
+        internal static int NudgeTreesOutOfCorridors(Terrain terrain, TerrainData data)
+        {
+            TreeInstance[] instances = data.treeInstances;
+            if (instances == null || instances.Length == 0)
+                return 0;
+
+            Vector3 terrainPos = terrain.transform.position;
+            Vector3 size = data.size;
+            bool changed = false;
+            int movedCount = 0;
+
+            for (int i = 0; i < instances.Length; i++)
+            {
+                TreeInstance ti = instances[i];
+                float origX = ti.position.x;
+                float origZ = ti.position.z;
+
+                // 树的归一化坐标 → 世界 XZ（镜像 ValidateProject ⑦ 的 TransformPoint 换算）。
+                Vector3 world = terrain.transform.TransformPoint(new Vector3(
+                    ti.position.x * size.x, ti.position.y * size.y, ti.position.z * size.z));
+                float wx = world.x;
+                float wz = world.z;
+                NudgeOutOfCorridors(ref wx, ref wz, i);
+                if (Mathf.Approximately(wx, world.x) && Mathf.Approximately(wz, world.z))
+                    continue;
+
+                // 世界 XZ → 归一化坐标；Y 重新按高度图采样（与 SeedTrees 同源换算）。
+                Vector3 local = terrain.transform.InverseTransformPoint(new Vector3(wx, 0f, wz));
+                float nnx = local.x / size.x;
+                float nnz = local.z / size.z;
+                ti.position = new Vector3(nnx, data.GetInterpolatedHeight(nnx, nnz) / size.y, nnz);
+                instances[i] = ti;
+                changed = true;
+                movedCount++;
+            }
+
+            if (changed)
+            {
+                data.SetTreeInstances(instances, false);
+                Debug.Log($"[SceneBuilder] 轨迹净空：把 {movedCount} 棵树推出 MovementCorridor 净空带（半宽 + {MovementCorridor.CorridorTreeClearVerge}m）。");
+            }
+            else
+            {
+                Debug.Log("[SceneBuilder] 轨迹净空：无需移动（全部地形树已在净空带外）。");
+            }
+            return movedCount;
+        }
+
+        /// <summary>
+        /// 把世界 XZ 点推出全部 4 条 MovementCorridor 路线的**轨迹净空带**
+        /// （该弧长处所在侧半宽 + <see cref="MovementCorridor.CorridorTreeClearVerge"/>，再加 0.3m 富余）。
+        ///
+        /// 侵入判定与 ValidateProject ⑦ 完全同判据（ProjectUnclamped + 弧长须在 [0, Length] 内，
+        /// 路线端帽之外不计）。推出 = 沿该弧长处的左法线横向平移、弧长不变（树只横移不沿路滑）；
+        /// 横跨多条路线的树可能第一轮推出后落进另一条的带内 ⇒ 最多迭代 4 轮直到四条都不侵入。
+        /// 恰压中心线（|lateral| 极小）时按树序号奇偶定侧，保证确定性、同批树不全挤同一侧。
+        /// 调用时机：见 <see cref="NudgeTreesOutOfCorridors"/>（Bake 内 ForestSeeder 之后的实例级 pass）。
+        /// </summary>
+        private static void NudgeOutOfCorridors(ref float wx, ref float wz, int treeIndex)
+        {
+            var point = new Vector2(wx, wz);
+            for (int pass = 0; pass < 4; pass++)
+            {
+                bool moved = false;
+                for (int route = 0; route < MovementCorridor.RouteCount; route++)
+                {
+                    MovementCorridor.ProjectUnclamped(route, point, out float arc, out float lateral);
+                    if (arc < 0f || arc > MovementCorridor.Length(route))
+                        continue;
+
+                    MovementCorridor.GetSampleAt(route, arc, out _, out _, out float halfLeft, out float halfRight);
+                    float limit = (lateral >= 0f ? halfLeft : halfRight)
+                        + MovementCorridor.CorridorTreeClearVerge;
+                    if (Mathf.Abs(lateral) >= limit)
+                        continue;
+
+                    float side = Mathf.Abs(lateral) < 0.05f
+                        ? ((treeIndex & 1) == 0 ? 1f : -1f)
+                        : Mathf.Sign(lateral);
+                    point = MovementCorridor.PointAt(route, arc, side * (limit + 0.3f));
+                    moved = true;
+                }
+                if (!moved)
+                    break;
+            }
+            wx = point.x;
+            wz = point.y;
+        }
+
         // ---------------------------------------------------------------- 共享基线设施（Understory 回滚同源复刻）
 
         // 恐龙出生点（XZ）：树/草/岩石排除区与环绕构图的契约数据。长度与内容决定 GroundRandomSeed 随机流
@@ -597,7 +787,8 @@ namespace JurassicWorld.Editor
                 maxWidth = 1.4f,
                 minHeight = 0.6f,
                 maxHeight = 1.4f,
-                noiseSpread = 0.15f
+                noiseSpread = 0.15f,
+                density = 1, // CoverageMode 下的实例数倍率基准（InstanceCountMode 下无副作用；写整数字面量以兼容 int/float 声明）
             });
 
             // bush 基线算法与 spawn 点已抽为共享 helper（BuildBushBaselineDensity / DinosaurSpawnPoints）：
@@ -620,69 +811,30 @@ namespace JurassicWorld.Editor
             var scatterRoot = new GameObject("Environment Props");
             var random = new System.Random(GroundRandomSeed + 2);
 
-            Vector2[] spawnXZ = { new Vector2(0, 11), new Vector2(10, 27), new Vector2(-10, 19), new Vector2(8, 15), new Vector2(-13, 35) };
-
             GameObject[] bushPrefabs = NatureStarterKitLocator.FindDetailMeshes()
                 .Where(p => p.name.IndexOf("bush", StringComparison.OrdinalIgnoreCase) >= 0)
                 .ToArray();
 
-            Material rockMat = null;
-            if (NatureStarterKitLocator.IsImported)
-            {
-                Texture2D groundTex = NatureStarterKitLocator.FindGroundTexture("ground");
-                if (groundTex != null)
-                {
-                    EnsureFolder(MaterialFolder);
-                    rockMat = LoadOrCreateStandardMaterial(MaterialFolder + "/RockNatural.mat");
-                    rockMat.mainTexture = groundTex;
-                    rockMat.mainTextureScale = new Vector2(2f, 2f);
-                    rockMat.SetFloat("_Glossiness", 0.02f);
-                    EditorUtility.SetDirty(rockMat);
-                }
-            }
+            // 中央 12 个大岩石：资产门控换成 HQ 岩石 prefab（无 prefab 时退回原程序化 Sphere）。
+            // 兜底材质只在需要时创建：有 HQ prefab 时完全跳过，不再每 Bake 无谓改写 RockNatural.mat。
+            GameObject[] rockPrefabs = UnderstoryAssetLocator.FindRockPrefabs();
+            Material fallbackRockMat = rockPrefabs.Length == 0 ? EnsureFallbackRockMaterial() : null;
 
-            for (int i = 0; i < 12; i++)
-            {
-                float x = (float)(random.NextDouble() * 160.0 - 80.0);
-                float z = (float)(random.NextDouble() * 160.0 - 80.0);
-
-                bool tooClose = false;
-                foreach (Vector2 sp in spawnXZ)
-                    if (Vector2.Distance(sp, new Vector2(x, z)) < 6f) { tooClose = true; break; }
-                if (tooClose) continue;
-
-                var rock = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-                rock.name = "Rock_Large_" + i.ToString("D2");
-                rock.transform.SetParent(scatterRoot.transform);
-                rock.transform.position = new Vector3(x, 0.3f, z);
-                rock.transform.localScale = new Vector3(
-                    2.5f + (float)random.NextDouble() * 2f,
-                    0.8f + (float)random.NextDouble() * 0.6f,
-                    2.0f + (float)random.NextDouble() * 1.5f);
-                rock.transform.rotation = Quaternion.Euler(
-                    (float)random.NextDouble() * 15f,
-                    (float)random.NextDouble() * 360f,
-                    (float)random.NextDouble() * 10f);
-
-                if (rockMat != null)
-                    rock.GetComponent<Renderer>().sharedMaterial = rockMat;
-
-                Collider col = rock.GetComponent<Collider>();
-                if (col != null) UnityEngine.Object.DestroyImmediate(col);
-
-                GameObjectUtility.SetStaticEditorFlags(rock, StaticEditorFlags.BatchingStatic);
-            }
+            Terrain scatterTerrain = UnityEngine.Object.FindObjectOfType<Terrain>();
+            ScatterCentralRocks(scatterRoot, scatterTerrainData: scatterTerrain != null ? scatterTerrain.terrainData : null,
+                scatterTerrainTransform: scatterTerrain != null ? scatterTerrain.transform : null,
+                random, fallbackRockMat, rockPrefabs);
 
             if (bushPrefabs.Length > 0)
             {
-                for (int i = 0; i < spawnXZ.Length; i++)
+                for (int i = 0; i < ScatterSpawnXZ.Length; i++)
                 {
                     for (int j = 0; j < 2; j++)
                     {
                         float angle = (float)random.NextDouble() * Mathf.PI * 2f;
                         float dist = 12f + (float)random.NextDouble() * 6f;
-                        float bx = spawnXZ[i].x + Mathf.Cos(angle) * dist;
-                        float bz = spawnXZ[i].y + Mathf.Sin(angle) * dist;
+                        float bx = ScatterSpawnXZ[i].x + Mathf.Cos(angle) * dist;
+                        float bz = ScatterSpawnXZ[i].y + Mathf.Sin(angle) * dist;
 
                         GameObject bushPrefab = bushPrefabs[random.Next(bushPrefabs.Length)];
                         GameObject bush = (GameObject)PrefabUtility.InstantiatePrefab(bushPrefab, scatterRoot.transform);
@@ -701,6 +853,175 @@ namespace JurassicWorld.Editor
             }
 
             Debug.Log($"[SceneBuilder] Environment Props: {scatterRoot.transform.childCount} 个大型岩石/构图植物已放置。");
+        }
+
+        // ---------------------------------------------------------------- 中央岩石（资产门控 + 空间占位语义）
+
+        /// <summary>构图用出生点（岩石避让 + 灌木环绕中心）。内容决定 GroundRandomSeed+2 随机流的消费次数，勿改。</summary>
+        private static readonly Vector2[] ScatterSpawnXZ =
+        {
+            new Vector2(0, 11), new Vector2(10, 27), new Vector2(-10, 19), new Vector2(8, 15), new Vector2(-13, 35)
+        };
+
+        /// <summary>HQ 岩石贴地后的固定 sink（米，常量）：不引入随机性，故不影响 placement RNG。</summary>
+        private const float CentralRockSink = 0.05f;
+
+        /// <summary>单个中央岩石的 footprint 记录（供 PolyHavenPassPreview 报告，验证替换前后占位一致）。</summary>
+        internal struct CentralRockFootprint
+        {
+            public string Name;
+            public float TargetFootprint; // 原程序化 Sphere 的世界水平占位直径
+            public float ActualFootprint; // HQ 替换后的世界水平 footprint
+        }
+
+        /// <summary>最近一次 ScatterCentralRocks 的 footprint 记录（进程内传递；Preview 报告直接读取）。</summary>
+        internal static readonly List<CentralRockFootprint> LastCentralRockFootprints = new List<CentralRockFootprint>();
+
+        /// <summary>
+        /// 中央 12 个大岩石放置（"Environment Props" 下的 Rock_Large_*）。
+        ///
+        /// 【只换资产、不换布局】：root 名、Rock_Large_* 命名、位置、循环结构、
+        /// 以及 RNG 消费次数与顺序（x,z → 3 次 scale → 3 次 rotation）全部与替换前一致；
+        /// prefab 选择用索引取模，不额外消费 RNG。因此灌木构图与中央活动区布局逐字节不变。
+        ///
+        /// 【空间占位语义保持】：不做 `localScale = randomScale` 的粗暴替换。
+        /// HQ prefab 用 mesh bounds 求原生 XZ footprint，再算确定性 uniform normalization scale：
+        ///     finalScale = targetFootprint(原 Sphere 世界水平直径，已含原随机缩放) / sourceFootprint
+        /// 只允许 uniform scale（随机因子已折进 targetFootprint，不重复相乘）；随后按 mesh bounds.min.y
+        /// 做 ground anchoring 使岩石底部贴地。这样 DinosaurSpawnRandomizer 读取 Environment Props 的
+        /// renderer bounds 作开局避让圆时，尺寸语义与原 Sphere 实质一致。
+        ///
+        /// 提取为 internal 方法是为了让 PolyHavenPassPreview 能在临时场景里复用【同一条生产代码路径】。
+        /// </summary>
+        internal static void ScatterCentralRocks(GameObject parent, TerrainData scatterTerrainData,
+            Transform scatterTerrainTransform, System.Random random, Material fallbackMaterial, GameObject[] rockPrefabs)
+        {
+            bool usePrefabs = rockPrefabs != null && rockPrefabs.Length > 0 && scatterTerrainData != null;
+
+            int prefabCount = usePrefabs ? rockPrefabs.Length : 0;
+            var sourceFootprint = new float[prefabCount];
+            var sourceMinY = new float[prefabCount];
+            for (int i = 0; i < prefabCount; i++)
+            {
+                MeshFilter filter = rockPrefabs[i].GetComponentInChildren<MeshFilter>();
+                Bounds meshBounds = filter != null && filter.sharedMesh != null
+                    ? filter.sharedMesh.bounds
+                    : new Bounds(Vector3.zero, Vector3.one);
+                sourceFootprint[i] = Mathf.Max(0.001f, Mathf.Max(meshBounds.size.x, meshBounds.size.z));
+                sourceMinY[i] = meshBounds.min.y;
+            }
+
+            LastCentralRockFootprints.Clear();
+            for (int i = 0; i < 12; i++)
+            {
+                float x = (float)(random.NextDouble() * 160.0 - 80.0);
+                float z = (float)(random.NextDouble() * 160.0 - 80.0);
+
+                bool tooClose = false;
+                foreach (Vector2 sp in ScatterSpawnXZ)
+                    if (Vector2.Distance(sp, new Vector2(x, z)) < 6f) { tooClose = true; break; }
+                if (tooClose) continue;
+
+                // 3 次 scale + 3 次 rotation：消费次数与顺序与替换前完全一致。
+                double rawScaleX = random.NextDouble();
+                double rawScaleY = random.NextDouble();
+                double rawScaleZ = random.NextDouble();
+                float rotX = (float)random.NextDouble() * 15f;
+                float rotY = (float)random.NextDouble() * 360f;
+                float rotZ = (float)random.NextDouble() * 10f;
+
+                // 原程序化 Sphere 的 localScale（primitive mesh 直径为 1，故 world 直径 == localScale）。
+                var originalSphereScale = new Vector3(
+                    2.5f + 2f * (float)rawScaleX,
+                    0.8f + 0.6f * (float)rawScaleY,
+                    2.0f + 1.5f * (float)rawScaleZ);
+                float targetFootprint = Mathf.Max(originalSphereScale.x, originalSphereScale.z);
+
+                if (usePrefabs)
+                {
+                    int index = i % rockPrefabs.Length; // 索引取模：不额外消费 RNG
+                    GameObject rock = (GameObject)PrefabUtility.InstantiatePrefab(rockPrefabs[index], parent.transform);
+                    rock.name = "Rock_Large_" + i.ToString("D2");
+
+                    float finalScale = targetFootprint / sourceFootprint[index];
+                    rock.transform.localScale = Vector3.one * finalScale;
+                    rock.transform.rotation = Quaternion.Euler(rotX, rotY, rotZ);
+
+                    float nx = (x + scatterTerrainData.size.x / 2f) / scatterTerrainData.size.x;
+                    float nz = (z + scatterTerrainData.size.z / 2f) / scatterTerrainData.size.z;
+                    float groundY = scatterTerrainTransform.position.y + scatterTerrainData.GetInterpolatedHeight(nx, nz);
+                    rock.transform.position = new Vector3(
+                        x, groundY - sourceMinY[index] * finalScale - CentralRockSink, z);
+
+                    foreach (Collider col in rock.GetComponentsInChildren<Collider>(true))
+                        UnityEngine.Object.DestroyImmediate(col);
+                    GameObjectUtility.SetStaticEditorFlags(rock, StaticEditorFlags.BatchingStatic);
+
+                    Renderer renderer = rock.GetComponentInChildren<Renderer>();
+                    Vector3 size = renderer != null ? renderer.bounds.size : Vector3.zero;
+                    LastCentralRockFootprints.Add(new CentralRockFootprint
+                    {
+                        Name = rock.name,
+                        TargetFootprint = targetFootprint,
+                        ActualFootprint = Mathf.Max(size.x, size.z)
+                    });
+                }
+                else
+                {
+                    // 兜底：无 HQ 岩石 prefab 时保持替换前的程序化 Sphere 行为不变。
+                    var rock = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                    rock.name = "Rock_Large_" + i.ToString("D2");
+                    rock.transform.SetParent(parent.transform);
+                    rock.transform.position = new Vector3(x, 0.3f, z);
+                    rock.transform.localScale = originalSphereScale;
+                    rock.transform.rotation = Quaternion.Euler(rotX, rotY, rotZ);
+
+                    if (fallbackMaterial != null)
+                        rock.GetComponent<Renderer>().sharedMaterial = fallbackMaterial;
+
+                    Collider col = rock.GetComponent<Collider>();
+                    if (col != null)
+                        UnityEngine.Object.DestroyImmediate(col);
+
+                    GameObjectUtility.SetStaticEditorFlags(rock, StaticEditorFlags.BatchingStatic);
+                }
+            }
+
+            if (!usePrefabs)
+                Debug.LogWarning("[SceneBuilder] 未找到 HQ 岩石 prefab（Assets/Vegetation/Rocks），" +
+                                 "Environment Props 退回程序化 Sphere 占位。");
+        }
+
+        /// <summary>
+        /// Preview 专用入口：用与生产完全相同的种子重放中央 12 岩石的放置。
+        /// 岩石循环是 BuildScatterPrefabs 中 GroundRandomSeed+2 随机流的【首个】消费者，
+        /// 故独立新建同种子 Random 即得到与生产逐项一致的前缀序列（不改变生产随机契约）。
+        /// </summary>
+        internal static void ScatterCentralRocksForPreview(GameObject parent, TerrainData data,
+            Transform terrainTransform, GameObject[] rockPrefabs)
+        {
+            ScatterCentralRocks(parent, data, terrainTransform,
+                new System.Random(GroundRandomSeed + 2), null, rockPrefabs);
+        }
+
+        /// <summary>
+        /// 兜底岩石材质：仅在无 HQ 岩石 prefab 时使用，保持替换前对 RockNatural.mat 的原有配置。        /// 有 HQ prefab 时完全跳过 → 不再每 Bake 无谓改写该材质资产。
+        /// </summary>
+        private static Material EnsureFallbackRockMaterial()
+        {
+            if (!NatureStarterKitLocator.IsImported)
+                return null;
+            Texture2D groundTex = NatureStarterKitLocator.FindGroundTexture("ground");
+            if (groundTex == null)
+                return null;
+
+            EnsureFolder(MaterialFolder);
+            Material rockMat = LoadOrCreateStandardMaterial(MaterialFolder + "/RockNatural.mat");
+            rockMat.mainTexture = groundTex;
+            rockMat.mainTextureScale = new Vector2(2f, 2f);
+            rockMat.SetFloat("_Glossiness", 0.02f);
+            EditorUtility.SetDirty(rockMat);
+            return rockMat;
         }
 
         // ---------------------------------------------------------------- HUD
@@ -2013,7 +2334,8 @@ namespace JurassicWorld.Editor
             field.SetValue(target, value);
         }
 
-        private static void EnsureFolder(string folder)
+        // internal：PolyHavenAssetIntegration 复用同一实现，避免各自复制一份递归建目录逻辑。
+        internal static void EnsureFolder(string folder)
         {
             if (AssetDatabase.IsValidFolder(folder))
                 return;

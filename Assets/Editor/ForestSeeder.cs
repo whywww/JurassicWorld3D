@@ -59,7 +59,7 @@ namespace JurassicWorld.Editor
         private const float RampWidth = 18f;
 
         // 边界强制密林墙厚度（borderDist < WallInset 时 p 强制 ≥ 0.92，遮挡地形边）
-        private const float WallInset = 12f;
+        internal const float WallInset = 12f;
 
         // 树群噪声尺度（≈22m 一团，产生大小不一的树群与不规则空隙）
         private const float ClusterScale = 0.045f;
@@ -250,6 +250,10 @@ namespace JurassicWorld.Editor
             bool capacityHit = false;
             int[] radialHistogram = new int[RadialBandCount];
 
+            // 林下层展示环布局由 UnderstorySeeder 独占（纯函数、无随机消费）；其 Pass 被禁用时不留缺口（回滚契约）。
+            bool showcaseClearance = UnderstorySeeder.PassEnabled;
+            int showcaseExcluded = 0;
+
             for (int attempt = 0; attempt < ForestAttempts; attempt++)
             {
                 if (forest.Count >= forestCapacity)
@@ -303,6 +307,15 @@ namespace JurassicWorld.Editor
                         }
                     }
                     if (inChannel) continue;
+
+                    // (e2) 林下层展示环清空：为近林带的岩石簇 / 倒木 / 树桩让出「清空圆 + 指向平坦矩形的视线
+                    //      通道」，否则 1-5m 高的实体道具会被树冠与树干完全挡死（玩家在可达边界看不到）。
+                    //      与视觉通道同一条 borderDist 守卫：密林墙段保持遮挡语义、地平线仍被挡住。
+                    if (showcaseClearance && UnderstorySeeder.InShowcaseClearance(candidate))
+                    {
+                        showcaseExcluded++;
+                        continue;
+                    }
                 }
 
                 // (f) 接受 / 拒绝
@@ -366,6 +379,7 @@ namespace JurassicWorld.Editor
                 $"森林 prototype 区间 [{baseCount}, {baseCount + sortedForestPrefabs.Length})；" +
                 $"硬上限 MaxTotalInstances={MaxTotalInstances}（capacity={forestCapacity}）；" +
                 $"attemptsUsed={attemptsUsed}/{ForestAttempts}，接受率={acceptRate:P2}（forest/attemptsUsed），触顶 forestCapacity={capacityHit}；" +
+                $"展示环清空={UnderstorySeeder.BuildShowcaseRing().Count} 处（排除候选 {showcaseExcluded} 个）；" +
                 $"写回={(wroteBack ? "已写入" : "跳过（与现有一致）")}；" +
                 $"物种直方图: {string.Join(", ", histogramParts.ToArray())}；" +
                 $"径向密度直方图（到核心矩形原始距离 d）: {string.Join(", ", radialParts.ToArray())}");

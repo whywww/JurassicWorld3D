@@ -7,12 +7,13 @@ namespace JurassicWorld.Editor
 {
     /// <summary>
     /// Understory 密度分布抽查（诊断工具，等价于「抽查 GetDetailLayer」的自动化版）：
-    /// 读取 JurassicTerrainData 的 bush（6 层平均）与 grass01 层，打印 ASCII 密度热图 +
-    /// 到平坦矩形距离的分带统计，用于视觉验收前确认分区数据形态。
+    /// 读取 JurassicTerrainData 的 bush（6 层平均）/ fern（N 层平均）与 grass01 层，打印 ASCII 密度热图 +
+    /// 到【恐龙活动包络】带符号距离的分带统计，用于视觉验收前确认分区数据形态。
     ///
-    /// 典型期望（默认常量）：dFlat &lt; 7.5 恒 0；[7.5,19.5) 爬升（ramp 12m）；
-    /// [19.5,45) 团块带（bush 中高值 + 通道/泥斑减半）；地形边缘密林墙抬高；
-    /// 北带 z∈[90,100] 因空间不足（地形边 100）覆盖薄属已知限制。
+    /// 典型期望（VisualVegetationZones 梯度，默认常量）：R0 空地（内缩 50m）恒 0；
+    /// R1 (-50,0] 活动包络外缘稀疏爬升；R2 (0,8] 玩家过渡带；R3 (8,19.5] 林缘爬升到饱和；
+    /// R4 >19.5 团块带（bush 中高值 + 通道/泥斑减半）；地形边缘密林墙抬高。
+    /// 中大型道具（rock/log/stump/hero bush）另由 DinoSafetyBuffer 约束在活动包络 +7.5m 之外，本图不含它们。
     ///
     /// 菜单：Jurassic World/Check Understory Density；
     /// 批处理：-executeMethod JurassicWorld.Editor.UnderstoryDensityCheck.Run
@@ -53,6 +54,23 @@ namespace JurassicWorld.Editor
             for (int x = 0; x < res; x++)
                 bushAvg[x, z] /= bushLayers.Length;
 
+            // fern N 层 → 逐格平均场（低矮植被梯度的另一半：R1/R2 由内侧簇流提供）
+            int[] fernLayers = UnderstorySeeder.FindFernDetailLayerIndices(data);
+            float[,] fernAvg = fernLayers.Length > 0 ? new float[res, res] : null;
+            foreach (int layerIdx in fernLayers)
+            {
+                int[,] layer = data.GetDetailLayer(0, 0, res, res, layerIdx);
+                for (int z = 0; z < res; z++)
+                for (int x = 0; x < res; x++)
+                    fernAvg[x, z] += layer[x, z];
+            }
+            if (fernAvg != null)
+            {
+                for (int z = 0; z < res; z++)
+                for (int x = 0; x < res; x++)
+                    fernAvg[x, z] /= fernLayers.Length;
+            }
+
             // grass01 层（与 UnderstorySeeder 同源签名：prototypeTexture == grass01 纹理）
             float[,] grass = null;
             Texture2D grass01 = NatureStarterKitLocator.FindGroundTexture("grass01");
@@ -73,7 +91,7 @@ namespace JurassicWorld.Editor
             }
 
             var sb = new StringBuilder();
-            sb.AppendLine($"[DensityCheck] res={res}，bush 层 {bushLayers.Length} 个（下图 = 逐格平均），grass01 {(grass != null ? "已识别" : "未识别")}。");
+            sb.AppendLine($"[DensityCheck] res={res}，bush 层 {bushLayers.Length} 个 / fern 层 {fernLayers.Length} 个（下图 = 逐格平均），grass01 {(grass != null ? "已识别" : "未识别")}。");
             sb.AppendLine("行 = z 从 +100(北) 到 -100(南)；列 = x 从 -100(西) 到 +100(东)；每字符 ≈4.2m。");
             sb.AppendLine("bush 平均密度： '.'=0  ':'<0.5  '+'<1.5  '*'<3  '#'>=3");
             AppendMap(sb, bushAvg, res, v => v <= 0f ? '.' : v < 0.5f ? ':' : v < 1.5f ? '+' : v < 3f ? '*' : '#');
@@ -83,43 +101,51 @@ namespace JurassicWorld.Editor
                 AppendMap(sb, grass, res, v => v <= 0f ? '.' : v < 1f ? ':' : v < 2f ? '+' : v < 3f ? '*' : '#');
             }
 
-            // 分带统计（到平坦矩形距离；同时统计 bush 与 grass）
-            sb.AppendLine("分带统计（到平坦矩形 [-70,70]×[-70,90] 的距离）：");
-            float[] bounds = { 0f, 7.5f, 19.5f, 45f, 150f };
-            var dFlat = new float[res, res];
+            // 分带统计（到【恐龙活动包络】的**带符号**距离，唯一轴心 = WorldBounds；不再用地形平坦区）
+            sb.AppendLine($"分带统计（到恐龙活动包络 {ActivityRectText()} 的带符号距离；负 = 包络内）：");
+            float[] bounds =
+            {
+                -150f, -WorldBounds.ClearingInset, 0f, WorldBounds.PlayerTransitionOuter,
+                WorldBounds.NearForestOuter, 45f, 150f
+            };
+            var sd = new float[res, res];
             for (int z = 0; z < res; z++)
             for (int x = 0; x < res; x++)
-                dFlat[x, z] = UnderstorySeeder.DistanceToFlatRectWorld(
+                sd[x, z] = WorldBounds.SignedDistanceToDinosaurActivity(
                     (float)x / res * 200f - 100f, (float)z / res * 200f - 100f);
             for (int b = 0; b < bounds.Length - 1; b++)
             {
                 long count = 0, nonZero = 0;
-                double sumBush = 0, sumGrass = 0;
+                double sumBush = 0, sumGrass = 0, sumFern = 0;
                 float maxBush = 0;
                 for (int z = 0; z < res; z++)
                 for (int x = 0; x < res; x++)
                 {
-                    float d = dFlat[x, z];
+                    float d = sd[x, z];
                     if (d < bounds[b] || d >= bounds[b + 1])
                         continue;
                     count++;
                     sumBush += bushAvg[x, z];
                     if (grass != null) sumGrass += grass[x, z];
+                    if (fernAvg != null) sumFern += fernAvg[x, z];
                     if (bushAvg[x, z] > 0.5f) nonZero++;
                     if (bushAvg[x, z] > maxBush) maxBush = bushAvg[x, z];
                 }
                 double avgBush = count > 0 ? sumBush / count : 0;
                 double avgGrass = grass != null && count > 0 ? sumGrass / count : 0;
-                sb.AppendLine($"  dFlat ∈ [{bounds[b],5},{bounds[b + 1],5}) : bush 平均 {avgBush:F2}（非零格 {100.0 * nonZero / Math.Max(1, count):F0}%，max {maxBush:F1}） / grass 平均 {avgGrass:F2}  [{count} 格]");
+                double avgFern = fernAvg != null && count > 0 ? sumFern / count : 0;
+                sb.AppendLine($"  sd ∈ [{bounds[b],6},{bounds[b + 1],6}) : bush 平均 {avgBush:F2}（非零格 {100.0 * nonZero / Math.Max(1, count):F0}%，max {maxBush:F1}） / " +
+                              $"fern 平均 {avgFern:F2} / grass 平均 {avgGrass:F2}  [{count} 格]");
             }
 
             // 关键点抽查
             sb.AppendLine("关键点抽查：");
-            AppendPoint(sb, bushAvg, grass, res, 0f, 0f, "活动区中心(0,0)          ");
-            AppendPoint(sb, bushAvg, grass, res, 60f, 20f, "东缘(60,20) 向外观测点   ");
-            AppendPoint(sb, bushAvg, grass, res, 90f, 20f, "东缘外 30m(90,20)       ");
-            AppendPoint(sb, bushAvg, grass, res, 0f, -89f, "南缘外(0,-89)           ");
-            AppendPoint(sb, bushAvg, grass, res, 0f, 97f, "北带(0,97) 空间不足     ");
+            AppendPoint(sb, bushAvg, fernAvg, grass, res, 0f, 0f, "R0 空地中心(0,0)         ");
+            AppendPoint(sb, bushAvg, fernAvg, grass, res, 60f, 20f, "R1 活动包络外缘(60,20)   ");
+            AppendPoint(sb, bushAvg, fernAvg, grass, res, 75f, 20f, "R2 玩家过渡带(75,20)     ");
+            AppendPoint(sb, bushAvg, fernAvg, grass, res, 90f, 20f, "东缘外 30m(90,20)       ");
+            AppendPoint(sb, bushAvg, fernAvg, grass, res, 0f, -89f, "南缘外(0,-89)           ");
+            AppendPoint(sb, bushAvg, fernAvg, grass, res, 0f, 97f, "北带(0,97) 空间不足     ");
 
             Debug.Log(sb.ToString());
         }
@@ -139,12 +165,18 @@ namespace JurassicWorld.Editor
             }
         }
 
-        private static void AppendPoint(StringBuilder sb, float[,] bush, float[,] grass, int res, float wx, float wz, string label)
+        private static void AppendPoint(StringBuilder sb, float[,] bush, float[,] fern, float[,] grass, int res, float wx, float wz, string label)
         {
             int x = Mathf.Clamp(Mathf.RoundToInt((wx + 100f) / 200f * res), 0, res - 1);
             int z = Mathf.Clamp(Mathf.RoundToInt((wz + 100f) / 200f * res), 0, res - 1);
             string g = grass != null ? $" grass={grass[x, z]:F0}" : "";
-            sb.AppendLine($"  {label} bush={bush[x, z]:F2}{g}");
+            string f = fern != null ? $" fern={fern[x, z]:F2}" : "";
+            sb.AppendLine($"  {label} bush={bush[x, z]:F2}{f}{g}");
         }
+
+        /// <summary>活动包络矩形文本（与 WorldBounds.Describe 同源，避免本工具独自硬编码）。</summary>
+        private static string ActivityRectText() =>
+            $"x[{WorldBounds.DinosaurActivityXZ.xMin:F0},{WorldBounds.DinosaurActivityXZ.xMax:F0}]" +
+            $"×z[{WorldBounds.DinosaurActivityXZ.yMin:F0},{WorldBounds.DinosaurActivityXZ.yMax:F0}]";
     }
 }
