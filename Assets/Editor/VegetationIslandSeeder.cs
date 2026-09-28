@@ -1,18 +1,30 @@
 using System;
 using System.Linq;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using UnityEngine;
 
 namespace JurassicWorld.Editor
 {
     /// <summary>
-    /// Five authored clearing islands. This runs as part of BakeScene, so a later
+    /// Authored clearing islands. This runs as part of BakeScene, so a later
     /// rebuild retains the composition. Props are visual only; route clearance is
     /// measured at their roots and all imported colliders are removed.
     /// </summary>
     internal static class VegetationIslandSeeder
     {
         internal const string RootName = "Phase 2 Vegetation Islands";
+
+        [MenuItem("Jurassic World/Vegetation Diversity/Rebuild Midground Islands")]
+        public static void RebuildMidgroundIslands()
+        {
+            var scene = EditorSceneManager.OpenScene("Assets/Scenes/Main.unity");
+            GameObject old = GameObject.Find(RootName);
+            if (old != null) UnityEngine.Object.DestroyImmediate(old);
+            Seed();
+            EditorSceneManager.MarkSceneDirty(scene);
+            EditorSceneManager.SaveScene(scene);
+        }
 
         private static readonly Vector2[] FernOffsets =
         {
@@ -66,7 +78,20 @@ namespace JurassicWorld.Editor
             BuildIsland(root.transform, terrain, "D_OppositePath", new Vector2(28f, 21f),
                 -55f, 2, trees, bushes, ferns, null);
 
-            Debug.Log($"[VegetationIslands] Five islands baked; B tree={centralTree}, C rock={rockXZ}.");
+            // Broken sightlines across the whole central clearing. These sit at
+            // different depths and alternate sides of the dinosaur routes.
+            BuildIsland(root.transform, terrain, "E_WestApproach", new Vector2(-13f, -24f),
+                62f, 1, trees, bushes, ferns, deadwood.Length > 0 ? deadwood[0] : null);
+            BuildIsland(root.transform, terrain, "F_EastApproach", new Vector2(13f, -13f),
+                -18f, 1, trees, bushes, ferns, null);
+            BuildIsland(root.transform, terrain, "G_WestMiddle", new Vector2(-19f, 18f),
+                119f, 1, trees, bushes, ferns, deadwood.Length > 0 ? deadwood[0] : null);
+            BuildIsland(root.transform, terrain, "H_EastMiddle", new Vector2(18f, 34f),
+                -42f, 1, trees, bushes, ferns, null);
+            BuildIsland(root.transform, terrain, "I_NorthMiddle", new Vector2(-9f, 48f),
+                27f, 1, trees, bushes, ferns, deadwood.Length > 0 ? deadwood[0] : null);
+
+            Debug.Log($"[VegetationIslands] Ten islands baked; B tree={centralTree}, C rock={rockXZ}.");
         }
 
         private static Vector2 FindCentralTree(Terrain terrain, Vector2 target)
@@ -132,7 +157,10 @@ namespace JurassicWorld.Editor
             GameObject instance = (GameObject)PrefabUtility.InstantiatePrefab(prefab, parent);
             instance.name = name;
             instance.transform.position = new Vector3(xz.x, GroundY(terrain, xz), xz.y);
-            instance.transform.rotation = Quaternion.Euler(0f, yaw, 0f);
+            // Some saplings lean into the gap; the trunk is grounded again below.
+            float lean = name.StartsWith("Sapling_", StringComparison.Ordinal)
+                ? (parent.GetSiblingIndex() % 2 == 0 ? 13f : -11f) : 0f;
+            instance.transform.rotation = Quaternion.Euler(lean, yaw, 0f);
 
             Bounds bounds = RenderBounds(instance);
             float currentSize = heightBased ? bounds.size.y : Mathf.Max(bounds.size.x, bounds.size.z);
@@ -152,7 +180,7 @@ namespace JurassicWorld.Editor
         {
             if (IsClear(desired, clearance)) return desired;
             // Keep all adjustments local, so each island remains a single mass.
-            for (float radius = 0.6f; radius <= 2.4f; radius += 0.6f)
+            for (float radius = 0.6f; radius <= 8.4f; radius += 0.6f)
                 for (int i = 0; i < 16; i++)
                 {
                     float angle = i * Mathf.PI * 2f / 16f;
