@@ -4,7 +4,7 @@ using UnityEngine;
 namespace JurassicWorld
 {
     /// <summary>
-    /// Phase 1 的两条闭合中心线。西侧与东侧各由轻 S 去程、向外错开 7m 的回程和两端
+    /// Phase 1 的六条闭合中心线。各由轻 S 去程、向外错开 7m 的回程和两端
     /// 半径 3.5m 的回转弧组成。出生、行走、标记和净空校验共用此几何。
     /// Vector2 一律表示世界坐标 (x, z)。
     /// </summary>
@@ -12,7 +12,8 @@ namespace JurassicWorld
     {
         public const int MainRoute = 0;
         public const int ForegroundRoute = 1; // 旧调用名；现在表示东侧闭合通道
-        public const int MinRouteCount = 2;
+        public const int MinRouteCount = 6;
+        public const float MinRouteLength = 120f;
         public const float MinSwingMeters = 10f;
         public const float TurnRadius = 3.5f;
         public const float ReturnOffset = 7f;
@@ -21,7 +22,11 @@ namespace JurassicWorld
 
         private const int SamplesPerSegment = 24;
         private const int SamplesPerTurn = 24;
-        private static readonly string[] Names = { "West Loop（西侧）", "East Loop（东侧）" };
+        private static readonly string[] Names =
+        {
+            "West Loop（西侧）", "East Loop（东侧）", "Outer West（西外侧）",
+            "Outer East（东外侧）", "South Traverse（南侧）", "North Traverse（北侧）",
+        };
 
         // 首尾竖向切线接回转弧；中间的横向摆动保持轻 S。
         private static readonly Vector2[][] Outbound =
@@ -37,6 +42,30 @@ namespace JurassicWorld
                 new Vector2(13f, -27f), new Vector2(13f, -20f),
                 new Vector2(18f, -8f), new Vector2(10f, 10f),
                 new Vector2(15f, 27f), new Vector2(11f, 37f), new Vector2(11f, 44f),
+            },
+            new[]
+            {
+                new Vector2(-35f, -34f), new Vector2(-35f, -25f),
+                new Vector2(-40f, -7f), new Vector2(-33f, 13f),
+                new Vector2(-38f, 32f), new Vector2(-34f, 49f), new Vector2(-34f, 58f),
+            },
+            new[]
+            {
+                new Vector2(35f, -34f), new Vector2(35f, -25f),
+                new Vector2(40f, -7f), new Vector2(33f, 13f),
+                new Vector2(38f, 32f), new Vector2(34f, 49f), new Vector2(34f, 58f),
+            },
+            new[]
+            {
+                new Vector2(-39f, -39f), new Vector2(-31f, -39f),
+                new Vector2(-16f, -36f), new Vector2(0f, -39f),
+                new Vector2(16f, -36f), new Vector2(31f, -39f), new Vector2(39f, -39f),
+            },
+            new[]
+            {
+                new Vector2(-39f, 58f), new Vector2(-31f, 58f),
+                new Vector2(-16f, 61f), new Vector2(0f, 58f),
+                new Vector2(16f, 61f), new Vector2(31f, 58f), new Vector2(39f, 58f),
             },
         };
 
@@ -54,7 +83,14 @@ namespace JurassicWorld
             public float Length;
         }
 
-        private static readonly RouteData[] Routes = { BuildRoute(0), BuildRoute(1) };
+        private static readonly RouteData[] Routes = BuildRoutes();
+
+        private static RouteData[] BuildRoutes()
+        {
+            var routes = new RouteData[Outbound.Length];
+            for (int i = 0; i < routes.Length; i++) routes[i] = BuildRoute(i);
+            return routes;
+        }
 
         private static RouteData Route(int index)
         {
@@ -66,38 +102,40 @@ namespace JurassicWorld
         private static RouteData BuildRoute(int route)
         {
             Vector2[] outbound = Outbound[route];
-            int outward = route == MainRoute ? -1 : 1;
+            int outward = route == MainRoute || route == 2 || route == 4 ? -1 : 1;
+            Vector2 lateral = route < 4 ? Vector2.right : Vector2.up;
+            Vector2 forward = route < 4 ? Vector2.up : Vector2.right;
             var points = new List<Vector2>();
             AppendSpline(points, outbound, false);
 
             Vector2 north = outbound[outbound.Length - 1];
-            float northCenterX = north.x + outward * TurnRadius;
+            Vector2 northCenter = north + lateral * outward * TurnRadius;
             float northStart = outward < 0 ? 0f : Mathf.PI;
             float northEnd = outward < 0 ? Mathf.PI : 0f;
             for (int i = 1; i <= SamplesPerTurn; i++)
             {
                 float angle = Mathf.Lerp(northStart, northEnd, (float)i / SamplesPerTurn);
-                points.Add(new Vector2(northCenterX + TurnRadius * Mathf.Cos(angle),
-                    north.y + TurnRadius * Mathf.Sin(angle)));
+                points.Add(northCenter + lateral * TurnRadius * Mathf.Cos(angle)
+                    + forward * TurnRadius * Mathf.Sin(angle));
             }
 
             var inbound = new Vector2[outbound.Length];
             for (int i = 0; i < outbound.Length; i++)
             {
                 Vector2 source = outbound[outbound.Length - 1 - i];
-                inbound[i] = new Vector2(source.x + outward * ReturnOffset, source.y);
+                inbound[i] = source + lateral * outward * ReturnOffset;
             }
             AppendSpline(points, inbound, true);
 
             Vector2 south = outbound[0];
-            float southCenterX = south.x + outward * TurnRadius;
+            Vector2 southCenter = south + lateral * outward * TurnRadius;
             float southStart = outward < 0 ? Mathf.PI : 0f;
             float southEnd = outward < 0 ? 2f * Mathf.PI : -Mathf.PI;
             for (int i = 1; i < SamplesPerTurn; i++)
             {
                 float angle = Mathf.Lerp(southStart, southEnd, (float)i / SamplesPerTurn);
-                points.Add(new Vector2(southCenterX + TurnRadius * Mathf.Cos(angle),
-                    south.y + TurnRadius * Mathf.Sin(angle)));
+                points.Add(southCenter + lateral * TurnRadius * Mathf.Cos(angle)
+                    + forward * TurnRadius * Mathf.Sin(angle));
             }
 
             var samples = new CorridorSample[points.Count];
@@ -273,7 +311,143 @@ namespace JurassicWorld
 
         public static string Describe()
         {
-            return $"闭合中心线：西侧 {Length(MainRoute):F1}m，东侧 {Length(ForegroundRoute):F1}m";
+            var parts = new string[RouteCount];
+            for (int route = 0; route < RouteCount; route++)
+                parts[route] = $"{GetRouteName(route)} {Length(route):F1}m";
+            return "闭合中心线：" + string.Join("；", parts);
+        }
+    }
+
+    /// <summary>由不同中心线的近距离采样生成的通行区。同一区域同一时刻只允许一只恐龙进入。</summary>
+    public static class MovementCorridorCrossings
+    {
+        private const float ConflictDistance = 8f;
+        private const float ZoneRadius = 11.5f;
+        private const float ApproachMargin = 4f;
+
+        private sealed class Zone
+        {
+            public int RouteA, RouteB;
+            public Vector2 Center;
+            public float Radius = ZoneRadius;
+            public DinosaurAgent Owner;
+        }
+
+        private static readonly List<Zone> Zones = BuildZones();
+        public static int ZoneCount => Zones.Count;
+        public static void GetZone(int index, out int routeA, out int routeB, out Vector2 center,
+            out float radius)
+        {
+            Zone zone = Zones[index];
+            routeA = zone.RouteA;
+            routeB = zone.RouteB;
+            center = zone.Center;
+            radius = zone.Radius;
+        }
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetOwners()
+        {
+            foreach (Zone zone in Zones) zone.Owner = null;
+        }
+
+        private static List<Zone> BuildZones()
+        {
+            var zones = new List<Zone>();
+            for (int a = 0; a < MovementCorridor.RouteCount; a++)
+            for (int b = a + 1; b < MovementCorridor.RouteCount; b++)
+            for (int i = 0; i < MovementCorridor.SampleCount(a); i += 4)
+            {
+                Vector2 pa = MovementCorridor.GetSample(a, i).Position;
+                for (int j = 0; j < MovementCorridor.SampleCount(b); j += 4)
+                {
+                    Vector2 pb = MovementCorridor.GetSample(b, j).Position;
+                    if ((pa - pb).sqrMagnitude > ConflictDistance * ConflictDistance) continue;
+                    Vector2 midpoint = (pa + pb) * 0.5f;
+                    Zone existing = null;
+                    foreach (Zone zone in zones)
+                        if (zone.RouteA == a && zone.RouteB == b &&
+                            (zone.Center - midpoint).sqrMagnitude < 100f)
+                        {
+                            existing = zone;
+                            break;
+                        }
+                    if (existing == null)
+                        zones.Add(new Zone { RouteA = a, RouteB = b, Center = midpoint });
+                }
+            }
+            bool merged;
+            do
+            {
+                merged = false;
+                for (int i = 0; i < zones.Count && !merged; i++)
+                for (int j = i + 1; j < zones.Count; j++)
+                {
+                    Zone first = zones[i], second = zones[j];
+                    if (first.RouteA != second.RouteA || first.RouteB != second.RouteB ||
+                        Vector2.Distance(first.Center, second.Center) >= first.Radius + second.Radius)
+                        continue;
+                    Vector2 center = (first.Center + second.Center) * 0.5f;
+                    first.Radius = Mathf.Max(Vector2.Distance(center, first.Center) + first.Radius,
+                        Vector2.Distance(center, second.Center) + second.Radius);
+                    first.Center = center;
+                    zones.RemoveAt(j);
+                    merged = true;
+                    break;
+                }
+            } while (merged);
+            return zones;
+        }
+
+        public static bool IsInside(int route, Vector2 position)
+        {
+            foreach (Zone zone in Zones)
+                if ((zone.RouteA == route || zone.RouteB == route) &&
+                    (zone.Center - position).sqrMagnitude < zone.Radius * zone.Radius)
+                    return true;
+            return false;
+        }
+
+        public static bool CanAdvance(DinosaurAgent agent, DinosaurAgent[] peers, Vector2 next)
+        {
+            foreach (Zone zone in Zones)
+            {
+                if (zone.RouteA != agent.RouteIndex && zone.RouteB != agent.RouteIndex) continue;
+                if ((zone.Center - next).sqrMagnitude >= zone.Radius * zone.Radius) continue;
+                int otherRoute = zone.RouteA == agent.RouteIndex ? zone.RouteB : zone.RouteA;
+                DinosaurAgent peer = null;
+                foreach (DinosaurAgent candidate in peers)
+                    if (candidate != null && candidate.RouteIndex == otherRoute)
+                    {
+                        peer = candidate;
+                        break;
+                    }
+                if (peer == null) continue;
+                Vector2 peerPosition = new Vector2(peer.transform.position.x, peer.transform.position.z);
+                float peerDistance = Vector2.Distance(zone.Center, peerPosition);
+                if (zone.Owner != null)
+                {
+                    Vector2 ownerPosition = new Vector2(zone.Owner.transform.position.x,
+                        zone.Owner.transform.position.z);
+                    if (Vector2.Distance(zone.Center, ownerPosition) >= zone.Radius)
+                        zone.Owner = null;
+                }
+                if (zone.Owner == null)
+                {
+                    Vector2 selfPosition = new Vector2(agent.transform.position.x, agent.transform.position.z);
+                    if (peerDistance < zone.Radius &&
+                        Vector2.Distance(zone.Center, selfPosition) >= zone.Radius)
+                        zone.Owner = peer;
+                    else if (peerDistance < zone.Radius + ApproachMargin &&
+                             peer.CurrentState == DinosaurAgent.DinosaurState.RandomWalk &&
+                             peer.LaneIndex < agent.LaneIndex)
+                        zone.Owner = peer;
+                    else
+                        zone.Owner = agent;
+                }
+                if (zone.Owner != agent) return false;
+            }
+            return true;
         }
     }
 }

@@ -13,6 +13,10 @@ namespace JurassicWorld
         {
             new Color(0.15f, 1f, 1f),
             new Color(0.35f, 1f, 0.45f),
+            new Color(1f, 0.7f, 0.2f),
+            new Color(1f, 0.35f, 0.55f),
+            new Color(0.65f, 0.45f, 1f),
+            new Color(1f, 0.95f, 0.3f),
         };
 
         [SerializeField] private bool showMarkers = ShowMarkersDefault;
@@ -67,10 +71,17 @@ namespace JurassicWorld
         private void Update()
         {
             if (!Input.GetKeyDown(toggleKey)) return;
-            showMarkers = !showMarkers;
-            ApplyVisibility();
+            SetShowMarkers(!showMarkers);
             Debug.Log($"[MovementCorridorDebug] 中心线 {(showMarkers ? "显示" : "隐藏")}（{toggleKey}）。", this);
         }
+
+        public void SetShowMarkers(bool visible)
+        {
+            showMarkers = visible;
+            ApplyVisibility();
+        }
+
+        private void OnValidate() => ApplyVisibility();
 
         private void ApplyVisibility()
         {

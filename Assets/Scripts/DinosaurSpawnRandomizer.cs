@@ -103,7 +103,6 @@ namespace JurassicWorld
             var placedPositions = new List<Vector2>(agents.Length);
             var placedRadii = new List<float>(agents.Length);
             int acceptedCount = 0;
-            int fallbackCount = 0;
             var routeCounts = new int[MovementCorridor.RouteCount];   // 各路线分到的恐龙数（日志用）
 
             for (int i = 0; i < agents.Length; i++)
@@ -115,20 +114,20 @@ namespace JurassicWorld
                 Vector3 previous = agent.transform.position;
                 // 每次 Play 随机打乱通道顺序，再轮转分派。当前两只恐龙必分到不同通道，
                 // 同时霸王龙/伶盗龙各自进入哪一条线仍是随机的。
-                int route = routeOrder[i % routeOrder.Length];
-
-                Vector2 position;
-                if (TrySamplePosition(agent, route, hasCamera, cameraXZ, propPositions, propRadii,
-                        placedPositions, placedRadii, random, out position))
+                int route = -1;
+                Vector2 position = Vector2.zero;
+                for (int attemptRoute = 0; attemptRoute < routeOrder.Length; attemptRoute++)
                 {
-                    acceptedCount++;
+                    int candidateRoute = routeOrder[(i + attemptRoute) % routeOrder.Length];
+                    if (routeCounts[candidateRoute] != 0) continue;
+                    if (!TrySamplePosition(agent, candidateRoute, hasCamera, cameraXZ, propPositions, propRadii,
+                            placedPositions, placedRadii, random, out position)) continue;
+                    route = candidateRoute;
+                    break;
                 }
-                else
-                {
-                    position = new Vector2(previous.x, previous.z);
-                    fallbackCount++;
-                    Debug.LogWarning($"[SpawnRandomizer] {agent.DisplayName}: {MaxAttemptsPerDinosaur} 次采样均失败，回退烘焙原位置 ({position.x:F1}, {position.y:F1})。");
-                }
+                if (route < 0)
+                    throw new System.InvalidOperationException($"[SpawnRandomizer] {agent.DisplayName} 没有安全的中心线出生点。");
+                acceptedCount++;
 
                 agent.ApplySpawnPlacement(position, route);
                 placedPositions.Add(position);
@@ -142,7 +141,7 @@ namespace JurassicWorld
             var distribution = new System.Text.StringBuilder();
             for (int r = 0; r < routeCounts.Length; r++)
                 distribution.Append(r == 0 ? "；" : "、").Append(MovementCorridor.GetRouteName(r)).Append(" × ").Append(routeCounts[r]);
-            Debug.Log($"[SpawnRandomizer] 开局随机分派完成：{acceptedCount}/{agents.Length} 只采样成功，{fallbackCount} 只回退原位置；路线分布 {distribution}。");
+            Debug.Log($"[SpawnRandomizer] 开局随机分派完成：{acceptedCount}/{agents.Length} 只在线上安全出生；路线分布 {distribution}。");
         }
 
         // ---------------------------------------------------------------- 采样
@@ -164,7 +163,7 @@ namespace JurassicWorld
             for (int attempt = 0; attempt < MaxAttemptsPerDinosaur; attempt++)
             {
                 Vector2 candidate = SampleCorridorCandidate(agent, route, random);
-                if (IsSpawnSafe(candidate, radius, treeAvoidRadius, hasCamera, cameraXZ,
+                if (IsSpawnSafe(route, candidate, radius, treeAvoidRadius, hasCamera, cameraXZ,
                         propPositions, propRadii, placedPositions, placedRadii))
                 {
                     result = candidate;
@@ -177,7 +176,7 @@ namespace JurassicWorld
             {
                 float arc = MovementCorridor.GetSample(route, sample).Distance;
                 Vector2 candidate = MovementCorridor.PointAt(route, arc);
-                if (IsSpawnSafe(candidate, radius, treeAvoidRadius, hasCamera, cameraXZ,
+                if (IsSpawnSafe(route, candidate, radius, treeAvoidRadius, hasCamera, cameraXZ,
                         propPositions, propRadii, placedPositions, placedRadii))
                 {
                     result = candidate;
@@ -189,11 +188,12 @@ namespace JurassicWorld
             return false;
         }
 
-        private static bool IsSpawnSafe(Vector2 candidate, float radius, float treeAvoidRadius,
+        private static bool IsSpawnSafe(int route, Vector2 candidate, float radius, float treeAvoidRadius,
             bool hasCamera, Vector2 cameraXZ, List<Vector2> propPositions, List<float> propRadii,
             List<Vector2> placedPositions, List<float> placedRadii)
         {
-            return (!hasCamera || Vector2.Distance(candidate, cameraXZ) >= CameraMinDistance)
+            return !MovementCorridorCrossings.IsInside(route, candidate)
+                && (!hasCamera || Vector2.Distance(candidate, cameraXZ) >= CameraMinDistance)
                 && !TerrainTreeObstacleRegistry.IsBlocked(candidate, treeAvoidRadius)
                 && !OverlapsCircles(candidate, radius + PropMargin, propPositions, propRadii)
                 && !OverlapsCircles(candidate, radius + PeerMargin, placedPositions, placedRadii);

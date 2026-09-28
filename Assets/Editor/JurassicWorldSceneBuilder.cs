@@ -677,23 +677,30 @@ namespace JurassicWorld.Editor
         private static void NudgeOutOfCorridors(ref float wx, ref float wz, int treeIndex, float treeScale)
         {
             var point = new Vector2(wx, wz);
-            for (int pass = 0; pass < 4; pass++)
+            float limit = Mathf.Max(MovementCorridor.CenterlineTreeClearance,
+                DinosaurAgent.TreeAvoidRadiusCap + 0.7f * treeScale + 0.3f);
+            for (int pass = 0; pass < 16; pass++)
             {
                 bool moved = false;
                 for (int route = 0; route < MovementCorridor.RouteCount; route++)
                 {
                     MovementCorridor.ProjectToCorridor(route, point, out float arc, out float lateral);
                     MovementCorridor.GetSampleAt(route, arc, out Vector2 center, out Vector2 tangent);
-                    float limit = Mathf.Max(MovementCorridor.CenterlineTreeClearance,
-                        DinosaurAgent.TreeAvoidRadiusCap + 0.7f * treeScale + 0.3f);
                     if (Mathf.Abs(lateral) >= limit)
                         continue;
 
-                    float side = Mathf.Abs(lateral) < 0.05f
-                        ? ((treeIndex & 1) == 0 ? 1f : -1f)
-                        : Mathf.Sign(lateral);
                     Vector2 normal = new Vector2(-tangent.y, tangent.x);
-                    point = center + normal * side * (limit + 0.3f);
+                    Vector2 left = center + normal * (limit + 2f);
+                    Vector2 right = center - normal * (limit + 2f);
+                    float leftScore = float.MaxValue, rightScore = float.MaxValue;
+                    for (int other = 0; other < MovementCorridor.RouteCount; other++)
+                    {
+                        leftScore = Mathf.Min(leftScore, MovementCorridor.MinDistanceToRoute(left, other));
+                        rightScore = Mathf.Min(rightScore, MovementCorridor.MinDistanceToRoute(right, other));
+                    }
+                    point = leftScore > rightScore + 0.01f ? left :
+                        rightScore > leftScore + 0.01f ? right :
+                        ((treeIndex & 1) == 0 ? left : right);
                     moved = true;
                 }
                 if (!moved)

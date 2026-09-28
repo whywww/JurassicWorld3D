@@ -207,6 +207,7 @@ namespace JurassicWorld
         private float routeArc;
         private float targetArc;
         private float walkRemaining;
+        private bool waitingAtCrossing;
         /// <summary>岔口换轨的候选路线缓冲（单个岔口最多 4 条路，避免每次判定分配数组）。</summary>
         private readonly int[] junctionRouteBuffer = new int[8];
         private Vector3 target;
@@ -228,6 +229,7 @@ namespace JurassicWorld
         // ─── 会车让行（同类防卡死）状态 ─────────────────────────────────────────────
         /// <summary>本 Agent 的车道序号：稳定排序结果，同时充当随机种子偏移与「先行权」末级裁决。</summary>
         private int laneIndex;
+        public int LaneIndex => laneIndex;
         /// <summary>车道偏置 ∈ [-1,1]：负=靠通道右半宽，正=靠左半宽（左法线为正），由 AssignLane 写入。</summary>
         private float laneBias;
 
@@ -372,8 +374,13 @@ namespace JurassicWorld
                     UpdateStuckWatchdog();
                     if (!MoveTowards(target, WalkSpeed))
                     {
+                        if (waitingAtCrossing) break;
                         stateTimer -= Time.deltaTime;
-                        if (stateTimer <= 0f || walkRemaining <= 0.05f)
+                        Vector2 currentXZ = new Vector2(transform.position.x, transform.position.z);
+                        bool crossing = MovementCorridorCrossings.IsInside(routeIndex, currentXZ);
+                        if (crossing && walkRemaining <= 0.05f)
+                            walkRemaining = 1f;
+                        if (!crossing && (stateTimer <= 0f || walkRemaining <= 0.05f))
                             BeginIdle();
                     }
                     break;
@@ -407,6 +414,13 @@ namespace JurassicWorld
         /// </summary>
         private void UpdateStuckWatchdog()
         {
+            if (waitingAtCrossing)
+            {
+                stuckWatchdogPos = transform.position;
+                stuckWatchdogTime = 0f;
+                stuckWatchdogLogged = false;
+                return;
+            }
             if (FlatDistance(transform.position, stuckWatchdogPos) > 0.5f)
             {
                 stuckWatchdogPos = transform.position;
@@ -607,6 +621,7 @@ namespace JurassicWorld
 
         private void BeginIdle()
         {
+            waitingAtCrossing = false;
             CurrentState = DinosaurState.Idle;
             stateTimer = Range(3f, 7f);
             blockedTime = 0f;
@@ -617,6 +632,7 @@ namespace JurassicWorld
 
         private void BeginRandomWalk()
         {
+            waitingAtCrossing = false;
             CurrentState = DinosaurState.RandomWalk;
             stateTimer = Range(4f, 8f);
             blockedTime = 0f;
@@ -865,12 +881,21 @@ namespace JurassicWorld
         // 行走时位置和朝向同时沿闭合中心线推进；Idle 或受阻时均不旋转。
         private bool MoveAlongCorridor(float speed)
         {
+            waitingAtCrossing = false;
             float step = Mathf.Min(walkRemaining, speed * Time.deltaTime);
             if (step <= 1e-5f)
                 return false;
 
             float nextArc = Mathf.Repeat(routeArc + step, MovementCorridor.Length(routeIndex));
             Vector2 nextXZ = MovementCorridor.PointAt(routeIndex, nextArc);
+
+            if (!MovementCorridorCrossings.CanAdvance(this, peers, nextXZ))
+            {
+                waitingAtCrossing = true;
+                blockedTime = 0f;
+                PlayClip(idleClip);
+                return false;
+            }
 
             DinosaurAgent blocker = FindBlockingPeer(nextXZ);
             if (blocker != null)

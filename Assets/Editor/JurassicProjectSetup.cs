@@ -225,10 +225,10 @@ namespace JurassicWorld.Editor
 
             Debug.Log($"[Validate] 四边界：{WorldBounds.Describe()}");
 
-            // 两条独立闭合中心线：几何、净空与场景标记同时验收。
+            // 六条闭合中心线：几何、净空、交叉通行区与场景标记同时验收。
             float Cross(Vector2 u, Vector2 v) => u.x * v.y - u.y * v.x;
-            if (MovementCorridor.RouteCount != 2)
-                throw new InvalidDataException("Phase 1 必须恰有两条中心线。");
+            if (MovementCorridor.RouteCount != 6)
+                throw new InvalidDataException("Phase 1 必须恰有六条中心线。");
 
             float widestPairRadius = 0f;
             for (int i = 0; i < agents.Length; i++)
@@ -242,6 +242,8 @@ namespace JurassicWorld.Editor
             {
                 string routeName = MovementCorridor.GetRouteName(route);
                 MovementCorridor.CorridorMetrics metrics = MovementCorridor.Measure(route);
+                if (MovementCorridor.Length(route) < MovementCorridor.MinRouteLength)
+                    throw new InvalidDataException($"路线「{routeName}」短于 {MovementCorridor.MinRouteLength}m。");
                 Rect bounds = metrics.CenterlineBounds;
                 if (bounds.xMin < activityBounds.xMin || bounds.xMax > activityBounds.xMax ||
                     bounds.yMin < activityBounds.yMin || bounds.yMax > activityBounds.yMax)
@@ -301,11 +303,13 @@ namespace JurassicWorld.Editor
                     MovementCorridor.GetSample(0, i).Position, 1));
             if (minimumRouteSeparation < widestPairRadius + 1f)
                 throw new InvalidDataException($"两条中心线最近仅 {minimumRouteSeparation:F1}m，恐龙可能相撞。");
+            if (MovementCorridorCrossings.ZoneCount < 2)
+                throw new InvalidDataException("南北横穿路线缺少预期的交叉通行区。");
 
             GameObject corridorRoot = GameObject.Find(MovementCorridorDebug.RootNodeName);
             if (corridorRoot == null || corridorRoot.GetComponent<MovementCorridorDebug>() == null)
                 throw new InvalidDataException("场景缺少可开关的 MovementCorridorDebug 标记；请重新 Bake Scene。");
-            Debug.Log($"[Validate] 两条闭合中心线合格；最小间距 {minimumRouteSeparation:F1}m，树木净空、接头与 F3 标记合格。 {MovementCorridor.Describe()}");
+            Debug.Log($"[Validate] 六条闭合中心线合格；交叉区 {MovementCorridorCrossings.ZoneCount} 个，树木净空、接头与 F3 标记合格。 {MovementCorridor.Describe()}");
             // ─── Understory Pass 验证（几何安全不变量 + 视觉梯度 + 资产门控状态） ───
             int understoryEntityCount = 0;
             int bushLayerCount = 0;
