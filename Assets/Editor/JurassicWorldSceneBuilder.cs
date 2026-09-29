@@ -65,6 +65,7 @@ namespace JurassicWorld.Editor
             VegetationIslandSeeder.Seed();
             // The reviewed Phase 2 biome pass is regenerated after a full scene Bake.
             Phase2VegetationSeeder.Seed();
+            GroundEcologyPass.SeedSurface(UnityEngine.Object.FindObjectOfType<Terrain>());
             // Dense Jungle Phase 1：可开关的通道 debug 标注（纯场景线段，不动 TerrainData / 植被 Pass）。
             BuildMovementCorridorDebug();
         }
