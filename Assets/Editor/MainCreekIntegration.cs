@@ -87,7 +87,7 @@ namespace JurassicWorld.Editor
             return best;
         }
 
-        static bool NearCreek(float x, float z, float margin)
+        internal static bool NearCreek(float x, float z, float margin)
         {
             if (x < 50f - margin || x > 70f + margin || z < StartZ - margin || z > EndZ + margin)
                 return false;
@@ -301,11 +301,10 @@ namespace JurassicWorld.Editor
             for (float z = StartZ + 4f; z < EndZ; z += 8f)
             {
                 float centerZ = Mathf.Min(EndZ - 2f, z);
-                float slope = (Center(Mathf.Min(EndZ, centerZ + 0.1f)) - Center(Mathf.Max(StartZ, centerZ - 0.1f))) / 0.2f;
                 var section = new GameObject("Creek Water Section");
                 section.transform.SetParent(oceanObject.transform, true);
                 section.transform.position = new Vector3(Center(centerZ), WaterY, centerZ);
-                section.transform.rotation = Quaternion.Euler(0f, Mathf.Atan(slope) * Mathf.Rad2Deg, 0f);
+                section.transform.rotation = Quaternion.identity;
                 section.transform.localScale = new Vector3(12f, 1f, 13f);
                 section.AddComponent<WaterBody>();
             }

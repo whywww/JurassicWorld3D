@@ -4,7 +4,7 @@
 |---|---|---|---|
 | Desktop Trees Pack 60 | [Fab listing](https://www.fab.com/listings/43b47da3-b552-4b6f-9deb-d638c26d3021), Tree Master | [Fab Standard License](https://www.fab.com/eula) | Trees 1, 5, and 10; source FBX and textures supplied by the project owner |
 | Palm Trees | [Sketchfab model](https://sketchfab.com/3d-models/palm-trees-55690379305145488e20afb05fc687e6), YadroGames | CC BY | Palm forms 2 and 4; attribution: **Palm Trees by YadroGames, licensed under CC BY via Sketchfab** |
-| Banana Tree | [Sketchfab model](https://sketchfab.com/3d-models/banana-tree-5cb46e64d7fc40978c3d6798017eced1), Garecra | CC BY | Broad-leaf understory; attribution: **Banana Tree by Garecra, licensed under CC BY via Sketchfab** |
+| Banana Tree | [Sketchfab model](https://sketchfab.com/3d-models/banana-tree-5cb46e64d7fc40978c3d6798017eced1), Garecra | CC BY | Tropical scene trees and prototype understory; attribution: **Banana Tree by Garecra, licensed under CC BY via Sketchfab** |
 | Island Tree 02 | [Poly Haven model](https://polyhaven.com/a/island_tree_02), Rico Cilliers and Rob Tuytel | [CC0](https://polyhaven.com/license) | One hero tree, reduced from source mesh to three LODs (192,998 / 64,331 / 19,299 triangles) |
 | Pachira Aquatica 01 | [Poly Haven model](https://polyhaven.com/a/pachira_aquatica_01), Rico Cilliers and Rob Tuytel | [CC0](https://polyhaven.com/license) | Understory form B |
 

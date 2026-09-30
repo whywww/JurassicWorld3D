@@ -14,9 +14,13 @@ namespace JurassicWorld.Editor
         internal const string RootName = "Phase 2 Biome Vegetation";
         private const string OldRootName = "Vegetation Diversity Prototype (X -15..15, Z 60..90)";
         private const string ScenePath = "Assets/Scenes/Main.unity";
+        private const string BananaPrefabPath = "Assets/VegetationDiversity/Prefabs/BananaTree.prefab";
+        private const string BananaGroveName = "Banana Grove Tropical";
         private const int ExpectedGroups = 30;
+        private const int ExpectedBananaTrees = 12;
         private const float AvoidanceMargin = 1f;
         private static readonly Rect PlayArea = Rect.MinMaxRect(-74f, -73f, 74f, 85f);
+        private static readonly Rect BananaGroveArea = Rect.MinMaxRect(50f, -65f, 70f, -35f);
 
         private enum Biome { Autumn, Transition, Tropical }
         private struct GroupSite
@@ -72,8 +76,8 @@ namespace JurassicWorld.Editor
         };
         private static readonly TreeSpec[] TropicalTrees =
         {
-            new TreeSpec("Assets/VegetationDiversity/GeneratedPalms/CoconutPalm_A.prefab", 6.6f, 0.38f),
-            new TreeSpec("Assets/VegetationDiversity/GeneratedPalms/CoconutPalm_B.prefab", 7.2f, 0.40f),
+            new TreeSpec(BananaPrefabPath, 3.2f, 0.38f),
+            new TreeSpec(BananaPrefabPath, 3.6f, 0.40f),
             new TreeSpec("Assets/VegetationDiversity/Prefabs/Pachira_B.prefab", 5f, 0.6f),
             new TreeSpec("Assets/VegetationDiversity/Prefabs/IslandTree02.prefab", 10f, 1.1f),
         };
@@ -92,7 +96,8 @@ namespace JurassicWorld.Editor
         {
             Terrain terrain = UnityEngine.Object.FindObjectOfType<Terrain>();
             if (terrain == null) throw new InvalidOperationException("Phase 2 requires the scene Terrain.");
-            CoconutPalmAssetBuilder.EnsurePrefabs();
+            if (AssetDatabase.LoadAssetAtPath<GameObject>(BananaPrefabPath) == null)
+                throw new InvalidOperationException("Phase 2 requires the prepared BananaTree prefab.");
             GameObject old = GameObject.Find(OldRootName);
             if (old != null) UnityEngine.Object.DestroyImmediate(old);
             old = GameObject.Find(RootName);
@@ -101,6 +106,9 @@ namespace JurassicWorld.Editor
             var root = new GameObject(RootName);
             var terrainTrees = TerrainTreePositions(terrain);
             var newTrees = new List<Vector2>();
+            var existingSceneTrees = UnityEngine.Object.FindObjectsOfType<SceneTreeObstacle>()
+                .Select(tree => new Vector2(tree.transform.position.x, tree.transform.position.z)).ToList();
+            var bananaSpecs = new List<TreeSpec>();
             GameObject[] ferns = UnderstoryAssetLocator.FindFernPrefabs();
             GameObject[] bushes = NatureStarterKitLocator.FindDetailMeshes()
                 .Where(p => p.name.IndexOf("bush", StringComparison.OrdinalIgnoreCase) >= 0)
@@ -118,6 +126,11 @@ namespace JurassicWorld.Editor
                 for (int j = 0; j < 2; j++)
                 {
                     TreeSpec spec = options[(i + j) % options.Length];
+                    if (spec.Path == BananaPrefabPath)
+                    {
+                        bananaSpecs.Add(spec);
+                        continue;
+                    }
                     Vector2 desired = site.Point + (j == 0 ? new Vector2(-2f, 1.5f) : new Vector2(2.5f, -1.5f));
                     PlaceTree(spec, desired, site.Biome, i * 51f + j * 107f,
                         terrain, terrainTrees, newTrees, group.transform);
@@ -131,13 +144,26 @@ namespace JurassicWorld.Editor
                     PlaceUnderstory(prefab, desired, terrain, group.transform, j);
                 }
             }
-            if (root.transform.childCount != ExpectedGroups)
+            if (bananaSpecs.Count != ExpectedBananaTrees)
+                throw new InvalidOperationException("Banana tree slot count drifted.");
+            var grove = new GameObject(BananaGroveName);
+            grove.transform.SetParent(root.transform);
+            for (int index = 0; index < bananaSpecs.Count; index++)
+            {
+                int row = index / 4;
+                int column = index % 4;
+                Vector2 desired = new Vector2(54f + column * 4f + (row % 2 == 0 ? 0f : 1f), -57f + row * 6f);
+                TreeSpec spec = bananaSpecs[index];
+                Vector2 spot = FindGroveSpot(desired, spec.TrunkRadius, terrainTrees, existingSceneTrees, newTrees);
+                PlaceTreeAtSpot(spec, spot, index * 137f, terrain, newTrees, grove.transform);
+            }
+            if (root.transform.childCount != ExpectedGroups + 1)
                 throw new InvalidOperationException("Phase 2 group count drifted.");
             MoveCentralRocksOffRoutes(terrain);
             RealignRightRockIsland(terrain);
             RegisterExistingIslandSaplings();
             ValidateRoutes(root);
-            Debug.Log($"PHASE2_FULL_BUILT groups={ExpectedGroups} trees={newTrees.Count} understory={ExpectedGroups * 6} " +
+            Debug.Log($"PHASE2_FULL_BUILT groups={ExpectedGroups} grove={ExpectedBananaTrees} trees={newTrees.Count} understory={ExpectedGroups * 6} " +
                       "west=autumn center=green east=tropical; TerrainData and ForestSeeder unchanged.");
         }
 
@@ -145,6 +171,12 @@ namespace JurassicWorld.Editor
             Terrain terrain, List<Vector2> oldTrees, List<Vector2> newTrees, Transform parent)
         {
             Vector2 spot = FindTreeSpot(desired, biome, spec.TrunkRadius, oldTrees, newTrees);
+            PlaceTreeAtSpot(spec, spot, yaw, terrain, newTrees, parent);
+        }
+
+        private static void PlaceTreeAtSpot(TreeSpec spec, Vector2 spot, float yaw,
+            Terrain terrain, List<Vector2> newTrees, Transform parent)
+        {
             GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(spec.Path);
             if (prefab == null) throw new InvalidOperationException("Missing tree prefab: " + spec.Path);
             GameObject instance = (GameObject)PrefabUtility.InstantiatePrefab(prefab, parent);
@@ -176,6 +208,24 @@ namespace JurassicWorld.Editor
                     return spot;
                 }
             throw new InvalidOperationException($"No route-safe {biome} tree position near {desired}.");
+        }
+
+        private static Vector2 FindGroveSpot(Vector2 desired, float radius, List<Vector2> terrainTrees,
+            List<Vector2> sceneTrees, List<Vector2> newTrees)
+        {
+            for (float spread = 0f; spread <= 2f; spread += 0.5f)
+            for (int step = 0; step < (spread == 0f ? 1 : 32); step++)
+            {
+                float angle = step * Mathf.PI * 2f / 32f;
+                Vector2 spot = desired + new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * spread;
+                if (!BananaGroveArea.Contains(spot) || MainCreekIntegration.NearCreek(spot.x, spot.y, 6f)) continue;
+                if (terrainTrees.Any(tree => Vector2.Distance(tree, spot) < radius + 2f)) continue;
+                if (sceneTrees.Any(tree => Vector2.Distance(tree, spot) < radius + 2f)) continue;
+                if (newTrees.Any(tree => Vector2.Distance(tree, spot) < radius + 2f)) continue;
+                if (DistanceToRoutes(spot) <= radius + DinosaurAgent.TreeAvoidRadiusCap + AvoidanceMargin) continue;
+                return spot;
+            }
+            throw new InvalidOperationException($"No safe banana grove position within 2m of {desired}.");
         }
 
         private static bool InBiome(float x, Biome biome) =>
@@ -237,7 +287,9 @@ namespace JurassicWorld.Editor
             GameObject root = GameObject.Find(RootName);
             if (root == null) throw new InvalidOperationException("Phase 2 scene root missing.");
             ValidateRoutes(root);
-            if (root.transform.childCount != ExpectedGroups) throw new InvalidOperationException("Group count mismatch.");
+            Transform grove = root.transform.Find(BananaGroveName);
+            if (root.transform.childCount != ExpectedGroups + 1 || grove == null)
+                throw new InvalidOperationException("Group or banana grove count mismatch.");
             TerrainTreeObstacleRegistry.Invalidate();
             TerrainTreeObstacleRegistry.EnsureInitialized();
             int routeSamples = 0;
@@ -253,14 +305,27 @@ namespace JurassicWorld.Editor
                 if (!TerrainTreeObstacleRegistry.IsBlocked(
                         new Vector2(tree.transform.position.x, tree.transform.position.z), 0.05f))
                     throw new InvalidOperationException("Scene tree is missing from runtime avoidance: " + tree.name);
-            foreach (string palm in new[] { "CoconutPalm_A", "CoconutPalm_B" })
+            GameObject bananaPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(BananaPrefabPath);
+            Renderer[] bananaRenderers = bananaPrefab != null ? bananaPrefab.GetComponentsInChildren<Renderer>(true) : Array.Empty<Renderer>();
+            if (bananaRenderers.Length == 0 || bananaRenderers.Any(renderer => renderer.sharedMaterials.Any(material => material == null)))
+                throw new InvalidOperationException("BananaTree prefab or its materials are missing.");
+            SceneTreeObstacle[] sceneTrees = root.GetComponentsInChildren<SceneTreeObstacle>();
+            int bananaCount = sceneTrees.Count(tree => PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(tree.gameObject) == BananaPrefabPath);
+            SceneTreeObstacle[] groveTrees = grove.GetComponentsInChildren<SceneTreeObstacle>();
+            if (bananaCount != ExpectedBananaTrees || groveTrees.Length != ExpectedBananaTrees)
+                throw new InvalidOperationException($"Expected {ExpectedBananaTrees} banana trees, found {bananaCount}.");
+            foreach (SceneTreeObstacle tree in groveTrees)
             {
-                GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/VegetationDiversity/GeneratedPalms/" + palm + ".prefab");
-                AssertThreeLods(prefab, palm, true);
-                foreach (Transform child in prefab.transform)
-                    if (child.name.StartsWith("Fronds_LOD", StringComparison.Ordinal) && !child.gameObject.activeSelf)
-                        throw new InvalidOperationException("A coconut palm LOD renderer is inactive: " + child.name);
+                Vector2 point = new Vector2(tree.transform.position.x, tree.transform.position.z);
+                if (PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(tree.gameObject) != BananaPrefabPath ||
+                    !BananaGroveArea.Contains(point) || MainCreekIntegration.NearCreek(point.x, point.y, 6f))
+                    throw new InvalidOperationException("Banana tree is outside the safe grove: " + tree.name);
+                if (!groveTrees.Any(other => other != tree &&
+                    Vector2.Distance(point, new Vector2(other.transform.position.x, other.transform.position.z)) < 8f))
+                    throw new InvalidOperationException("A banana tree is isolated from the grove: " + tree.name);
             }
+            if (sceneTrees.Any(tree => tree.name.StartsWith("CoconutPalm_", StringComparison.Ordinal)))
+                throw new InvalidOperationException("A generated coconut palm remains in the scene.");
             foreach (string fab in new[] { "FabTree_1", "FabTree_5", "FabTree_10" })
                 AssertThreeLods(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/VegetationDiversity/Prefabs/" + fab + ".prefab"), fab, false);
             Debug.Log($"PHASE2_FULL_VALID groups={root.transform.childCount} trees={root.GetComponentsInChildren<SceneTreeObstacle>().Length} " +
