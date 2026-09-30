@@ -125,7 +125,7 @@ namespace JurassicWorld
                 }
                 return 0f;
             }
-            return groundTerrain.SampleHeight(new Vector3(xz.x, 0f, xz.y));
+            return groundTerrain.SampleHeight(new Vector3(xz.x, 0f, xz.y)) + groundTerrain.transform.position.y;
         }
     }
 }
