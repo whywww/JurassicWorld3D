@@ -18,9 +18,17 @@ namespace JurassicWorld.Editor
         private const string BananaGroveName = "Banana Grove Tropical";
         private const int ExpectedGroups = 30;
         private const int ExpectedBananaTrees = 12;
+        private const int BananaGroveSeed = 73129;
+        private const float BananaGroveMinSeparation = 3f;
+        private const float BananaGroveMaxNeighbourDistance = 7.5f;
         private const float AvoidanceMargin = 1f;
         private static readonly Rect PlayArea = Rect.MinMaxRect(-74f, -73f, 74f, 85f);
         private static readonly Rect BananaGroveArea = Rect.MinMaxRect(50f, -65f, 70f, -35f);
+        private static readonly Vector2[] BananaClusterCenters =
+        {
+            new Vector2(55f, -56f), new Vector2(62f, -52f), new Vector2(58f, -43f),
+        };
+        private static readonly int[] BananaClusterCounts = { 4, 5, 3 };
 
         private enum Biome { Autumn, Transition, Tropical }
         private struct GroupSite
@@ -148,14 +156,18 @@ namespace JurassicWorld.Editor
                 throw new InvalidOperationException("Banana tree slot count drifted.");
             var grove = new GameObject(BananaGroveName);
             grove.transform.SetParent(root.transform);
-            for (int index = 0; index < bananaSpecs.Count; index++)
+            var groveRandom = new System.Random(BananaGroveSeed);
+            int bananaIndex = 0;
+            for (int cluster = 0; cluster < BananaClusterCenters.Length; cluster++)
+            for (int member = 0; member < BananaClusterCounts[cluster]; member++)
             {
-                int row = index / 4;
-                int column = index % 4;
-                Vector2 desired = new Vector2(54f + column * 4f + (row % 2 == 0 ? 0f : 1f), -57f + row * 6f);
-                TreeSpec spec = bananaSpecs[index];
-                Vector2 spot = FindGroveSpot(desired, spec.TrunkRadius, terrainTrees, existingSceneTrees, newTrees);
-                PlaceTreeAtSpot(spec, spot, index * 137f, terrain, newTrees, grove.transform);
+                TreeSpec slot = bananaSpecs[bananaIndex++];
+                float height = Mathf.Lerp(2.8f, 4f, (float)groveRandom.NextDouble());
+                var spec = new TreeSpec(slot.Path, height, slot.TrunkRadius);
+                Vector2 spot = FindGroveSpot(BananaClusterCenters[cluster], spec.TrunkRadius,
+                    groveRandom, terrainTrees, existingSceneTrees, newTrees);
+                float yaw = (float)groveRandom.NextDouble() * 360f;
+                PlaceTreeAtSpot(spec, spot, yaw, terrain, newTrees, grove.transform);
             }
             if (root.transform.childCount != ExpectedGroups + 1)
                 throw new InvalidOperationException("Phase 2 group count drifted.");
@@ -210,22 +222,22 @@ namespace JurassicWorld.Editor
             throw new InvalidOperationException($"No route-safe {biome} tree position near {desired}.");
         }
 
-        private static Vector2 FindGroveSpot(Vector2 desired, float radius, List<Vector2> terrainTrees,
-            List<Vector2> sceneTrees, List<Vector2> newTrees)
+        private static Vector2 FindGroveSpot(Vector2 center, float radius, System.Random random,
+            List<Vector2> terrainTrees, List<Vector2> sceneTrees, List<Vector2> newTrees)
         {
-            for (float spread = 0f; spread <= 2f; spread += 0.5f)
-            for (int step = 0; step < (spread == 0f ? 1 : 32); step++)
+            for (int attempt = 0; attempt < 160; attempt++)
             {
-                float angle = step * Mathf.PI * 2f / 32f;
-                Vector2 spot = desired + new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * spread;
+                float angle = (float)random.NextDouble() * Mathf.PI * 2f;
+                float spread = Mathf.Sqrt((float)random.NextDouble()) * 5.2f;
+                Vector2 spot = center + new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * spread;
                 if (!BananaGroveArea.Contains(spot) || MainCreekIntegration.NearCreek(spot.x, spot.y, 6f)) continue;
                 if (terrainTrees.Any(tree => Vector2.Distance(tree, spot) < radius + 2f)) continue;
                 if (sceneTrees.Any(tree => Vector2.Distance(tree, spot) < radius + 2f)) continue;
-                if (newTrees.Any(tree => Vector2.Distance(tree, spot) < radius + 2f)) continue;
+                if (newTrees.Any(tree => Vector2.Distance(tree, spot) < BananaGroveMinSeparation)) continue;
                 if (DistanceToRoutes(spot) <= radius + DinosaurAgent.TreeAvoidRadiusCap + AvoidanceMargin) continue;
                 return spot;
             }
-            throw new InvalidOperationException($"No safe banana grove position within 2m of {desired}.");
+            throw new InvalidOperationException($"No safe banana grove position near cluster {center}.");
         }
 
         private static bool InBiome(float x, Biome biome) =>
@@ -314,16 +326,25 @@ namespace JurassicWorld.Editor
             SceneTreeObstacle[] groveTrees = grove.GetComponentsInChildren<SceneTreeObstacle>();
             if (bananaCount != ExpectedBananaTrees || groveTrees.Length != ExpectedBananaTrees)
                 throw new InvalidOperationException($"Expected {ExpectedBananaTrees} banana trees, found {bananaCount}.");
+            var bananaHeights = new List<float>();
+            var nearestDistances = new List<float>();
             foreach (SceneTreeObstacle tree in groveTrees)
             {
                 Vector2 point = new Vector2(tree.transform.position.x, tree.transform.position.z);
                 if (PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(tree.gameObject) != BananaPrefabPath ||
                     !BananaGroveArea.Contains(point) || MainCreekIntegration.NearCreek(point.x, point.y, 6f))
                     throw new InvalidOperationException("Banana tree is outside the safe grove: " + tree.name);
-                if (!groveTrees.Any(other => other != tree &&
-                    Vector2.Distance(point, new Vector2(other.transform.position.x, other.transform.position.z)) < 8f))
+                float nearest = groveTrees.Where(other => other != tree).Min(other =>
+                    Vector2.Distance(point, new Vector2(other.transform.position.x, other.transform.position.z)));
+                if (nearest < BananaGroveMinSeparation || nearest > BananaGroveMaxNeighbourDistance)
                     throw new InvalidOperationException("A banana tree is isolated from the grove: " + tree.name);
+                nearestDistances.Add(nearest);
+                bananaHeights.Add(RenderBounds(tree.gameObject).size.y);
             }
+            if (bananaHeights.Max() - bananaHeights.Min() < 0.8f)
+                throw new InvalidOperationException("Banana grove height variation is too small.");
+            if (nearestDistances.Select(distance => Mathf.RoundToInt(distance * 10f)).Distinct().Count() < 4)
+                throw new InvalidOperationException("Banana grove spacing is too uniform.");
             if (sceneTrees.Any(tree => tree.name.StartsWith("CoconutPalm_", StringComparison.Ordinal)))
                 throw new InvalidOperationException("A generated coconut palm remains in the scene.");
             foreach (string fab in new[] { "FabTree_1", "FabTree_5", "FabTree_10" })
