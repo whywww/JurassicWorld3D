@@ -19,6 +19,8 @@ namespace JurassicWorld
         // 这是原代码 NOTE 预留的「扩大地图」迁移，取代原先硬编码 eyeHeight 的前提（平坦区 heightmap 恒 0）。
         private Vector3 velocity;
         private Vector3 previousMousePosition;
+        public float TravelHeading => Mathf.Repeat(travelYaw, 360f);
+
         private float travelYaw;
         private float yaw;
         private float pitch;

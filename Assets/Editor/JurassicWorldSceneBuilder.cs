@@ -1053,7 +1053,7 @@ namespace JurassicWorld.Editor
             statusRect.anchorMin = new Vector2(1f, 1f);
             statusRect.anchorMax = new Vector2(1f, 1f);
             statusRect.pivot = new Vector2(1f, 1f);
-            statusRect.anchoredPosition = new Vector2(-34f, -30f);
+            statusRect.anchoredPosition = new Vector2(-268f, -30f);
             statusRect.sizeDelta = new Vector2(980f, 90f);
             status.text = $"正在加载 {expectedCount} 种恐龙模型…";
 
@@ -1071,6 +1071,7 @@ namespace JurassicWorld.Editor
             SetField(hud, "statusText", status);
             SetField(hud, "helpText", help);
             SetField(hud, "expectedDinosaurCount", expectedCount);
+            root.AddComponent<WorldNavigationHud>().BuildUi(font);
             BuildInfoPanel(root.transform, font);
             EditorUtility.SetDirty(hud);
         }
