@@ -251,10 +251,13 @@ namespace JurassicWorld
         /// 可通过狭窄树缝的合理范围，解决大体型恐龙因 reach 过大而被整片林区拒绝通行的问题。
         /// </summary>
         private float treeAvoidRadius;
+        private DinosaurCoreBody coreBody;
+        private Vector2 CoreForward { get { Vector3 f = transform.rotation * Quaternion.Euler(0f, VisualYaw, 0f) * Vector3.forward; return new Vector2(f.x, f.z).normalized; } }
 
         private void Awake()
         {
             spawnPoint = transform.position;
+            coreBody = GetComponent<DinosaurCoreBody>();
             // 运行时为纯 Transform 位移、无 Rigidbody/物理组件，树干与同类阻挡只能走几何查询：
             // 此处惰性构建地形树障碍注册表（一次性，毫秒级），之后每帧只做网格查询。
             TerrainTreeObstacleRegistry.EnsureInitialized();
@@ -468,8 +471,9 @@ namespace JurassicWorld
         public void ApplySpawnPlacement(Vector2 xz, int route)
         {
             routeIndex = route >= 0 && route < MovementCorridor.RouteCount ? route : MovementCorridor.MainRoute;
+            travelSign = 1;
 
-            // 出生点与朝向都直接取闭合中心线，绝无横向车道偏移。
+            // 出生点与朝向都直接取中心线，绝无横向车道偏移。
             MovementCorridor.ProjectToCorridor(routeIndex, xz, out float arc, out _);
             routeArc = arc;
             targetArc = arc;
@@ -678,7 +682,7 @@ namespace JurassicWorld
             targetIsYieldTarget = false;
             float step = Range(WanderStepDistanceMin, WanderStepDistance);
             walkRemaining = step;
-            targetArc = Mathf.Repeat(routeArc + step, MovementCorridor.Length(routeIndex));
+            targetArc = MovementCorridor.TravelDistance(routeIndex, routeArc + travelSign * step);
             Vector2 targetXZ = MovementCorridor.PointAt(routeIndex, targetArc);
             return new Vector3(targetXZ.x, MovementHeight, targetXZ.y);
         }
@@ -782,8 +786,16 @@ namespace JurassicWorld
                 * Quaternion.Euler(0f, -VisualYaw, 0f);
             float turnRate = Mathf.Lerp(MinimumTurnRate, MaximumTurnRate,
                 Mathf.InverseLerp(0.7f, 5.5f, speed));
+            Quaternion previousRotation = transform.rotation;
+            Vector2 previousForward = CoreForward;
             transform.rotation = Quaternion.RotateTowards(
                 transform.rotation, desiredRotation, turnRate * Time.deltaTime);
+            if (groundObstacleAware && coreBody != null)
+            {
+                Vector2 at = new Vector2(transform.position.x, transform.position.z);
+                if (TerrainTreeObstacleRegistry.IsCoreStepBlocked(at, at, previousForward, CoreForward, coreBody))
+                    transform.rotation = previousRotation;
+            }
             Vector3 visualForward = GetVisualForward();
             Vector3 step = visualForward * speed * Time.deltaTime;
 
@@ -813,7 +825,7 @@ namespace JurassicWorld
             float progress;
             if (groundObstacleAware)
             {
-                actualXZ = TerrainTreeObstacleRegistry.SlideMove(
+                actualXZ = coreBody != null ? TerrainTreeObstacleRegistry.MoveCore(currentXZ, desiredXZ, CoreForward, coreBody) : TerrainTreeObstacleRegistry.SlideMove(
                     currentXZ, desiredXZ, treeAvoidRadius, Time.deltaTime);
                 // Major 1 + Minor 3：进度比改用方向投影 + Clamp01，护栏阈值与 SlideMove 收敛阈值对齐。
                 // desiredLength ≤ SlideRemainingThreshold 时按 progress=1f（正常小步）处理，避免慢速
@@ -878,14 +890,13 @@ namespace JurassicWorld
             return false;
         }
 
-        // 行走时位置和朝向同时沿闭合中心线推进；Idle 或受阻时均不旋转。
+        // 持续沿闭合中心线推进；没有端点掉头或原地转向。
         private bool MoveAlongCorridor(float speed)
         {
+            Vector2 currentXZ = new Vector2(transform.position.x, transform.position.z);
             waitingAtCrossing = false;
             float step = Mathf.Min(walkRemaining, speed * Time.deltaTime);
-            if (step <= 1e-5f)
-                return false;
-
+            if (step <= 1e-5f) return false;
             float nextArc = Mathf.Repeat(routeArc + step, MovementCorridor.Length(routeIndex));
             Vector2 nextXZ = MovementCorridor.PointAt(routeIndex, nextArc);
 
@@ -904,14 +915,15 @@ namespace JurassicWorld
                 PlayClip(idleClip);
                 if (blockedTime > BlockedEscalationSeconds)
                 {
-                    Debug.LogWarning($"[DinosaurAgent] {displayName} 在闭合中心线 {routeIndex} 被同伴阻挡。", this);
+                    Debug.LogWarning($"[DinosaurAgent] {displayName} 在中心线 {routeIndex} 被同伴阻挡。", this);
                     BeginIdle();
                     return true;
                 }
                 return false;
             }
 
-            if (groundObstacleAware && TerrainTreeObstacleRegistry.IsBlocked(nextXZ, treeAvoidRadius))
+            MovementCorridor.GetSampleAt(routeIndex, nextArc, out _, out Vector2 tangent);
+            if (groundObstacleAware && (coreBody != null ? TerrainTreeObstacleRegistry.IsCoreStepBlocked(currentXZ, nextXZ, CoreForward, tangent, coreBody) : TerrainTreeObstacleRegistry.IsBlocked(nextXZ, treeAvoidRadius)))
             {
                 blockedTime += Time.deltaTime;
                 PlayClip(idleClip);
@@ -924,7 +936,6 @@ namespace JurassicWorld
                 return false;
             }
 
-            MovementCorridor.GetSampleAt(routeIndex, nextArc, out _, out Vector2 tangent);
             Quaternion rotation = Quaternion.LookRotation(
                 new Vector3(tangent.x, 0f, tangent.y), Vector3.up)
                 * Quaternion.Euler(0f, -VisualYaw, 0f);
@@ -1002,7 +1013,7 @@ namespace JurassicWorld
         {
             // Minor 7：停步帧也执行仅去穿透滑移，防止恐龙陷在树干内时因 peer 早退而永不触发 LimitPushOut。
             // MovementHeight 依赖 Terrain 核心活动区 heightmap=0（world Y=0），引入地形起伏时需改为高度采样 + eyeOffset。
-            Vector2 depenXZ = TerrainTreeObstacleRegistry.SlideMove(
+            Vector2 depenXZ = coreBody != null ? currentXZ : TerrainTreeObstacleRegistry.SlideMove(
                 currentXZ, currentXZ, treeAvoidRadius, Time.deltaTime);
             transform.position = new Vector3(depenXZ.x, MovementHeight, depenXZ.y);
 

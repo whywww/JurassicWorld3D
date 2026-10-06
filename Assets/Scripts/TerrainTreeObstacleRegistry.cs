@@ -25,6 +25,7 @@ namespace JurassicWorld
         {
             public Vector2 position;
             public float radius;
+            public TreeTrunkSection[] sections;
         }
 
         /// <summary>空间网格边长（米）。4m 兼顾「一格内树数量少」与「邻域遍历次数少」。</summary>
@@ -112,6 +113,46 @@ namespace JurassicWorld
         /// 注册表为空（无地形 / 无树）时恒返回 false（放行）。
         /// 边界语义：dist² &lt; reach² 判「阻塞」，dist² >= reach² 判「自由」。
         /// </summary>
+        public static bool IsCoreBlocked(Vector2 xz, Vector2 forward, DinosaurCoreBody body)
+        {
+            EnsureInitialized();
+            float broad = body.BroadRadius;
+            int span = NeighborSpan(broad), cx = CellIndex(xz.x), cz = CellIndex(xz.y);
+            for (int x = -span; x <= span; x++) for (int z = -span; z <= span; z++)
+            {
+                if (!cells.TryGetValue(CellKey(cx + x, cz + z), out var bucket)) continue;
+                foreach (var obstacle in bucket)
+                {
+                    if ((obstacle.position - xz).sqrMagnitude >= (broad + obstacle.radius) * (broad + obstacle.radius)) continue;
+                    foreach (var section in obstacle.sections)
+                        if (body.Intersects(xz, forward, section)) return true;
+                }
+            }
+            return false;
+        }
+        public static bool IsCoreStepBlocked(Vector2 from, Vector2 to, Vector2 fromForward, Vector2 toForward, DinosaurCoreBody body)
+        {
+            float angle = Vector2.SignedAngle(fromForward, toForward);
+            int steps = Mathf.Max(1, Mathf.CeilToInt(Vector2.Distance(from, to) / .1f), Mathf.CeilToInt(Mathf.Abs(angle) / 2f));
+            for (int i = 0; i <= steps; i++)
+            {
+                float t = i / (float)steps, a = angle * t * Mathf.Deg2Rad;
+                Vector2 forward = new Vector2(fromForward.x * Mathf.Cos(a) - fromForward.y * Mathf.Sin(a), fromForward.x * Mathf.Sin(a) + fromForward.y * Mathf.Cos(a));
+                if (IsCoreBlocked(Vector2.Lerp(from, to, t), forward, body)) return true;
+            }
+            return false;
+        }
+        public static Vector2 MoveCore(Vector2 current, Vector2 desired, Vector2 forward, DinosaurCoreBody body)
+        {
+            if (!IsCoreStepBlocked(current, desired, forward, forward, body)) return desired;
+            float low = 0f, high = 1f;
+            for (int i = 0; i < 10; i++)
+            {
+                float t = (low + high) * .5f;
+                if (IsCoreStepBlocked(current, Vector2.Lerp(current, desired, t), forward, forward, body)) high = t; else low = t;
+            }
+            return Vector2.Lerp(current, desired, low);
+        }
         public static bool IsBlocked(Vector2 xz, float radius)
         {
             EnsureInitialized();
@@ -497,6 +538,7 @@ namespace JurassicWorld
             warnedMissingTerrainData = false;
 
             TreeInstance[] instances = terrainData.treeInstances;
+            var baked = Object.FindObjectOfType<ForestTrunkProfiles>();
 
             Vector3 origin = terrain.transform.position;
             Vector3 size = terrainData.size;
@@ -515,7 +557,20 @@ namespace JurassicWorld
                 // Y 由各脚本自行决定（恐龙恒为 MovementHeight、相机 = 地形高 + eyeHeight），不参与碰撞。
                 float worldX = origin.x + instance.position.x * size.x;
                 float worldZ = origin.z + instance.position.z * size.z;
-                Insert(worldX, worldZ, radius);
+                TreeTrunkSection[] sections = null;
+                if (baked != null && instance.prototypeIndex < baked.prototypes.Length)
+                {
+                    var source = baked.prototypes[instance.prototypeIndex].sections; sections = new TreeTrunkSection[source.Length];
+                    float cos = Mathf.Cos(instance.rotation), sin = Mathf.Sin(instance.rotation);
+                    for (int j = 0; j < source.Length; j++)
+                    {
+                        var band = source[j]; Vector2 p = band.center * instance.widthScale;
+                        band.center = new Vector2(worldX + p.x * cos + p.y * sin, worldZ - p.x * sin + p.y * cos);
+                        float y = origin.y + instance.position.y * size.y; band.bottom = y + band.bottom * instance.heightScale; band.top = y + band.top * instance.heightScale;
+                        band.radius *= instance.widthScale; sections[j] = band;
+                    }
+                }
+                Insert(worldX, worldZ, radius, sections);
             }
 
             // Authored scene trees use the same swept-circle movement queries as Terrain trees.
@@ -524,12 +579,14 @@ namespace JurassicWorld
             {
                 if (!marker.isActiveAndEnabled || marker.Radius <= 0f) continue;
                 Vector3 position = marker.transform.position;
-                Insert(position.x, position.z, marker.Radius);
+                var sections = new TreeTrunkSection[marker.trunkSections.Length];
+                for (int j = 0; j < sections.Length; j++) { sections[j] = marker.trunkSections[j]; sections[j].center += new Vector2(position.x, position.z); }
+                Insert(position.x, position.z, marker.Radius, sections);
             }
         }
 
         /// <summary>把一个障碍圆写入其所属网格桶。</summary>
-        private static void Insert(float worldX, float worldZ, float radius)
+        private static void Insert(float worldX, float worldZ, float radius, TreeTrunkSection[] sections = null)
         {
             long key = CellKey(CellIndex(worldX), CellIndex(worldZ));
             List<TreeObstacle> bucket;
@@ -542,6 +599,7 @@ namespace JurassicWorld
             TreeObstacle obstacle;
             obstacle.position = new Vector2(worldX, worldZ);
             obstacle.radius = radius;
+            obstacle.sections = sections != null && sections.Length > 0 ? sections : new[] { new TreeTrunkSection { center = new Vector2(worldX, worldZ), radius = radius, bottom = -100f, top = 100f } };
             bucket.Add(obstacle);
 
             obstacleCount++;

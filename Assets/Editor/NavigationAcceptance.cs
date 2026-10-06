@@ -111,6 +111,9 @@ namespace JurassicWorld.Editor
                     Require(nav.PlayerArrow.anchoredPosition.sqrMagnitude < 0.01f, "Player marker center mismatch.");
                     float arrowHeading = Mathf.Repeat(-nav.PlayerArrow.localEulerAngles.z, 360f);
                     Require(Mathf.Abs(Mathf.DeltaAngle(arrowHeading, explorer.TravelHeading)) < 0.01f, "Arrow is not tracking travel heading.");
+                    view.transform.position = new Vector3(-12.3f, position.y, 45.6f);
+                    nav.SendMessage("LateUpdate");
+                    Require(nav.CoordinatesText.text == "X: -12.3   Z: 45.6", "World XZ coordinates mismatch.");
                     view.transform.position = position;
                     view.transform.rotation = rotation;
                     explorer.enabled = enabled;
@@ -133,10 +136,11 @@ namespace JurassicWorld.Editor
                 Require(nav.PlayerArrow.gameObject.activeInHierarchy, "Player arrow invisible after reload.");
                 Require(nav.PlayerArrow.GetComponent<CanvasRenderer>() != null, "Player arrow CanvasRenderer missing.");
                 Require(UnityEngine.Object.FindObjectsOfType<WorldNavigationHud>().Length == 1, "Duplicate navigation after reload.");
+                Require(nav.CoordinatesText.gameObject.activeInHierarchy && nav.CoordinatesText.text.Contains("Z:"), "Coordinates missing after reload.");
                 CheckCreek(nav);
                 CaptureHud(1920, 1080, "navigation-hud.png");
                 CaptureHud(960, 540, "navigation-small.png");
-                Debug.Log("NAVIGATION_VERIFIED: heading, pitch, north wrap, terrain coverage, marker position, independent travel direction, thumbnail, enable/disable cleanup, scene reload, 1920x1080 and 960x540 HUD captures, creek node projection/order, marker layering, missing creek fallback, scene reload.");
+                Debug.Log("NAVIGATION_VERIFIED: heading, pitch, north wrap, terrain coverage, marker position, independent travel direction, thumbnail, enable/disable cleanup, scene reload, 1920x1080 and 960x540 HUD captures, creek node projection/order, marker layering, missing creek fallback, scene reload, signed world XZ coordinates.");
                 Finish(null);
             }
             catch (Exception error) { Finish(error); }

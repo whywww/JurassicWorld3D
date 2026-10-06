@@ -225,15 +225,11 @@ namespace JurassicWorld.Editor
 
             Debug.Log($"[Validate] 四边界：{WorldBounds.Describe()}");
 
-            // 六条闭合中心线：几何、净空、交叉通行区与场景标记同时验收。
+            // 六条不规则中心线：几何、净空、交叉通行区与场景标记同时验收。
             float Cross(Vector2 u, Vector2 v) => u.x * v.y - u.y * v.x;
             if (MovementCorridor.RouteCount != 6)
                 throw new InvalidDataException("Phase 1 必须恰有六条中心线。");
 
-            float widestPairRadius = 0f;
-            for (int i = 0; i < agents.Length; i++)
-                for (int j = i + 1; j < agents.Length; j++)
-                    widestPairRadius = Mathf.Max(widestPairRadius, agents[i].CollisionRadius + agents[j].CollisionRadius);
             Collider[] solidObstacles = Object.FindObjectsOfType<Collider>()
                 .Where(c => c.enabled && !c.isTrigger && !(c is TerrainCollider) &&
                     c.GetComponentInParent<DinosaurAgent>() == null).ToArray();
@@ -241,6 +237,8 @@ namespace JurassicWorld.Editor
             for (int route = 0; route < MovementCorridor.RouteCount; route++)
             {
                 string routeName = MovementCorridor.GetRouteName(route);
+                if (!MovementCorridor.IsClosed(route))
+                    throw new InvalidDataException($"路线「{routeName}」必须是连续闭合环线。");
                 MovementCorridor.CorridorMetrics metrics = MovementCorridor.Measure(route);
                 if (MovementCorridor.Length(route) < MovementCorridor.MinRouteLength)
                     throw new InvalidDataException($"路线「{routeName}」短于 {MovementCorridor.MinRouteLength}m。");
@@ -253,8 +251,8 @@ namespace JurassicWorld.Editor
                     throw new InvalidDataException($"路线「{routeName}」超出森林核心区域。");
                 if (metrics.SwingX < MovementCorridor.MinSwingMeters)
                     throw new InvalidDataException($"路线「{routeName}」横向摆幅不足。");
-                if (metrics.SeamGap > 0.8f || metrics.SeamTurnDegrees > 15f || MovementCorridor.TurnRadius < 3.5f)
-                    throw new InvalidDataException($"路线「{routeName}」闭合接头或回转半径不合格。");
+                if (MovementCorridor.IsClosed(route) && (metrics.SeamGap > 0.8f || metrics.SeamTurnDegrees > 15f))
+                    throw new InvalidDataException($"路线「{routeName}」闭合接头不连续。");
 
                 int count = MovementCorridor.SampleCount(route);
                 for (int i = 0; i < count; i++)
@@ -271,9 +269,10 @@ namespace JurassicWorld.Editor
                         if (dx * dx + dz * dz < DinosaurAgent.TreeAvoidRadiusCap * DinosaurAgent.TreeAvoidRadiusCap)
                             throw new InvalidDataException($"路线「{routeName}」弧长 {sample.Distance:F1}m 被实体 {obstacle.name} 阻挡。");
                     }
-                    for (int j = i + 2; j < count; j++)
+                    int segmentCount = count - (MovementCorridor.IsClosed(route) ? 0 : 1);
+                    for (int j = i + 2; i < segmentCount && i < segmentCount; j++)
                     {
-                        if (i == 0 && j == count - 1) continue;
+                        if (MovementCorridor.IsClosed(route) && i == 0 && j == count - 1) continue;
                         Vector2 a = sample.Position;
                         Vector2 b = MovementCorridor.GetSample(route, (i + 1) % count).Position;
                         Vector2 c = MovementCorridor.GetSample(route, j).Position;
@@ -289,27 +288,23 @@ namespace JurassicWorld.Editor
                 {
                     Vector3 world = terrain.transform.TransformPoint(new Vector3(
                         tree.position.x * terrainSize.x, tree.position.y * terrainSize.y, tree.position.z * terrainSize.z));
-                    MovementCorridor.ProjectToCorridor(route, new Vector2(world.x, world.z), out _, out float lateral);
+                    Vector2 treeXZ = new Vector2(world.x, world.z);
                     float limit = Mathf.Max(MovementCorridor.CenterlineTreeClearance,
                         DinosaurAgent.TreeAvoidRadiusCap + 0.7f * tree.widthScale + 0.3f);
-                    if (Mathf.Abs(lateral) < limit - 0.01f)
+                    if (MovementCorridor.MinDistanceToRoute(treeXZ, route) < limit - 0.01f)
                         throw new InvalidDataException($"路线「{routeName}」中心线附近有树 ({world.x:F1},{world.z:F1})。");
                 }
             }
 
-            float minimumRouteSeparation = float.MaxValue;
-            for (int i = 0; i < MovementCorridor.SampleCount(0); i++)
-                minimumRouteSeparation = Mathf.Min(minimumRouteSeparation, MovementCorridor.MinDistanceToRoute(
-                    MovementCorridor.GetSample(0, i).Position, 1));
-            if (minimumRouteSeparation < widestPairRadius + 1f)
-                throw new InvalidDataException($"两条中心线最近仅 {minimumRouteSeparation:F1}m，恐龙可能相撞。");
             if (MovementCorridorCrossings.ZoneCount < 2)
-                throw new InvalidDataException("南北横穿路线缺少预期的交叉通行区。");
+                throw new InvalidDataException("不规则路线缺少预期的交叉通行区。");
+
+            RouteObstacleClearance.Validate(terrain);
 
             GameObject corridorRoot = GameObject.Find(MovementCorridorDebug.RootNodeName);
             if (corridorRoot == null || corridorRoot.GetComponent<MovementCorridorDebug>() == null)
                 throw new InvalidDataException("场景缺少可开关的 MovementCorridorDebug 标记；请重新 Bake Scene。");
-            Debug.Log($"[Validate] 六条闭合中心线合格；交叉区 {MovementCorridorCrossings.ZoneCount} 个，树木净空、接头与 F3 标记合格。 {MovementCorridor.Describe()}");
+            Debug.Log($"[Validate] 六条不规则中心线合格；交叉区 {MovementCorridorCrossings.ZoneCount} 个，树木净空、接头与 F3 标记合格。 {MovementCorridor.Describe()}");
             // ─── Understory Pass 验证（几何安全不变量 + 视觉梯度 + 资产门控状态） ───
             int understoryEntityCount = 0;
             int bushLayerCount = 0;

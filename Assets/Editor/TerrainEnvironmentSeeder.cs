@@ -141,7 +141,7 @@ namespace JurassicWorld.Editor
 
         // ------------------------------------------------------------------ 私有辅助：PaintGroundLayers
 
-        private static void PaintGroundLayers(TerrainData data)
+        internal static void PaintGroundLayers(TerrainData data)
         {
             // Ensure folder exists
             if (!AssetDatabase.IsValidFolder(TerrainLayerFolder))

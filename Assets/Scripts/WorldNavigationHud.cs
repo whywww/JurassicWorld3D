@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -21,6 +22,7 @@ namespace JurassicWorld
         [SerializeField] private RawImage mapImage;
         [SerializeField] private RectTransform playerArrow;
         [SerializeField] private Text compassText;
+        [SerializeField] private Text coordinatesText;
         [SerializeField] private Transform creekFlow;
         [SerializeField] private MinimapCreekGraphic creekLine;
 
@@ -39,12 +41,13 @@ namespace JurassicWorld
         public Camera MapCamera => mapCamera;
         public RectTransform PlayerArrow => playerArrow;
         public Text CompassText => compassText;
+        public Text CoordinatesText => coordinatesText;
         public MinimapCreekGraphic CreekLine => creekLine;
 
         // Called by the scene builder too, so the UI remains visible/editable outside Play Mode.
         public void BuildUi(Font font)
         {
-            if (panel != null) { ApplyLayout(); EnsureCreekOverlay(); return; }
+            if (panel != null) { EnsureCoordinates(font); ApplyLayout(); EnsureCreekOverlay(); return; }
             panel = MakeRect(transform, "World Navigation", new Vector2(mapSize + 8f, mapSize + 54f));
             panel.anchorMin = panel.anchorMax = panel.pivot = Vector2.one;
             panel.anchoredPosition = -screenMargin;
@@ -53,7 +56,7 @@ namespace JurassicWorld
             background.raycastTarget = false;
 
             compassText = MakeText(panel, "Compass", font, 18, new Vector2(mapSize, 34f));
-            compassText.rectTransform.anchoredPosition = new Vector2(0f, mapSize * 0.5f + 8f);
+            compassText.rectTransform.anchoredPosition = new Vector2(0f, mapSize * 0.5f + 21f);
             compassText.text = "N   000°";
             RectTransform mapRect = MakeRect(panel, "Landscape", new Vector2(mapSize, mapSize));
             mapRect.anchoredPosition = new Vector2(0f, -19f);
@@ -79,9 +82,24 @@ namespace JurassicWorld
             shadow.effectColor = Color.black;
             shadow.effectDistance = new Vector2(1.5f, -1.5f);
             playerArrow.gameObject.SetActive(false);
+            EnsureCoordinates(font);
+            ApplyLayout();
             EnsureCreekOverlay();
         }
 
+        private void EnsureCoordinates(Font font)
+        {
+            if (coordinatesText == null)
+            {
+                Transform existing = panel.Find("World Coordinates");
+                coordinatesText = existing != null ? existing.GetComponent<Text>()
+                    : MakeText(panel, "World Coordinates", font, 16, new Vector2(mapSize, 26f));
+                coordinatesText.text = "X: --   Z: --";
+            }
+            coordinatesText.rectTransform.anchorMin = coordinatesText.rectTransform.anchorMax = new Vector2(0.5f, 0f);
+            coordinatesText.rectTransform.anchoredPosition = new Vector2(0f, 17f);
+            coordinatesText.rectTransform.sizeDelta = new Vector2(mapSize, 26f);
+        }
         private void EnsureCreekOverlay()
         {
             if (creekFlow == null)
@@ -120,11 +138,13 @@ namespace JurassicWorld
         private void ApplyLayout()
         {
             mapSize = Mathf.Max(80f, mapSize);
-            panel.sizeDelta = new Vector2(mapSize + 8f, mapSize + 54f);
+            panel.sizeDelta = new Vector2(mapSize + 8f, mapSize + 80f);
             panel.anchoredPosition = -screenMargin;
             mapImage.rectTransform.sizeDelta = new Vector2(mapSize, mapSize);
+            mapImage.rectTransform.anchoredPosition = new Vector2(0f, -6f);
+            coordinatesText.rectTransform.sizeDelta = new Vector2(mapSize, 26f);
             compassText.rectTransform.sizeDelta = new Vector2(mapSize, 34f);
-            compassText.rectTransform.anchoredPosition = new Vector2(0f, mapSize * 0.5f + 8f);
+            compassText.rectTransform.anchoredPosition = new Vector2(0f, mapSize * 0.5f + 21f);
             Transform map = mapImage.transform;
             map.Find("North").GetComponent<RectTransform>().anchoredPosition = new Vector2(0f, mapSize * 0.5f - 13f);
             map.Find("East").GetComponent<RectTransform>().anchoredPosition = new Vector2(mapSize * 0.5f - 13f, 0f);
@@ -188,6 +208,9 @@ namespace JurassicWorld
                 player = explorer != null ? explorer.transform : viewCamera.transform;
             }
             if (player != null && explorer == null) explorer = player.GetComponent<SmoothExplorerCamera>();
+            coordinatesText.text = player != null
+                ? string.Format(CultureInfo.InvariantCulture, "X: {0:F1}   Z: {1:F1}", player.position.x, player.position.z)
+                : "X: --   Z: --";
             if (viewCamera != null)
             {
                 lastHeading = HorizontalHeading(viewCamera.transform.forward, lastHeading);

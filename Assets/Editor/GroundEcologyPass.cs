@@ -14,6 +14,94 @@ namespace JurassicWorld.Editor
         private const float TerrainHalf = 100f;
         private const int Seed = 271834;
 
+        [MenuItem("Jurassic World/Rebuild Dinosaur Routes")]
+        public static void RebuildRoutes()
+        {
+            if (EditorApplication.isPlayingOrWillChangePlaymode)
+                throw new InvalidOperationException("Exit Play Mode before rebuilding routes.");
+            if (EditorSceneManager.GetActiveScene().isDirty)
+                throw new InvalidOperationException("Save the current scene before rebuilding routes.");
+            var scene = EditorSceneManager.OpenScene("Assets/Scenes/Main.unity");
+            Terrain terrain = UnityEngine.Object.FindObjectOfType<Terrain>();
+            if (terrain == null) throw new InvalidOperationException("Dinosaur routes require the baked Terrain.");
+            var anchors = CollectAnchors();
+            if (anchors.Count == 0) throw new InvalidOperationException("Dinosaur routes require vegetation islands.");
+            RouteObstacleClearance.Rebuild(terrain);
+            RepaintRoutes(terrain);
+            EditorSceneManager.MarkSceneDirty(scene);
+            EditorSceneManager.SaveScene(scene);
+            AssetDatabase.SaveAssets();
+            Debug.Log("DINOSAUR_ROUTES_REBUILT: " + MovementCorridor.Describe());
+        }
+
+        internal static void RepaintRoutes(Terrain terrain)
+        {
+            var anchors = CollectAnchors();
+            TerrainData data = terrain.terrainData;
+            TerrainLayer[] priorLayers = data.terrainLayers;
+            float[,,] priorPaint = priorLayers.Length > 4
+                ? data.GetAlphamaps(0, 0, data.alphamapWidth, data.alphamapHeight) : null;
+            // Reset the base paint so the previous routes are erased rather than painted over.
+            TerrainEnvironmentSeeder.PaintGroundLayers(data);
+            PaintAlphamap(data, anchors);
+            if (priorPaint != null) RestoreExtraLayers(data, priorLayers, priorPaint);
+            EditorUtility.SetDirty(terrain.terrainData);
+        }
+
+        internal static void RepaintLocalRegion(Terrain terrain)
+        {
+            TerrainData data = terrain.terrainData;
+            float[,,] original = data.GetAlphamaps(0, 0, data.alphamapWidth, data.alphamapHeight);
+            float[,,] saved = LocalForestRepair.Baseline.GetAlphamaps(0, 0, data.alphamapWidth, data.alphamapHeight);
+            TerrainData baseline = UnityEngine.Object.Instantiate(data);
+            try
+            {
+                TerrainEnvironmentSeeder.PaintGroundLayers(baseline);
+                PaintAlphamap(baseline, CollectAnchors());
+                float[,,] fresh = baseline.GetAlphamaps(0, 0, baseline.alphamapWidth, baseline.alphamapHeight);
+                for (int z = 0; z < data.alphamapHeight; z++)
+                for (int x = 0; x < data.alphamapWidth; x++)
+                {
+                    Vector3 p = terrain.transform.TransformPoint(new Vector3(
+                        x / (float)(data.alphamapWidth - 1) * data.size.x, 0,
+                        z / (float)(data.alphamapHeight - 1) * data.size.z));
+                    float weight = LocalForestRepair.Weight(new Vector2(p.x, p.z));
+                    if (weight <= 0f) continue;
+                    // Preserve every creek/bank layer exactly; redistribute only the base four.
+                    float available = 1f, savedBase = 0f;
+                    for (int layer = 4; layer < data.alphamapLayers; layer++) available -= original[z, x, layer];
+                    for (int layer = 0; layer < 4; layer++) savedBase += saved[z, x, layer];
+                    for (int layer = 0; layer < 4; layer++)
+                        original[z, x, layer] = available * Mathf.Lerp(savedBase > 0f ? saved[z, x, layer] / savedBase : (layer == 0 ? 1f : 0f), fresh[z, x, layer], weight);
+                }
+                data.SetAlphamaps(0, 0, original);
+            }
+            finally { UnityEngine.Object.DestroyImmediate(baseline); }
+        }
+
+        private static void RestoreExtraLayers(TerrainData data, TerrainLayer[] priorLayers, float[,,] priorPaint)
+        {
+            float[,,] basePaint = data.GetAlphamaps(0, 0, data.alphamapWidth, data.alphamapHeight);
+            var layers = (TerrainLayer[])priorLayers.Clone();
+            Array.Copy(data.terrainLayers, layers, 4);
+            var result = new float[data.alphamapHeight, data.alphamapWidth, layers.Length];
+            for (int z = 0; z < data.alphamapHeight; z++)
+            for (int x = 0; x < data.alphamapWidth; x++)
+            {
+                float extra = 0f;
+                for (int layer = 4; layer < layers.Length; layer++)
+                {
+                    result[z, x, layer] = priorPaint[z, x, layer];
+                    extra += priorPaint[z, x, layer];
+                }
+                for (int layer = 0; layer < 4; layer++)
+                    result[z, x, layer] = basePaint[z, x, layer] * Mathf.Clamp01(1f - extra);
+            }
+            data.terrainLayers = layers;
+            data.SetAlphamaps(0, 0, result);
+            Debug.Log($"DINOSAUR_ROUTES_PRESERVED: {layers.Length - 4} extra terrain layers (creek banks).");
+        }
+
         [MenuItem("Jurassic World/Rebuild Ground Ecology")]
         public static void Rebuild()
         {
@@ -31,12 +119,14 @@ namespace JurassicWorld.Editor
 
         internal static void SeedSurface(Terrain terrain)
         {
+            RouteObstacleClearance.Rebuild(terrain);
             var anchors = CollectAnchors();
             if (anchors.Count == 0) throw new InvalidOperationException("Ground Ecology requires vegetation islands.");
             TerrainData data = terrain.terrainData;
             PaintAlphamap(data, anchors);
             ThinDetails(data, anchors);
             PlaceDebris(terrain, anchors);
+            RouteObstacleClearance.Rebuild(terrain);
             Debug.Log($"[GroundEcology] Painted {MovementCorridor.RouteCount} paths and {anchors.Count} islands.");
         }
 

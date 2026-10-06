@@ -1,6 +1,32 @@
 # Vegetation Diversity: Phase 2 Full Layout
 
-Open `Assets/Scenes/Main.unity`. The full layout is the root object **Phase 2 Biome Vegetation**. It adds 30 vegetation groups, one banana grove, 60 trees, and 180 fern/bush instances across the playable area. Autumn Fab trees are placed west of x=-20, the 12 banana trees form a grove in the southeast clearing (x=50–70, z=-65 to -35), other broadleaf trees remain east of x=20, and green Nature Starter Kit trees form the central transition. ForestSeeder and TerrainData tree seeding remain unchanged.
+## Current central forest stage one
+
+The five imported species have now been visually approved. **Central Forest Densification / Stage 1** uses them in natural groups across X[-60,60], Z[-50,82], alongside existing vegetation. The former comparison arrangement is retained inactive under **Preview Backup** for the Remove command. The following preview instructions describe the original comparison workflow; do not rebuild that separate preview while reviewing the forest.
+
+Use **Jurassic World > Central Forest** to build Stage One, append Stage Two after review, validate, remove this planting, or compare actual Play render cost without images. Stage One is saved in Main; Stage Two is prepared but has not been executed. `Assets/Editor/CentralForestStage.json` stores the confirmed stage, and Bake rebuilds only that stage after the existing passes.
+
+The current Stage One keeps **399 central trees**. Autumn forest occupies **20.02% of the full terrain footprint in the northwest**, with an 18m transition and sparse fringe. Of the 337 autumn trees originally inside the new region, **169 remain**; the rest are replaced with green trees at their existing sites. Regional conversion retains one tree for each of 313 Terrain instances and 16 original scene trees. Original instance fields and scene parents/transforms remain in `ForestRegionBackup` for Remove. Terrain heights, ground/creek layers and perimeter prototypes are unchanged.
+
+Tree planting and movement use the same baked **torso/hips** animation envelope, in 0.5m height layers, with **zero additional safety margin**. Explicit skin-bone mappings cover the currently enabled ground dinosaurs; a new species requires a mapping before building. Head, tail, limbs, foliage and lateral branches do not enlarge the tree exclusion. Rocks/deadwood retain full-body +1m clearance. Runtime circles only select nearby trunks; oriented core-versus-stem sections decide blocking. Route candidates start at the safe stem edge and prioritize the first 0–2m. Spawn exclusions and dinosaur-to-dinosaur separation are retained.
+
+All 18 observation segments now have trees on both sides within 12m. Median left/right stem distance falls from 8.15m to **3.4m**; 17/18 segments have estimated overhead crown projection. These are geometry estimates, not rendered leaf pixels. **373 non-solid grass/fern/small-shrub objects** occupy sparse irregular patches on all six routes, alongside 697 forest understory objects. No images were generated; inspect Editor Play for the visual result.
+
+Density accounting preserves the approved 7084m² denominator and 399-tree total: **65.1%** of the original perimeter reference. The relaxed core clearance makes 10608m² available, where the same trees yield **43.5%**. These are different denominators, both explicitly reported. Reaching 65% with the new denominator would require 198 additional trees; this revision follows the approved instruction not to increase the central total.
+
+Reports in `Tools/VegetationDiversity/CentralForest`: `DensityReport.md`, `NorthwestRegion.md`, `RouteEdges.md` / `RouteEdgesBeforeCoreRevision.md`, and `PlayPerformance.md` / `PlayPerformanceBeforeCoreRevision.md`. Revision checkpoints are `Main_BeforeCoreRouteRevision.unity` and `MainCreekTerrain_BeforeCoreRouteRevision.asset` under `Tools/VegetationDiversity/Checkpoints`; restore both for the exact pre-revision state. `CentralForestStage.json` persists layout version 4, stage 1, seed and the 337-tree baseline, so repeat builds/Bake do not halve the count again. Remove restores the original pre-densification vegetation; Stage Two has not run.
+
+## Original five-tree comparison workflow
+
+The original **Poly Haven Five Tree Preview** showed one each of Island Tree 01, Island Tree 03, Tree Small 02, Jacaranda Tree, and Fir Tree 01 (variant A). Prefabs retain native model sizes; the original Jacaranda comparison instance used 65% scale and the other four used 100%. This comparison was approved before forest distribution and is now retained as an inactive backup.
+
+Use **Jurassic World > Vegetation Diversity > Five Tree Preview** to prepare assets, build the central preview, validate it, or capture views. Rebuilding replaces only this preview root. The first build preserves `Tools/VegetationDiversity/Checkpoints/Main_BeforeFiveTreePreview.unity`.
+
+Actual scene renders and the placement/LOD validation report are saved in `Tools/VegetationDiversity/FiveTreePreview`. The overview, eye-level view, five individual tree views, and three forced-LOD comparison images use the existing scene lighting. Rendering does not move the player camera or save temporary visibility changes.
+
+To reproduce the new assets, run `Download-FiveTreePreview.ps1`, then run `prepare_five_tree_preview.py` and `reduce_preview_foliage_lods.py` with Blender in background mode and the project directory after `--`. Source hashes are in each downloaded asset's manifest; triangle counts and native dimensions are in `Tools/VegetationDiversity/five-tree-model-report.json`.
+
+The base **Phase 2 Biome Vegetation** pass adds 30 vegetation groups, one banana grove, 60 trees and 180 fern/bush instances. Its original west-autumn/east-tropical arrangement is subsequently corrected by the northwest regional pass during Bake. The 12 banana trees remain in the southeast grove (x=50–70, z=-65 to -35). Use the Central Forest commands for the revised layout; a full Bake reapplies the region and confirmed stage after the base passes.
 
 The scene includes the previously reviewed 15-group layout plus 15 added groups to fill more of the player exploration area. The saved first-stage scene is `Tools/VegetationDiversity/Checkpoints/Main_Phase2_Stage1Review.unity`; the pre-Phase-2 scene is `Tools/VegetationDiversity/Checkpoints/Main_BeforePhase2.unity`.
 

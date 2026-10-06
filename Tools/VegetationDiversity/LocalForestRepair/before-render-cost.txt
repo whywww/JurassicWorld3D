@@ -1,0 +1,4 @@
+0 degrees: CPU Camera.Render median 17.10ms
+78 degrees: CPU Camera.Render median 9.59ms
+180 degrees: CPU Camera.Render median 9.36ms
+270 degrees: CPU Camera.Render median 13.09ms

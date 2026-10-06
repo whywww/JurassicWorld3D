@@ -20,7 +20,7 @@ namespace JurassicWorld.Editor
     //  - 各组件的可配置参数通过 [SerializeField] 私有字段写入，字段名与运行期脚本严格一致（见 SetField）。
     public static class JurassicWorldSceneBuilder
     {
-        private const int GroundRandomSeed = 271828;
+        private const int GroundRandomSeed = MovementCorridor.LayoutSeed;
         private const string MaterialFolder = "Assets/Materials";
         private const string SkyPanoramaPath = "Assets/Materials/NatureSkyPanorama.tga";
         private const string DinosaurMaterialFolder = "Assets/Materials/Dinosaurs";
@@ -66,6 +66,8 @@ namespace JurassicWorld.Editor
             // The reviewed Phase 2 biome pass is regenerated after a full scene Bake.
             Phase2VegetationSeeder.Seed();
             GroundEcologyPass.SeedSurface(UnityEngine.Object.FindObjectOfType<Terrain>());
+            CentralForestDensification.SeedConfiguredStage();
+            LocalForestRepair.SeedConfigured();
             // Dense Jungle Phase 1：可开关的通道 debug 标注（纯场景线段，不动 TerrainData / 植被 Pass）。
             BuildMovementCorridorDebug();
         }
@@ -681,9 +683,34 @@ namespace JurassicWorld.Editor
         /// </summary>
         private static void NudgeOutOfCorridors(ref float wx, ref float wz, int treeIndex, float treeScale)
         {
-            var point = new Vector2(wx, wz);
             float limit = Mathf.Max(MovementCorridor.CenterlineTreeClearance,
                 DinosaurAgent.TreeAvoidRadiusCap + 0.7f * treeScale + 0.3f);
+            NudgeOutOfCorridorsWithClearance(ref wx, ref wz, treeIndex, limit);
+        }
+
+        internal static int NudgeSceneTreesOutOfCorridors(Terrain terrain)
+        {
+            int moved = 0;
+            foreach (SceneTreeObstacle tree in UnityEngine.Object.FindObjectsOfType<SceneTreeObstacle>())
+            {
+                Vector3 position = tree.transform.position;
+                float x = position.x, z = position.z;
+                NudgeOutOfCorridorsWithClearance(ref x, ref z, moved,
+                    Mathf.Max(MovementCorridor.CenterlineTreeClearance, DinosaurAgent.TreeAvoidRadiusCap + tree.Radius + .3f));
+                if (Mathf.Approximately(x, position.x) && Mathf.Approximately(z, position.z)) continue;
+                float heightDelta = terrain.SampleHeight(new Vector3(x, 0f, z)) - terrain.SampleHeight(position);
+                tree.transform.position = new Vector3(x, position.y + heightDelta, z);
+                EditorUtility.SetDirty(tree.transform);
+                moved++;
+            }
+            TerrainTreeObstacleRegistry.Invalidate();
+            Debug.Log($"[SceneBuilder] 场景树净空：移动 {moved} 棵挡路树。");
+            return moved;
+        }
+
+        private static void NudgeOutOfCorridorsWithClearance(ref float wx, ref float wz, int treeIndex, float limit)
+        {
+            var point = new Vector2(wx, wz);
             for (int pass = 0; pass < 16; pass++)
             {
                 bool moved = false;
@@ -691,7 +718,7 @@ namespace JurassicWorld.Editor
                 {
                     MovementCorridor.ProjectToCorridor(route, point, out float arc, out float lateral);
                     MovementCorridor.GetSampleAt(route, arc, out Vector2 center, out Vector2 tangent);
-                    if (Mathf.Abs(lateral) >= limit)
+                    if (Vector2.Distance(point, center) >= limit)
                         continue;
 
                     Vector2 normal = new Vector2(-tangent.y, tangent.x);

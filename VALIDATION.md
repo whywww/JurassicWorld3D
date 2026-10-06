@@ -520,3 +520,47 @@ fern 总目标密度 Σ=210982、各 variant Σ 守恒 OK；第 2 次 Bake 全�
 - 若抛「R1/R2 梯度带抽样密度全为 0」：梯度未生效（门被压死 / 层识别失败），查 Bake 日志
   `[UnderstorySeeder] 密度场…` 与 `[WorldBounds]` 摘要。
 - 若相机在边缘悬空/钻地：`SmoothExplorerCamera` 是否拿到 Terrain（日志会警告「场景无 Terrain」）。
+
+## 恐龙不规则路线验证
+
+- 六条路线由 `MovementCorridor.LayoutSeed`（与地表生成共用的固定种子）生成：四条大小不同的不规则环线、两条去回程分开的斜向闭合环线。周期曲线平滑连接，交叉处保持各自路线，没有端点反向。
+- 只刷新路线时使用菜单 `Jurassic World > Rebuild Dinosaur Routes`。它会按已启用恐龙的实际行走动画、模型长宽与路线朝向扫掠，加 1 米余量，只移开树干、低处木质枝干及岩石；允许树叶、细枝和灌木轻微交叠，单次移位限制 12 米，再重绘地表土路；保留恐龙数量、速度及地图主体布局。完整 Bake 也使用同一份路径几何。
+- 批处理验收：`Unity.exe -batchmode -projectPath <project> -executeMethod JurassicWorld.Editor.DinosaurRouteAcceptance.Run -logFile Logs/routes-all-acceptance.log`，不要加 `-quit`，测试完成后会自动退出。
+- 验收覆盖 32 个种子的可复现性、边界、自交、环线接缝，以及当前地图的模型净空；Play Mode 分三组覆盖全部六条路线，共模拟 1200 秒，检查多圈闭合行走、贴线、瞬移、持续阻塞和同伴间距。成功日志为 `DINOSAUR_ROUTE_GEOMETRY_OK` 和 `DINOSAUR_ROUTE_MOVEMENT_OK`；地图预览输出到 `Logs/routes-map.png`。
+- 密林修复记录：`Logs/forest-restore.log`。仅从原始版本恢复匹配的障碍物位置，不整体回滚资产。1972 棵地形树保留数量，1942 棵保留原位置；局部避让移动 30 棵地形树、30 个场景障碍物，最大 11.25 米。木质与岩石使用实际子网格，排除叶片材质和高处树冠；关联景观组随岩石移动，但不把叶片和灌木算入岩石包围范围。
+
+- 本次通过：`Logs/forest-acceptance.log`（32 种子、六条路线共 1200 秒），`Logs/forest-refresh-preview.log`（重复刷新位置及数量、恐龙速度、地形高度和溪流河岸稳定）。预览：`Logs/routes-map.png`、`Logs/routes-forest-0.png`、`Logs/routes-forest-1.png`。
+
+## 中心密林加密第一阶段（修正前检查点）
+
+- 已保存 Main，中心 X[-60,60] Z[-50,82] 共 399 棵乔木；加密组 283 棵，秋叶树 100 棵（25.1%）。按扣除必要路线净空后的 7084m² 可种植面积，密度达到外围 13 个样方中位值的 65.1%；完整数据见 `Tools/VegetationDiversity/CentralForest/DensityReport.md`。
+- `Jurassic World > Central Forest` 提供第一阶段构建、确认后追加第二阶段、验证、撤销和 Play 开销比较。`Assets/Editor/CentralForestStage.json` 固定为阶段 1；第二阶段没有运行。用户自行 Editor Play 视觉确认，不生成截图。
+- `Logs/central-forest-stage1.log`：落地、材料、LOD 引用、溪流避让及全部木质障碍的动画身体扫掠 + 1m 净空通过。`Logs/central-forest-repeat.log`：重复构建两次，位置、数量及 Terrain 树不变。
+- `Logs/central-forest-ownership.log`：在内存中撤销加密并恢复原五树预览，再通过持久化阶段的 Bake 钩子重建，树木及 580 个林下实例的位置完全一致；原有对象和地形树保留，阶段仍为 1。测试不保存场景。
+- `Logs/central-forest-routes-graphics.log`：32 个路线种子几何检查通过；全部六条路线累计模拟 1200 秒，多圈行走、同伴净空、无卡住或路线偏离通过。无图形模式不适用于现有地图渲染，因此 Play 验收使用正常图形设备。
+- `Tools/VegetationDiversity/CentralForest/PlayPerformance.md`：实际 Play 三个相同视点，1280×720，CPU 渲染提交中位 11.74 → 15.05ms；GPU 计时不可用，不将这些结果解释成发布版 FPS。
+- 相对于 `Tools/VegetationDiversity/Checkpoints/Main_BeforeCentralForest.unity`，1890 个原有序列化对象全部保留；仅五树预览的根对象/Transform（转为不激活备份）和 SceneRoots 列表发生变化，其余原有对象字节不变。溪流 TerrainData SHA256 保持 `B2688C1C0C35A04323FDC6A193580415E2636C74719AD7EFD269B7FE3FE836D0`。
+
+## 第一阶段修正：西北秋叶林与路线林冠（修正前检查点）
+
+- Main 已保存，阶段仍为 1。西北主体区占全地形投影面积 25.11%（2m网格），18m渐变边缘及14m稀疏过渡；这是区域面积指标，不再对秋叶树设置25%的数量配额。主体区秋叶树395棵，过渡区48棵，远离过渡区0棵。报告：`Tools/VegetationDiversity/CentralForest/NorthwestRegion.md`。
+- 355个 Terrain 树实例及18棵原场景树等量转换，完整原字段/原索引及原父节点、局部变换保存在 `ForestRegionBackup` 中。原场景树作为不激活备份保留。中心共399棵（65.1%外围参考密度），秋叶104棵，仅统计、不设比例配额；新增林下实例558个。
+- 树群优先采样路线安全包络外侧1–5m；另有10棵高冠树覆盖路线观察位置。18个固定观察段的树冠投影覆盖由1/18增至14/18，两侧12m内都有树干的段数由9/18增至12/18。4个林冠空缺及6个两侧树干空缺保留必要净空，详见 `RouteEdges.md` 与 `RouteEdgesBeforeRevision.md`；这些是LOD0几何估计，不是叶片像素覆盖，实际视觉由用户自行Editor Play确认。
+- `Logs/northwest-route-canopy.log`：全部树落地、溪流避让、材质及LOD引用、0.5m高度层动画身体扫掠+1m净空通过。`Logs/northwest-route-regression.log`：高处硬枝允许、身体高度硬枝拒绝、软叶片允许、路线树干拒绝；精确恢复原Terrain树数组，地形高度、溪流/地表alphamap、外围prototype数组不变；撤销及持久化Bake钩子确定性重建通过，未启用阶段2，测试不保存场景。
+- `Logs/northwest-route-play.log`：正常图形设备下，32种子几何检查及全部六条路线1200秒运动验收通过，无卡住、路线偏离或同伴重叠；无截图。
+- `Logs/northwest-route-repeat.log`：连续重复构建两次通过，树木数量、位置及剩余 Terrain 树数组完全一致，没有重复植被或累积替换。
+- `Logs/northwest-route-performance.log` 与 `PlayPerformance.md`：相同三视点、1280×720、实际Play，CPU渲染提交中位6.14 → 11.28ms（+5.14ms）。基线在内存副本中恢复区域原树及预览，未修改保存的场景/地形；GPU计时不可用，不解释为发布版FPS。
+- 修改前检查点为 `Tools/VegetationDiversity/Checkpoints/Main_BeforeNorthwestRouteRevision.unity` 和 `MainCreekTerrain_BeforeNorthwestRouteRevision.asset`；恢复修正前状态需要同时恢复这两个文件。最终Main SHA256为 `DB50BAA043BC5DD3926D0127B224FEB815275340420B84F95E86100CCF9C009C`；修改后地形树资产为 `4BD0A66E3F4D6CDC948AEE07EB965C6E9DC8D5A05DF2393CB5293AE04A842FA8`。原有1890个基础场景序列化对象全部保留，32个变化均属于预览备份、区域替换原树的父关系及相关父节点/根列表，其余原有对象字节一致。
+
+## 第一阶段再次修正：20%秋叶林与核心身体净空
+
+- Main 已保存，阶段1、布局版本4，未执行阶段2、无截图。新西北主体面积20.02%（2m地面网格），18m渐变及14m稀疏过渡。新主体内修正前337棵秋叶树，保留169棵；多余秋叶等量换成绿树，过渡区45棵，远处0棵。原Terrain树313个及原场景树16棵等量转换；完整原实例、原父节点及局部变换可恢复。
+- 中心399棵保持不变；按原7084m²标定口径为外围参考密度65.1%。新核心净空使可种植面积扩大到10608m²，同样399棵按新口径是43.5%，不满足新口径60%～70%；达到新口径65%需额外198棵。本次按已确认“不增加中心总棵数”执行，两种口径均明确记录，未以总量变化凑指标。
+- 明确映射当前地面恐龙的躯干/髋部蒙皮骨骼，按核心骨骼总权重≥0.5裁切表面并采样实际行走动画16帧及初始姿态，生成0.5m高度层。编辑器和运行时共享序列化核心包络与树干截面：零额外留距，仍补偿路线采样和转弯扫掠；头尾、四肢、枝叶不扩大树禁区。运行时圆形查询只做空间筛选，实际阻挡由方向性核心包络判定。岩石/倒木保留全身体+1m，出生及恐龙同伴规则保留。
+- 路线植树优先安全包络外0～2m，再延伸到5m。18个观察段两侧均有12m内树干；两侧树干距离中位8.15→3.4m，树冠投影14/18→17/18。最近树干距核心包络保守估计0.33～2.43m，中位0.655m，逐段列于RouteEdges.md。冠层是界框/外接圆几何估计，实际视觉需自行Editor Play确认。
+- 新增路线点缀373个，草0.15～0.5m，蕨/灌木0.4～0.8m；无Collider、无SceneTreeObstacle，不触发树干绕行。另有697个森林林下实例。既有草纹理和双面裁切Shader复用，新增轻量交叉草簇网格，不下载资源，不改Terrain detail数据。
+- `Logs/core-forest-final-build.log`：落地、溪流、材质、LOD引用、核心树干与全身体岩石净空通过。`Logs/core-forest-final-regression.log`：核心内部拒绝树干、边界外无额外留距、枝叶允许、路线点缀无碰撞通过；精确恢复原Terrain树数组，地形高度/溪流图层/外围原型不变；撤销及保存阶段的Bake钩子重建位置一致；连续重复构建两次无重复或再次减半。检查均在内存中进行，未保存测试场景。
+- `Logs/core-forest-play.log`：正常图形设备、32种子几何检查和六条路线1200秒运动验收通过，逐帧核心身体与树干无相交，无卡住、瞬移、偏离路线或恐龙同伴重叠。原截图文件时间保持2026-10-06 11:54:17。
+- 本次前检查点：`Tools/VegetationDiversity/Checkpoints/Main_BeforeCoreRouteRevision.unity` 与 `MainCreekTerrain_BeforeCoreRouteRevision.asset`，精确恢复本次前状态须同时恢复两者。Remove菜单恢复首次加密前的原植被，保留半数基准供后续重建，不再次按当前169棵减半。
+- `Logs/core-forest-performance.log`：同一三视点、1280×720正常图形Play，CPU渲染提交合并中位7.64→13.13ms（+5.50ms，+72.0%）。基线为首次加密前植被的内存恢复，与本次前旧版第一阶段的绝对值不可直接当作同次对比；旧版报告另存PlayPerformanceBeforeCoreRevision.md。GPU计时不可用，不解释为发布版FPS。
+- 性能及运动测试后资产哈希不变：Main `DE90B52F290C969506EA83DD40EDABF48B3800E8AB3F38219C8FC49F4DD81058`，TerrainData `2F9F4AB83ADBBDB66CB405BA2C5BD0F7D23F4DD292D6DBBABABD277F190CA18C`。相对首次加密前检查点1890个原有序列化对象全部保留；113个变化包含76个树干截面注册数据、区域替换原树/预览的父关系、相关父节点/根列表及恐龙核心包络组件引用。未改未涉及对象的世界位置、尺寸和方向；注册数据变化为本次碰撞规则所需。

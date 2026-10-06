@@ -192,8 +192,7 @@ namespace JurassicWorld
             bool hasCamera, Vector2 cameraXZ, List<Vector2> propPositions, List<float> propRadii,
             List<Vector2> placedPositions, List<float> placedRadii)
         {
-            return !MovementCorridorCrossings.IsInside(route, candidate)
-                && (!hasCamera || Vector2.Distance(candidate, cameraXZ) >= CameraMinDistance)
+            return (!hasCamera || Vector2.Distance(candidate, cameraXZ) >= CameraMinDistance)
                 && !TerrainTreeObstacleRegistry.IsBlocked(candidate, treeAvoidRadius)
                 && !OverlapsCircles(candidate, radius + PropMargin, propPositions, propRadii)
                 && !OverlapsCircles(candidate, radius + PeerMargin, placedPositions, placedRadii);

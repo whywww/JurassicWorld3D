@@ -1,0 +1,12 @@
+# 西北秋叶林分区
+
+全地图地形投影面积的 **20.02%** 为西北秋叶林主体（2m网格）；边界为平滑不规则曲线。区域是面积指标，主体面积目标20%；秋叶数量按修正前新主体区内数量的一半保留，其余等量换成绿树。
+
+秋叶树：修正前落在新主体区内 337，保留一半 169；主体区 169；18m渐变及额外14m零星过渡 45；远离过渡区 0。
+
+外围及原有树转换：地形实例 313，场景树 21；转换前后当地棵数相同。
+
+被替换地形树的完整实例字段及原索引保存在 Northwest Autumn Region / ForestRegionBackup；原场景树保存在不激活的 Original Scene Trees 中，并记录原父对象和局部变换。Remove 恢复这些记录。地形高度、地表图层、溪流、原型数组和未涉及树实例不改动。
+
+修改前检查点：Tools/VegetationDiversity/Checkpoints/Main_BeforeCoreRouteRevision.unity 及 MainCreekTerrain_BeforeCoreRouteRevision.asset。阶段仍为1，无截图。
+

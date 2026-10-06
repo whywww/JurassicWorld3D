@@ -48,7 +48,7 @@ namespace JurassicWorld
                 child.transform.SetParent(transform, false);
                 var line = child.AddComponent<LineRenderer>();
                 line.useWorldSpace = true;
-                line.loop = true;
+                line.loop = MovementCorridor.IsClosed(route);
                 line.sharedMaterial = materials[route];
                 line.startWidth = lineWidth;
                 line.endWidth = lineWidth;
@@ -106,7 +106,7 @@ namespace JurassicWorld
             {
                 Gizmos.color = Colors[Mathf.Min(route, Colors.Length - 1)];
                 int count = MovementCorridor.SampleCount(route);
-                for (int i = 0; i < count; i++)
+                for (int i = 0; i < count - (MovementCorridor.IsClosed(route) ? 0 : 1); i++)
                 {
                     Vector2 a = MovementCorridor.GetSample(route, i).Position;
                     Vector2 b = MovementCorridor.GetSample(route, (i + 1) % count).Position;
