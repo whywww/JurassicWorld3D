@@ -9,12 +9,17 @@ namespace JurassicWorld.Editor
     /// <summary>Final, deterministic surface pass over the baked paths and vegetation islands.</summary>
     internal static class GroundEcologyPass
     {
-        private const string RootName = "Ground Ecology";
         private const string AssetFolder = "Assets/Terrain/GroundEcology";
+        private const string RootName = "Ground Ecology";
         private const float TerrainHalf = 100f;
         private const int Seed = 271834;
 
-        [MenuItem("Jurassic World/Rebuild Dinosaur Routes")]
+        [MenuItem("Jurassic World/Environment/Routes/Rebuild Dinosaur Routes")]
+        private static void RebuildRoutesMenu() => JurassicMenuGuard.Run(RebuildRoutes, true);
+
+        [MenuItem("Jurassic World/Environment/Routes/Rebuild Dinosaur Routes", true)]
+        private static bool RebuildRoutesMenuEnabled() => JurassicMenuGuard.CanRun;
+
         public static void RebuildRoutes()
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode)
@@ -102,7 +107,12 @@ namespace JurassicWorld.Editor
             Debug.Log($"DINOSAUR_ROUTES_PRESERVED: {layers.Length - 4} extra terrain layers (creek banks).");
         }
 
-        [MenuItem("Jurassic World/Rebuild Ground Ecology")]
+        [MenuItem("Jurassic World/Environment/Ground/Rebuild Ground Ecology")]
+        private static void RebuildMenu() => JurassicMenuGuard.Run(Rebuild, true);
+
+        [MenuItem("Jurassic World/Environment/Ground/Rebuild Ground Ecology", true)]
+        private static bool RebuildMenuEnabled() => JurassicMenuGuard.CanRun;
+
         public static void Rebuild()
         {
             var scene = EditorSceneManager.OpenScene("Assets/Scenes/Main.unity");
@@ -434,6 +444,7 @@ namespace JurassicWorld.Editor
             surface.transform.SetParent(parent);
             surface.AddComponent<MeshFilter>().sharedMesh = mesh;
             surface.AddComponent<MeshRenderer>().sharedMaterial = material;
+            NaturalGroundDecoration.Upgrade(surface.GetComponent<MeshRenderer>());
         }
     }
 }

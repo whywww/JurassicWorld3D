@@ -22,7 +22,12 @@ namespace JurassicWorld.Editor
                 EditorApplication.playModeStateChanged += OnPlayModeChanged;
         }
 
-        [MenuItem("Jurassic World/Navigation/Install in Main Scene")]
+        [MenuItem("Jurassic World/Environment/Navigation/Install in Main Scene")]
+        private static void InstallMenu() => JurassicMenuGuard.Run(Install, true);
+
+        [MenuItem("Jurassic World/Environment/Navigation/Install in Main Scene", true)]
+        private static bool InstallMenuEnabled() => JurassicMenuGuard.CanRun;
+
         public static void Install()
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode) throw new InvalidOperationException("Exit Play Mode before installing navigation.");

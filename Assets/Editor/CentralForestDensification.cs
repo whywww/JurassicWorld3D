@@ -65,22 +65,42 @@ namespace JurassicWorld.Editor
             internal string Samples;
         }
 
-        [MenuItem("Jurassic World/Central Forest/1 Build Stage One")]
+        [MenuItem("Jurassic World/Environment/Central Forest/1 Build Stage One")]
+        private static void BuildStageOneMenu() => JurassicMenuGuard.Run(BuildStageOne, true);
+
+        [MenuItem("Jurassic World/Environment/Central Forest/1 Build Stage One", true)]
+        private static bool BuildStageOneMenuEnabled() => JurassicMenuGuard.CanRun;
+
         public static void BuildStageOne() => BuildSaved(1);
-        [MenuItem("Jurassic World/Central Forest/2 Append Stage Two (After Review)")]
+        [MenuItem("Jurassic World/Environment/Central Forest/2 Append Stage Two (After Review)")]
+        private static void AppendStageTwoMenu() => JurassicMenuGuard.Run(AppendStageTwo, true);
+
+        [MenuItem("Jurassic World/Environment/Central Forest/2 Append Stage Two (After Review)", true)]
+        private static bool AppendStageTwoMenuEnabled() => JurassicMenuGuard.CanRun;
+
         public static void AppendStageTwo()
         {
             if (LoadStage() < 1) throw new InvalidOperationException("Build and review stage one first.");
             BuildSaved(2);
         }
-        [MenuItem("Jurassic World/Central Forest/3 Validate")]
+        [MenuItem("Jurassic World/Environment/Central Forest/3 Validate")]
+        private static void ValidateMenu() => JurassicMenuGuard.Run(Validate, true);
+
+        [MenuItem("Jurassic World/Environment/Central Forest/3 Validate", true)]
+        private static bool ValidateMenuEnabled() => JurassicMenuGuard.CanRun;
+
         public static void Validate()
         {
             RequireEditMode();
             if (EditorSceneManager.GetActiveScene().path != ScenePath) EditorSceneManager.OpenScene(ScenePath);
             ValidateInScene();
         }
-        [MenuItem("Jurassic World/Central Forest/4 Remove Densification")]
+        [MenuItem("Jurassic World/Environment/Central Forest/4 Remove Densification")]
+        private static void RemoveMenu() => JurassicMenuGuard.Run(Remove, true);
+
+        [MenuItem("Jurassic World/Environment/Central Forest/4 Remove Densification", true)]
+        private static bool RemoveMenuEnabled() => JurassicMenuGuard.CanRun;
+
         public static void Remove()
         {
             RequireEditMode();

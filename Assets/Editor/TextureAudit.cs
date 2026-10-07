@@ -27,7 +27,7 @@ namespace JurassicWorld.Editor
             public long sourceFileBytes;
         }
 
-        [MenuItem("Jurassic World/Export Texture Audit")]
+        [MenuItem("Jurassic World/Diagnostics/Export Texture Audit")]
         public static void Export()
         {
             var rows = new List<Row>();
@@ -81,7 +81,7 @@ namespace JurassicWorld.Editor
             var markdown = new StringBuilder();
             markdown.AppendLine("# 纹理资源审计")
                 .AppendLine()
-                .AppendLine("由 Unity Editor 的 `Jurassic World/Export Texture Audit` 导出。分辨率与格式来自当前导入结果；运行内存是 `Profiler.GetRuntimeMemorySizeLong` 的估值，并非 GPU 显存实测或场景实际驻留量。")
+                .AppendLine("由 Unity Editor 的 `Jurassic World/Diagnostics/Export Texture Audit` 导出。分辨率与格式来自当前导入结果；运行内存是 `Profiler.GetRuntimeMemorySizeLong` 的估值，并非 GPU 显存实测或场景实际驻留量。")
                 .AppendLine()
                 .AppendLine($"- 纹理数量：{rows.Count}")
                 .AppendLine($"- 源文件长边至少 4096 像素：{large}")

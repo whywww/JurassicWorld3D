@@ -35,7 +35,12 @@ namespace JurassicWorld.Editor
         {
             EditorApplication.playModeStateChanged += OnState;
         }
-        [MenuItem("Jurassic World/Central Forest/5 Compare Play Render Cost (No Images)")]
+        [MenuItem("Jurassic World/Diagnostics/Central Forest/Compare Play Render Cost (No Images)")]
+        private static void RunMenu() => JurassicMenuGuard.Run(Run, true);
+
+        [MenuItem("Jurassic World/Diagnostics/Central Forest/Compare Play Render Cost (No Images)", true)]
+        private static bool RunMenuEnabled() => JurassicMenuGuard.CanRun;
+
         public static void Run()
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode) throw new InvalidOperationException("Exit Play Mode first.");

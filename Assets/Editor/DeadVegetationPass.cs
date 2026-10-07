@@ -27,7 +27,12 @@ namespace JurassicWorld.Editor
             "20_Autumn", "05_Autumn", "21_Autumn"
         };
 
-        [MenuItem("Jurassic World/Rebuild Autumn Deadwood Belt in Main")]
+        [MenuItem("Jurassic World/Environment/Ground/Rebuild Autumn Deadwood Belt")]
+        private static void RebuildMainMenu() => JurassicMenuGuard.Run(RebuildMain, true);
+
+        [MenuItem("Jurassic World/Environment/Ground/Rebuild Autumn Deadwood Belt", true)]
+        private static bool RebuildMainMenuEnabled() => JurassicMenuGuard.CanRun;
+
         public static void RebuildMain()
         {
             var scene = EditorSceneManager.OpenScene(ScenePath);
@@ -39,48 +44,6 @@ namespace JurassicWorld.Editor
             EditorSceneManager.SaveScene(scene);
             AssetDatabase.SaveAssets();
             Debug.Log("AUTUMN_DEADWOOD_READY: saved directly into Main.unity.");
-        }
-
-        [MenuItem("Jurassic World/Fix Autumn Fallen Logs in Main")]
-        public static void FixMainFallenLogs()
-        {
-            var scene = EditorSceneManager.OpenScene(ScenePath);
-            Terrain terrain = UnityEngine.Object.FindObjectOfType<Terrain>();
-            GameObject root = GameObject.Find(RootName);
-            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(AutumnGroundedLogAssetBuilder.PrefabPath);
-            if (terrain == null || root == null || prefab == null)
-                throw new InvalidOperationException("Main terrain, autumn belt, or tested log prefab is missing.");
-            Transform[] oldLogs = root.transform.Cast<Transform>()
-                .Where(t => t.name.StartsWith("Fallen log ", StringComparison.Ordinal)).ToArray();
-            if (oldLogs.Length != 8)
-                throw new InvalidOperationException("Expected exactly eight autumn fallen logs; found " + oldLogs.Length);
-            foreach (Transform old in oldLogs)
-            {
-                GameObject source = PrefabUtility.GetCorrespondingObjectFromSource(old.gameObject);
-                if (source != null && AssetDatabase.GetAssetPath(source) == AutumnGroundedLogAssetBuilder.PrefabPath)
-                {
-                    Debug.Log("AUTUMN_MAIN_LOG_ALREADY_FIXED: " + old.name);
-                    continue;
-                }
-                GameObject replacement = (GameObject)PrefabUtility.InstantiatePrefab(prefab, root.transform);
-                replacement.name = old.name;
-                replacement.transform.SetSiblingIndex(old.GetSiblingIndex());
-                replacement.transform.position = new Vector3(old.position.x, 0f, old.position.z);
-                replacement.transform.rotation = Quaternion.Euler(0f, old.eulerAngles.y, 0f);
-                replacement.transform.localScale = old.localScale;
-                LogContact contact = GroundFallenLog(replacement, terrain);
-                if (contact.HighestGap > 0.10f || contact.DeepestBurial > 0.15f)
-                    throw new InvalidOperationException($"Main log {old.name} failed contact: gap={contact.HighestGap:F3}, burial={contact.DeepestBurial:F3}");
-                foreach (Collider collider in replacement.GetComponentsInChildren<Collider>(true))
-                    UnityEngine.Object.DestroyImmediate(collider);
-                GameObjectUtility.SetStaticEditorFlags(replacement, StaticEditorFlags.BatchingStatic);
-                UnityEngine.Object.DestroyImmediate(old.gameObject);
-                Debug.Log($"AUTUMN_MAIN_LOG_CONTACT {replacement.name} gap={contact.HighestGap:F3}m burial={contact.DeepestBurial:F3}m");
-            }
-            EditorSceneManager.MarkSceneDirty(scene);
-            EditorSceneManager.SaveScene(scene);
-            AssetDatabase.SaveAssets();
-            Debug.Log("AUTUMN_MAIN_FALLEN_LOGS_FIXED: eight autumn logs saved to Main.unity.");
         }
 
         internal static void SeedActiveScene(Terrain terrain)
@@ -260,6 +223,7 @@ namespace JurassicWorld.Editor
             moss.transform.SetParent(parent, false);
             moss.AddComponent<MeshFilter>().sharedMesh = mesh;
             moss.AddComponent<MeshRenderer>().sharedMaterial = material;
+            NaturalGroundDecoration.Upgrade(moss.GetComponent<MeshRenderer>());
             GameObjectUtility.SetStaticEditorFlags(moss, StaticEditorFlags.BatchingStatic);
         }
 

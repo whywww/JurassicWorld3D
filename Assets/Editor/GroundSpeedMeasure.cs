@@ -7,13 +7,12 @@ using System.Reflection;
 namespace JurassicWorld.Editor
 {
     /// <summary>
-    /// 临时工具：精确测量 T-Rex walk 动画的原生地速。
-    /// 菜单 Jurassic World > Measure T-Rex Ground Speed 执行。
-    /// 完成后请删除此文件。
+    /// 诊断工具：精确测量 T-Rex walk 动画的原生地速。
+    /// 菜单 Jurassic World > Diagnostics > Measure T-Rex Ground Speed 执行。
     /// </summary>
     public static class GroundSpeedMeasure
     {
-        [MenuItem("Jurassic World/Measure T-Rex Ground Speed")]
+        [MenuItem("Jurassic World/Diagnostics/Measure T-Rex Ground Speed")]
         public static void Measure()
         {
             // 1. 加载 T-Rex FBX prefab

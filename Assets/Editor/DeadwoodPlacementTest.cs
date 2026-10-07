@@ -15,7 +15,12 @@ namespace JurassicWorld.Editor
         private const string PlayerPath = "Builds/DeadwoodPlacementTest/DeadwoodPlacementTest.exe";
         private const string LogPath = AutumnGroundedLogAssetBuilder.PrefabPath;
 
-        [MenuItem("Jurassic World/Build Isolated Deadwood Placement Test")]
+        [MenuItem("Jurassic World/Diagnostics/Deadwood/Build Isolated Placement Test")]
+        private static void BuildMenu() => JurassicMenuGuard.Run(Build, true);
+
+        [MenuItem("Jurassic World/Diagnostics/Deadwood/Build Isolated Placement Test", true)]
+        private static bool BuildMenuEnabled() => JurassicMenuGuard.CanRun;
+
         public static void Build()
         {
             AutumnGroundedLogAssetBuilder.EnsureAssets();

@@ -25,7 +25,12 @@ namespace JurassicWorld.Editor
             return t * t * (3f - 2f * t);
         }
 
-        [MenuItem("Jurassic World/Repair Southeast Forest/Build and Verify")]
+        [MenuItem("Jurassic World/Environment/Southeast Forest/Build and Verify")]
+        private static void BuildAndVerifyMenu() => JurassicMenuGuard.Run(BuildAndVerify, true);
+
+        [MenuItem("Jurassic World/Environment/Southeast Forest/Build and Verify", true)]
+        private static bool BuildAndVerifyMenuEnabled() => JurassicMenuGuard.CanRun;
+
         public static void BuildAndVerify()
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode || EditorSceneManager.GetActiveScene().isDirty)

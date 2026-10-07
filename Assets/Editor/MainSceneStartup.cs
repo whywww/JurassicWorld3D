@@ -18,6 +18,11 @@ namespace JurassicWorld.Editor
         }
 
         [MenuItem("Jurassic World/Open Main Scene")]
+        private static void OpenMainMenu() => JurassicMenuGuard.Run(OpenMain, true);
+
+        [MenuItem("Jurassic World/Open Main Scene", true)]
+        private static bool OpenMainMenuEnabled() => JurassicMenuGuard.CanRun;
+
         private static void OpenMain()
         {
             EditorSceneManager.OpenScene(MainScene, OpenSceneMode.Single);
@@ -45,6 +50,19 @@ namespace JurassicWorld.Editor
             }
             if (camera && light)
                 OpenMain();
+        }
+    }
+    // Menu-only checks leave production and -executeMethod entry points unattended.
+    internal static class JurassicMenuGuard
+    {
+        internal static bool CanRun => !EditorApplication.isPlayingOrWillChangePlaymode;
+
+        internal static void Run(System.Action action, bool saveModifiedScenes)
+        {
+            if (!CanRun) return;
+            if (saveModifiedScenes && !Application.isBatchMode &&
+                !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
+            action();
         }
     }
 }

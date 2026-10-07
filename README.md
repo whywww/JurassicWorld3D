@@ -66,11 +66,23 @@ Unity 版本：`2022.3.62f3c1`。场景包含霸王龙、胜王龙、伶盗龙�
 - 空格键只触发一次召唤；当前视野中的恐龙穿过视角后自动恢复随机活动。
 - 信息卡只在召唤后且霸王龙位于画面中央、距离合适时出现。
 
-可在菜单执行 `Jurassic World > Validate MVP`，或用批处理方法 `JurassicWorld.Editor.JurassicProjectSetup.ValidateProject` 检查模型、动画和场景。
+可在菜单执行 `Jurassic World > Scene > Validate MVP`，或用批处理方法 `JurassicWorld.Editor.JurassicProjectSetup.ValidateProject` 检查模型、动画和场景。
+
+## 编辑器工具菜单
+
+`Jurassic World` 顶层保留 `Open Main Scene`，其余工具分组如下：
+
+- **Scene**：烘焙、验证主场景及构建 Windows 程序。
+- **Environment**：森林、植被、小溪、地表生态、恐龙路线和导航维护。
+- **Assets**：准备植被资源、集成 PolyHaven 资源和重导入恐龙模型。
+- **Diagnostics**：性能比较、密度检查、纹理审计和隔离倒木测试。
+- **Acceptance**：生产烘焙对账、截图和动态细节验收。
+
+打开或重建场景的菜单在 Play Mode 中禁用，执行前提示处理未保存场景。有效批处理入口保持原类名和方法名。旧空场景创建、植被原型布局、五树对比布局、天空接缝探针及一次性修复工具已移除；当前场景、资源和历史备份保留。
 
 ## 当前边界
 
-- 仅保证 Unity Editor 演示，不生成独立程序。
+- 以 Unity Editor 演示为主要验证目标；可通过 Scene 菜单构建 Windows 程序，独立程序需另行验收。
 - 使用标准单相机和旧版 Input API；未接入 BCI、裸眼 3D 厂商 SDK、NavMesh 或多恐龙选择。
 - GLB 或 FBX 加载失败会在 Console 和屏幕顶部明确报错，不使用占位模型冒充成功结果。
 

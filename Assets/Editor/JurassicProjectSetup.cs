@@ -12,20 +12,14 @@ namespace JurassicWorld.Editor
     {
         private const string MainScenePath = "Assets/Scenes/Main.unity";
 
-        [MenuItem("Jurassic World/Create MVP Scene")]
-        public static void CreateScene()
-        {
-            Directory.CreateDirectory("Assets/Scenes");
-            var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
-            EditorSceneManager.SaveScene(scene, MainScenePath);
-            EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(MainScenePath, true) };
-            AssetDatabase.SaveAssets();
-            Debug.Log("Jurassic World MVP scene created.");
-        }
-
         // 编辑态烘焙入口（任务 #3 可用 -executeMethod JurassicWorld.Editor.JurassicProjectSetup.BakeScene 调用）。
         // 打开 Main.unity → 由 JurassicWorldSceneBuilder 建造全部内容 → 标脏并保存场景与资产。
-        [MenuItem("Jurassic World/Bake Scene (Edit Mode)")]
+        [MenuItem("Jurassic World/Scene/Bake Scene (Edit Mode)")]
+        private static void BakeSceneMenu() => JurassicMenuGuard.Run(BakeScene, true);
+
+        [MenuItem("Jurassic World/Scene/Bake Scene (Edit Mode)", true)]
+        private static bool BakeSceneMenuEnabled() => JurassicMenuGuard.CanRun;
+
         public static void BakeScene()
         {
             Directory.CreateDirectory("Assets/Scenes");
@@ -55,7 +49,12 @@ namespace JurassicWorld.Editor
         // 验证性重导入入口（实验用）：对 Assets/Resources/Dinosaurs 下所有 .fbx 强制重新导入，
         // 用于验证「恐龙 FBX 导入设置是否发生漂移」——若 .meta 未变、git diff 为空，则说明重导入是 no-op，
         // 排除「导入管线状态漂移导致脚部悬空」这一假设；配合 BakeScene 使用，把烘焙前的模型状态刷新到磁盘。
-        [MenuItem("Jurassic World/Reimport Dinosaur Models")]
+        [MenuItem("Jurassic World/Assets/Reimport Dinosaur Models")]
+        private static void ReimportDinosaurModelsMenu() => JurassicMenuGuard.Run(ReimportDinosaurModels, false);
+
+        [MenuItem("Jurassic World/Assets/Reimport Dinosaur Models", true)]
+        private static bool ReimportDinosaurModelsMenuEnabled() => JurassicMenuGuard.CanRun;
+
         public static void ReimportDinosaurModels()
         {
             const string root = "Assets/Resources/Dinosaurs";
@@ -77,11 +76,16 @@ namespace JurassicWorld.Editor
 
         // 编辑态断言：不点 Play，打开烘焙后的 Main.unity，检查场景内已存在相机、方向光与「当前启用数量」
         // （JurassicWorldSceneBuilder.EnabledDinosaurCount）的挂 DinosaurAgent 的恐龙 GameObject。
-        [MenuItem("Jurassic World/Validate MVP")]
+        [MenuItem("Jurassic World/Scene/Validate MVP")]
+        private static void ValidateProjectMenu() => JurassicMenuGuard.Run(ValidateProject, true);
+
+        [MenuItem("Jurassic World/Scene/Validate MVP", true)]
+        private static bool ValidateProjectMenuEnabled() => JurassicMenuGuard.CanRun;
+
         public static void ValidateProject()
         {
             if (!File.Exists(MainScenePath))
-                throw new FileNotFoundException("缺少已烘焙的主场景，请先执行 Jurassic World/Bake Scene (Edit Mode)。", MainScenePath);
+                throw new FileNotFoundException("缺少已烘焙的主场景，请先执行 Jurassic World/Scene/Bake Scene (Edit Mode)。", MainScenePath);
 
             EditorSceneManager.OpenScene(MainScenePath, OpenSceneMode.Single);
 
@@ -537,7 +541,7 @@ namespace JurassicWorld.Editor
                 throw new InvalidDataException(
                     $"检测到 {offenders.Count} 个 Renderer 缺失/不支持 material 或 shader（共检查 {checkedCount} 个）：" +
                     string.Join("；", offenders) +
-                    "。请执行 Jurassic World/Integrate PolyHaven Assets 后重 Bake。");
+                    "。请执行 Jurassic World/Assets/Integrate PolyHaven Assets 后重 Bake。");
 
             Debug.Log($"[Validate] HQ 资产完整性：已检查 Renderer {checkedCount} 个，无 missing material / shader。");
         }

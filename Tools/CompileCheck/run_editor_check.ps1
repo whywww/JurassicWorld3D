@@ -29,10 +29,25 @@ foreach ($n in $xml.SelectNodes('//Reference/HintPath')) {
 $ac = Join-Path $projDir 'Library\ScriptAssemblies\Assembly-CSharp.dll'
 if (Test-Path -LiteralPath $ac) { [void]$sb.AppendLine('-r:"' + $ac + '"') }
 
+# Project references compile into Unity's ScriptAssemblies, rather than HintPath entries.
+foreach ($n in $xml.SelectNodes('//ProjectReference[@Include]')) {
+    $assemblyName = [System.IO.Path]::GetFileNameWithoutExtension($n.GetAttribute('Include'))
+    if ($assemblyName -eq 'Assembly-CSharp') { continue }
+    $assemblyPath = Join-Path $projDir ('Library\ScriptAssemblies\' + $assemblyName + '.dll')
+    if (-not (Test-Path -LiteralPath $assemblyPath)) { throw "Missing project assembly: $assemblyPath" }
+    [void]$sb.AppendLine('-r:"' + $assemblyPath + '"')
+}
+
 foreach ($n in $xml.SelectNodes('//Compile[@Include]')) {
     $f = $n.GetAttribute('Include')
+    if ($f -match '^Assets[\\/]Editor[\\/]') { continue }
     $p = Join-Path $projDir $f
     [void]$sb.AppendLine('"' + $p + '"')
+}
+
+# Unity-generated csproj files can lag behind editor script additions/deletions.
+foreach ($source in Get-ChildItem -LiteralPath (Join-Path $projDir 'Assets\Editor') -Filter '*.cs' -Recurse) {
+    [void]$sb.AppendLine('"' + $source.FullName + '"')
 }
 
 $rsp = Join-Path $env:TEMP 'jw_editor_check.rsp'
@@ -43,3 +58,4 @@ $mono = 'C:\Program Files\Unity 2022.3.62f3c1\Editor\Data\MonoBleedingEdge\bin\m
 $csc = 'C:\Program Files\Unity 2022.3.62f3c1\Editor\Data\MonoBleedingEdge\lib\mono\msbuild\Current\bin\Roslyn\csc.exe'
 & $mono $csc "@$rsp"
 Write-Host "CSC EXIT: $LASTEXITCODE"
+exit $LASTEXITCODE

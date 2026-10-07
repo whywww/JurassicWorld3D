@@ -135,7 +135,12 @@ namespace JurassicWorld.Editor
 
         // ================================================================ 入口
 
-        [MenuItem("Jurassic World/Integrate PolyHaven Assets")]
+        [MenuItem("Jurassic World/Assets/Integrate PolyHaven Assets")]
+        private static void EnsureAssetsMenuMenu() => JurassicMenuGuard.Run(EnsureAssetsMenu, false);
+
+        [MenuItem("Jurassic World/Assets/Integrate PolyHaven Assets", true)]
+        private static bool EnsureAssetsMenuMenuEnabled() => JurassicMenuGuard.CanRun;
+
         public static void EnsureAssetsMenu()
         {
             if (EnsureAssets())

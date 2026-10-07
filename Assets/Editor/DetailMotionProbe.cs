@@ -39,6 +39,11 @@ namespace JurassicWorld.Editor
         private const float Pitch = -14f;
 
         [MenuItem("Jurassic World/Acceptance/Probe Detail Motion", false, 7)]
+        private static void MenuProbeMenu() => JurassicMenuGuard.Run(MenuProbe, true);
+
+        [MenuItem("Jurassic World/Acceptance/Probe Detail Motion", true)]
+        private static bool MenuProbeMenuEnabled() => JurassicMenuGuard.CanRun;
+
         public static void MenuProbe() => Probe();
 
         public static void Probe()

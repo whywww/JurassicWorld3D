@@ -97,7 +97,12 @@ namespace JurassicWorld.Editor
         static float GroundY(Terrain terrain, Vector3 point) =>
             terrain.SampleHeight(point) + terrain.transform.position.y;
 
-        [MenuItem("Jurassic World/Integrate East to North Creek in Main")]
+        [MenuItem("Jurassic World/Environment/Creek/Integrate East to North Creek")]
+        private static void IntegrateMenu() => JurassicMenuGuard.Run(Integrate, true);
+
+        [MenuItem("Jurassic World/Environment/Creek/Integrate East to North Creek", true)]
+        private static bool IntegrateMenuEnabled() => JurassicMenuGuard.CanRun;
+
         public static void Integrate()
         {
             if (!File.Exists(MainScene) || !File.Exists(SourceTerrain) || !File.Exists(WaterMaterial) ||
@@ -385,7 +390,12 @@ namespace JurassicWorld.Editor
             }
         }
 
-        [MenuItem("Jurassic World/Place Main Camera at Creek")]
+        [MenuItem("Jurassic World/Environment/Creek/Place Main Camera at Creek")]
+        private static void PlaceMainCameraAtCreekMenu() => JurassicMenuGuard.Run(PlaceMainCameraAtCreek, true);
+
+        [MenuItem("Jurassic World/Environment/Creek/Place Main Camera at Creek", true)]
+        private static bool PlaceMainCameraAtCreekMenuEnabled() => JurassicMenuGuard.CanRun;
+
         public static void PlaceMainCameraAtCreek()
         {
             Scene scene = EditorSceneManager.OpenScene(MainScene, OpenSceneMode.Single);
@@ -408,7 +418,12 @@ namespace JurassicWorld.Editor
             Debug.Log("MAIN_CREEK_CAMERA_READY: Main Camera starts at Creek Ground View 1.");
         }
 
-        [MenuItem("Jurassic World/Build Playable Main with Creek")]
+        [MenuItem("Jurassic World/Scene/Build Windows Player")]
+        private static void BuildPlayableMenu() => JurassicMenuGuard.Run(BuildPlayable, true);
+
+        [MenuItem("Jurassic World/Scene/Build Windows Player", true)]
+        private static bool BuildPlayableMenuEnabled() => JurassicMenuGuard.CanRun;
+
         public static void BuildPlayable()
         {
             Directory.CreateDirectory("Builds/JurassicWorld");

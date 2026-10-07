@@ -26,7 +26,7 @@ namespace JurassicWorld.Editor
     /// 缩小规模不改契约：只用 UnderstorySeeder.PreviewScale（确定性前缀），
     /// 不改任何分布常量、不改任何随机流；Full Bake 恒为 PreviewScale = 1。
     ///
-    /// 菜单：Jurassic World/Preview HQ Asset Pass
+    /// 菜单：Jurassic World/Diagnostics/Preview HQ Asset Pass
     /// 批处理：-executeMethod JurassicWorld.Editor.PolyHavenPassPreview.Run
     /// </summary>
     public static class PolyHavenPassPreview
@@ -49,7 +49,12 @@ namespace JurassicWorld.Editor
         private const float CutoutTransparentMin = 0.10f;
         private const float CutoutTransparentMax = 0.92f;
 
-        [MenuItem("Jurassic World/Preview HQ Asset Pass")]
+        [MenuItem("Jurassic World/Diagnostics/Preview HQ Asset Pass")]
+        private static void RunMenuMenu() => JurassicMenuGuard.Run(RunMenu, true);
+
+        [MenuItem("Jurassic World/Diagnostics/Preview HQ Asset Pass", true)]
+        private static bool RunMenuMenuEnabled() => JurassicMenuGuard.CanRun;
+
         public static void RunMenu()
         {
             Run();

@@ -43,21 +43,51 @@ namespace JurassicWorld.Editor
         // ================================================================ 菜单入口
 
         [MenuItem("Jurassic World/Acceptance/1. Dump Production Constants", false, 1)]
+        private static void MenuDumpConstantsMenu() => JurassicMenuGuard.Run(MenuDumpConstants, true);
+
+        [MenuItem("Jurassic World/Acceptance/1. Dump Production Constants", true)]
+        private static bool MenuDumpConstantsMenuEnabled() => JurassicMenuGuard.CanRun;
+
         public static void MenuDumpConstants() => DumpProductionConstants();
 
         [MenuItem("Jurassic World/Acceptance/2. Capture Pre-Bake Baseline", false, 2)]
+        private static void MenuCapturePrebakeMenu() => JurassicMenuGuard.Run(MenuCapturePrebake, true);
+
+        [MenuItem("Jurassic World/Acceptance/2. Capture Pre-Bake Baseline", true)]
+        private static bool MenuCapturePrebakeMenuEnabled() => JurassicMenuGuard.CanRun;
+
         public static void MenuCapturePrebake() => Capture("prebake");
 
         [MenuItem("Jurassic World/Acceptance/3. Capture Post-Bake #1", false, 3)]
+        private static void MenuCapturePostbake1Menu() => JurassicMenuGuard.Run(MenuCapturePostbake1, true);
+
+        [MenuItem("Jurassic World/Acceptance/3. Capture Post-Bake #1", true)]
+        private static bool MenuCapturePostbake1MenuEnabled() => JurassicMenuGuard.CanRun;
+
         public static void MenuCapturePostbake1() => Capture("postbake1");
 
         [MenuItem("Jurassic World/Acceptance/4. Verify Bake #1 vs Pre-Bake", false, 4)]
+        private static void MenuVerifyBake1Menu() => JurassicMenuGuard.Run(MenuVerifyBake1, true);
+
+        [MenuItem("Jurassic World/Acceptance/4. Verify Bake #1 vs Pre-Bake", true)]
+        private static bool MenuVerifyBake1MenuEnabled() => JurassicMenuGuard.CanRun;
+
         public static void MenuVerifyBake1() => VerifyBake1();
 
         [MenuItem("Jurassic World/Acceptance/5. Capture Post-Bake #2", false, 5)]
+        private static void MenuCapturePostbake2Menu() => JurassicMenuGuard.Run(MenuCapturePostbake2, true);
+
+        [MenuItem("Jurassic World/Acceptance/5. Capture Post-Bake #2", true)]
+        private static bool MenuCapturePostbake2MenuEnabled() => JurassicMenuGuard.CanRun;
+
         public static void MenuCapturePostbake2() => Capture("postbake2");
 
         [MenuItem("Jurassic World/Acceptance/6. Compare #1 vs #2 (Idempotency)", false, 6)]
+        private static void MenuCompareIdempotencyMenu() => JurassicMenuGuard.Run(MenuCompareIdempotency, true);
+
+        [MenuItem("Jurassic World/Acceptance/6. Compare #1 vs #2 (Idempotency)", true)]
+        private static bool MenuCompareIdempotencyMenuEnabled() => JurassicMenuGuard.CanRun;
+
         public static void MenuCompareIdempotency() => CompareIdempotency();
 
         // ================================================================ 批处理入口（-executeMethod）
@@ -210,7 +240,7 @@ namespace JurassicWorld.Editor
 
             if (!File.Exists(FullPath(MainScenePath)))
             {
-                abortReason = $"缺少已烘焙的主场景 {MainScenePath}：请先执行 Jurassic World/Bake Scene (Edit Mode)。";
+                abortReason = $"缺少已烘焙的主场景 {MainScenePath}：请先执行 Jurassic World/Scene/Bake Scene (Edit Mode)。";
                 return false;
             }
 

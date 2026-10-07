@@ -26,7 +26,7 @@ namespace JurassicWorld.Editor
     /// 【与其它工具的分工】本工具会**修改**场景与 TerrainData（等价于菜单 Bake Scene）；
     /// 只读采集请用 ProductionAcceptance / UnderstoryDensityCheck。
     ///
-    /// 菜单：Jurassic World/Environment Spatial Rebalance/Bake + 影响对账
+    /// 菜单：Jurassic World/Acceptance/Spatial Rebalance/Bake + 影响对账
     /// 批处理：-executeMethod JurassicWorld.Editor.SpatialRebalanceBakeVerify.Run
     /// </summary>
     internal static class SpatialRebalanceBakeVerify
@@ -36,7 +36,12 @@ namespace JurassicWorld.Editor
         private const string OutputPath = "Logs/spatial_rebalance/accounting.txt";
         private const float SdTolerance = 0.05f;
 
-        [MenuItem("Jurassic World/Environment Spatial Rebalance/Bake + 影响对账", false, 40)]
+        [MenuItem("Jurassic World/Acceptance/Spatial Rebalance/Bake + 影响对账", false, 40)]
+        private static void MenuRunMenu() => JurassicMenuGuard.Run(MenuRun, true);
+
+        [MenuItem("Jurassic World/Acceptance/Spatial Rebalance/Bake + 影响对账", true)]
+        private static bool MenuRunMenuEnabled() => JurassicMenuGuard.CanRun;
+
         public static void MenuRun() => Run();
 
         public static void Run()

@@ -44,6 +44,11 @@ namespace JurassicWorld.Editor
         private static readonly float[] DeadwoodLodDistances = { 5f, 15f, 30f, 45f };
 
         [MenuItem("Jurassic World/Acceptance/7. Render Eye-Height Acceptance Shots", false, 7)]
+        private static void MenuCaptureMenu() => JurassicMenuGuard.Run(MenuCapture, true);
+
+        [MenuItem("Jurassic World/Acceptance/7. Render Eye-Height Acceptance Shots", true)]
+        private static bool MenuCaptureMenuEnabled() => JurassicMenuGuard.CanRun;
+
         public static void MenuCapture() => Capture();
 
         /// <summary>批处理入口：-executeMethod JurassicWorld.Editor.AcceptanceShotCapture.Capture</summary>

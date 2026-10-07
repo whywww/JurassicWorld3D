@@ -27,7 +27,12 @@ namespace JurassicWorld.Editor
         private static readonly int[] Headings = { 0, 78, 180, 270, 0, 90, 180, 270 };
         static LocalForestPlayPerformance() { EditorApplication.playModeStateChanged += OnState; }
 
-        [MenuItem("Jurassic World/Repair Southeast Forest/Compare Play Render Cost")]
+        [MenuItem("Jurassic World/Diagnostics/Southeast Forest/Compare Play Render Cost")]
+        private static void RunMenu() => JurassicMenuGuard.Run(Run, true);
+
+        [MenuItem("Jurassic World/Diagnostics/Southeast Forest/Compare Play Render Cost", true)]
+        private static bool RunMenuEnabled() => JurassicMenuGuard.CanRun;
+
         public static void Run()
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode || EditorSceneManager.GetActiveScene().isDirty)

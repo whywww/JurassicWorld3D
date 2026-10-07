@@ -90,7 +90,12 @@ namespace JurassicWorld.Editor
             new TreeSpec("Assets/VegetationDiversity/Prefabs/IslandTree02.prefab", 10f, 1.1f),
         };
 
-        [MenuItem("Jurassic World/Vegetation Diversity/Build Phase 2 Full Layout")]
+        [MenuItem("Jurassic World/Environment/Vegetation/Build Phase 2 Full Layout")]
+        private static void BuildFullLayoutMenu() => JurassicMenuGuard.Run(BuildFullLayout, true);
+
+        [MenuItem("Jurassic World/Environment/Vegetation/Build Phase 2 Full Layout", true)]
+        private static bool BuildFullLayoutMenuEnabled() => JurassicMenuGuard.CanRun;
+
         public static void BuildFullLayout()
         {
             var scene = EditorSceneManager.OpenScene(ScenePath);
@@ -292,7 +297,12 @@ namespace JurassicWorld.Editor
             return minimum;
         }
 
-        [MenuItem("Jurassic World/Vegetation Diversity/Validate Phase 2 Full Layout")]
+        [MenuItem("Jurassic World/Environment/Vegetation/Validate Phase 2 Full Layout")]
+        private static void ValidateFullLayoutMenu() => JurassicMenuGuard.Run(ValidateFullLayout, true);
+
+        [MenuItem("Jurassic World/Environment/Vegetation/Validate Phase 2 Full Layout", true)]
+        private static bool ValidateFullLayoutMenuEnabled() => JurassicMenuGuard.CanRun;
+
         public static void ValidateFullLayout()
         {
             EditorSceneManager.OpenScene(ScenePath);
@@ -372,7 +382,12 @@ namespace JurassicWorld.Editor
                 throw new InvalidOperationException($"LOD triangle counts do not decrease for {name}: {string.Join("/", triangles)}");
         }
 
-        [MenuItem("Jurassic World/Vegetation Diversity/Measure Phase 2 Render Cost")]
+        [MenuItem("Jurassic World/Diagnostics/Vegetation/Measure Phase 2 Render Cost")]
+        private static void MeasureFullRenderCostMenu() => JurassicMenuGuard.Run(MeasureFullRenderCost, true);
+
+        [MenuItem("Jurassic World/Diagnostics/Vegetation/Measure Phase 2 Render Cost", true)]
+        private static bool MeasureFullRenderCostMenuEnabled() => JurassicMenuGuard.CanRun;
+
         public static void MeasureFullRenderCost()
         {
             EditorSceneManager.OpenScene(ScenePath);

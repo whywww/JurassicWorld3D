@@ -15,7 +15,12 @@ namespace JurassicWorld.Editor
     {
         internal const string RootName = "Phase 2 Vegetation Islands";
 
-        [MenuItem("Jurassic World/Vegetation Diversity/Rebuild Midground Islands")]
+        [MenuItem("Jurassic World/Environment/Vegetation/Rebuild Midground Islands")]
+        private static void RebuildMidgroundIslandsMenu() => JurassicMenuGuard.Run(RebuildMidgroundIslands, true);
+
+        [MenuItem("Jurassic World/Environment/Vegetation/Rebuild Midground Islands", true)]
+        private static bool RebuildMidgroundIslandsMenuEnabled() => JurassicMenuGuard.CanRun;
+
         public static void RebuildMidgroundIslands()
         {
             var scene = EditorSceneManager.OpenScene("Assets/Scenes/Main.unity");

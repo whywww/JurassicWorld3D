@@ -4,7 +4,7 @@
 
 The five imported species have now been visually approved. **Central Forest Densification / Stage 1** uses them in natural groups across X[-60,60], Z[-50,82], alongside existing vegetation. The former comparison arrangement is retained inactive under **Preview Backup** for the Remove command. The following preview instructions describe the original comparison workflow; do not rebuild that separate preview while reviewing the forest.
 
-Use **Jurassic World > Central Forest** to build Stage One, append Stage Two after review, validate, remove this planting, or compare actual Play render cost without images. Stage One is saved in Main; Stage Two is prepared but has not been executed. `Assets/Editor/CentralForestStage.json` stores the confirmed stage, and Bake rebuilds only that stage after the existing passes.
+Use **Jurassic World > Environment > Central Forest** to build Stage One, append Stage Two after review, validate, remove this planting, while Play render cost comparison is under **Jurassic World > Diagnostics > Central Forest**. Stage One is saved in Main; Stage Two is prepared but has not been executed. `Assets/Editor/CentralForestStage.json` stores the confirmed stage, and Bake rebuilds only that stage after the existing passes.
 
 The current Stage One keeps **399 central trees**. Autumn forest occupies **20.02% of the full terrain footprint in the northwest**, with an 18m transition and sparse fringe. Of the 337 autumn trees originally inside the new region, **169 remain**; the rest are replaced with green trees at their existing sites. Regional conversion retains one tree for each of 313 Terrain instances and 16 original scene trees. Original instance fields and scene parents/transforms remain in `ForestRegionBackup` for Remove. Terrain heights, ground/creek layers and perimeter prototypes are unchanged.
 
@@ -20,9 +20,7 @@ Reports in `Tools/VegetationDiversity/CentralForest`: `DensityReport.md`, `North
 
 The original **Poly Haven Five Tree Preview** showed one each of Island Tree 01, Island Tree 03, Tree Small 02, Jacaranda Tree, and Fir Tree 01 (variant A). Prefabs retain native model sizes; the original Jacaranda comparison instance used 65% scale and the other four used 100%. This comparison was approved before forest distribution and is now retained as an inactive backup.
 
-Use **Jurassic World > Vegetation Diversity > Five Tree Preview** to prepare assets, build the central preview, validate it, or capture views. Rebuilding replaces only this preview root. The first build preserves `Tools/VegetationDiversity/Checkpoints/Main_BeforeFiveTreePreview.unity`.
-
-Actual scene renders and the placement/LOD validation report are saved in `Tools/VegetationDiversity/FiveTreePreview`. The overview, eye-level view, five individual tree views, and three forced-LOD comparison images use the existing scene lighting. Rendering does not move the player camera or save temporary visibility changes.
+The comparison build, validation and capture commands have been retired. Existing inactive preview backups, reports and images in `Tools/VegetationDiversity/FiveTreePreview` are historical records and remain available. Prepare the approved species through **Jurassic World > Assets > Prepare Five Forest Tree Species**; use the Central Forest commands for production planting.
 
 To reproduce the new assets, run `Download-FiveTreePreview.ps1`, then run `prepare_five_tree_preview.py` and `reduce_preview_foliage_lods.py` with Blender in background mode and the project directory after `--`. Source hashes are in each downloaded asset's manifest; triangle counts and native dimensions are in `Tools/VegetationDiversity/five-tree-model-report.json`.
 
@@ -32,15 +30,17 @@ The scene includes the previously reviewed 15-group layout plus 15 added groups 
 
 The Sketchfab Banana Tree source is supplied as `Palm.fbx`. Its bark vertices are widened 1.7× in the prepared `BananaTree.fbx` so the trunk remains visible at the scene's 2.8–4.0 m scale. Leaves, UVs, and bark material remain from the source. Regenerate it with `prepare_models.py banana <source Palm.fbx> <prepared BananaTree.fbx>` if needed.
 
-Editor commands under **Jurassic World > Vegetation Diversity**:
+Production layout commands are under **Jurassic World > Environment > Vegetation**; asset preparation and diagnostics have their own groups:
 
-- **Prepare Assets** refreshes the Built-in RP materials and prefabs from the prepared FBX files.
+- **Assets > Prepare Biome Vegetation** refreshes the Built-in RP materials and prefabs from the prepared FBX files.
 - **Build Phase 2 Full Layout** replaces this scene root idempotently and re-registers scene-tree trunk avoidance.
 - **Validate Phase 2 Full Layout** checks 30 groups plus the banana grove, 60 tree trunks, 12 clustered banana trees outside the creek, biome placement, all six route loops and turns, existing island saplings and central rocks, runtime obstacle registration, and Fab tree LODs.
-- **Measure Phase 2 Render Cost** compares offscreen 1280×720 CPU render submission with the root off and on, and reports mesh/texture memory. It does not measure GPU frame time.
+- **Diagnostics > Vegetation > Measure Phase 2 Render Cost** compares offscreen 1280×720 CPU render submission with the root off and on, and reports mesh/texture memory. It does not measure GPU frame time.
 
-`Jurassic World > Bake Scene` regenerates the full layout after terrain, rocks, and central islands are rebuilt. The bake hook does not add trees to TerrainData or alter ForestSeeder.
+`Jurassic World > Scene > Bake Scene` regenerates the full layout after terrain, rocks, and central islands are rebuilt. The bake hook does not add trees to TerrainData or alter ForestSeeder.
 
 The scene uses the prepared Sketchfab Banana Tree prefab in the 12 former coconut-palm slots. A fixed seed distributes them among three overlapping southeast clusters with randomized 2.8–4.0 m heights and headings. Placement fails rather than spreading a tree outside the clearing or into the creek. The downloaded Sketchfab palm source files remain archived but are not used by the scene.
 
 The previous coconut-palm layout measured 3.15 ms baseline vs 4.74 ms with the vegetation root active (+1.59 ms CPU render submission) at 1280×720. Re-run **Measure Phase 2 Render Cost** after this banana-tree replacement; GPU frame time is not measured in batch mode.
+
+The earlier 30×30 m prototype layout and its validation/performance commands have been retired in favor of Phase 2. Its asset preparation entry point remains available.

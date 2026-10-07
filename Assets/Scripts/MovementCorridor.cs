@@ -306,10 +306,11 @@ namespace JurassicWorld
     public static class MovementCorridorCrossings
     {
         private const float ZoneRadius = 11.5f;
-        private const float ApproachMargin = 4f;
+        private const float WaitingClearance = 0.5f;
 
         private sealed class CrossingGate
         {
+            public int RouteA, RouteB;
             public DinosaurAgent Owner;
         }
 
@@ -322,6 +323,16 @@ namespace JurassicWorld
         }
 
         private static readonly List<Zone> Zones = BuildZones();
+        private static readonly CrossingGate[] Gates = CollectGates();
+        private static readonly List<CrossingGate> RequestedGates = new List<CrossingGate>();
+
+        private static CrossingGate[] CollectGates()
+        {
+            var gates = new List<CrossingGate>();
+            foreach (Zone zone in Zones)
+                if (!gates.Contains(zone.Gate)) gates.Add(zone.Gate);
+            return gates.ToArray();
+        }
         public static int ZoneCount => Zones.Count;
         public static void GetZone(int index, out int routeA, out int routeB, out Vector2 center,
             out float radius)
@@ -345,7 +356,7 @@ namespace JurassicWorld
             for (int a = 0; a < MovementCorridor.RouteCount; a++)
             for (int b = a + 1; b < MovementCorridor.RouteCount; b++)
             {
-                var gate = new CrossingGate();
+                var gate = new CrossingGate { RouteA = a, RouteB = b };
                 for (int i = 0; i < MovementCorridor.SampleCount(a); i += 4)
                 for (int j = 0; j < MovementCorridor.SampleCount(b); j += 4)
                 {
@@ -369,6 +380,17 @@ namespace JurassicWorld
             => Zones.Exists(zone => zone.Gate == gate
                 && (zone.Center - position).sqrMagnitude < zone.Radius * zone.Radius);
 
+        // A waiting root must also be clear of every point the owner can traverse.
+        // Circles alone can leave it within collision range at an acute crossing.
+        private static bool IsProtected(CrossingGate gate, DinosaurAgent agent,
+            DinosaurAgent peer, Vector2 position)
+        {
+            int otherRoute = gate.RouteA == agent.RouteIndex ? gate.RouteB : gate.RouteA;
+            return IsInsideGate(gate, position)
+                || MovementCorridor.MinDistanceToRoute(position, otherRoute)
+                    < agent.CollisionRadius + peer.CollisionRadius + WaitingClearance;
+        }
+
         public static bool IsInside(int route, Vector2 position)
             => IsInside(route, position, -1);
 
@@ -384,46 +406,46 @@ namespace JurassicWorld
 
         public static bool CanAdvance(DinosaurAgent agent, DinosaurAgent[] peers, Vector2 next)
         {
-            foreach (Zone zone in Zones)
+            // Check each shared gate once, then reserve atomically after all checks pass.
+            RequestedGates.Clear();
+            foreach (CrossingGate gate in Gates)
             {
-                if (zone.RouteA != agent.RouteIndex && zone.RouteB != agent.RouteIndex) continue;
-                if ((zone.Center - next).sqrMagnitude >= zone.Radius * zone.Radius) continue;
-                int otherRoute = zone.RouteA == agent.RouteIndex ? zone.RouteB : zone.RouteA;
+                if (gate.RouteA != agent.RouteIndex && gate.RouteB != agent.RouteIndex) continue;
+                int otherRoute = gate.RouteA == agent.RouteIndex ? gate.RouteB : gate.RouteA;
                 DinosaurAgent peer = null;
                 foreach (DinosaurAgent candidate in peers)
-                    if (candidate != null && candidate.RouteIndex == otherRoute)
+                    if (candidate != null && candidate != agent && candidate.RouteIndex == otherRoute)
                     {
                         peer = candidate;
                         break;
                     }
                 if (peer == null) continue;
                 Vector2 peerPosition = new Vector2(peer.transform.position.x, peer.transform.position.z);
-                float peerDistance = Vector2.Distance(zone.Center, peerPosition);
-                if (zone.Gate.Owner != null)
+                if (gate.Owner != null)
                 {
-                    Vector2 ownerPosition = new Vector2(zone.Gate.Owner.transform.position.x,
-                        zone.Gate.Owner.transform.position.z);
-                    if (!IsInsideGate(zone.Gate, ownerPosition))
-                        zone.Gate.Owner = null;
+                    DinosaurAgent owner = gate.Owner;
+                    Vector2 ownerPosition = new Vector2(owner.transform.position.x,
+                        owner.transform.position.z);
+                    if (!owner.isActiveAndEnabled || (owner != agent && owner != peer)
+                        || !IsProtected(gate, owner, owner == agent ? peer : agent, ownerPosition))
+                        gate.Owner = null;
                 }
-                if (zone.Gate.Owner == null)
+                if (!IsProtected(gate, agent, peer, next)) continue;
+                if (gate.Owner == null)
                 {
                     Vector2 selfPosition = new Vector2(agent.transform.position.x, agent.transform.position.z);
-                    if (IsInsideGate(zone.Gate, peerPosition) && !IsInsideGate(zone.Gate, selfPosition))
-                        zone.Gate.Owner = peer;
-                    else if (peerDistance < zone.Radius + ApproachMargin &&
-                             peer.CurrentState == DinosaurAgent.DinosaurState.RandomWalk &&
-                             peer.LaneIndex < agent.LaneIndex)
-                        zone.Gate.Owner = peer;
+                    // Occupancy takes precedence. An approaching peer cannot preempt
+                    // an agent already inside, irrespective of name or lane index.
+                    if (IsProtected(gate, peer, agent, peerPosition)
+                        && !IsProtected(gate, agent, peer, selfPosition))
+                        gate.Owner = peer;
                 }
-                if (zone.Gate.Owner != null && zone.Gate.Owner != agent) return false;
+                if (gate.Owner != null && gate.Owner != agent) return false;
+                RequestedGates.Add(gate);
             }
             // Reserve all overlapping zones only after every zone grants passage.
             // A waiting dinosaur must not hold one zone while requesting another.
-            foreach (Zone zone in Zones)
-                if ((zone.RouteA == agent.RouteIndex || zone.RouteB == agent.RouteIndex) &&
-                    (zone.Center - next).sqrMagnitude < zone.Radius * zone.Radius)
-                    zone.Gate.Owner = agent;
+            foreach (CrossingGate gate in RequestedGates) gate.Owner = agent;
             return true;
         }
     }

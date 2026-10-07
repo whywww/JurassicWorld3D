@@ -42,7 +42,7 @@
 3. **Wind Zone 生效**：静置观察树冠约 5 秒，确认有轻微自然摆动，而非完全静止（验证 `WindZone` 组件已挂载并影响 Tree Creator shader）。
 4. **Skybox 自然无接缝**：抬头观察天空，确认显示渐变蓝天/云层（**非默认纯灰色或纯黑色**），且**画面中不存在竖直接缝线、云不被直线切断**（验证 `Assets/Materials/NaturalSkybox.mat`（Skybox/Panoramic 经纬度全景 + `NatureSkyPanorama.tga`）已绑定到 `RenderSettings.skybox`；旧 NSk2 cubemap 天空 `skybox.mat` 存在面缝伪影，已不再使用）。
 5. **外围起伏**：将相机推至地图边缘（±90m 附近），确认外围地形有轻微起伏但恐龙不会越界，边缘被远景树木自然遮挡。
-6. **Bake 幂等性**：连续执行两次 `Jurassic World > Bake Scene`，确认第二次运行后树木与草地实例数量**不变**（不重复播种），恐龙位置、相机、光照正常重建。第二次的 Editor 日志应出现 `[ForestSeeder] 结果与现有实例一致，跳过写回`（固定种子下逐字段比对命中，跳过 `treePrototypes` 赋值与 `SetTreeInstances`，避免重写 ~3MB 二进制资产并重烘树 billboard）。
+6. **Bake 幂等性**：连续执行两次 `Jurassic World > Scene > Bake Scene`，确认第二次运行后树木与草地实例数量**不变**（不重复播种），恐龙位置、相机、光照正常重建。第二次的 Editor 日志应出现 `[ForestSeeder] 结果与现有实例一致，跳过写回`（固定种子下逐字段比对命中，跳过 `treePrototypes` 赋值与 `SetTreeInstances`，避免重写 ~3MB 二进制资产并重烘树 billboard）。
 7. **森林密度量化对比**：`[ForestSeeder] 森林播种完成` 日志含 `attemptsUsed` / 接受率 / 是否触顶 `forestCapacity` / 物种直方图 / 径向密度直方图（按到核心矩形的原始距离分环带 `[5,10) [10,15) [15,20) [20,25) [25+)`）。执行「遮挡达标即止」密度迭代时，以该直方图做改参前后的逐带对比，`[5,10)` 带棵数同时是硬隔离自检指标（应显著小于外带且核心区泄漏为 0）。
 
 ### 失败排查
@@ -66,12 +66,9 @@
 - 天空盒 shader 必须为 `Skybox/Panoramic`（全景单张贴图连续采样，无 cubemap 面边界）；违反即抛异常并提示重新 Bake。
 - 天空材质 `_MainTex` 非空（对应 `NatureSkyPanorama.tga` 已就绪）。
 
-### 像素探针（临时工具，验证后可删除 `Assets/Editor/SkyProbeCapture.cs`）
+### 像素探针（历史验证记录）
 
-- 命令：`Unity.exe -batchmode -quit -projectPath <proj> -executeMethod JurassicWorld.Editor.SkyProbeCapture.Capture`（或菜单 Jurassic World > Capture Sky Probe）。
-- 探针以默认机位环绕 8 个方位各渲染一帧（`Logs/sky_probe_yaw*.png`），统计天空带逐列亮度均值的最大相邻差（已剔除树木暗列），输出 `SKY_SEAM_PROBE worstYaw/maxVerticalStep` 日志；<5 视为干净，>15 视为明显接缝。
-- 最差方位附带环绕列 ±6 列亮度剖面（区分"平均色条带"与"真实内容台阶"）。
-- 探针会临时关闭天空贴图 mip 重渲染同一方位做 A/B（`NOMIP_AB` 日志 + `Logs/sky_probe_nomip.png`），验证后自动恢复导入设置；若 mip=off 后台阶显著下降，说明残留属经纬度环绕列 mip 采样伪影（Bake 已强制关闭 mip）。
+天空接缝修复曾通过八个方位的渲染和禁用 mip 的 A/B 探针验证。一次性 `SkyProbeCapture` 工具及菜单已移除；已有报告和图像保留。当前天空配置继续由 `JurassicProjectSetup.ValidateProject` 校验。
 
 ## Understory Pass 验证（林下层植被 / 岩石 / 资产门控接口）
 
@@ -110,7 +107,7 @@
 
 ### 幂等与回滚演练
 
-1. **双 Bake 幂等（hash 判据）**：连续执行两次 `Jurassic World > Bake Scene (Edit Mode)`。
+1. **双 Bake 幂等（hash 判据）**：连续执行两次 `Jurassic World > Scene > Bake Scene (Edit Mode)`。
    - 第 1 次 Full Bake **合法地**修改 `JurassicTerrainData.asset`（正式写入 Fern detail data）——记录该文件的**文件 hash**；
    - 第 2 次 Full Bake 后再算 hash，**两次 hash 必须完全相同**；
    - 同时断言：Fern 各层 Σdensity 一致；Rock / Deadwood 实例数一致；`Environment Props` 下 `Rock_Large_*` 仍为 12；不新增重复 prefab / material / texture；
@@ -148,7 +145,7 @@ Unity.exe -batchmode -quit -projectPath <proj> \
   -executeMethod JurassicWorld.Editor.PolyHavenPassPreview.Run \
   -logFile Logs/hq_preview.log
 ```
-或菜单 `Jurassic World > Preview HQ Asset Pass`。
+或菜单 `Jurassic World > Diagnostics > Preview HQ Asset Pass`。
 
 - **非破坏性契约**：克隆 `JurassicTerrainData`（`Object.Instantiate`）+ **Single 临时场景**，全部派生物落在克隆体与临时场景上；
   结束 / 异常 / 取消都销毁临时对象与克隆体；**全程不调用 `AssetDatabase.SaveAssets` / `SaveScene`**；
@@ -175,7 +172,7 @@ Unity.exe -batchmode -quit -projectPath <proj> \
   ⚠️ **排除词含 `tree`** —— 故 log / stump prefab 命名为 `DeadwoodLogTrunk02` / `DeadwoodStump01`，
   直接用源名 `DeadTreeTrunk02` / `TreeStump01` 会被**静默过滤**。
 - 若报告 FAIL `fern 层数为 0`：检查 `PolyHavenAssetIntegration.EnsureAssets` 日志是否报源资产缺失。
-- 若报告 FAIL `缺失 material / shader`：执行 `Jurassic World > Integrate PolyHaven Assets` 后重试；
+- 若报告 FAIL `缺失 material / shader`：执行 `Jurassic World > Assets > Integrate PolyHaven Assets` 后重试；
   Standard 材质在代码中创建时必须显式 `EnableKeyword("_NORMALMAP")` 与 `("_METALLICGLOSSMAP")`，否则法线 / 光滑度不生效。
 - 若报告 FAIL `Fern 透明像素占比` 越界：检查 `Fern02_AlbedoCutout.png` 的 mask 来源探查结论，或调 `Fern02_Cutout.mat` 的 `_Cutoff`。
 - 若报告 FAIL `fern 密度不守恒` 或 `存在 Σdensity 完全相同的 fern 层`：说明回退成了「每层写一份完整目标密度」，检查 `ApplyFernGate` 的变体拆分。
@@ -431,7 +428,7 @@ Unity.exe -batchmode -quit -projectPath <proj> \
 
 ### 机器验证（`SpatialRebalanceBakeVerify`）
 
-菜单 `Jurassic World/Environment Spatial Rebalance/Bake + 影响对账`，或批处理
+菜单 `Jurassic World/Acceptance/Spatial Rebalance/Bake + 影响对账`，或批处理
 `-executeMethod JurassicWorld.Editor.SpatialRebalanceBakeVerify.Run`。它在**同一进程内**执行
 「快照 → Bake#1 → 快照 → 逐项对账 → Bake#2 幂等 → `ValidateProject`」，报告写入
 `Logs/spatial_rebalance/accounting.txt`，合格标志 `JURASSIC_SPATIAL_REBALANCE_OK`。
@@ -524,7 +521,7 @@ fern 总目标密度 Σ=210982、各 variant Σ 守恒 OK；第 2 次 Bake 全�
 ## 恐龙不规则路线验证
 
 - 六条路线由 `MovementCorridor.LayoutSeed`（与地表生成共用的固定种子）生成：四条大小不同的不规则环线、两条去回程分开的斜向闭合环线。周期曲线平滑连接，交叉处保持各自路线，没有端点反向。
-- 只刷新路线时使用菜单 `Jurassic World > Rebuild Dinosaur Routes`。它会按已启用恐龙的实际行走动画、模型长宽与路线朝向扫掠，加 1 米余量，只移开树干、低处木质枝干及岩石；允许树叶、细枝和灌木轻微交叠，单次移位限制 12 米，再重绘地表土路；保留恐龙数量、速度及地图主体布局。完整 Bake 也使用同一份路径几何。
+- 只刷新路线时使用菜单 `Jurassic World > Environment > Routes > Rebuild Dinosaur Routes`。它会按已启用恐龙的实际行走动画、模型长宽与路线朝向扫掠，加 1 米余量，只移开树干、低处木质枝干及岩石；允许树叶、细枝和灌木轻微交叠，单次移位限制 12 米，再重绘地表土路；保留恐龙数量、速度及地图主体布局。完整 Bake 也使用同一份路径几何。
 - 批处理验收：`Unity.exe -batchmode -projectPath <project> -executeMethod JurassicWorld.Editor.DinosaurRouteAcceptance.Run -logFile Logs/routes-all-acceptance.log`，不要加 `-quit`，测试完成后会自动退出。
 - 验收覆盖 32 个种子的可复现性、边界、自交、环线接缝，以及当前地图的模型净空；Play Mode 分三组覆盖全部六条路线，共模拟 1200 秒，检查多圈闭合行走、贴线、瞬移、持续阻塞和同伴间距。成功日志为 `DINOSAUR_ROUTE_GEOMETRY_OK` 和 `DINOSAUR_ROUTE_MOVEMENT_OK`；地图预览输出到 `Logs/routes-map.png`。
 - 密林修复记录：`Logs/forest-restore.log`。仅从原始版本恢复匹配的障碍物位置，不整体回滚资产。1972 棵地形树保留数量，1942 棵保留原位置；局部避让移动 30 棵地形树、30 个场景障碍物，最大 11.25 米。木质与岩石使用实际子网格，排除叶片材质和高处树冠；关联景观组随岩石移动，但不把叶片和灌木算入岩石包围范围。
@@ -534,7 +531,7 @@ fern 总目标密度 Σ=210982、各 variant Σ 守恒 OK；第 2 次 Bake 全�
 ## 中心密林加密第一阶段（修正前检查点）
 
 - 已保存 Main，中心 X[-60,60] Z[-50,82] 共 399 棵乔木；加密组 283 棵，秋叶树 100 棵（25.1%）。按扣除必要路线净空后的 7084m² 可种植面积，密度达到外围 13 个样方中位值的 65.1%；完整数据见 `Tools/VegetationDiversity/CentralForest/DensityReport.md`。
-- `Jurassic World > Central Forest` 提供第一阶段构建、确认后追加第二阶段、验证、撤销和 Play 开销比较。`Assets/Editor/CentralForestStage.json` 固定为阶段 1；第二阶段没有运行。用户自行 Editor Play 视觉确认，不生成截图。
+- `Jurassic World > Environment > Central Forest` 提供第一阶段构建、确认后追加第二阶段、验证和撤销；Play 开销比较位于 `Jurassic World > Diagnostics > Central Forest`。`Assets/Editor/CentralForestStage.json` 固定为阶段 1；第二阶段没有运行。用户自行 Editor Play 视觉确认，不生成截图。
 - `Logs/central-forest-stage1.log`：落地、材料、LOD 引用、溪流避让及全部木质障碍的动画身体扫掠 + 1m 净空通过。`Logs/central-forest-repeat.log`：重复构建两次，位置、数量及 Terrain 树不变。
 - `Logs/central-forest-ownership.log`：在内存中撤销加密并恢复原五树预览，再通过持久化阶段的 Bake 钩子重建，树木及 580 个林下实例的位置完全一致；原有对象和地形树保留，阶段仍为 1。测试不保存场景。
 - `Logs/central-forest-routes-graphics.log`：32 个路线种子几何检查通过；全部六条路线累计模拟 1200 秒，多圈行走、同伴净空、无卡住或路线偏离通过。无图形模式不适用于现有地图渲染，因此 Play 验收使用正常图形设备。

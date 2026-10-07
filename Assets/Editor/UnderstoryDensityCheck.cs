@@ -15,7 +15,7 @@ namespace JurassicWorld.Editor
     /// R4 >19.5 团块带（bush 中高值 + 通道/泥斑减半）；地形边缘密林墙抬高。
     /// 中大型道具（rock/log/stump/hero bush）另由 DinoSafetyBuffer 约束在活动包络 +7.5m 之外，本图不含它们。
     ///
-    /// 菜单：Jurassic World/Check Understory Density；
+    /// 菜单：Jurassic World/Diagnostics/Check Understory Density；
     /// 批处理：-executeMethod JurassicWorld.Editor.UnderstoryDensityCheck.Run
     /// </summary>
     public static class UnderstoryDensityCheck
@@ -23,7 +23,7 @@ namespace JurassicWorld.Editor
         private const string TerrainDataPath = "Assets/Terrain/JurassicTerrainData.asset";
         private const int MapSize = 48;           // ASCII 图 48×48（每字符 ≈4.2m）
 
-        [MenuItem("Jurassic World/Check Understory Density")]
+        [MenuItem("Jurassic World/Diagnostics/Check Understory Density")]
         public static void Run()
         {
             TerrainData data = AssetDatabase.LoadAssetAtPath<TerrainData>(TerrainDataPath);
