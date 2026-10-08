@@ -14,7 +14,9 @@ $dc = $xml.SelectSingleNode('//PropertyGroup/DefineConstants').InnerText
 [void]$sb.AppendLine('-noconfig')
 [void]$sb.AppendLine('-nowarn:0169,USG0001')
 [void]$sb.AppendLine('-define:' + $dc)
-[void]$sb.AppendLine('-out:"' + (Join-Path $env:TEMP 'Assembly-CSharp.check.dll') + '"')
+$compileCheckDirectory = Join-Path $env:TEMP 'JurassicWorldCompileCheck'
+[void][System.IO.Directory]::CreateDirectory($compileCheckDirectory)
+[void]$sb.AppendLine('-out:"' + (Join-Path $compileCheckDirectory 'Assembly-CSharp.dll') + '"')
 
 foreach ($n in $xml.SelectNodes('//Reference/HintPath')) {
     $p = $n.InnerText
@@ -26,10 +28,17 @@ foreach ($n in $xml.SelectNodes('//Reference/HintPath')) {
     }
 }
 
+$runtimeSourcePaths = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
 foreach ($n in $xml.SelectNodes('//Compile[@Include]')) {
     $f = $n.GetAttribute('Include')
     $p = Join-Path $projDir $f
+    [void]$runtimeSourcePaths.Add($p)
     [void]$sb.AppendLine('"' + $p + '"')
+}
+
+# Unity-generated project files can lag behind newly added runtime components.
+foreach ($source in Get-ChildItem -LiteralPath (Join-Path $projDir 'Assets\Scripts') -Filter '*.cs' -Recurse) {
+    if ($runtimeSourcePaths.Add($source.FullName)) { [void]$sb.AppendLine('"' + $source.FullName + '"') }
 }
 
 $rsp = Join-Path $env:TEMP 'jw_runtime_check.rsp'
@@ -40,3 +49,4 @@ $mono = 'C:\Program Files\Unity 2022.3.62f3c1\Editor\Data\MonoBleedingEdge\bin\m
 $csc = 'C:\Program Files\Unity 2022.3.62f3c1\Editor\Data\MonoBleedingEdge\lib\mono\msbuild\Current\bin\Roslyn\csc.exe'
 & $mono $csc "@$rsp"
 Write-Host "CSC EXIT: $LASTEXITCODE"
+exit $LASTEXITCODE

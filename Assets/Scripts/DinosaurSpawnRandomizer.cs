@@ -102,6 +102,7 @@ namespace JurassicWorld
 
             var placedPositions = new List<Vector2>(agents.Length);
             var placedRadii = new List<float>(agents.Length);
+            var placedRoutes = new List<int>(agents.Length);
             int acceptedCount = 0;
             var routeCounts = new int[MovementCorridor.RouteCount];   // 各路线分到的恐龙数（日志用）
 
@@ -121,7 +122,7 @@ namespace JurassicWorld
                     int candidateRoute = routeOrder[(i + attemptRoute) % routeOrder.Length];
                     if (routeCounts[candidateRoute] != 0) continue;
                     if (!TrySamplePosition(agent, candidateRoute, hasCamera, cameraXZ, propPositions, propRadii,
-                            placedPositions, placedRadii, random, out position)) continue;
+                            placedPositions, placedRadii, placedRoutes, random, out position)) continue;
                     route = candidateRoute;
                     break;
                 }
@@ -132,6 +133,7 @@ namespace JurassicWorld
                 agent.ApplySpawnPlacement(position, route);
                 placedPositions.Add(position);
                 placedRadii.Add(agent.CollisionRadius);
+                placedRoutes.Add(route);
                 routeCounts[route]++;
 
                 Debug.Log($"[SpawnRandomizer] {agent.DisplayName}: 随机路线[{route}] {MovementCorridor.GetRouteName(route)}，" +
@@ -154,7 +156,7 @@ namespace JurassicWorld
         /// </summary>
         private static bool TrySamplePosition(DinosaurAgent agent, int route, bool hasCamera, Vector2 cameraXZ,
             List<Vector2> propPositions, List<float> propRadii,
-            List<Vector2> placedPositions, List<float> placedRadii,
+            List<Vector2> placedPositions, List<float> placedRadii, List<int> placedRoutes,
             System.Random random, out Vector2 result)
         {
             float radius = agent.CollisionRadius;
@@ -164,7 +166,7 @@ namespace JurassicWorld
             {
                 Vector2 candidate = SampleCorridorCandidate(agent, route, random);
                 if (IsSpawnSafe(route, candidate, radius, treeAvoidRadius, hasCamera, cameraXZ,
-                        propPositions, propRadii, placedPositions, placedRadii))
+                        propPositions, propRadii, placedPositions, placedRadii, placedRoutes))
                 {
                     result = candidate;
                     return true;
@@ -177,7 +179,7 @@ namespace JurassicWorld
                 float arc = MovementCorridor.GetSample(route, sample).Distance;
                 Vector2 candidate = MovementCorridor.PointAt(route, arc);
                 if (IsSpawnSafe(route, candidate, radius, treeAvoidRadius, hasCamera, cameraXZ,
-                        propPositions, propRadii, placedPositions, placedRadii))
+                        propPositions, propRadii, placedPositions, placedRadii, placedRoutes))
                 {
                     result = candidate;
                     return true;
@@ -190,8 +192,11 @@ namespace JurassicWorld
 
         private static bool IsSpawnSafe(int route, Vector2 candidate, float radius, float treeAvoidRadius,
             bool hasCamera, Vector2 cameraXZ, List<Vector2> propPositions, List<float> propRadii,
-            List<Vector2> placedPositions, List<float> placedRadii)
+            List<Vector2> placedPositions, List<float> placedRadii, List<int> placedRoutes)
         {
+            for (int i = 0; i < placedPositions.Count; i++)
+                if (!MovementCorridorCrossings.CanSpawnTogether(route, candidate, radius,
+                    placedRoutes[i], placedPositions[i], placedRadii[i])) return false;
             return (!hasCamera || Vector2.Distance(candidate, cameraXZ) >= CameraMinDistance)
                 && !TerrainTreeObstacleRegistry.IsBlocked(candidate, treeAvoidRadius)
                 && !OverlapsCircles(candidate, radius + PropMargin, propPositions, propRadii)

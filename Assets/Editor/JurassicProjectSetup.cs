@@ -133,6 +133,8 @@ namespace JurassicWorld.Editor
             // （中央 ~161 棵 + 外围森林 ~1500-2200 棵）；回滚态（森林段已被精确剥离）只要求中央段 >= 100。
             int minTrees = ForestSeeder.ForestEnabled ? 400 : 100;
             int treeCount = terrain.terrainData.treeInstanceCount;
+            var foliageConversion = Object.FindObjectOfType<FoliageTerrainConversion>();
+            if (foliageConversion != null) treeCount += foliageConversion.removed.Length;
             if (treeCount < minTrees)
                 throw new InvalidDataException(
                     $"Terrain 树实例数不足：treeInstanceCount={treeCount} < 阈值 {minTrees}（ForestSeeder.ForestEnabled={ForestSeeder.ForestEnabled}），" +

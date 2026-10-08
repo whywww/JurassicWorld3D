@@ -75,8 +75,8 @@ namespace JurassicWorld
         // 【Dense Jungle Phase 1】漫步目标改由 MovementCorridor（恐龙移动通道）决定：不再是
         // 「当前朝向 ±WanderTurnAngle 转向」的自由游走，而是沿通道的**自有车道** ±步长推进。
         // 原 WanderTurnAngle(70°) 常量随之移除；步长上限与车道常量见下。
-        private const float WanderStepDistance = 18f;
-        private const float WanderStepDistanceMin = 8f;
+        private const float WanderStepDistance = 36f;
+        private const float WanderStepDistanceMin = 16f;
 
         // ─── 车道（lane）：「每只恐龙各走各的」的来源 ───────────────────────────────
         // Phase 1 首版让所有恐龙把目标投影回**同一条中心线**再叠 ±2.5m 抖动，
@@ -638,7 +638,7 @@ namespace JurassicWorld
         {
             waitingAtCrossing = false;
             CurrentState = DinosaurState.RandomWalk;
-            stateTimer = Range(4f, 8f);
+            stateTimer = Range(8f, 16f);
             blockedTime = 0f;
             priorityBlockedTime = 0f;
             target = ComputeWanderTarget();   // 内部会清 targetIsYieldTarget

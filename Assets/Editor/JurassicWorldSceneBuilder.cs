@@ -42,6 +42,7 @@ namespace JurassicWorld.Editor
         // 建造入口：清空当前场景后重建全部内容（幂等，避免与已烘焙对象重复）。
         public static void Build()
         {
+            FoliageInteractionPreparation.RestoreCurrent();
             ClearActiveScene();
             DeleteLegacyEnvironmentAssets();
             // HQ 资产铸造（幂等）：确保 Assets/Vegetation/{Ferns,Rocks,Deadwood} 下的 project-owned
@@ -68,6 +69,7 @@ namespace JurassicWorld.Editor
             GroundEcologyPass.SeedSurface(UnityEngine.Object.FindObjectOfType<Terrain>());
             CentralForestDensification.SeedConfiguredStage();
             LocalForestRepair.SeedConfigured();
+            FoliageInteractionPreparation.SeedConfigured();
             // Dense Jungle Phase 1：可开关的通道 debug 标注（纯场景线段，不动 TerrainData / 植被 Pass）。
             BuildMovementCorridorDebug();
         }

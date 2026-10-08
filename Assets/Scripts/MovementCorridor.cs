@@ -376,19 +376,32 @@ namespace JurassicWorld
             return zones;
         }
 
-        private static bool IsInsideGate(CrossingGate gate, Vector2 position)
-            => Zones.Exists(zone => zone.Gate == gate
-                && (zone.Center - position).sqrMagnitude < zone.Radius * zone.Radius);
-
         // A waiting root must also be clear of every point the owner can traverse.
         // Circles alone can leave it within collision range at an acute crossing.
         private static bool IsProtected(CrossingGate gate, DinosaurAgent agent,
             DinosaurAgent peer, Vector2 position)
         {
             int otherRoute = gate.RouteA == agent.RouteIndex ? gate.RouteB : gate.RouteA;
-            return IsInsideGate(gate, position)
+            return IsConflictPosition(agent.RouteIndex, position, otherRoute,
+                agent.CollisionRadius + peer.CollisionRadius);
+        }
+
+        private static bool IsConflictPosition(int route, Vector2 position,
+            int otherRoute, float combinedRadius)
+            => IsInside(route, position, otherRoute)
                 || MovementCorridor.MinDistanceToRoute(position, otherRoute)
-                    < agent.CollisionRadius + peer.CollisionRadius + WaitingClearance;
+                    < combinedRadius + WaitingClearance;
+
+        // Root-to-root spawn spacing is insufficient: a stationary occupant can
+        // obstruct the owner's exit much later. At most one may start inside
+        // the protected region shared by their routes.
+        public static bool CanSpawnTogether(int route, Vector2 position, float radius,
+            int peerRoute, Vector2 peerPosition, float peerRadius)
+        {
+            float combinedRadius = radius + peerRadius;
+            return Vector2.Distance(position, peerPosition) >= combinedRadius
+                && !(IsConflictPosition(route, position, peerRoute, combinedRadius)
+                    && IsConflictPosition(peerRoute, peerPosition, route, combinedRadius));
         }
 
         public static bool IsInside(int route, Vector2 position)

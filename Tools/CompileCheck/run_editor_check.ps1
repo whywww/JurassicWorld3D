@@ -14,7 +14,10 @@ $dc = $xml.SelectSingleNode('//PropertyGroup/DefineConstants').InnerText
 [void]$sb.AppendLine('-noconfig')
 [void]$sb.AppendLine('-nowarn:0169,USG0001')
 [void]$sb.AppendLine('-define:' + $dc)
-[void]$sb.AppendLine('-out:"' + (Join-Path $env:TEMP 'Assembly-CSharp-Editor.check.dll') + '"')
+# Keep Unity's assembly name so InternalsVisibleTo checks match the real editor build.
+$compileCheckDirectory = Join-Path $env:TEMP 'JurassicWorldCompileCheck'
+[void][System.IO.Directory]::CreateDirectory($compileCheckDirectory)
+[void]$sb.AppendLine('-out:"' + (Join-Path $compileCheckDirectory 'Assembly-CSharp-Editor.dll') + '"')
 
 foreach ($n in $xml.SelectNodes('//Reference/HintPath')) {
     $p = $n.InnerText
@@ -26,7 +29,8 @@ foreach ($n in $xml.SelectNodes('//Reference/HintPath')) {
     }
 }
 
-$ac = Join-Path $projDir 'Library\ScriptAssemblies\Assembly-CSharp.dll'
+$ac = Join-Path $compileCheckDirectory 'Assembly-CSharp.dll'
+if (-not (Test-Path -LiteralPath $ac)) { $ac = Join-Path $projDir 'Library\ScriptAssemblies\Assembly-CSharp.dll' }
 if (Test-Path -LiteralPath $ac) { [void]$sb.AppendLine('-r:"' + $ac + '"') }
 
 # Project references compile into Unity's ScriptAssemblies, rather than HintPath entries.

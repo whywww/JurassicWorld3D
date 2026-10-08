@@ -76,15 +76,41 @@ public static class CrossingRegression
         }
         Console.WriteLine("PASS occupied-first, reserved entry, idle owner, safe waiting, release (both directions and indices)");
     }
-    static void Simulate(int routeA, int routeB, bool reverseOrder, bool originalSpawn = false)
+    static void Simulate(int routeA, int routeB, bool reverseOrder, int recordedSpawn = 0, int spawnSeed = -1)
     {
         Reset();
         var agents = new[] { Agent(routeA, 5f, 1), Agent(routeB, 1.5f, 0) };
         float[] arcs = { SafeArc(routeA, routeB, .15f), SafeArc(routeB, routeA, .65f) };
-        if (originalSpawn)
+        if (recordedSpawn != 0)
         {
-            MovementCorridor.ProjectToCorridor(3, new Vector2(-11.5f, 39.3f), out arcs[0], out _);
-            MovementCorridor.ProjectToCorridor(5, new Vector2(-22.2f, 51.4f), out arcs[1], out _);
+            Vector2 rex = recordedSpawn == 1 ? new Vector2(-11.5f, 39.3f) : new Vector2(-44f, 48f);
+            Vector2 raptor = recordedSpawn == 1 ? new Vector2(-22.2f, 51.4f) : new Vector2(-23.7f, 60.1f);
+            MovementCorridor.ProjectToCorridor(routeA, rex, out arcs[0], out _);
+            MovementCorridor.ProjectToCorridor(routeB, raptor, out arcs[1], out _);
+        }
+        if (spawnSeed >= 0)
+        {
+            var random = new System.Random(spawnSeed);
+            arcs[0] = (float)random.NextDouble() * MovementCorridor.Length(routeA);
+            bool accepted = false;
+            for (int attempt = 0; attempt < 200; attempt++)
+            {
+                arcs[1] = (float)random.NextDouble() * MovementCorridor.Length(routeB);
+                Vector2 p = MovementCorridor.PointAt(routeA, arcs[0]), q = MovementCorridor.PointAt(routeB, arcs[1]);
+                if (!MovementCorridorCrossings.CanSpawnTogether(routeA, p, 5f, routeB, q, 1.5f)
+                    || Vector2.Distance(p, q) < 12.5f) continue;
+                accepted = true; break;
+            }
+            Require(accepted, "No compatible random spawn");
+        }
+        if (recordedSpawn == 2)
+        {
+            Require(!MovementCorridorCrossings.CanSpawnTogether(routeA, MovementCorridor.PointAt(routeA, arcs[0]), 5f,
+                routeB, MovementCorridor.PointAt(routeB, arcs[1]), 1.5f), "Unsafe recorded spawn was accepted");
+            // Production rejects this candidate and samples another. Pick the first
+            // safe sample here so the replay is deterministic.
+            arcs[1] = SafeArc(routeB, routeA, arcs[1] / MovementCorridor.Length(routeB));
+            Console.WriteLine("PASS rejected both-occupied recorded spawn; replaying with safe replacement");
         }
         float[] travelled = new float[2], stopped = new float[2];
         float[] timers = { 5f, 7f };
@@ -114,19 +140,25 @@ public static class CrossingRegression
             else stopped[i] += .1f;
             Require(Vector2.Distance(Position(a), Position(b)) >= 6.49f, "Overlap");
             Require(Math.Min(stopped[0], stopped[1]) < 120f,
-                $"Deadlock routes={routeA},{routeB} original={originalSpawn} frame={frame} positions={Position(agents[0])},{Position(agents[1])}");
+                $"Deadlock routes={routeA},{routeB} recorded={recordedSpawn} frame={frame} positions={Position(agents[0])},{Position(agents[1])}");
         }
         for (int i = 0; i < 2; i++) Require(travelled[i] > MovementCorridor.Length(agents[i].RouteIndex) * 2f, "Did not complete two loops");
-        Console.WriteLine($"PASS routes={routeA},{routeB} reverse={reverseOrder} original={originalSpawn} travelled={travelled[0]:F1},{travelled[1]:F1}");
+        Console.WriteLine($"PASS routes={routeA},{routeB} reverse={reverseOrder} recorded={recordedSpawn} seed={spawnSeed} travelled={travelled[0]:F1},{travelled[1]:F1}");
     }
     public static int Main()
     {
         try
         {
             OccupancyAndReservation();
-            Simulate(3, 5, false, true);
+            Simulate(5, 3, false, 2);
+            Simulate(5, 3, true, 2);
+            Simulate(3, 5, false, 1);
             for (int a = 0; a < 6; a++) for (int b = a + 1; b < 6; b++)
-            { Simulate(a, b, false); Simulate(a, b, true); }
+            {
+                Simulate(a, b, false); Simulate(a, b, true);
+                Simulate(a, b, false, 0, 1000 + a * 6 + b);
+                Simulate(b, a, true, 0, 2000 + a * 6 + b);
+            }
             return 0;
         }
         catch (Exception e) { Console.Error.WriteLine(e); return 1; }
