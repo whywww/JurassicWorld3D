@@ -39,7 +39,7 @@ Production layout commands are under **Jurassic World > Environment > Vegetation
 
 `Jurassic World > Scene > Bake Scene` regenerates the full layout after terrain, rocks, and central islands are rebuilt. The bake hook does not add trees to TerrainData or alter ForestSeeder.
 
-The scene uses the prepared Sketchfab Banana Tree prefab in the 12 former coconut-palm slots. A fixed seed distributes them among three overlapping southeast clusters with randomized 2.8–4.0 m heights and headings. Placement fails rather than spreading a tree outside the clearing or into the creek. The downloaded Sketchfab palm source files remain archived but are not used by the scene.
+The scene uses the prepared Sketchfab Banana Tree prefab in the 12 former coconut-palm slots. A fixed seed distributes them among three overlapping southeast clusters with randomized 2.8–4.0 m heights and headings. Placement fails rather than spreading a tree outside the clearing or into the creek. The retired Sketchfab Palm Trees source archive, models, textures, materials and prefabs have been removed. The four palm instances in the pre-Phase-2 checkpoint have also been removed; the Banana Tree source named Palm.fbx is retained.
 
 The previous coconut-palm layout measured 3.15 ms baseline vs 4.74 ms with the vegetation root active (+1.59 ms CPU render submission) at 1280×720. Re-run **Measure Phase 2 Render Cost** after this banana-tree replacement; GPU frame time is not measured in batch mode.
 

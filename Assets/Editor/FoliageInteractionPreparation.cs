@@ -429,7 +429,7 @@ namespace JurassicWorld.Editor
             }
         }
 
-        private static DinosaurFoliageInteractor BakeInteractor(DinosaurAgent agent)
+        internal static DinosaurFoliageInteractor BakeInteractor(DinosaurAgent agent)
         {
             var interactor = agent.GetComponent<DinosaurFoliageInteractor>() ?? agent.gameObject.AddComponent<DinosaurFoliageInteractor>();
             var capsules = new List<DinosaurFoliageInteractor.Capsule>();

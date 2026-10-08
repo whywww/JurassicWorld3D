@@ -76,10 +76,10 @@ namespace JurassicWorld.Editor
 
         // 编辑态断言：不点 Play，打开烘焙后的 Main.unity，检查场景内已存在相机、方向光与「当前启用数量」
         // （JurassicWorldSceneBuilder.EnabledDinosaurCount）的挂 DinosaurAgent 的恐龙 GameObject。
-        [MenuItem("Jurassic World/Scene/Validate MVP")]
+        [MenuItem("Jurassic World/Scene/Validate Scene")]
         private static void ValidateProjectMenu() => JurassicMenuGuard.Run(ValidateProject, true);
 
-        [MenuItem("Jurassic World/Scene/Validate MVP", true)]
+        [MenuItem("Jurassic World/Scene/Validate Scene", true)]
         private static bool ValidateProjectMenuEnabled() => JurassicMenuGuard.CanRun;
 
         public static void ValidateProject()

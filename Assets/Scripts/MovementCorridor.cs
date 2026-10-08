@@ -325,6 +325,7 @@ namespace JurassicWorld
         private static readonly List<Zone> Zones = BuildZones();
         private static readonly CrossingGate[] Gates = CollectGates();
         private static readonly List<CrossingGate> RequestedGates = new List<CrossingGate>();
+        private static DinosaurAgent trafficOwner;
 
         private static CrossingGate[] CollectGates()
         {
@@ -347,6 +348,7 @@ namespace JurassicWorld
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void ResetOwners()
         {
+            trafficOwner = null;
             foreach (Zone zone in Zones) zone.Gate.Owner = null;
         }
 
@@ -388,9 +390,11 @@ namespace JurassicWorld
 
         private static bool IsConflictPosition(int route, Vector2 position,
             int otherRoute, float combinedRadius)
-            => IsInside(route, position, otherRoute)
-                || MovementCorridor.MinDistanceToRoute(position, otherRoute)
-                    < combinedRadius + WaitingClearance;
+            // Debug circles can cover almost an entire short loop. Reserving them
+            // prevents its owner from ever releasing a gate, starving other routes.
+            // Reserve only where a stopped root could obstruct the peer's path.
+            => MovementCorridor.MinDistanceToRoute(position, otherRoute)
+                < combinedRadius + WaitingClearance;
 
         // Root-to-root spawn spacing is insufficient: a stationary occupant can
         // obstruct the owner's exit much later. At most one may start inside
@@ -419,6 +423,9 @@ namespace JurassicWorld
 
         public static bool CanAdvance(DinosaurAgent agent, DinosaurAgent[] peers, Vector2 next)
         {
+            int peerCount = 0;
+            foreach (var peer in peers) if (peer != null && peer != agent) peerCount++;
+            if (peerCount >= 2) return CanAdvanceTrafficGroup(agent, peers, next);
             // Check each shared gate once, then reserve atomically after all checks pass.
             RequestedGates.Clear();
             foreach (CrossingGate gate in Gates)
@@ -461,5 +468,32 @@ namespace JurassicWorld
             foreach (CrossingGate gate in RequestedGates) gate.Owner = agent;
             return true;
         }
+
+        private static bool InTrafficRegion(DinosaurAgent agent, DinosaurAgent[] peers, Vector2 point, DinosaurAgent extraPeer = null)
+        {
+            foreach (var peer in peers)
+                if (peer != null && peer != agent && peer.RouteIndex != agent.RouteIndex
+                    && IsConflictPosition(agent.RouteIndex, point, peer.RouteIndex, agent.CollisionRadius + peer.CollisionRadius)) return true;
+            return extraPeer != null && extraPeer != agent && extraPeer.RouteIndex != agent.RouteIndex
+                && IsConflictPosition(agent.RouteIndex, point, extraPeer.RouteIndex, agent.CollisionRadius + extraPeer.CollisionRadius);
+        }
+
+        private static bool CanAdvanceTrafficGroup(DinosaurAgent agent, DinosaurAgent[] peers, Vector2 next)
+        {
+            // One lease across the connected traffic group prevents three agents
+            // from occupying separate pair gates and blocking each other's exits.
+            if (trafficOwner != null)
+            {
+                Vector2 ownerPoint = new Vector2(trafficOwner.transform.position.x, trafficOwner.transform.position.z);
+                if (!trafficOwner.isActiveAndEnabled || !InTrafficRegion(trafficOwner, peers, ownerPoint, agent)) trafficOwner = null;
+            }
+            if (!InTrafficRegion(agent, peers, next)) return true;
+            if (trafficOwner == null) trafficOwner = agent;
+            return trafficOwner == agent;
+        }
+
+        public static bool ShouldKeepMoving(DinosaurAgent agent, Vector2 point)
+            => trafficOwner == agent || IsInside(agent.RouteIndex, point);
+
     }
 }

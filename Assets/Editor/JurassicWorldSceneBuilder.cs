@@ -1133,6 +1133,7 @@ namespace JurassicWorld.Editor
 
         private static void BuildDinosaurs(Camera camera, Font font)
         {
+            StegosaurusSceneIntegration.EnsureAssets();
             foreach (DinosaurTemplate template in CreateTemplates())
             {
                 if (!template.enabled)
@@ -1145,7 +1146,7 @@ namespace JurassicWorld.Editor
             }
         }
 
-        private static void BuildDinosaur(DinosaurTemplate t, Camera camera, Font font)
+        private static DinosaurAgent BuildDinosaur(DinosaurTemplate t, Camera camera, Font font)
         {
             var root = new GameObject(t.objectName);
             root.transform.position = t.position;
@@ -1174,7 +1175,7 @@ namespace JurassicWorld.Editor
             visualRoot.transform.SetParent(root.transform, false);
 
             GameObject model = InstantiateModel(t, visualRoot.transform);
-            if (model != null)
+            if (model != null && !t.preserveSourceMaterials)
                 ApplyBakedMaterials(model, t);
 
             // Fit 只在烘焙时算一次并把缩放/位置写入 transform（非幂等，运行期绑定器不再调用）。
@@ -1202,6 +1203,7 @@ namespace JurassicWorld.Editor
             SetField(loader, "footRiseThreshold", t.footRiseThreshold);
             SetField(loader, "footLockDistanceLimit", t.footLockDistanceLimit);
             EditorUtility.SetDirty(loader);
+            return agent;
         }
 
         // ---------------------------------------------------------------- 烘焙期脚部接地对齐 + 步幅/地速校准
@@ -2123,10 +2125,12 @@ namespace JurassicWorld.Editor
 
         private static GameObject InstantiateModel(DinosaurTemplate t, Transform parent)
         {
-            GameObject prefab = Resources.Load<GameObject>(t.resourcePath);
+            GameObject prefab = string.IsNullOrEmpty(t.assetPath)
+                ? Resources.Load<GameObject>(t.resourcePath)
+                : AssetDatabase.LoadAssetAtPath<GameObject>(t.assetPath);
             if (prefab == null)
             {
-                Debug.LogError("[SceneBuilder] 未找到恐龙 FBX 资源：Resources/" + t.resourcePath +
+                Debug.LogError("[SceneBuilder] 未找到恐龙模型资源：" + (string.IsNullOrEmpty(t.assetPath) ? "Resources/" + t.resourcePath : t.assetPath) +
                     "（若为并行导入任务尚未完成，请先导入素材再烘焙）。");
                 return null;
             }
@@ -2137,6 +2141,16 @@ namespace JurassicWorld.Editor
             model.transform.localRotation = Quaternion.Euler(0f, t.yaw, 0f);
             model.transform.localScale = Vector3.one;
             return model;
+        }
+
+        internal static DinosaurAgent AddStegosaurusToCurrentScene()
+        {
+            Camera camera = Camera.main;
+            if (camera == null) throw new InvalidOperationException("Main camera required to add Stegosaurus.");
+            DinosaurTemplate template = CreateTemplates().Single(t => t.objectName == "Stegosaurus");
+            MovementCorridor.GetSampleAt(2, MovementCorridor.Length(2) * .35f, out Vector2 point, out Vector2 tangent);
+            template.position = new Vector3(point.x, 0f, point.y);
+            return BuildDinosaur(template, camera, LoadBuiltinFont());
         }
 
         private static void ApplyBakedMaterials(GameObject model, DinosaurTemplate t)
@@ -2386,6 +2400,8 @@ namespace JurassicWorld.Editor
             public string objectName;
             public string displayName;
             public string resourcePath;
+            public string assetPath;
+            public bool preserveSourceMaterials;
             public Vector3 position;
             public float targetLength;
             public float yaw;
@@ -2483,28 +2499,6 @@ namespace JurassicWorld.Editor
                     collisionRadius = 5f,   // 体长 15m 的顶级掠食者：行为级碰撞半径取 5m
                 },
 
-                // 风神翼龙（原为 GLB 翼龙，现改 FBX；飞行单位，EnableFootLock=false、alignBottom=false、y 抬高）。
-                new DinosaurTemplate
-                {
-                    enabled = false,   // 用户要求暂时禁用（不显示）
-                    objectName = "Quetzalcoatlus",
-                    displayName = "风神翼龙",
-                    resourcePath = "Dinosaurs/Quetzalcoatlus/source/Quetzalcoatlus",
-                    position = new Vector3(10f, 11f, 27f),
-                    targetLength = 8f,
-                    yaw = 180f,
-                    focusHeight = 1.2f,
-                    walkSpeed = 3.8f,
-                    description = "风神翼龙  Quetzalcoatlus\n\n生存年代：晚白垩世\n食性：肉食性\n活动方式：飞行\n\n白垩纪晚期最大的飞行动物之一，翼展可达 10 米以上，以鱼类和小型动物为食。",
-                    idleHint = "idle",
-                    moveHint = "fly",
-                    alignBottom = false,
-                    enableFootLock = false,
-                    primaryAlbedo = "Dinosaurs/Quetzalcoatlus/textures/b48",
-                    collisionRadius = 3f,   // 翼展大但身体细长：取中等碰撞半径
-                    groundObstacleAware = false,   // 飞行单位：不被地面树干阻挡（TerrainTreeObstacleRegistry 查询跳过）
-                },
-
                 // 胜王龙
                 new DinosaurTemplate
                 {
@@ -2568,6 +2562,30 @@ namespace JurassicWorld.Editor
                     footContactHeight = 0.12f,
                     footRiseThreshold = 0.001f,
                     collisionRadius = 1.5f,   // 体长 2.7m 小型猎手：与 DinosaurTemplate 默认值一致
+                },
+
+                new DinosaurTemplate
+                {
+                    objectName = "Stegosaurus",
+                    enabled = false,   // 用户要求暂时禁用，保留配置以便恢复
+                    displayName = "剑龙",
+                    assetPath = StegosaurusSceneIntegration.PrefabPath,
+                    preserveSourceMaterials = true,
+                    position = new Vector3(18f, 0f, 24f),
+                    targetLength = 9f,
+                    yaw = 0f,
+                    focusHeight = 2.5f,
+                    walkSpeed = 1.15f,
+                    description = "剑龙  Stegosaurus\n\n植食性恐龙，拥有背部骨板和带刺的尾巴。\n场景体长：约 9 米。",
+                    idleHint = "Idle",
+                    moveHint = "Walk",
+                    footBoneNames = new[] { "Foot.L", "Foot.R", "BackFoot.L", "BackFoot.R", "Toes.L", "Toes.R", "BackToes.L", "BackToes.R" },
+                    footLockJointDepth = 2,
+                    releaseFootLockOnRise = true,
+                    footRiseThreshold = .001f,
+                    syncMoveAnimationSpeed = true,
+                    syncWalkSpeedToNative = true,
+                    collisionRadius = 3f,
                 },
 
                 // 阿根廷龙

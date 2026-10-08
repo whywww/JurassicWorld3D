@@ -18,9 +18,10 @@ namespace JurassicWorld.Editor
         private static float[] travelled;
         private static float[] lastProgress;
         private static float startTime;
+        private static float previousSampleTime;
         private static double deadline;
         private static int scenario = -1;
-        private static readonly int[,] RoutePairs = { { 0, 4 }, { 1, 2 }, { 3, 5 } };
+        private static readonly int[,] RoutePairs = { { 0, 4, 2 }, { 1, 2, 5 }, { 3, 5, 0 } };
 
         static DinosaurRouteAcceptance()
         {
@@ -171,6 +172,8 @@ namespace JurassicWorld.Editor
         {
             try
             {
+                if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().path != "Assets/Scenes/Main.unity")
+                    EditorSceneManager.OpenScene("Assets/Scenes/Main.unity");
                 VerifyGeometry();
                 SessionState.SetBool(PreviewKey, false);
                 SessionState.SetBool(ImagesKey, images);
@@ -196,18 +199,20 @@ namespace JurassicWorld.Editor
         {
             if (state != PlayModeStateChange.EnteredPlayMode) return;
             agents = UnityEngine.Object.FindObjectsOfType<DinosaurAgent>();
-            Require(agents.Length == 2, "Route verification expects the two enabled dinosaurs.");
+            Require(agents.Length == JurassicWorldSceneBuilder.EnabledDinosaurCount && agents.Length == RoutePairs.GetLength(1),
+                "Route verification expects the three enabled dinosaurs.");
             previous = new Vector3[agents.Length];
             travelled = new float[agents.Length];
             lastProgress = new float[agents.Length];
             startTime = Time.time;
+            previousSampleTime = Time.time;
             deadline = EditorApplication.timeSinceStartup + 150;
             for (int i = 0; i < agents.Length; i++)
             {
                 previous[i] = agents[i].transform.position;
                 lastProgress[i] = Time.time;
             }
-            Time.timeScale = 20f;
+            Time.timeScale = 4f;
             EditorApplication.update += VerifyMovement;
         }
 
@@ -222,9 +227,15 @@ namespace JurassicWorld.Editor
                 for (int sample = 0; sample < MovementCorridor.SampleCount(route); sample++)
                 {
                     Vector2 point = MovementCorridor.GetSample(route, sample).Position;
-                    if (MovementCorridorCrossings.IsInside(route, point, RoutePairs[index, 1 - i])) continue;
-                    if (i > 0 && Vector2.Distance(point, new Vector2(previous[0].x, previous[0].z))
-                        < agents[0].CollisionRadius + agents[i].CollisionRadius + 1f) continue;
+                    bool overlaps = false;
+                    for (int peer = 0; peer < i; peer++)
+                    {
+                        Vector2 peerPoint = new Vector2(previous[peer].x, previous[peer].z);
+                        if (Vector2.Distance(point, peerPoint) < agents[peer].CollisionRadius + agents[i].CollisionRadius + 1f ||
+                            !MovementCorridorCrossings.CanSpawnTogether(route, point, agents[i].CollisionRadius,
+                                agents[peer].RouteIndex, peerPoint, agents[peer].CollisionRadius)) overlaps = true;
+                    }
+                    if (overlaps) continue;
                     agents[i].ApplySpawnPlacement(point, route);
                     agents[i].SendMessage("BeginRandomWalk");
                     previous[i] = agents[i].transform.position;
@@ -236,8 +247,9 @@ namespace JurassicWorld.Editor
                 Require(placed, "No safe scenario placement for route " + route);
             }
             startTime = Time.time;
-            deadline = EditorApplication.timeSinceStartup + 150;
-            Debug.Log($"ROUTE_SCENARIO {index}: routes={RoutePairs[index, 0]},{RoutePairs[index, 1]}");
+            previousSampleTime = Time.time;
+            deadline = EditorApplication.timeSinceStartup + 350;
+            Debug.Log($"ROUTE_SCENARIO {index}: routes={RoutePairs[index, 0]},{RoutePairs[index, 1]},{RoutePairs[index, 2]}");
         }
 
         private static void VerifyMovement()
@@ -273,23 +285,28 @@ namespace JurassicWorld.Editor
                         Require(!TerrainTreeObstacleRegistry.IsCoreBlocked(new Vector2(position.x,position.z),new Vector2(forward.x,forward.z).normalized,core), "Core body intersects a trunk during movement: " + agents[i].DisplayName);
                     }
                     float step = Vector3.Distance(previous[i], position);
-                    Require(step < 5f, "Agent teleported: " + agents[i].DisplayName);
+                    float maxStep = Mathf.Max(agents[i].WalkSpeed, agents[i].ApproachSpeed) * (Time.time - previousSampleTime) + .1f;
+                    Require(step <= maxStep, $"Agent teleported: {agents[i].DisplayName}, step={step:F2}m, limit={maxStep:F2}m.");
                     travelled[i] += step;
                     if (step > .01f) lastProgress[i] = Time.time;
+                    if (Time.time - lastProgress[i] >= 120f) DumpTraffic();
                     Require(Time.time - lastProgress[i] < 120f, "Agent stuck: " + agents[i].DisplayName);
                     Require(MovementCorridor.MinDistanceToRoute(new Vector2(position.x, position.z), agents[i].RouteIndex) < .02f, "Agent left route.");
                     previous[i] = position;
                 }
-                Require(Vector3.Distance(agents[0].transform.position, agents[1].transform.position)
-                    >= agents[0].CollisionRadius + agents[1].CollisionRadius - .01f, "Dinosaurs overlap.");
-                if (Time.time - startTime < 400f) return;
+                previousSampleTime = Time.time;
+                for (int i = 0; i < agents.Length; i++)
+                    for (int j = i + 1; j < agents.Length; j++)
+                        Require(Vector3.Distance(agents[i].transform.position, agents[j].transform.position)
+                            >= agents[i].CollisionRadius + agents[j].CollisionRadius - .01f, "Dinosaurs overlap.");
+                if (Time.time - startTime < 600f) return;
                 for (int i = 0; i < agents.Length; i++)
                 {
                     Debug.Log($"ROUTE_MOVEMENT {agents[i].DisplayName} route={agents[i].RouteIndex} travelled={travelled[i]:F1}m");
                     Require(travelled[i] > MovementCorridor.Length(agents[i].RouteIndex) * 2f, "Agent did not complete route.");
                 }
                 if (scenario < RoutePairs.GetLength(0) - 1) { BeginScenario(scenario + 1); return; }
-                Debug.Log("DINOSAUR_ROUTE_MOVEMENT_OK: all six routes; 1200 simulated seconds; full routes, continuous movement, peer clearance, no stuck agents.");
+                Debug.Log("DINOSAUR_ROUTE_MOVEMENT_OK: all six routes; 1800 simulated seconds; full routes, continuous movement, peer clearance, no stuck agents.");
                 Finish(null);
             }
             catch (Exception error) { Finish(error); }
@@ -303,6 +320,28 @@ namespace JurassicWorld.Editor
             if (error != null) Debug.LogException(error);
             if (Application.isBatchMode) EditorApplication.Exit(error == null ? 0 : 1);
             else EditorApplication.isPlaying = false;
+        }
+
+        private static void DumpTraffic()
+        {
+            var flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
+            foreach (DinosaurAgent agent in agents)
+            {
+                int index = Array.IndexOf(agents, agent);
+                Vector2 position = new Vector2(agent.transform.position.x, agent.transform.position.z);
+                float nextArc = Mathf.Repeat(agent.RouteArc + .2f, MovementCorridor.Length(agent.RouteIndex));
+                MovementCorridor.GetSampleAt(agent.RouteIndex, nextArc, out Vector2 next, out Vector2 tangent);
+                Vector3 forward = agent.transform.rotation * Quaternion.Euler(0f, agent.VisualYaw, 0f) * Vector3.forward;
+                bool trunk = TerrainTreeObstacleRegistry.IsCoreStepBlocked(position, next, new Vector2(forward.x, forward.z), tangent, agent.GetComponent<DinosaurCoreBody>());
+                var blocker = typeof(DinosaurAgent).GetMethod("FindBlockingPeer", flags).Invoke(agent, new object[] { next }) as DinosaurAgent;
+                Debug.Log($"ROUTE_WAIT {agent.name} route={agent.RouteIndex} arc={agent.RouteArc:F1} position={agent.transform.position} travelled={travelled[index]:F1} lastProgress={Time.time-lastProgress[index]:F1}s trunk={trunk} peer={(blocker != null ? blocker.name : "none")} state={agent.CurrentState} waiting={typeof(DinosaurAgent).GetField("waitingAtCrossing", flags).GetValue(agent)}");
+            }
+            var gates = (Array)typeof(MovementCorridorCrossings).GetField("Gates", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null);
+            foreach (object gate in gates)
+            {
+                Type type = gate.GetType(); var owner = type.GetField("Owner", flags).GetValue(gate) as DinosaurAgent;
+                if (owner != null) Debug.Log($"ROUTE_GATE {type.GetField("RouteA", flags).GetValue(gate)}-{type.GetField("RouteB", flags).GetValue(gate)} owner={owner.name}");
+            }
         }
 
         private static void CaptureMap(WorldNavigationHud nav)

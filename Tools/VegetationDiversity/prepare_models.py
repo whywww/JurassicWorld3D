@@ -14,13 +14,7 @@ def export(objects, target):
                              axis_forward='-Z', axis_up='Y', add_leaf_bones=False)
     print(f'VEG_PREPARED {target} meshes={[obj.name for obj in objects if obj.type == "MESH"]}')
 
-if kind == 'palm':
-    for number in (1, 2, 3, 4):
-        bark = bpy.data.objects[f'Bark_{number}']
-        leaf = bpy.data.objects[f'Leaf_{number}']
-        bark.location.x = 0
-        export([bark, leaf], os.path.join(destination, f'Palm_{number}.fbx'))
-elif kind == 'pachira':
+if kind == 'pachira':
     for letter in 'abcd':
         bark = bpy.data.objects[f'pachira_aquatica_01_bark_{letter}']
         leaf = bpy.data.objects[f'pachira_aquatica_01_leaves_{letter}']

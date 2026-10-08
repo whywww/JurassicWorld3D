@@ -380,7 +380,7 @@ namespace JurassicWorld
                         if (waitingAtCrossing) break;
                         stateTimer -= Time.deltaTime;
                         Vector2 currentXZ = new Vector2(transform.position.x, transform.position.z);
-                        bool crossing = MovementCorridorCrossings.IsInside(routeIndex, currentXZ);
+                        bool crossing = MovementCorridorCrossings.ShouldKeepMoving(this, currentXZ);
                         if (crossing && walkRemaining <= 0.05f)
                             walkRemaining = 1f;
                         if (!crossing && (stateTimer <= 0f || walkRemaining <= 0.05f))

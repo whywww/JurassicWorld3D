@@ -15,7 +15,6 @@ namespace JurassicWorld.Editor
         private const string Source = "Assets/ThirdParty/VegetationDiversity";
         private const string Prepared = Source + "/Prepared";
         private const string Fab = Source + "/Source/FabDesktopTrees60";
-        private const string Palm = Source + "/Source/SketchfabPalmTrees/textures";
         private const string Banana = Source + "/Source/SketchfabBananaTree/textures";
         private const string Island = Source + "/PolyHaven/IslandTree02/textures";
         private const string Pachira = Source + "/PolyHaven/PachiraAquatica01/textures";
@@ -37,13 +36,6 @@ namespace JurassicWorld.Editor
             MakeMaterial("Fab_Trunk", standard, Fab + "/T_Trees60_Trunk.png", null,
                 Fab + "/T_Trees60_Trunk_normal.png", 0.12f);
             MakeMaterial("Fab_Leaf", foliage, Fab + "/T_Trees60_Leaf.png", null, null, 0.12f);
-
-            for (int i = 1; i <= 4; i++)
-            {
-                MakeMaterial("Palm_Bark_" + i, standard, Palm + $"/Bark_{i}_Bake1_pbr_diffuse.jpg", null, null, 0.12f);
-                int leaf = Mathf.Max(2, i);
-                MakeMaterial("Palm_Leaf_" + i, foliage, Palm + $"/PalmLeaf_{leaf}.png", null, null, 0.12f);
-            }
 
             MakeMaterial("Island_Trunk", standard, Island + "/island_tree_02_diff_1k.jpg", null,
                 Island + "/island_tree_02_nor_gl_1k.exr", 0.1f);
@@ -71,13 +63,11 @@ namespace JurassicWorld.Editor
             }
 
             foreach (int number in new[] { 1, 5, 10 }) MakePrefab($"FabTree_{number}", number);
-            MakePrefab("Palm_2", 2);
-            MakePrefab("Palm_4", 4);
             MakePrefab("BananaTree", 0);
             MakePrefab("Pachira_B", 0);
             MakePrefab("IslandTree02", 0);
             AssetDatabase.SaveAssets();
-            Debug.Log("VEG_ASSETS_READY: eight new prefabs prepared, including a three-level hero tree.");
+            Debug.Log("VEG_ASSETS_READY: six prefabs prepared, including a three-level hero tree.");
         }
 
         private static Material MakeMaterial(string name, Shader shader, string albedo,
@@ -178,7 +168,6 @@ namespace JurassicWorld.Editor
         {
             string chosen;
             if (prefab.StartsWith("FabTree_")) chosen = slot == 0 ? "Fab_Trunk" : "Fab_Leaf";
-            else if (prefab.StartsWith("Palm_")) chosen = rendererName.Contains("bark") ? "Palm_Bark_" + number : "Palm_Leaf_" + number;
             else if (prefab == "IslandTree02")
                 chosen = importedName.Contains("leaves") || (importedName.Length == 0 && slot == 1) ? "Island_Leaves" :
                     importedName.Contains("branches") || (importedName.Length == 0 && slot == 2) ? "Island_Branches" : "Island_Trunk";

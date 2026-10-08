@@ -48,9 +48,7 @@ namespace JurassicWorld.Editor
                 if (!agent.isActiveAndEnabled || !new SerializedObject(agent).FindProperty("groundObstacleAware").boolValue) continue;
                 BodyEnvelope envelope = MeasureBody(agent); bodies.Add(envelope);
                 BodyEnvelope core = MeasureBody(agent, true); bodies.Add(core);
-                var profile = agent.GetComponent<DinosaurCoreBody>() ?? agent.gameObject.AddComponent<DinosaurCoreBody>();
-                profile.bands = core.Layers.OrderBy(l => l.Key).Select(l => new DinosaurCoreBody.Band { layer = l.Key, bounds = l.Value }).ToArray();
-                profile.coreBones = CoreBones(agent);
+                BakeCoreProfile(agent, core);
                 Bounds bounds = envelope.Full;
                 bodyBottom = Mathf.Min(bodyBottom, agent.MovementHeight + bounds.min.y - SafetyMargin);
                 bodyTop = Mathf.Max(bodyTop, agent.MovementHeight + bounds.max.y + SafetyMargin);
@@ -83,6 +81,20 @@ namespace JurassicWorld.Editor
                 }
             }
             if (collectObstacles) CollectObstacles();
+        }
+
+        internal static void BakeCoreProfile(DinosaurAgent agent)
+        {
+            BodyCache.Clear();
+            BakeCoreProfile(agent, MeasureBody(agent, true));
+        }
+
+        private static void BakeCoreProfile(DinosaurAgent agent, BodyEnvelope core)
+        {
+            var profile = agent.GetComponent<DinosaurCoreBody>() ?? agent.gameObject.AddComponent<DinosaurCoreBody>();
+            profile.bands = core.Layers.OrderBy(l => l.Key).Select(l => new DinosaurCoreBody.Band { layer = l.Key, bounds = l.Value }).ToArray();
+            profile.coreBones = CoreBones(agent);
+            EditorUtility.SetDirty(profile);
         }
 
         private static BodyEnvelope MeasureBody(DinosaurAgent agent, bool core = false)
@@ -184,6 +196,7 @@ namespace JurassicWorld.Editor
         {
             if (agent.name.Contains("Tyrannosaurus")) return new[] { "jt_Spine1_C", "jt_Spine2_C", "jt_Hips_C", "jt_Hip_R", "jt_Hip_L" };
             if (agent.name.Contains("Velociraptor")) return new[] { "Root", "Spine_1", "Spine_2", "Spine_3", "Pelvis.R", "Pelvis.L", "Hip.R", "Hip.L", "Breast.R", "Breast.L" };
+            if (agent.name == "Stegosaurus") return new[] { "Root", "Spine1", "Spine2", "Spine3", "Pelvis", "Hip.L", "Hip.R", "Shoulder.L", "Shoulder.R", "Gut" };
             throw new InvalidOperationException("Explicit core bone mapping required for " + agent.name);
         }
         private static List<Vector3> ClipCore(List<Vector3> points, float[] weights)

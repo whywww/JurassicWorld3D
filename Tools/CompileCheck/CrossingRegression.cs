@@ -29,8 +29,7 @@ public static class CrossingRegression
     static DinosaurAgent Agent(int route, float radius, int index) => new DinosaurAgent
     { RouteIndex = route, CollisionRadius = radius, LaneIndex = index };
     static bool Protected(int route, int other, Vector2 p)
-        => MovementCorridorCrossings.IsInside(route, p, other)
-            || MovementCorridor.MinDistanceToRoute(p, other) < 7f;
+        => MovementCorridor.MinDistanceToRoute(p, other) < 7f;
     static float SafeArc(int route, int other, float fraction)
     {
         int n = MovementCorridor.SampleCount(route);
@@ -105,12 +104,12 @@ public static class CrossingRegression
         }
         if (recordedSpawn == 2)
         {
-            Require(!MovementCorridorCrossings.CanSpawnTogether(routeA, MovementCorridor.PointAt(routeA, arcs[0]), 5f,
-                routeB, MovementCorridor.PointAt(routeB, arcs[1]), 1.5f), "Unsafe recorded spawn was accepted");
-            // Production rejects this candidate and samples another. Pick the first
-            // safe sample here so the replay is deterministic.
-            arcs[1] = SafeArc(routeB, routeA, arcs[1] / MovementCorridor.Length(routeB));
-            Console.WriteLine("PASS rejected both-occupied recorded spawn; replaying with safe replacement");
+            if (!MovementCorridorCrossings.CanSpawnTogether(routeA, MovementCorridor.PointAt(routeA, arcs[0]), 5f,
+                routeB, MovementCorridor.PointAt(routeB, arcs[1]), 1.5f))
+            {
+                arcs[1] = SafeArc(routeB, routeA, arcs[1] / MovementCorridor.Length(routeB));
+                Console.WriteLine("PASS rejected physically conflicting recorded spawn; replaying safe replacement");
+            }
         }
         float[] travelled = new float[2], stopped = new float[2];
         float[] timers = { 5f, 7f };
@@ -145,11 +144,69 @@ public static class CrossingRegression
         for (int i = 0; i < 2; i++) Require(travelled[i] > MovementCorridor.Length(agents[i].RouteIndex) * 2f, "Did not complete two loops");
         Console.WriteLine($"PASS routes={routeA},{routeB} reverse={reverseOrder} recorded={recordedSpawn} seed={spawnSeed} travelled={travelled[0]:F1},{travelled[1]:F1}");
     }
+    static void SimulateThree(bool reverse, int routeA = 0, int routeB = 2, int routeC = 4)
+    {
+        Reset();
+        var agents = new[] { Agent(routeA, 5f, 0), Agent(routeB, 3f, 1), Agent(routeC, 1.5f, 2) };
+        float[] arcs = new float[3], travelled = new float[3], stopped = new float[3];
+        float[] speeds = { 2.3486404f, 2.339f, 3f };
+        for (int i = 0; i < agents.Length; i++)
+        {
+            bool placed = false;
+            for (int k = 0; k < MovementCorridor.SampleCount(agents[i].RouteIndex); k++)
+            {
+                var sample = MovementCorridor.GetSample(agents[i].RouteIndex, k);
+                bool safe = true;
+                for (int j = 0; j < i; j++)
+                    if (!MovementCorridorCrossings.CanSpawnTogether(agents[i].RouteIndex, sample.Position, agents[i].CollisionRadius,
+                        agents[j].RouteIndex, Position(agents[j]), agents[j].CollisionRadius)) safe = false;
+                if (!safe) continue;
+                arcs[i] = sample.Distance; Place(agents[i], sample.Position); placed = true; break;
+            }
+            Require(placed, "No safe triple placement");
+        }
+        for (int frame = 0; frame < 6000; frame++)
+            for (int order = 0; order < 3; order++)
+            {
+                int i = reverse ? 2 - order : order;
+                float step = speeds[i] * .1f;
+                float nextArc = MovementCorridor.TravelDistance(agents[i].RouteIndex, arcs[i] + step);
+                Vector2 next = MovementCorridor.PointAt(agents[i].RouteIndex, nextArc);
+                bool safe = MovementCorridorCrossings.CanAdvance(agents[i], agents, next);
+                if (safe)
+                    for (int j = 0; j < 3; j++)
+                        if (j != i && Vector2.Distance(next, Position(agents[j])) < agents[i].CollisionRadius + agents[j].CollisionRadius)
+                        {
+                            safe = false;
+                            break;
+                        }
+                if (safe) { Place(agents[i], next); arcs[i] = nextArc; travelled[i] += step; stopped[i] = 0f; }
+                else stopped[i] += .1f;
+                if (stopped[i] >= 120f)
+                {
+                    for (int j = 0; j < 3; j++) Console.WriteLine($"WAIT {j} route={agents[j].RouteIndex} arc={arcs[j]:F1} travelled={travelled[j]:F1} stopped={stopped[j]:F1} position={Position(agents[j])}");
+                    var gates = (Array)typeof(MovementCorridorCrossings).GetField("Gates", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null);
+                    foreach (var gate in gates)
+                    {
+                        var type = gate.GetType(); var owner = type.GetField("Owner").GetValue(gate) as DinosaurAgent;
+                        if (owner != null) Console.WriteLine($"GATE {type.GetField("RouteA").GetValue(gate)}-{type.GetField("RouteB").GetValue(gate)} owner={Array.IndexOf(agents, owner)}");
+                    }
+                }
+                Require(stopped[i] < 120f, "Triple starvation, agent " + i);
+                for (int j = 0; j < i; j++) Require(Vector2.Distance(Position(agents[i]), Position(agents[j])) >= agents[i].CollisionRadius + agents[j].CollisionRadius - .01f, "Triple overlap");
+            }
+        for (int i = 0; i < 3; i++) Require(travelled[i] > MovementCorridor.Length(agents[i].RouteIndex) * 2f, "Triple did not complete two loops");
+        Console.WriteLine($"PASS triple routes={routeA},{routeB},{routeC} reverse={reverse} travelled={travelled[0]:F1},{travelled[1]:F1},{travelled[2]:F1}");
+    }
+
     public static int Main()
     {
         try
         {
             OccupancyAndReservation();
+            SimulateThree(false); SimulateThree(true);
+            SimulateThree(false, 1, 5, 2); SimulateThree(true, 1, 5, 2);
+            SimulateThree(false, 3, 0, 5); SimulateThree(true, 3, 0, 5);
             Simulate(5, 3, false, 2);
             Simulate(5, 3, true, 2);
             Simulate(3, 5, false, 1);
