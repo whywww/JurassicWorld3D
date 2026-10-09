@@ -2,6 +2,8 @@
 FBX binary parser: extract T-Rex walk animation and compute ground speed
 via forward kinematics (FK) on the bone skeleton.
 """
+import argparse
+from pathlib import Path
 import struct
 import math
 import zlib
@@ -136,7 +138,12 @@ def main():
     import sys
     sys.stdout.reconfigure(encoding='utf-8')
     
-    fbx_path = r'c:\Users\tclre\OneDrive\Documents\work\Unity\JurassicWorld\Assets\Resources\Dinosaurs\TRex\source\T-Rex.fbx'
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--fbx", type=Path,
+                        default=Path(__file__).resolve().parent.parent /
+                        "Assets/Resources/Dinosaurs/TRex/source/T-Rex.fbx",
+                        help="FBX input (default: project T-Rex asset)")
+    fbx_path = parser.parse_args().fbx
     print("Parsing FBX...")
     root, ver = parse_fbx(fbx_path)
     print(f"FBX Version: {ver}")

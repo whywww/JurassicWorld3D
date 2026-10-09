@@ -1,8 +1,10 @@
-param([string]$CorridorSource)
+param([string]$CorridorSource, [string]$UnityEditorPath)
 $ErrorActionPreference = 'Stop'
 $projectRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 if (-not $CorridorSource) { $CorridorSource = Join-Path $projectRoot 'Assets\Scripts\MovementCorridor.cs' }
-$unityRoot = 'C:\Program Files\Unity 2022.3.62f3c1\Editor\Data'
+. (Join-Path $PSScriptRoot 'Resolve-UnityEditorPath.ps1')
+$unityEditor = Resolve-UnityEditorPath -UnityEditorPath $UnityEditorPath -ProjectRoot $projectRoot
+$unityRoot = Join-Path $unityEditor 'Data'
 $mono = Join-Path $unityRoot 'MonoBleedingEdge\bin\mono.exe'
 $compiler = Join-Path $unityRoot 'MonoBleedingEdge\lib\mono\msbuild\Current\bin\Roslyn\csc.exe'
 $core = Join-Path $unityRoot 'Managed\UnityEngine\UnityEngine.CoreModule.dll'

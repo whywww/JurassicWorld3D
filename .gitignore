@@ -74,3 +74,6 @@ crashlytics-build.properties
 # Project-specific: large source asset archives
 # ============================================================
 *.zip
+
+# Local EMOTIV credentials (also beside a Windows Player executable)
+emotiv.local.json

@@ -17,6 +17,7 @@ namespace JurassicWorld
         // 西/东/南三侧 = 恐龙活动包络外扩 8m（玩家可走下平坦区、踩上外围过渡带缓坡），北侧止于北林线 88。
         // 因为可达区已越出地形平坦区，相机 Y 必须采样地形高度（见下方 SampleGroundHeight）——
         // 这是原代码 NOTE 预留的「扩大地图」迁移，取代原先硬编码 eyeHeight 的前提（平坦区 heightmap 恒 0）。
+        [SerializeField] private EmotivPlayerInput emotivInput;
         private Vector3 velocity;
         private Vector3 previousMousePosition;
         public float TravelHeading => Mathf.Repeat(travelYaw, 360f);
@@ -31,6 +32,7 @@ namespace JurassicWorld
 
         private void Start()
         {
+            if (emotivInput == null) emotivInput = GetComponent<EmotivPlayerInput>();
             yaw = transform.eulerAngles.y;
             travelYaw = yaw;
             pitch = initialPitch;
@@ -47,11 +49,16 @@ namespace JurassicWorld
             float forward = (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow) ? 1f : 0f)
                 - (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow) ? 1f : 0f);
 
-            if (!Mathf.Approximately(turn, 0f))
-            {
-                travelYaw += turn * turnSpeed * Time.deltaTime;
-                forward = 1f;
-            }
+            // Detect held keys, even when opposing keys cancel, so the keyboard always wins.
+            bool keyboardActive = Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.S)
+                || Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D)
+                || Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.DownArrow)
+                || Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.RightArrow);
+            Vector2 movement = ResolveMovementInput(keyboardActive, turn, forward,
+                !keyboardActive && emotivInput != null ? emotivInput.ReadMovement() : Vector2.zero);
+            turn = movement.x;
+            forward = movement.y;
+            travelYaw += turn * turnSpeed * Time.deltaTime;
 
             Vector3 travelDirection = Quaternion.Euler(0f, travelYaw, 0f) * Vector3.forward;
             Vector3 desired = travelDirection * forward * moveSpeed;
@@ -109,6 +116,13 @@ namespace JurassicWorld
             }
 
             transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.Euler(pitch, yaw, 0f), 1f - Mathf.Exp(-10f * Time.deltaTime));
+        }
+
+        internal static Vector2 ResolveMovementInput(bool keyboardActive, float turn, float forward, Vector2 mental)
+        {
+            return keyboardActive
+                ? new Vector2(turn, !Mathf.Approximately(turn, 0f) ? 1f : forward)
+                : mental;
         }
 
         /// <summary>

@@ -1,7 +1,10 @@
+param([string]$UnityEditorPath)
 # Standalone Roslyn check for Assembly-CSharp-Editor using Unity's bundled compiler.
 # Mirrors Assembly-CSharp-Editor.csproj references/defines; output goes to %TEMP%.
 $ErrorActionPreference = 'Stop'
 $projDir = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+. (Join-Path $PSScriptRoot 'Resolve-UnityEditorPath.ps1')
+$unityEditor = Resolve-UnityEditorPath -UnityEditorPath $UnityEditorPath -ProjectRoot $projDir
 $csprojPath = Join-Path $projDir 'Assembly-CSharp-Editor.csproj'
 $xml = New-Object System.Xml.XmlDocument
 $xml.Load($csprojPath)
@@ -58,8 +61,8 @@ $rsp = Join-Path $env:TEMP 'jw_editor_check.rsp'
 [System.IO.File]::WriteAllText($rsp, $sb.ToString(), [System.Text.Encoding]::UTF8)
 Write-Host "RSP written: $rsp"
 
-$mono = 'C:\Program Files\Unity 2022.3.62f3c1\Editor\Data\MonoBleedingEdge\bin\mono.exe'
-$csc = 'C:\Program Files\Unity 2022.3.62f3c1\Editor\Data\MonoBleedingEdge\lib\mono\msbuild\Current\bin\Roslyn\csc.exe'
+$mono = Join-Path $unityEditor 'Data\MonoBleedingEdge\bin\mono.exe'
+$csc = Join-Path $unityEditor 'Data\MonoBleedingEdge\lib\mono\msbuild\Current\bin\Roslyn\csc.exe'
 & $mono $csc "@$rsp"
 Write-Host "CSC EXIT: $LASTEXITCODE"
 exit $LASTEXITCODE

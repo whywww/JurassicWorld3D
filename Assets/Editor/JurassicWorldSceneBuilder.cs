@@ -116,7 +116,9 @@ namespace JurassicWorld.Editor
             camera.farClipPlane = 150f;
             camera.clearFlags = CameraClearFlags.Skybox;
 
+            EmotivPlayerInput emotivInput = cameraObject.AddComponent<EmotivPlayerInput>();
             SmoothExplorerCamera explorer = cameraObject.AddComponent<SmoothExplorerCamera>();
+            SetField(explorer, "emotivInput", emotivInput);
             // 视高由 3m 降到 1.7m 后近地视觉流速加快，同步降速以保持原有观感与人的尺度感。
             SetField(explorer, "moveSpeed", 4f);
             SetField(explorer, "acceleration", 6f);

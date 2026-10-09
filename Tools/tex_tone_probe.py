@@ -1,9 +1,16 @@
 # -*- coding: utf-8 -*-
 """探测 NSk2 地面/草地纹理的平均色调，判断哪些偏绿（草）哪些偏棕（泥土）。"""
+import argparse
+from pathlib import Path
 import os
 from PIL import Image
 
-base = r"d:\OneDrive\Documents\work\Unity\JurassicWorld\Assets\NatureStarterKit2\Textures"
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument("--textures", type=Path,
+                    default=Path(__file__).resolve().parent.parent /
+                    "Assets/NatureStarterKit2/Textures",
+                    help="Texture directory (default: project NatureStarterKit2 textures)")
+base = parser.parse_args().textures
 names = ["ground01.tga", "ground02.tga", "ground03.tga",
          "grass01.tga", "grass02.tga",
          "bark01.tga", "bark02.tga", "bush01.tga"]
