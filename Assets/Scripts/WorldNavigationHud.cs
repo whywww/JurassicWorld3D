@@ -35,8 +35,11 @@ namespace JurassicWorld
         private float nextTerrainCheck;
         private int terrainSignature;
         private float lastHeading;
+        private float nextDinosaurCheck;
+        private readonly Dictionary<DinosaurAgent, RectTransform> dinosaurMarkers = new Dictionary<DinosaurAgent, RectTransform>();
         private static readonly string[] Directions = { "N", "NE", "E", "SE", "S", "SW", "W", "NW" };
 
+        public IReadOnlyDictionary<DinosaurAgent, RectTransform> DinosaurMarkers => dinosaurMarkers;
         public bool MapReady => mapReady;
         public Camera MapCamera => mapCamera;
         public RectTransform PlayerArrow => playerArrow;
@@ -192,6 +195,7 @@ namespace JurassicWorld
         {
             refreshRequested = true;
             nextTerrainCheck = 0f;
+            nextDinosaurCheck = 0f;
         }
 
         private void OnSceneLoaded(Scene scene, LoadSceneMode mode) => RefreshMap();
@@ -233,6 +237,7 @@ namespace JurassicWorld
                     UpdateCreekMarker();
                 }
             }
+            UpdateDinosaurMarkers();
             playerArrow.gameObject.SetActive(player != null && mapReady);
             if (player != null && mapReady)
             {
@@ -244,6 +249,54 @@ namespace JurassicWorld
             }
         }
 
+        private void UpdateDinosaurMarkers()
+        {
+            if (Time.unscaledTime >= nextDinosaurCheck)
+            {
+                nextDinosaurCheck = Time.unscaledTime + 1f;
+                var active = new HashSet<DinosaurAgent>(FindObjectsOfType<DinosaurAgent>());
+                var removed = new List<DinosaurAgent>();
+                foreach (var entry in dinosaurMarkers)
+                    if (entry.Key == null || !active.Contains(entry.Key) || !entry.Key.isActiveAndEnabled) removed.Add(entry.Key);
+                foreach (var agent in removed)
+                {
+                    dinosaurMarkers[agent].gameObject.SetActive(false);
+                    Destroy(dinosaurMarkers[agent].gameObject);
+                    dinosaurMarkers.Remove(agent);
+                }
+                foreach (DinosaurAgent agent in active)
+                {
+                    if (!agent.isActiveAndEnabled || dinosaurMarkers.ContainsKey(agent)) continue;
+                    RectTransform marker = MakeRect(mapImage.transform, "Dinosaur Marker " + agent.GetInstanceID(), new Vector2(24f, 24f));
+                    Image background = marker.gameObject.AddComponent<Image>();
+                    background.color = new Color(0.035f, 0.065f, 0.055f, 0.95f);
+                    background.raycastTarget = false;
+                    Outline border = marker.gameObject.AddComponent<Outline>();
+                    border.effectColor = new Color(0.85f, 0.9f, 0.8f);
+                    border.effectDistance = Vector2.one;
+                    if (agent.MinimapPortrait != null)
+                    {
+                        Image portrait = MakeRect(marker, "Portrait", new Vector2(22f, 22f)).gameObject.AddComponent<Image>();
+                        portrait.sprite = agent.MinimapPortrait;
+                        portrait.preserveAspect = true;
+                        portrait.raycastTarget = false;
+                    }
+                    else
+                    {
+                        Text fallback = MakeText(marker, "Fallback", coordinatesText.font, 16, new Vector2(22f, 22f));
+                        fallback.text = string.IsNullOrEmpty(agent.DisplayName) ? "?" : agent.DisplayName.Substring(0, 1);
+                    }
+                    dinosaurMarkers.Add(agent, marker);
+                }
+                playerArrow.SetAsLastSibling();
+            }
+            foreach (var entry in dinosaurMarkers)
+            {
+                bool visible = mapReady && entry.Key != null && entry.Key.isActiveAndEnabled;
+                entry.Value.gameObject.SetActive(visible);
+                if (visible) entry.Value.anchoredPosition = MapPosition(mapCamera.WorldToViewportPoint(entry.Key.transform.position), mapSize, 13f / mapSize);
+            }
+        }
         public static float HorizontalHeading(Vector3 forward, float fallback)
         {
             return forward.x * forward.x + forward.z * forward.z < 0.000001f
@@ -374,7 +427,12 @@ namespace JurassicWorld
 
 
 
-        private void OnDestroy() => ReleaseResources();
+        private void OnDestroy()
+        {
+            foreach (var marker in dinosaurMarkers.Values) if (marker != null) Destroy(marker.gameObject);
+            dinosaurMarkers.Clear();
+            ReleaseResources();
+        }
 
         private void ReleaseResources()
         {

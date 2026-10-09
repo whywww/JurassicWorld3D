@@ -142,6 +142,7 @@ namespace JurassicWorld.Editor
                 Require(nav.PlayerArrow.GetComponent<CanvasRenderer>() != null, "Player arrow CanvasRenderer missing.");
                 Require(UnityEngine.Object.FindObjectsOfType<WorldNavigationHud>().Length == 1, "Duplicate navigation after reload.");
                 Require(nav.CoordinatesText.gameObject.activeInHierarchy && nav.CoordinatesText.text.Contains("Z:"), "Coordinates missing after reload.");
+                CheckDinosaurMarkers(nav);
                 CheckCreek(nav);
                 CaptureHud(1920, 1080, "navigation-hud.png");
                 CaptureHud(960, 540, "navigation-small.png");
@@ -151,6 +152,34 @@ namespace JurassicWorld.Editor
             catch (Exception error) { Finish(error); }
         }
 
+        private static void CheckDinosaurMarkers(WorldNavigationHud nav)
+        {
+            DinosaurAgent[] agents = UnityEngine.Object.FindObjectsOfType<DinosaurAgent>();
+            Require(nav.DinosaurMarkers.Count == agents.Length, "Dinosaur marker count mismatch.");
+            var temporary = new GameObject("Portrait Fallback Probe");
+            DinosaurAgent extra = temporary.AddComponent<DinosaurAgent>();
+            temporary.transform.position = new Vector3(500f, 0f, -500f);
+            var timer = typeof(WorldNavigationHud).GetField("nextDinosaurCheck", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+            timer.SetValue(nav, 0f);
+            nav.SendMessage("UpdateDinosaurMarkers");
+            Require(nav.DinosaurMarkers.Count == agents.Length + 1, "New dinosaur not registered.");
+            Require(nav.DinosaurMarkers[extra].Find("Fallback") != null, "Missing portrait fallback absent.");
+            Require(nav.DinosaurMarkers[extra].anchoredPosition == new Vector2(97f, -97f), "Dinosaur edge clamp failed.");
+            temporary.SetActive(false);
+            timer.SetValue(nav, 0f);
+            nav.SendMessage("UpdateDinosaurMarkers");
+            Require(nav.DinosaurMarkers.Count == agents.Length, "Hidden dinosaur marker not removed.");
+            UnityEngine.Object.Destroy(temporary);
+            foreach (DinosaurAgent agent in agents)
+            {
+                Require(agent.MinimapPortrait != null, "Missing dinosaur portrait.");
+                RectTransform marker = nav.DinosaurMarkers[agent];
+                Require(marker.gameObject.activeInHierarchy, "Dinosaur marker hidden.");
+                Require(marker.GetSiblingIndex() < nav.PlayerArrow.GetSiblingIndex(), "Dinosaur marker covers player.");
+                Vector2 expected = WorldNavigationHud.MapPosition(nav.MapCamera.WorldToViewportPoint(agent.transform.position), 220f, 13f / 220f);
+                Require((marker.anchoredPosition - expected).sqrMagnitude < 0.01f, "Dinosaur position mismatch.");
+            }
+        }
         private static void CheckCreek(WorldNavigationHud nav)
         {
             Transform flow = GameObject.Find("Downstream Flow").transform;

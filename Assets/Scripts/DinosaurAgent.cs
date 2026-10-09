@@ -41,6 +41,8 @@ namespace JurassicWorld
         [SerializeField] private bool groundObstacleAware = true;
 
         public Camera ViewCamera => viewCamera;
+        [SerializeField] private Sprite minimapPortrait;
+        public Sprite MinimapPortrait => minimapPortrait;
         public string DisplayName => displayName;
         public float MovementHeight => movementHeight;
         public float CollisionRadius => collisionRadius;

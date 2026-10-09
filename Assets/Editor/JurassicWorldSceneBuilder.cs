@@ -1154,6 +1154,7 @@ namespace JurassicWorld.Editor
             DinosaurAgent agent = root.AddComponent<DinosaurAgent>();
             SetField(agent, "viewCamera", camera);
             SetField(agent, "displayName", t.displayName);
+            SetField(agent, "minimapPortrait", AssetDatabase.LoadAssetAtPath<Sprite>("Assets/UI/DinosaurPortraits/" + t.objectName + ".png"));
             SetField(agent, "movementHeight", t.position.y);
             SetField(agent, "viewFocusHeight", t.focusHeight);
             SetField(agent, "visualYaw", t.yaw);
