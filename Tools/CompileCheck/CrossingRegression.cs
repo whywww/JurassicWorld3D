@@ -8,6 +8,7 @@ namespace JurassicWorld
 {
     public sealed class DinosaurAgent
     {
+        public bool IsOffRouteInteraction;
         public enum DinosaurState { Idle, RandomWalk, Approaching }
         public sealed class Pose { public Vector3 position; }
         public readonly Pose transform = new Pose();
@@ -66,6 +67,12 @@ public static class CrossingRegression
                 // An idle owner still occupies the gate; it must not be preempted.
                 owner.CurrentState = DinosaurAgent.DinosaurState.Idle;
                 Require(!MovementCorridorCrossings.CanAdvance(waiting, new[] { owner }, after.Position), "Idle owner lost reservation");
+                owner.IsOffRouteInteraction = true;
+                MovementCorridorCrossings.Release(owner);
+                Require(MovementCorridorCrossings.CanAdvance(waiting, new[] { owner }, after.Position), "Off-route interaction retained a gate");
+                owner.IsOffRouteInteraction = false;
+                Reset();
+                Require(!MovementCorridorCrossings.CanAdvance(waiting, new[] { owner }, after.Position), "Returning route occupant was ignored");
                 Place(owner, MovementCorridor.PointAt(ownerRoute, SafeArc(ownerRoute, other, 0f)));
                 Require(MovementCorridorCrossings.CanAdvance(waiting, new[] { owner }, after.Position), "Owner exit did not release gate");
                 checkedEntry = true;

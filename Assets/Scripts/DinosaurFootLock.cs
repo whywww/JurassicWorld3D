@@ -4,7 +4,7 @@ using UnityEngine;
 namespace JurassicWorld
 {
     [DefaultExecutionOrder(1000)]
-    public sealed class DinosaurFootLock : MonoBehaviour
+    public sealed partial class DinosaurFootLock : MonoBehaviour
     {
         private readonly List<Transform> feet = new List<Transform>();
         private readonly List<float> groundHeights = new List<float>();
@@ -59,6 +59,7 @@ namespace JurassicWorld
 
             if (feet.Count < 2)
                 Debug.LogWarning((agent != null ? agent.DisplayName : name) + "未找到足够的脚部骨骼，已停用落脚锁定。", this);
+            BindTRexFeet(visualRoot);
         }
 
         /// <summary>
@@ -109,10 +110,13 @@ namespace JurassicWorld
 
         private void LateUpdate()
         {
+            if (agent != null && agent.HasFootPhaseData && leftSupport != null && rightSupport != null)
+            { UpdateTRexFeet(); return; }
             if (agent == null || feet.Count < 2)
                 return;
 
-            if (agent.CurrentState == DinosaurAgent.DinosaurState.Idle)
+            if (agent.CurrentState == DinosaurAgent.DinosaurState.Idle
+                || (agent.InteractionPhase != DinosaurAgent.PlayerInteractionPhase.Inactive && !agent.IsInteractionMoving))
             {
                 // Idle 不做 IK 求解。groundHeights 现在恒为真实地面常量，不再做 ratchet 下探：
                 // 旧写法 Mathf.Min(groundHeights[i], 脚当前 Y) 会把地面基准拉到脚的实际高度（含悬空残差），

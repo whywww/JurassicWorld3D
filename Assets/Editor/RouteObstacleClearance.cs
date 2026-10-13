@@ -97,9 +97,29 @@ namespace JurassicWorld.Editor
             EditorUtility.SetDirty(profile);
         }
 
-        private static BodyEnvelope MeasureBody(DinosaurAgent agent, bool core = false)
+        internal static DinosaurCoreBody BakeInteractionBody(DinosaurAgent agent, AnimationClip[] clips)
         {
-            string key = agent.GetInstanceID() + "|" + agent.transform.lossyScale + "|" + agent.MovementHeight + "|" + agent.VisualYaw + "|" + core;
+            BodyCache.Clear();
+            // Off-route turns need the head, legs and tail envelope as well as torso/hips.
+            var envelope = MeasureBody(agent, false, clips);
+            Transform child = agent.transform.Find("Interaction Body");
+            if (child == null) { child = new GameObject("Interaction Body").transform; child.SetParent(agent.transform, false); }
+            var body = child.GetComponent<DinosaurCoreBody>() ?? child.gameObject.AddComponent<DinosaurCoreBody>();
+            body.bands = envelope.Layers.OrderBy(l => l.Key).Select(l => new DinosaurCoreBody.Band { layer = l.Key, bounds = l.Value }).ToArray();
+            body.coreBones = CoreBones(agent);
+            return body;
+        }
+
+        internal static DinosaurCoreBody.Band[] BakeMotionBands(DinosaurAgent agent, AnimationClip clip)
+        {
+            BodyCache.Clear();
+            var envelope = MeasureBody(agent, false, new[] { clip });
+            return envelope.Layers.OrderBy(l => l.Key).Select(l => new DinosaurCoreBody.Band { layer = l.Key, bounds = l.Value }).ToArray();
+        }
+
+        private static BodyEnvelope MeasureBody(DinosaurAgent agent, bool core = false, AnimationClip[] interactionClips = null)
+        {
+            string key = agent.GetInstanceID() + "|" + agent.transform.lossyScale + "|" + agent.MovementHeight + "|" + agent.VisualYaw + "|" + core + "|" + (interactionClips != null);
             if (BodyCache.TryGetValue(key, out var cached)) return cached;
             var loader = agent.GetComponent<DinosaurFbxLoader>();
             if (loader == null || loader.ModelRoot == null) throw new InvalidOperationException("Missing baked model: " + agent.name);
@@ -109,7 +129,7 @@ namespace JurassicWorld.Editor
             model.hideFlags = HideFlags.HideAndDontSave;
             Bounds bounds = new Bounds(); bool first = true;
             var envelope = new BodyEnvelope { Core = core };
-            float margin = core ? 0f : SafetyMargin;
+            float margin = core ? 0f : interactionClips != null ? .15f : SafetyMargin;
             string[] coreBones = core ? CoreBones(agent) : Array.Empty<string>();
             Quaternion visualCorrection = Quaternion.Euler(0f, -agent.VisualYaw, 0f);
             Action measure = () =>
@@ -183,10 +203,12 @@ namespace JurassicWorld.Editor
                 selected = selected ?? rootMotion ?? firstClip;
                 if (selected == null) throw new InvalidOperationException("Missing movement clip " + hint + ": " + agent.name);
                 // Match DinosaurAgent.FindClip: unused turn/root-motion clips must not widen the corridor.
-                for (int frame = 0; frame < 16; frame++) { selected.SampleAnimation(animation.gameObject, selected.length * frame / 16f); measure(); }
+                foreach (var clip in interactionClips ?? new[] { selected })
+                    for (int frame = 0; frame < (interactionClips == null ? 16 : 25); frame++) { clip.SampleAnimation(animation.gameObject, clip.length * frame / (interactionClips == null ? 16f : 24f)); measure(); }
                 if (first) throw new InvalidOperationException("Empty model geometry: " + agent.name);
                 envelope.Full = bounds; BodyCache[key] = envelope;
-                Debug.Log($"ROUTE_BODY_ENVELOPE {agent.name}: center={bounds.center} size={bounds.size}; clip={selected.name}, 16 poses, heightLayers={envelope.Layers.Count}, layer={HeightLayer}m, margin={margin}m, core={core}.");
+                string sampling = interactionClips == null ? selected.name + ", 16 poses" : interactionClips.Length + " interaction clips, 25 poses each";
+                Debug.Log($"ROUTE_BODY_ENVELOPE {agent.name}: center={bounds.center} size={bounds.size}; sampling={sampling}, heightLayers={envelope.Layers.Count}, layer={HeightLayer}m, margin={margin}m, core={core}.");
                 return envelope;
             }
             finally { UnityEngine.Object.DestroyImmediate(holder); }

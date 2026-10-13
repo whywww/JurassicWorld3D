@@ -2,7 +2,21 @@
 
 基于 Unity Built-in Render Pipeline 的恐龙森林探索项目。Unity 版本为 **`2022.3.62f3c1`**（以 `ProjectSettings/ProjectVersion.txt` 为准）。
 
-场景包含森林、香蕉林、草地与蕨类、苔藓岩石、枯木，以及从东侧延伸至北侧的 Crest 小溪。恐龙沿固定路线活动，玩家可在林地中步行观察。
+场景包含森林、香蕉林、草地与蕨类、苔藓岩石、枯木，以及从东侧延伸至北侧的 Crest 小溪。霸王龙在可通行林地自由漫游，其他恐龙沿路线活动，玩家可步行观察。
+
+## 暴龙的好奇互动
+
+主场景默认启用霸王龙自由漫游与短暂互动。正前方使用下述吼叫、追逐和返回序列；侧面仍使用原有观察、起跑和短暂跟随流程。所有互动不造成玩家伤害，其他恐龙继续沿各自路线活动。
+
+玩家首次在正前方约 ±20° 时使用独立序列：`look forward` → `idle investigate` → `idle investigae out` → `Big roar step`；随后 `Chase Roar` 与 `run head loop` 各播放一遍交替跟随，15 秒从正式跟随开始计时。接近 5 米、无法继续靠近、丢失视线或超时后执行 `run to stop` → `ROAR` → `mama cave bite` → `mama cave bite out`，咬击只作表现、不造成伤害。之后 `turn 180 look` 掉头，`walk slow loop` 沿实际追逐路径反向行走累计约 5 秒（路径不足则提前结束），再直接恢复漫游。新增动作有独立身体包络，受阻时暂停并重试，不强行穿过树石。侧面分支保留原有观察和跟随流程。
+
+选择霸王龙的 DinosaurAgent，在 **漫游方式** 中选择 **自由漫游 / 路线漫游**，仅启动时读取。自由漫游在当前位置周围 12～30 米内选择可达目标，停留 3～7 秒再继续；没有可行目标时停步并间隔 2 秒重试。选择 **Dinosaur Interaction Settings** 的 **允许玩家互动** 开关可关闭发现与跟随，不影响漫游方式。**Curiosity interaction** 区域保留发现距离、视角、15 秒互动时限、3 秒视线丢失宽限、10 秒冷却等参数。
+
+导航与动作包络已保存，正常 Play 无需重新烘焙。调整树石布局后执行 **Jurassic World > Interaction > Bake Curious T-Rex**；该命令校准动作并重建 NavMesh，保留现有树石位置。完整 Bake Scene 为重新构建场景，仍包含林地布置步骤。使用单独的 MainInteractionTerrain 副本，不修改原 Terrain 资产。
+
+路径提供导航方向，恐龙控制器统一驱动位移与转身，逐步复检身体、树干、石头和同伴。自由模式不受中心线、车道或路口调度限制；转身空间不足时寻找附近空地或停步等待。玩家进入不可达区域时，霸王龙在可达位置观察并退出互动；路线模式保留连续返回原路线的行为。运行中不瞬移。
+
+前方序列短验收菜单为 **Jurassic World > Acceptance > Verify T-Rex Front Sequence (Short)**。动作原件不变，专用动画副本、动作身体包络和 NavMesh 在 `Assets/Navigation/` 及主场景中保存；诊断报告写入 `Logs/trex-curiosity-animation-report.md`，前方短验收结果及轨迹写入 `Logs/trex-front-result.txt` 和 `Logs/trex-front-trace.txt`。
 
 ## 安装与启动
 
@@ -93,7 +107,7 @@ git lfs pull
 
 ### 4. 本地 JSON 配置
 
-所有 Emotiv 设置统一从项目根目录的 `emotiv.local.json` 读取，不再通过 Unity Inspector 修改。首次配置时，将 `emotiv.example.json` 复制为 `emotiv.local.json`，按下面字段填写；已有本地配置时直接编辑即可。
+所有 Emotiv 设置统一从项目根目录的 `emotiv.local.json` 读取。首次配置时，将 `emotiv.example.json` 复制为 `emotiv.local.json`，按下面字段填写；已有本地配置时直接编辑即可。
 
 | JSON 字段 | 用途／示例默认值 |
 |---|---|
@@ -106,9 +120,7 @@ git lfs pull
 
 `emotiv.local.json` 已加入 `.gitignore`，不会被普通 `git add` / commit 收录；不要强制添加该文件。场景不保存上述字段。修改 JSON 后重新进入 Play，或重启 Windows Player，即可加载最新配置。文件缺失、JSON 无效、必填字符串为空或数值超出范围时，脑控不连接，WASD 仍可用。
 
-`Smooth Explorer Camera` 的 **Emotiv Input** 引用已关联本相机的组件。若要关闭脑控，取消勾选 Emotiv Player Input 组件即可。
-
-Editor 从项目根目录读取 `emotiv.local.json`。Windows Player 从 exe 同目录读取该文件；构建后需要自行复制本地配置，Unity 不会把项目根目录的配置打包进构建。分享构建时不附带该文件。重新 **Bake Scene** 不影响本地配置。
+`Smooth Explorer Camera` 的 **Emotiv Input** 引用已关联本相机的组件。若要关闭脑控，取消勾选 Unity Inspector 的 Emotiv Player Input 组件即可。
 
 ### 5. 启动并确认连接
 
@@ -122,20 +134,14 @@ Editor 从项目根目录读取 `emotiv.local.json`。Windows Player 从 exe 同
 
 项目默认选择搜索结果中的第一个设备；测试时只保留目标耳机或目标 Virtual Brainwear。独立程序使用构建中保存的同一配置，并在运行前登录 Launcher；脑控参数目前通过 Editor 配置，没有独立程序内的配置界面。
 
-修复验证（2026-10-09）：修正缓冲模式下订阅回执未触发导致输入始终为零的问题，改为监听 `DataStreamProcess.SubscribedOK`。临时 Unity 项目中 46 项回归检查通过，覆盖真实 SDK 回执及 command 事件到玩家输入的链路、两种缓冲模式、neutral、断流和 session 丢失；项目运行时代码编译通过。实际设备／模拟器到场景相机移动仍需重新 Play 验证。
-
-### Virtual Brainwear 单个 push 测试
+### Virtual Brainwear 虚拟控制测试
 
 1. 在 Launcher 中创建 simulated device，保持设备 powered on / connected，打开模拟数据控制面板。
-2. 在 EmotivBCI 中创建例如 `SimGuest` 的 profile，完成并保存所需训练，确认 push 已训练且激活。仅验证 push 时不要求同时训练 pull / left / right；完整四方向测试再补齐另外三个动作。参见 [官方 BCI 说明](https://emotiv.gitbook.io/cortex-api/bci)。
-3. **停止 Unity Play，断开 EmotivBCI 的设备连接并完全退出 EmotivBCI，保留 Launcher。** 检查其他 Cortex 示例、BCI 工具或独立游戏实例也没有占用该设备的 profile。
+2. 在 EmotivBCI 中创建例如 `SimGuest` 的 profile，不需要完成训练。参见 [官方 BCI 说明](https://emotiv.gitbook.io/cortex-api/bci)。
+3. 断开 EmotivBCI 的设备连接并完全退出 EmotivBCI，保留 Launcher。检查其他 Cortex 示例、BCI 工具或独立游戏实例也没有占用该设备的 profile。
 4. 在 `emotiv.local.json` 中设置 `"profileName": "SimGuest"`，确认对应 Cortex 凭据已填写，再重新进入 Play。
-5. 等待 `Profile loaded: SimGuest` 及 `Mental Command stream subscribed; control ready`。在 Launcher 的模拟控制中选择 push，将 power 设置为高于 Threshold（例如 0.5），并让模拟器持续输出；返回 Unity Game 窗口，不按任何方向键，观察相机前进。
+5. 等待 `Profile loaded: SimGuest` 及 `Mental Command stream subscribed; control ready`。在 Launcher 的模拟控制中选择 push/pull/left/right，将 power 设置为高于 Threshold，并让模拟器持续输出；返回 Unity Game 窗口，不按任何方向键，观察相机前进。
 6. 用 `com data: push, power: ...` 日志确认收到的实际指令。改为 neutral 或 power 低于 0.3 后应平滑停止；同方向按键优先，不会与脑控叠加加速。
-
-如果 Console 显示 `the profile SimGuest is loaded by other apps`，表示已连接 Cortex / 建立 session，但 Unity 未成功加载 profile，当前代码因此还未订阅 `com`。`getCurrentProfile.loadedByThisApp=false` 指明 profile 来自其他应用；[官方 setupProfile 文档](https://emotiv.gitbook.io/cortex-api/bci/setupprofile) 明确禁止卸载另一应用加载的 profile。请先由占用者释放或退出，再重新 Play，不要把其他应用加载的 profile 当作 Unity 已成功加载。
-
-session 创建时的 `SubscribeData: No Stream to subscribe` 是插件在本项目尚未添加订阅列表前的提示；随后应该在 profile 加载成功后订阅 `com/sys/dev`。`handleWarning: 142 / Headset discovering complete` 只表示设备扫描完成，不能作为脑控可用的标志，见 [官方 Warning Objects](https://emotiv.gitbook.io/cortex-api/warning-objects)。
 
 ### 6. 方向控制规则
 
@@ -148,7 +154,7 @@ session 创建时的 `SubscribeData: No Stream to subscribe` 是插件在本项�
 
 power **达到** Threshold 才接受方向，移动和转向速度按限制在 `[0,1]` 的 power 缩放。主场景满速为 4 m/s、转向 60°/s，例如 power=0.5 的转弯目标为前进 2 m/s、转向 30°/s，移动仍经过原有平滑加减速。
 
-按住任意 WASD 或方向键时，**键盘完全优先**，即使同时按相反键使输入抵消也不会退回脑控；松开后恢复当前有效脑控输入。鼠标右键视角操作保留。neutral、未知 action、低 power、断流达到 Command Timeout 或 session 丢失时清除脑控输入，玩家按原逻辑平滑减速；碰撞、地图边界和地形高度约束仍然生效。
+按住任意 WASD 或方向键时，**键盘完全优先**，即使同时按相反键使输入抵消也不会退回脑控；松开后恢复当前有效脑控输入。鼠标右键视角操作保留。
 
 ### 常见问题
 
@@ -165,8 +171,6 @@ power **达到** Threshold 才接受方向，移动和转向速度按限制在 `
 | 断连后没有恢复 | 输入会自动清除；确认耳机和 Launcher 恢复在线，必要时停止 Play 后重新进入，重新完成授权／session 流程 |
 
 开发验证入口：**Jurassic World > Tests > Emotiv Input Acceptance**，检查四方向映射、阈值、速度缩放、键盘优先、超时和场景组件引用。该检查不代替真实耳机验证；完整验收需填写凭据后，用真实 Headset 或 Virtual Brainwear 走完上述连接日志并实际测试操作。
-
-验证记录（2026-10-09）：Unity 2022.3.62f3c1 编译及 51 项输入／场景／每帧碰撞与边界／重复初始化检查通过。真实 Headset、Virtual Brainwear、Launcher 应用授权和端到端脑控连接尚未验证，需要填写自己的应用凭据及训练 profile 后完成。
 
 ## 3D 资产资源清单
 

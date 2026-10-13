@@ -175,6 +175,9 @@ namespace JurassicWorld.Editor
                 if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().path != "Assets/Scenes/Main.unity")
                     EditorSceneManager.OpenScene("Assets/Scenes/Main.unity");
                 VerifyGeometry();
+                if (Application.isBatchMode)
+                    foreach (var behaviour in UnityEngine.Object.FindObjectsOfType<MonoBehaviour>())
+                        if (behaviour.GetType().Namespace == "Crest" || behaviour is EmotivPlayerInput) behaviour.enabled = false;
                 SessionState.SetBool(PreviewKey, false);
                 SessionState.SetBool(ImagesKey, images);
                 SessionState.SetBool(RunningKey, true);
@@ -199,8 +202,11 @@ namespace JurassicWorld.Editor
         {
             if (state != PlayModeStateChange.EnteredPlayMode) return;
             agents = UnityEngine.Object.FindObjectsOfType<DinosaurAgent>();
-            Require(agents.Length == JurassicWorldSceneBuilder.EnabledDinosaurCount && agents.Length == RoutePairs.GetLength(1),
-                "Route verification expects the three enabled dinosaurs.");
+            if (agents.Length != JurassicWorldSceneBuilder.EnabledDinosaurCount || agents.Length < 2 || agents.Length > RoutePairs.GetLength(1))
+            {
+                Finish(new InvalidOperationException("Route verification expects the configured enabled dinosaur count (two or three)."));
+                return;
+            }
             previous = new Vector3[agents.Length];
             travelled = new float[agents.Length];
             lastProgress = new float[agents.Length];
@@ -212,7 +218,7 @@ namespace JurassicWorld.Editor
                 previous[i] = agents[i].transform.position;
                 lastProgress[i] = Time.time;
             }
-            Time.timeScale = 4f;
+            Time.timeScale = Application.isBatchMode ? 16f : 4f;
             EditorApplication.update += VerifyMovement;
         }
 
@@ -222,6 +228,8 @@ namespace JurassicWorld.Editor
             typeof(MovementCorridorCrossings).GetMethod("ResetOwners", BindingFlags.NonPublic | BindingFlags.Static).Invoke(null, null);
             for (int i = 0; i < agents.Length; i++)
             {
+                // This regression measures route traffic. Player-triggered rests are verified separately.
+                typeof(DinosaurAgent).GetField("interactionReady", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(agents[i], false);
                 int route = RoutePairs[index, i];
                 bool placed = false;
                 for (int sample = 0; sample < MovementCorridor.SampleCount(route); sample++)

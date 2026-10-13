@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace JurassicWorld
 {
-    public sealed class DinosaurAgent : MonoBehaviour
+    public sealed partial class DinosaurAgent : MonoBehaviour
     {
         public enum DinosaurState
         {
@@ -11,6 +11,15 @@ namespace JurassicWorld
             RandomWalk,
             Approaching
         }
+
+        public enum PlayerInteractionPhase { Inactive, Observing, Turning, Starting, Following, Stopping, Looking, Returning, FrontSequence }
+
+        [Header("T-Rex player interaction")]
+        [SerializeField] private bool playerInteractionEnabled;
+        public PlayerInteractionPhase InteractionPhase { get; private set; }
+        public bool IsInteractionMoving => InteractionPhase != PlayerInteractionPhase.Inactive && interactionMoved;
+        private bool interactionReady, interactionMoved;
+        private readonly RaycastHit[] sightHits = new RaycastHit[32];
 
         /// <summary>召唤退出原因：区分「到达」「受阻放弃」「30s 兜底超时」三种场景。</summary>
         private enum SummonExitReason
@@ -258,6 +267,7 @@ namespace JurassicWorld
 
         private void Awake()
         {
+            startupRoamingMode = roamingMode;
             spawnPoint = transform.position;
             coreBody = GetComponent<DinosaurCoreBody>();
             // 运行时为纯 Transform 位移、无 Rigidbody/物理组件，树干与同类阻挡只能走几何查询：
@@ -269,8 +279,9 @@ namespace JurassicWorld
             // 分配车道 + 派生独立随机流：必须先于 BeginIdle（BeginIdle 要用 random 取 Idle 计时）。
             AssignLane();
             random = new System.Random(WanderSeedBase + laneIndex * WanderSeedStride);
-            MovementCorridor.ProjectToCorridor(routeIndex,
-                new Vector2(transform.position.x, transform.position.z), out routeArc, out _);
+            if (!IsFreeRoaming)
+                MovementCorridor.ProjectToCorridor(routeIndex,
+                    new Vector2(transform.position.x, transform.position.z), out routeArc, out _);
             BeginIdle();
         }
 
@@ -359,12 +370,18 @@ namespace JurassicWorld
 
         private void Update()
         {
+            if (frontTestWaiting) { PlayClip(idleClip); return; }
             if (SummonEnabled && Input.GetKeyDown(KeyCode.Space))
                 TrySummonVisibleDinosaur();
 
             // 循环窗口卷绕（见 moveClipLoopStart 字段注释）：把 move 播放时间钳在窗口内。
             // 放在 Update：动画采样在本帧 Update 之后发生，此帧修正即时生效。
             ApplyMoveLoopWindow();
+
+            if (UpdateRouteStepping()) return;
+            if (IsSteppingTurn && stepTurnUse == TurnUse.Wander) { TickSteppingTurn(); return; }
+            if (UpdatePlayerInteraction()) return;
+            if (UpdateFreeRoaming()) return;
 
             switch (CurrentState)
             {
@@ -408,6 +425,19 @@ namespace JurassicWorld
             float window = moveClipLoopEnd - moveClipLoopStart;
             if (moveState.time < moveClipLoopStart)
                 moveState.time = moveClipLoopStart;   // 跳过窗口前的起手段（含 CrossFade 入场：time 从 0 起步）
+            else if (HasFootPhaseData && moveState.time + Time.deltaTime * moveState.speed >= moveClipLoopEnd)
+            {
+                float advance = Time.deltaTime * moveState.speed;
+                float wrapped = moveClipLoopStart + Mathf.Repeat(moveState.time + advance - moveClipLoopStart, window);
+                var motion = interactionProfile.Find(InteractionMotionRole.Walk);
+                var end = SampleFootFrame(motion, moveClipLoopEnd);
+                var start = SampleFootFrame(motion, moveClipLoopStart);
+                var footLock = GetComponentInChildren<DinosaurFootLock>();
+                if (footLock != null)
+                    footLock.BlendWalkSeam(end.leftSole - start.leftSole, end.rightSole - start.rightSole);
+                // Legacy Animation advances after Update. Wrap its upcoming sample, not the previous one.
+                moveState.time = wrapped - advance;
+            }
             else if (moveState.time >= moveClipLoopEnd)
                 moveState.time = moveClipLoopStart + (moveState.time - moveClipLoopStart) % window;
         }
@@ -498,6 +528,7 @@ namespace JurassicWorld
             moveClip = FindClip(moveHint, "run", "walk", "fly", "animation");
             // 缓存 move state（循环窗口卷绕用；Animation 索引器是字典查找，避免每帧调用）。
             moveState = legacyAnimation != null && !string.IsNullOrEmpty(moveClip) ? legacyAnimation[moveClip] : null;
+            BindCuriosityAnimations();
             if (string.IsNullOrEmpty(idleClip))
                 idleClip = moveClip;
             if (string.IsNullOrEmpty(moveClip))
@@ -895,6 +926,7 @@ namespace JurassicWorld
         // 持续沿闭合中心线推进；没有端点掉头或原地转向。
         private bool MoveAlongCorridor(float speed)
         {
+            if (TryRouteTurn()) return true;
             Vector2 currentXZ = new Vector2(transform.position.x, transform.position.z);
             waitingAtCrossing = false;
             float step = Mathf.Min(walkRemaining, speed * Time.deltaTime);

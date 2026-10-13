@@ -32,6 +32,12 @@ foreach ($n in $xml.SelectNodes('//Reference/HintPath')) {
 }
 
 $runtimeSourcePaths = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
+foreach ($n in $xml.SelectNodes('//ProjectReference[@Include]')) {
+    $assemblyName = [System.IO.Path]::GetFileNameWithoutExtension($n.GetAttribute('Include'))
+    $assemblyPath = Join-Path $projDir ('Library\ScriptAssemblies\' + $assemblyName + '.dll')
+    if (-not (Test-Path -LiteralPath $assemblyPath)) { throw "Missing project assembly: $assemblyPath" }
+    [void]$sb.AppendLine('-r:"' + $assemblyPath + '"')
+}
 foreach ($n in $xml.SelectNodes('//Compile[@Include]')) {
     $f = $n.GetAttribute('Include')
     $p = Join-Path $projDir $f

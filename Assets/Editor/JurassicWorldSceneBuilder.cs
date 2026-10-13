@@ -72,6 +72,7 @@ namespace JurassicWorld.Editor
             FoliageInteractionPreparation.SeedConfigured();
             // Dense Jungle Phase 1：可开关的通道 debug 标注（纯场景线段，不动 TerrainData / 植被 Pass）。
             BuildMovementCorridorDebug();
+            TRexInteractionBake.BakeCurrentScene();
         }
 
         // ---------------------------------------------------------------- 通道 debug 标注（Phase 1）
@@ -1172,6 +1173,7 @@ namespace JurassicWorld.Editor
             // 行为级碰撞契约：另一代理在 DinosaurAgent.cs 中添加同名 [SerializeField] private bool groundObstacleAware = true;
             // 字段名必须逐字符一致（反射写入，编译期无依赖）；飞行单位写 false，不被地面树干阻挡。
             SetField(agent, "groundObstacleAware", t.groundObstacleAware);
+            SetField(agent, "playerInteractionEnabled", t.resourcePath == "Dinosaurs/TRex/source/T-Rex");
             EditorUtility.SetDirty(agent);
 
             var visualRoot = new GameObject(t.displayName + " Visual Root");

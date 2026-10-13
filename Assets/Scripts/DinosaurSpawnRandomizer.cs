@@ -113,6 +113,23 @@ namespace JurassicWorld
                     continue;
 
                 Vector3 previous = agent.transform.position;
+                if (agent.IsFrontTestControlled)
+                {
+                    placedPositions.Add(new Vector2(previous.x, previous.z));
+                    placedRadii.Add(agent.CollisionRadius); placedRoutes.Add(-1); acceptedCount++;
+                    continue;
+                }
+                if (agent.IsFreeRoaming)
+                {
+                    if (!agent.TryFreeSpawn(hasCamera, cameraXZ, placedPositions, placedRadii, random, out Vector2 freePosition))
+                        throw new System.InvalidOperationException($"[SpawnRandomizer] {agent.DisplayName} 没有安全的自由漫游出生点。");
+                    placedPositions.Add(freePosition);
+                    placedRadii.Add(agent.CollisionRadius);
+                    placedRoutes.Add(-1);
+                    acceptedCount++;
+                    Debug.Log($"[SpawnRandomizer] {agent.DisplayName}: 自由漫游安全出生 {freePosition}。");
+                    continue;
+                }
                 // 每次 Play 随机打乱通道顺序，再轮转分派。当前两只恐龙必分到不同通道，
                 // 同时霸王龙/伶盗龙各自进入哪一条线仍是随机的。
                 int route = -1;
@@ -143,7 +160,7 @@ namespace JurassicWorld
             var distribution = new System.Text.StringBuilder();
             for (int r = 0; r < routeCounts.Length; r++)
                 distribution.Append(r == 0 ? "；" : "、").Append(MovementCorridor.GetRouteName(r)).Append(" × ").Append(routeCounts[r]);
-            Debug.Log($"[SpawnRandomizer] 开局随机分派完成：{acceptedCount}/{agents.Length} 只在线上安全出生；路线分布 {distribution}。");
+            Debug.Log($"[SpawnRandomizer] 开局布置完成：{acceptedCount}/{agents.Length} 只安全出生；路线分布 {distribution}。");
         }
 
         // ---------------------------------------------------------------- 采样
@@ -195,7 +212,7 @@ namespace JurassicWorld
             List<Vector2> placedPositions, List<float> placedRadii, List<int> placedRoutes)
         {
             for (int i = 0; i < placedPositions.Count; i++)
-                if (!MovementCorridorCrossings.CanSpawnTogether(route, candidate, radius,
+                if (placedRoutes[i] >= 0 && !MovementCorridorCrossings.CanSpawnTogether(route, candidate, radius,
                     placedRoutes[i], placedPositions[i], placedRadii[i])) return false;
             return (!hasCamera || Vector2.Distance(candidate, cameraXZ) >= CameraMinDistance)
                 && !TerrainTreeObstacleRegistry.IsBlocked(candidate, treeAvoidRadius)

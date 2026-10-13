@@ -423,8 +423,9 @@ namespace JurassicWorld
 
         public static bool CanAdvance(DinosaurAgent agent, DinosaurAgent[] peers, Vector2 next)
         {
+            if (!agent.UsesRouteScheduling) return true;
             int peerCount = 0;
-            foreach (var peer in peers) if (peer != null && peer != agent) peerCount++;
+            foreach (var peer in peers) if (peer != null && peer != agent && peer.UsesRouteScheduling) peerCount++;
             if (peerCount >= 2) return CanAdvanceTrafficGroup(agent, peers, next);
             // Check each shared gate once, then reserve atomically after all checks pass.
             RequestedGates.Clear();
@@ -434,7 +435,7 @@ namespace JurassicWorld
                 int otherRoute = gate.RouteA == agent.RouteIndex ? gate.RouteB : gate.RouteA;
                 DinosaurAgent peer = null;
                 foreach (DinosaurAgent candidate in peers)
-                    if (candidate != null && candidate != agent && candidate.RouteIndex == otherRoute)
+                    if (candidate != null && candidate != agent && candidate.UsesRouteScheduling && candidate.RouteIndex == otherRoute)
                     {
                         peer = candidate;
                         break;
@@ -472,9 +473,9 @@ namespace JurassicWorld
         private static bool InTrafficRegion(DinosaurAgent agent, DinosaurAgent[] peers, Vector2 point, DinosaurAgent extraPeer = null)
         {
             foreach (var peer in peers)
-                if (peer != null && peer != agent && peer.RouteIndex != agent.RouteIndex
+                if (peer != null && peer != agent && peer.UsesRouteScheduling && peer.RouteIndex != agent.RouteIndex
                     && IsConflictPosition(agent.RouteIndex, point, peer.RouteIndex, agent.CollisionRadius + peer.CollisionRadius)) return true;
-            return extraPeer != null && extraPeer != agent && extraPeer.RouteIndex != agent.RouteIndex
+            return extraPeer != null && extraPeer != agent && extraPeer.UsesRouteScheduling && extraPeer.RouteIndex != agent.RouteIndex
                 && IsConflictPosition(agent.RouteIndex, point, extraPeer.RouteIndex, agent.CollisionRadius + extraPeer.CollisionRadius);
         }
 
@@ -485,7 +486,7 @@ namespace JurassicWorld
             if (trafficOwner != null)
             {
                 Vector2 ownerPoint = new Vector2(trafficOwner.transform.position.x, trafficOwner.transform.position.z);
-                if (!trafficOwner.isActiveAndEnabled || !InTrafficRegion(trafficOwner, peers, ownerPoint, agent)) trafficOwner = null;
+                if (!trafficOwner.isActiveAndEnabled || !trafficOwner.UsesRouteScheduling || !InTrafficRegion(trafficOwner, peers, ownerPoint, agent)) trafficOwner = null;
             }
             if (!InTrafficRegion(agent, peers, next)) return true;
             if (trafficOwner == null) trafficOwner = agent;
@@ -493,7 +494,13 @@ namespace JurassicWorld
         }
 
         public static bool ShouldKeepMoving(DinosaurAgent agent, Vector2 point)
-            => trafficOwner == agent || IsInside(agent.RouteIndex, point);
+            => agent.UsesRouteScheduling && (trafficOwner == agent || IsInside(agent.RouteIndex, point));
+
+        public static void Release(DinosaurAgent agent)
+        {
+            if (trafficOwner == agent) trafficOwner = null;
+            foreach (var gate in Gates) if (gate.Owner == agent) gate.Owner = null;
+        }
 
     }
 }

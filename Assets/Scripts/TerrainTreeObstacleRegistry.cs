@@ -113,6 +113,16 @@ namespace JurassicWorld
         /// 注册表为空（无地形 / 无树）时恒返回 false（放行）。
         /// 边界语义：dist² &lt; reach² 判「阻塞」，dist² >= reach² 判「自由」。
         /// </summary>
+        // Navigation baking consumes exactly the same world-space trunk geometry as runtime movement.
+        public static TreeTrunkSection[] GetTrunkSections()
+        {
+            EnsureInitialized();
+            var sections = new List<TreeTrunkSection>();
+            foreach (var bucket in cells.Values)
+                foreach (var obstacle in bucket) sections.AddRange(obstacle.sections);
+            return sections.ToArray();
+        }
+
         public static bool IsCoreBlocked(Vector2 xz, Vector2 forward, DinosaurCoreBody body)
         {
             EnsureInitialized();
@@ -153,6 +163,39 @@ namespace JurassicWorld
             }
             return Vector2.Lerp(current, desired, low);
         }
+        /// <summary>Line of sight against authored trunk sections, including Terrain trees without colliders.</summary>
+        public static bool IsSightBlocked(Vector3 from, Vector3 to)
+        {
+            EnsureInitialized();
+            Vector2 start = new Vector2(from.x, from.z), delta = new Vector2(to.x - from.x, to.z - from.z);
+            int padding = NeighborSpan(0f);
+            int minX = CellIndex(Mathf.Min(from.x, to.x)) - padding, maxX = CellIndex(Mathf.Max(from.x, to.x)) + padding;
+            int minZ = CellIndex(Mathf.Min(from.z, to.z)) - padding, maxZ = CellIndex(Mathf.Max(from.z, to.z)) + padding;
+            for (int x = minX; x <= maxX; x++) for (int z = minZ; z <= maxZ; z++)
+            {
+                if (!cells.TryGetValue(CellKey(x, z), out var bucket)) continue;
+                foreach (var obstacle in bucket) foreach (var section in obstacle.sections)
+                {
+                    float low = 0f, high = 1f;
+                    float dy = to.y - from.y;
+                    if (Mathf.Abs(dy) < 1e-6f)
+                    {
+                        if (from.y < section.bottom || from.y > section.top) continue;
+                    }
+                    else
+                    {
+                        float a = (section.bottom - from.y) / dy, b = (section.top - from.y) / dy;
+                        low = Mathf.Max(0f, Mathf.Min(a, b)); high = Mathf.Min(1f, Mathf.Max(a, b));
+                        if (low > high) continue;
+                    }
+                    float t = delta.sqrMagnitude > 1e-8f
+                        ? Mathf.Clamp(Vector2.Dot(section.center - start, delta) / delta.sqrMagnitude, low, high) : low;
+                    if ((start + delta * t - section.center).sqrMagnitude < section.radius * section.radius) return true;
+                }
+            }
+            return false;
+        }
+
         public static bool IsBlocked(Vector2 xz, float radius)
         {
             EnsureInitialized();
