@@ -19,7 +19,6 @@ namespace JurassicWorld
         public PlayerInteractionPhase InteractionPhase { get; private set; }
         public bool IsInteractionMoving => InteractionPhase != PlayerInteractionPhase.Inactive && interactionMoved;
         private bool interactionReady, interactionMoved;
-        private readonly RaycastHit[] sightHits = new RaycastHit[32];
 
         /// <summary>召唤退出原因：区分「到达」「受阻放弃」「30s 兜底超时」三种场景。</summary>
         private enum SummonExitReason
@@ -1095,7 +1094,7 @@ namespace JurassicWorld
         }
 
         /// <summary>
-        /// 同类先行权判定：返回 true 表示「我先走、对方让路」。
+        /// 同类先行权判定：返回 true 表示「我先走、对方让路」。霸王龙与伶盗龙相遇时固定由霸王龙先行。
         /// 三级全序保证任何一对恐龙都有唯一结论（杜绝「都不让」与「都让」）：
         /// 1) 召唤中的恐龙优先（玩家主动行为优先，且不该被闲逛者截停）；
         /// 2) 体型大者优先（小个子让路：霸王龙 r=5 先行、伶盗龙 r=1.5 让路）；
@@ -1103,6 +1102,8 @@ namespace JurassicWorld
         /// </summary>
         private bool HasRightOfWay(DinosaurAgent peer)
         {
+            if (species == DinosaurSpecies.Tyrannosaurus && peer.species == DinosaurSpecies.Velociraptor) return true;
+            if (species == DinosaurSpecies.Velociraptor && peer.species == DinosaurSpecies.Tyrannosaurus) return false;
             bool meSummoning = CurrentState == DinosaurState.Approaching;
             bool peerSummoning = peer.CurrentState == DinosaurState.Approaching;
             if (meSummoning != peerSummoning)

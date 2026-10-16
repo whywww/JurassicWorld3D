@@ -42,7 +42,7 @@ namespace JurassicWorld
             || frontFeet != null && frontFeet.ReturnHandoffActive;
         private readonly List<Vector3> frontTrail = new List<Vector3>();
         public string FrontInteractionStage => frontActive ? frontStage + (frontWaiting
-            ? frontWaitReason == "Peer" ? " (YieldingToPeer)" : " (TryingToDetour)"
+            ? frontWaitReason == "Peer" ? " (WaitingForPeerClearance)" : " (TryingToDetour)"
             : frontStaticPass ? " (PassingStaticObstacles)" : "") : "Inactive";
         public float FrontActionPlaybackTime => frontWaiting && frontWaitPlaying ? frontWaitTime : frontAction != null ? frontActionTime
             : (frontStage == FrontStage.Follow || IsSideLocomotion) && frontFollowMotion != null && legacyAnimation != null
@@ -76,7 +76,6 @@ namespace JurassicWorld
         {
             if (!frontTestControlled || !IsWaitingForInteraction || !interactionReady || !FrontActionsAvailable()) return false;
             frontTestWaiting = false;
-            sideTestSequence = false;
             FrontTestInteractionCount++;
             BeginFrontInteraction();
             return true;
@@ -91,8 +90,12 @@ namespace JurassicWorld
                 if (interactionProfile.Find(role) == null) return false;
             return interactionProfile.Find(InteractionMotionRole.Turn180Look) != null;
         }
-        private void BeginFrontInteraction()
+        private void BeginFrontInteraction() => BeginInteractionSequence(false, false);
+
+        private void BeginInteractionSequence(bool fromSide, bool fromLeft)
         {
+            sideTestSequence = fromSide;
+            sideFromLeft = fromSide && fromLeft;
             ClearSideRoarHandoff();
             ClearSideWalkBlend();
             frontFeet?.EndReturnHandoff();

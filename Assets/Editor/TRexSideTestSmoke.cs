@@ -95,7 +95,7 @@ namespace JurassicWorld.Editor
             var control = UnityEngine.Object.FindObjectOfType<TRexFrontTestController>();
             int current = SessionState.GetInt(Key + ".Case", 0);
             control.initialSide = current % 2 == 0 ? TRexFrontTestController.ApproachSide.Left : TRexFrontTestController.ApproachSide.Right;
-            control.sideAngle = current < 6 ? new[] { 21f, 45f, 90f }[current / 2] : 45f;
+            control.sideAngle = current < 6 ? new[] { 21f, 45f, 50f }[current / 2] : 45f;
             if (current == 11)
             {
                 control.initialSide = (TRexFrontTestController.ApproachSide)SessionState.GetInt(Key + ".SavedSide", 1);

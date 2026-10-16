@@ -7,6 +7,14 @@ namespace JurassicWorld
     public sealed partial class DinosaurAgent
     {
         public enum RoamingMode { [InspectorName("路线漫游")] Route, [InspectorName("自由漫游")] Free }
+        public enum DinosaurSpecies { Other, Tyrannosaurus, Velociraptor }
+        [SerializeField] private DinosaurSpecies species;
+        [SerializeField, Min(1f), InspectorName("霸王龙安全距离（米）")] private float safetyDistance = 15f;
+        [SerializeField, Min(1f), InspectorName("避让解除距离（米）")] private float safetyReleaseDistance = 20f;
+        public DinosaurSpecies Species => species;
+        public bool IsAvoidingTyrannosaurus { get; private set; }
+        public string AvoidanceStatus { get; private set; } = "Inactive";
+        private float nextSafetyReplan;
         [Header("Daily roaming")]
         [SerializeField, InspectorName("漫游方式"), Tooltip("仅启动时读取。自由漫游需要此恐龙的导航、身体和动作数据。")]
         private RoamingMode roamingMode;
@@ -21,7 +29,8 @@ namespace JurassicWorld
         {
             if (interactionSettings == null) interactionSettings = FindObjectOfType<DinosaurInteractionSettings>();
             if (curiosityPath == null) curiosityPath = new NavMeshPath();
-            return interactionSettings != null && interactionSettings.NavigationReady && interactionBody != null && HasFootPhaseData;
+            return interactionSettings != null && interactionSettings.NavigationReady && interactionBody != null
+                && (species == DinosaurSpecies.Velociraptor || HasFootPhaseData);
         }
 
         internal bool TryFreeSpawn(bool hasCamera, Vector2 camera, List<Vector2> occupied, List<float> radii,
@@ -37,6 +46,7 @@ namespace JurassicWorld
                 if (!NavMesh.SamplePosition(candidate, out var hit, 2f, NavigationFilter)) continue;
                 Vector2 p = new Vector2(hit.position.x, hit.position.z);
                 if (hasCamera && Vector2.Distance(p, camera) < 25f) continue;
+                if (!SafetySegmentAllowed(p, p, false)) continue;
                 bool overlap = false;
                 for (int i = 0; i < occupied.Count; i++)
                     if (Vector2.Distance(p, occupied[i]) < CollisionRadius + radii[i] + 6f) { overlap = true; break; }
@@ -121,6 +131,7 @@ namespace JurassicWorld
                 if (!freeNavigationWarning) { Debug.LogWarning("[Free roaming] Missing navigation/body/foot data; waiting safely.", this); freeNavigationWarning = true; }
                 return true;
             }
+            if (UpdateSafetyAvoidance()) return true;
             if (CurrentState == DinosaurState.Idle)
             {
                 stateTimer -= Time.deltaTime;
@@ -147,7 +158,7 @@ namespace JurassicWorld
                 else FreeIdle(Range(3f, 7f));
                 return true;
             }
-            bool moved = MoveCuriosity(WalkSpeed, false);
+            bool moved = species == DinosaurSpecies.Velociraptor ? MoveRaptorFree() : MoveCuriosity(WalkSpeed, false);
             if (IsSteppingTurn) return true;
             if (moved) PlayMovementClip(WalkSpeed); else PlayClip(idleClip);
             if (curiosityBlockedTime >= 2f)

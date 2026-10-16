@@ -59,24 +59,15 @@ namespace JurassicWorld
             offset.y = 0f;
             float angle = Vector3.Angle(GetVisualForward(), offset);
             bool waitingForTest = frontTestControlled && InteractionPhase == PlayerInteractionPhase.Inactive;
-            float baseRange = waitingForTest || frontActive || angle <= 20f ? frontDetectionDistance : detectionDistance;
+            float baseRange = waitingForTest || frontActive || FrontActionsAvailable() || angle <= 20f ? frontDetectionDistance : detectionDistance;
             float range = IsOffRouteInteraction ? baseRange * 1.5f : baseRange;
-            float maxAngle = waitingForTest || sideTestSequence && frontActive ? 90f : detectionAngle * .5f;
-            // Quaternion-derived headings can put an exact 90-degree bearing a few float ULPs over the limit.
+            float maxAngle = waitingForTest || sideTestSequence && frontActive || SideActionsAvailable()
+                ? (frontActive ? 90f : 50f) : detectionAngle * .5f;
+            // Quaternion-derived headings can put an exact boundary a few float ULPs over the limit.
             if (offset.sqrMagnitude > range * range || angle > maxAngle + .0001f) return false;
             Vector3 eye = transform.position + Vector3.up * ViewFocusHeight;
-            Vector3 sight = viewCamera.transform.position - eye;
             if (TerrainTreeObstacleRegistry.IsSightBlocked(eye, viewCamera.transform.position)) return false;
-            int count = Physics.RaycastNonAlloc(eye, sight.normalized, sightHits, sight.magnitude,
-                Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore);
-            if (count == sightHits.Length) return false;
-            for (int i = 0; i < count; i++)
-            {
-                Transform hit = sightHits[i].transform;
-                if (hit.IsChildOf(transform) || hit.IsChildOf(viewCamera.transform)) continue;
-                return false;
-            }
-            return true;
+            return interactionSettings == null || !interactionSettings.IsRockSightBlocked(eye, viewCamera.transform.position);
         }
 
         private void PlayCuriosity(InteractionMotionRole role, bool loop = false)
@@ -114,7 +105,9 @@ namespace JurassicWorld
         {
             frontFeet?.EndReturnHandoff();
             Vector3 playerDirection = viewCamera.transform.position - transform.position; playerDirection.y = 0f;
-            if (Vector3.Angle(GetVisualForward(), playerDirection) <= 20f && FrontActionsAvailable()) { BeginFrontInteraction(); return; }
+            float angle = Vector3.SignedAngle(GetVisualForward(), playerDirection, Vector3.up);
+            if (Mathf.Abs(angle) <= 20f && FrontActionsAvailable()) { BeginFrontInteraction(); return; }
+            if (Mathf.Abs(angle) <= 50f + .0001f && SideActionsAvailable()) { BeginInteractionSequence(true, angle < 0f); return; }
             CurrentState = DinosaurState.RandomWalk;
             InteractionPhase = PlayerInteractionPhase.Observing;
             lastSeenPlayer = viewCamera.transform.position;
@@ -145,6 +138,7 @@ namespace JurassicWorld
                 || curiosityPath.status == NavMeshPathStatus.PathInvalid
                 || (completeOnly && curiosityPath.status != NavMeshPathStatus.PathComplete)) return false;
             curiosityCorners = curiosityPath.corners;
+            if (!SafetyPathAllowed(curiosityCorners, IsAvoidingTyrannosaurus)) return false;
             curiosityCorner = 0;
             hasCuriosityPath = curiosityCorners.Length != 0;
             return hasCuriosityPath;
@@ -248,6 +242,7 @@ namespace JurassicWorld
                     to = from;
             }
             bool blocked = interactionSettings.StepBlocked(from, to, CoreForward, new Vector2(heading.x, heading.z), interactionBody)
+                || !SafetySegmentAllowed(from, to, IsAvoidingTyrannosaurus)
                 || FindBlockingStep(from, to) != null;
             if (!blocked && (to - from).sqrMagnitude > .000001f)
             {

@@ -103,6 +103,10 @@ namespace JurassicWorld.Editor
             var test = new GameObject("Front Test Controls").AddComponent<TRexFrontTestController>();
             test.dinosaur = rex; test.playerCamera = camera;
             test.approachLayout = layout;
+            var debugWindow = clone.GetComponent<DinosaurDebugWindow>();
+            if (debugWindow == null) debugWindow = clone.AddComponent<DinosaurDebugWindow>();
+            debugWindow.dinosaur = rex; debugWindow.playerCamera = camera;
+            debugWindow.visibleOnStart = true; debugWindow.anchorBottom = false; debugWindow.showResetHint = true;
             EditorSceneManager.SaveScene(scene, TRexFrontTestController.ScenePath);
             AssetDatabase.SaveAssets();
             Debug.Log("TREX_FRONT_TEST_SCENE_CREATED: fixed rex (0,0,0), player (0,1.7,40), one-shot zone x +/-2 z30..32; independent navigation.");

@@ -69,8 +69,8 @@ namespace JurassicWorld.Editor
             Set("peers", new[] { rex });
             rex.transform.SetPositionAndRotation(Vector3.zero, Quaternion.Euler(0f, -rex.VisualYaw, 0f));
             test.playerCamera.transform.position = new Vector3(0f, 1.7f, 24f);
-            Set("sideTestSequence", Side); Set("sideFromLeft", scenario % 2 == 0);
-            Call("BeginFrontInteraction"); Set("frontTestWaiting", false); Call("BeginFrontFollow", false);
+            Call("BeginInteractionSequence", Side, scenario % 2 == 0);
+            Set("frontTestWaiting", false); Call("BeginFrontFollow", false);
             if (scenario >= 14) { PrepareRecovery(); return; }
             if (Side && Case == 2)
             {

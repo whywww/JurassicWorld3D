@@ -16,7 +16,6 @@ namespace JurassicWorld
         public Transform approachLayout;
         public ApproachSide ActiveSide { get; private set; }
         public float ActiveAngle { get; private set; }
-        private GUIStyle label, title;
         public bool Triggered => dinosaur != null && dinosaur.FrontTestInteractionCount > 0;
         public bool IsInsideTrigger
         {
@@ -57,27 +56,6 @@ namespace JurassicWorld
 #else
             SceneManager.LoadScene(gameObject.scene.name);
 #endif
-        }
-        private void OnGUI()
-        {
-            if (dinosaur == null || playerCamera == null) return;
-            if (label == null)
-            {
-                label = new GUIStyle(GUI.skin.label) { fontSize = 17, wordWrap = true };
-                title = new GUIStyle(label) { fontSize = 22, fontStyle = FontStyle.Bold };
-            }
-            float distance = Vector2.Distance(new Vector2(playerCamera.transform.position.x, playerCamera.transform.position.z),
-                new Vector2(dinosaur.transform.position.x, dinosaur.transform.position.z));
-            GUI.Box(new Rect(12, 12, 650, 174), GUIContent.none);
-            GUI.Label(new Rect(28, 22, 610, 30), "Debug window", title);
-            GUI.Label(new Rect(28, 54, 610, 28), $"Angle: {dinosaur.PlayerInteractionAngle:F1} degrees", label);
-            string stage = dinosaur.IsFrontInteractionActive ? dinosaur.FrontInteractionStage
-                : dinosaur.InteractionCooldownRemaining > 0f ? $"Inactive (Cooldown: {dinosaur.InteractionCooldownRemaining:F1}s)"
-                : dinosaur.IsWaitingForInteraction ? "Waiting for interaction" : dinosaur.InteractionPhase.ToString();
-            GUI.Label(new Rect(28, 86, 610, 30), $"Stage: {stage}    Distance: {distance:F1} m", label);
-            GUI.Label(new Rect(28, 116, 550, 28), $"Animation: {dinosaur.CurrentAnimationSourceName}  {dinosaur.FrontActionPlaybackTime:F2}s"
-                + (dinosaur.FrontActionWaitingForSpace ? "  " + dinosaur.FrontBlockingReason : ""), label);
-            GUI.Label(new Rect(28, 148, 610, 28), "W/S: forward/back  |  A/D: turn  |  Right mouse: look  |  R: reset", label);
         }
     }
 }

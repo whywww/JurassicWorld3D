@@ -2598,6 +2598,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1154906966}
   - component: {fileID: 1154906965}
+  - component: {fileID: 1154906967}
   m_Layer: 0
   m_Name: Front Test Controls
   m_TagString: Untagged
@@ -2622,6 +2623,24 @@ MonoBehaviour:
   initialSide: 2
   sideAngle: 42.4
   approachLayout: {fileID: 1900000001}
+--- !u!114 &1154906967
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1154906964}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 19f4522d353f4e3d8fa5c99c5f21fc31, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  dinosaur: {fileID: 379201637}
+  playerCamera: {fileID: 1028963904}
+  visibleOnStart: 1
+  toggleKey: 285
+  anchorBottom: 0
+  showResetHint: 1
 --- !u!4 &1154906966
 Transform:
   m_ObjectHideFlags: 0

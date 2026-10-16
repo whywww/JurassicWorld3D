@@ -118,7 +118,7 @@ namespace JurassicWorld.Editor
                 else if (stage == 3)
                 {
                     Vector3 forward = rex.transform.rotation * Quaternion.Euler(0f, rex.VisualYaw, 0f) * Vector3.forward;
-                    sequenceDirection = Quaternion.Euler(0f, completed == 1 ? -45f : 90f, 0f) * forward;
+                    sequenceDirection = Quaternion.Euler(0f, completed == 1 ? -45f : 50f, 0f) * forward;
                     test.playerCamera.transform.position = rex.transform.position + sequenceDirection * 31f + Vector3.up * 1.7f;
                     if (Time.time < cooldownEnds + .25f)
                         Require(rex.FrontTestInteractionCount == completed, "Interaction triggered during cooldown or before a fresh detection hold.");
@@ -169,12 +169,12 @@ namespace JurassicWorld.Editor
         {
             var canSee = typeof(DinosaurAgent).GetMethod("CanSeePlayer", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
             Vector3 forward = rex.transform.rotation * Quaternion.Euler(0f, rex.VisualYaw, 0f) * Vector3.forward;
-            foreach (float angle in new[] { 0f, 20f, 21f, -45f, 89.9f, 90f, 90.1f, 180f })
+            foreach (float angle in new[] { 0f, 20f, 21f, -45f, -50f, 49.9f, 50f, 50.1f, -50.1f, 90f, 180f })
             foreach (float distance in new[] { 31.9f, 32.1f })
             {
                 test.playerCamera.transform.position = rex.transform.position
                     + Quaternion.Euler(0f, angle, 0f) * forward * distance + Vector3.up * 1.7f;
-                bool expected = Mathf.Abs(angle) <= 90f && distance <= 32f;
+                bool expected = Mathf.Abs(angle) <= 50f && distance <= 32f;
                 Require((bool)canSee.Invoke(rex, null) == expected, $"Detection boundary mismatch at {angle}deg / {distance}m.");
             }
             test.playerCamera.transform.position = rex.transform.position + forward * 28f + Vector3.up * 1.7f;
@@ -239,7 +239,7 @@ namespace JurassicWorld.Editor
         {
             EditorApplication.update -= Tick; SessionState.SetBool(Key, false); SessionState.SetBool(Key + ".Reset", false); Time.captureDeltaTime = 0f;
             Directory.CreateDirectory("Logs");
-            string result = error == null ? "PASS test scene: front/left/right marker layouts; live 0/90/180 degree angles; 32m/90deg detection boundaries and occlusion; natural detection outside yellow marker; three complete front/left/right sequences selected by live bearing; ten-second cooldown and fresh detection hold; R resets actor/player/configuration/cooldown. Visual Play feedback required." : error.ToString();
+            string result = error == null ? "PASS test scene: front/left/right marker layouts; live 0/90/180 degree angles; 32m/50deg detection boundaries and occlusion; natural detection outside yellow marker; three complete front/left/right sequences selected by live bearing; ten-second cooldown and fresh detection hold; R resets actor/player/configuration/cooldown. Visual Play feedback required." : error.ToString();
             File.WriteAllText("Logs/trex-front-test-result.txt", result);
             if (error == null) Debug.Log(result); else Debug.LogException(error);
             if (Application.isBatchMode) EditorApplication.Exit(error == null ? 0 : 1);

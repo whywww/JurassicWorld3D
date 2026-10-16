@@ -32,6 +32,18 @@ namespace JurassicWorld
         public bool PoseBlocked(Vector2 position, Vector2 forward, DinosaurCoreBody body)
             => PoseBlockReason(position, forward, body) != null;
 
+        // Uses the same baked large-rock geometry as movement, including rocks without colliders.
+        public bool IsRockSightBlocked(Vector3 from, Vector3 to)
+        {
+            Vector3 delta = to - from;
+            float length = delta.magnitude;
+            if (length <= Mathf.Epsilon) return false;
+            var ray = new Ray(from, delta / length);
+            foreach (Bounds rock in solidObstacles)
+                if (rock.Contains(from) || rock.IntersectRay(ray, out float distance) && distance < length) return true;
+            return false;
+        }
+
         public string PoseBlockReason(Vector2 position, Vector2 forward, DinosaurCoreBody body, bool ignoreStaticObstacles = false)
         {
             Vector2 right = new Vector2(forward.y, -forward.x);

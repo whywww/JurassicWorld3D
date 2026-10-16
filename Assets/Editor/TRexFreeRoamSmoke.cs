@@ -55,8 +55,9 @@ namespace JurassicWorld.Editor
             try
             {
                 rex = UnityEngine.Object.FindObjectsOfType<DinosaurAgent>().Single(a => a.name == "Tyrannosaurus Rex");
-                raptor = UnityEngine.Object.FindObjectsOfType<DinosaurAgent>().First(a => a != rex);
-                Require(rex.IsFreeRoaming && !rex.UsesRouteScheduling && !raptor.IsFreeRoaming, "Roaming modes/scheduling are incorrect.");
+                raptor = UnityEngine.Object.FindObjectsOfType<DinosaurAgent>().Single(a => a.Species == DinosaurAgent.DinosaurSpecies.Velociraptor);
+                Require(rex.IsFreeRoaming && !rex.UsesRouteScheduling && raptor.IsFreeRoaming && !raptor.UsesRouteScheduling,
+                    "Roaming modes/scheduling are incorrect.");
                 rex.ViewCamera.GetComponent<SmoothExplorerCamera>().enabled = false;
                 rex.ViewCamera.transform.position = new Vector3(200f, 2f, 200f);
                 disabled = SessionState.GetBool(Key + ".Off", false);
@@ -134,8 +135,8 @@ namespace JurassicWorld.Editor
                     Require(!settings.PoseBlocked(new Vector2(position.x, position.z), new Vector2(forward.x, forward.z), (DinosaurCoreBody)Get("interactionBody")),
                         "Free roaming entered a tree/rock/body boundary.");
                 }
-                Require(MovementCorridor.MinDistanceToRoute(new Vector2(raptor.transform.position.x, raptor.transform.position.z), raptor.RouteIndex) < .03f,
-                    "Other dinosaur left its original route constraint.");
+                Require(raptor.IsFreeRoaming && !raptor.UsesRouteScheduling,
+                    "Raptor returned to route scheduling.");
                 float elapsed = Time.time - started;
                 if (stage == 0 && elapsed >= 35f)
                 {
@@ -175,7 +176,7 @@ namespace JurassicWorld.Editor
         {
             EditorApplication.update -= Tick; SessionState.SetBool(Key, false); Time.captureDeltaTime = 0f;
             if (settings != null && originalObstacles != null) settings.solidObstacles = originalObstacles;
-            string result = error == null ? turnsOnly ? "PASS left/right 90 degree stepping turn preflight and completion. Short smoke; visual Play feedback required." : $"PASS free roaming {(disabled ? "interaction OFF" : "ON + local interaction exit + blocked stop")}: travelled={travelled:F2}m goals={goals} turns={turns} departure={maximumDeparture:F2}m; other actor remained on route. Short smoke; visual Play feedback required." : error.ToString();
+            string result = error == null ? turnsOnly ? "PASS left/right 90 degree stepping turn preflight and completion. Short smoke; visual Play feedback required." : $"PASS free roaming {(disabled ? "interaction OFF" : "ON + local interaction exit + blocked stop")}: travelled={travelled:F2}m goals={goals} turns={turns} departure={maximumDeparture:F2}m; raptor uses free roaming. Short smoke; visual Play feedback required." : error.ToString();
             Directory.CreateDirectory("Logs"); File.WriteAllText(turnsOnly ? "Logs/trex-free-turn-result.txt" : disabled ? "Logs/trex-free-roam-off-result.txt" : "Logs/trex-free-roam-result.txt", result);
             if (error == null) Debug.Log(result); else Debug.LogException(error);
             if (Application.isBatchMode) EditorApplication.Exit(error == null ? 0 : 1); else EditorApplication.isPlaying = false;

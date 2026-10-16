@@ -85,6 +85,7 @@ namespace JurassicWorld
             Vector2 a = new Vector2(from.x, from.z), b = new Vector2(to.x, to.z);
             if (constrainRoute && MovementCorridor.MinDistanceToRoute(b, routeIndex) > 2f) return false;
             if (interactionSettings.StepBlocked(a, b, new Vector2(f0.x, f0.z), new Vector2(f1.x, f1.z), interactionBody)
+                || !SafetySegmentAllowed(a, b, IsAvoidingTyrannosaurus)
                 || FindBlockingStep(a, b) != null) return false;
             var filter = NavigationFilter;
             return NavMesh.SamplePosition(to, out var hit, .25f, filter)

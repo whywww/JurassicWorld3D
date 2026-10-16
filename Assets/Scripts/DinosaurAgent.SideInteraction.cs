@@ -85,14 +85,19 @@ namespace JurassicWorld
 
         public bool TriggerSideInteractionTest(bool fromLeft)
         {
-            if (!frontTestControlled || !IsWaitingForInteraction || !interactionReady || !FrontActionsAvailable()) return false;
+            if (!frontTestControlled || !IsWaitingForInteraction || !interactionReady || !SideActionsAvailable()) return false;
+            frontTestWaiting = false;
+            FrontTestInteractionCount++;
+            BeginInteractionSequence(true, fromLeft);
+            return true;
+        }
+
+        private bool SideActionsAvailable()
+        {
+            if (!FrontActionsAvailable()) return false;
             foreach (var role in new[] { InteractionMotionRole.LookLeft, InteractionMotionRole.LookRight,
                 InteractionMotionRole.SideRoarLeft, InteractionMotionRole.SideRoarRight })
                 if (interactionProfile.Find(role) == null) return false;
-            sideTestSequence = true; sideFromLeft = fromLeft;
-            frontTestWaiting = false;
-            FrontTestInteractionCount++;
-            BeginFrontInteraction();
             return true;
         }
 

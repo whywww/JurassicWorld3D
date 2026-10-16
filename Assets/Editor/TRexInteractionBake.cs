@@ -326,6 +326,33 @@ namespace JurassicWorld.Editor
             Debug.Log("TREX_CURIOSITY_BAKE_OK");
         }
 
+        [MenuItem("Jurassic World/Interaction/Rebuild Main T-Rex Obstacles and Navigation")]
+        public static void RebuildMainObstaclesAndNavigation()
+        {
+            if (EditorApplication.isPlayingOrWillChangePlaymode) throw new InvalidOperationException("Exit Play mode before baking.");
+            var scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
+            if (scene.isDirty) throw new InvalidOperationException("Save the current scene before rebuilding navigation.");
+            if (scene.path != "Assets/Scenes/Main.unity") scene = EditorSceneManager.OpenScene("Assets/Scenes/Main.unity");
+            var rex = Object.FindObjectsOfType<DinosaurAgent>().Single(a => a.name == "Tyrannosaurus Rex");
+            var body = new SerializedObject(rex).FindProperty("interactionBody").objectReferenceValue as DinosaurCoreBody;
+            var settings = Object.FindObjectOfType<DinosaurInteractionSettings>();
+            if (body == null || body.bands.Length == 0 || settings == null || settings.navigationRadius <= 0f)
+                throw new InvalidOperationException("Main is missing existing T-Rex body/navigation calibration.");
+            RebuildObstaclesAndNavigation(settings, body);
+            EditorSceneManager.MarkSceneDirty(scene);
+            EditorSceneManager.SaveScene(scene);
+            AssetDatabase.SaveAssets();
+            Debug.Log($"TREX_LARGE_OBSTACLES_REBUILT: {settings.solidObstacles.Length} large rocks; trunks only; soft plants and small props excluded.");
+        }
+
+        private static void RebuildObstaclesAndNavigation(DinosaurInteractionSettings settings, DinosaurCoreBody body)
+        {
+            TerrainTreeObstacleRegistry.Invalidate();
+            settings.solidObstacles = SolidProps().Select(BoundsOf).Where(b => b.size.sqrMagnitude > .001f).ToArray();
+            BuildNavigation(settings, body);
+            EditorUtility.SetDirty(settings);
+        }
+
         internal static void BakeCurrentScene(bool adjustForest = true)
         {
             if (!AssetDatabase.IsValidFolder(Folder)) AssetDatabase.CreateFolder("Assets", "Navigation");
@@ -348,12 +375,9 @@ namespace JurassicWorld.Editor
             // Their larger animated envelope is still enforced by full-body trajectory checks.
             if (settings.navigationRadius <= 0f) settings.navigationRadius = body.BroadRadius + .35f;
             if (adjustForest) PrepareForest(settings.navigationRadius);
-            TerrainTreeObstacleRegistry.Invalidate();
-            var solids = SolidProps().Select(t => BoundsOf(t)).Where(b => b.size.sqrMagnitude > .001f).ToArray();
-            settings.solidObstacles = solids;
-            BuildNavigation(settings, body);
-            EditorUtility.SetDirty(settings);
+            RebuildObstaclesAndNavigation(settings, body);
             EditorUtility.SetDirty(rex);
+            DinosaurSafetySetup.ConfigureCurrentScene();
         }
 
         private static DinosaurInteractionProfile Calibrate(DinosaurAgent rex)
@@ -477,33 +501,81 @@ namespace JurassicWorld.Editor
 
         private static IEnumerable<Transform> SolidProps()
         {
-            var selected = new HashSet<Transform>();
-            foreach (string path in new[] { "Environment Props", "Understory Pass/Rocks", "Understory Pass/Deadwood", "Ground Pass Rocks", "Ground Ecology", "Autumn Deadwood Ecology Belt", "Phase 2 Vegetation Islands" })
+            foreach (string path in new[] { "Environment Props", "Understory Pass/Rocks" })
             {
                 GameObject root = GameObject.Find(path); if (root == null) continue;
-                foreach (Transform child in root.GetComponentsInChildren<Transform>())
+                foreach (Transform child in root.transform)
                 {
-                    if (child == root.transform) continue;
-                    string name = child.name.ToLowerInvariant();
-                    bool rock = name.Contains("rock");
-                    bool soft = name.Contains("moss") || name.Contains("fern") || name.Contains("grass") || name.Contains("bush");
-                    if (!rock && (soft || !(name.Contains("log") || name.Contains("stump") || name.Contains("snag") || name.Contains("deadwood")))) continue;
-                    if (!PrefabUtility.IsAnyPrefabInstanceRoot(child.gameObject) && child.GetComponent<Renderer>() == null) continue;
-                    bool nested = false;
-                    for (Transform ancestor = child.parent; ancestor != null; ancestor = ancestor.parent)
-                        if (selected.Contains(ancestor)) { nested = true; break; }
-                    if (!nested && selected.Add(child)) yield return child;
+                    if (!child.gameObject.activeInHierarchy) continue;
+                    bool large = path == "Environment Props"
+                        ? child.name.StartsWith("Rock_Large_", StringComparison.Ordinal)
+                        : child.name.StartsWith("Rock_", StringComparison.Ordinal) && child.name.EndsWith("_Hero", StringComparison.Ordinal);
+                    if (large) yield return child;
                 }
             }
         }
 
         private static Bounds BoundsOf(Transform target)
         {
-            var renderers = target.GetComponentsInChildren<Renderer>();
-            if (renderers.Length == 0) return new Bounds(target.position, Vector3.zero);
-            var bounds = renderers[0].bounds;
-            foreach (var renderer in renderers) bounds.Encapsulate(renderer.bounds);
+            bool found = false;
+            var bounds = new Bounds(target.position, Vector3.zero);
+            foreach (var renderer in target.GetComponentsInChildren<Renderer>())
+            {
+                bool soft = false;
+                for (var node = renderer.transform; node != null; node = node.parent)
+                {
+                    if (IsSoftPlant(node.name)) { soft = true; break; }
+                    if (node == target) break;
+                }
+                if (soft || renderer.sharedMaterials.Any(m => m != null && IsSoftPlant(m.name))) continue;
+                if (!found) { bounds = renderer.bounds; found = true; }
+                else bounds.Encapsulate(renderer.bounds);
+            }
             return bounds;
+        }
+
+        private static bool IsSoftPlant(string name)
+        {
+            name = name.ToLowerInvariant();
+            return name.Contains("fern") || name.Contains("grass") || name.Contains("bush")
+                || name.Contains("leaf") || name.Contains("leaves") || name.Contains("foliage");
+        }
+
+        [MenuItem("Jurassic World/Acceptance/Verify T-Rex Large Obstacle Policy")]
+        public static void VerifyLargeObstaclePolicy()
+        {
+            EditorSceneManager.OpenScene("Assets/Scenes/Main.unity");
+            var settings = Object.FindObjectOfType<DinosaurInteractionSettings>();
+            Bounds[] expected = SolidProps().Select(BoundsOf).Where(b => b.size.sqrMagnitude > .001f).ToArray();
+            if (expected.Length == 0 || !expected.SequenceEqual(settings.solidObstacles))
+                throw new InvalidOperationException("Main large-rock obstacle data is missing or stale.");
+            var fixture = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            fixture.name = "Rock_Large_Fixture";
+            fixture.transform.position = new Vector3(0f, 1f, 0f);
+            var rock = fixture.GetComponent<Renderer>().bounds;
+            var original = settings.solidObstacles;
+            try
+            {
+                var fern = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                fern.name = "Fern";
+                fern.transform.SetParent(fixture.transform, false);
+                fern.transform.localScale = Vector3.one * 20f;
+                if (BoundsOf(fixture.transform) != rock) throw new InvalidOperationException("Fern enlarged rock bounds.");
+                Object.DestroyImmediate(fixture.GetComponent<Collider>());
+                settings.solidObstacles = new[] { rock };
+                if (!settings.IsRockSightBlocked(new Vector3(-2f, 1f, 0f), new Vector3(2f, 1f, 0f))
+                    || settings.IsRockSightBlocked(new Vector3(-2f, 3f, 0f), new Vector3(2f, 3f, 0f))
+                    || settings.IsRockSightBlocked(new Vector3(-2f, 1f, 0f), new Vector3(-1f, 1f, 0f)))
+                    throw new InvalidOperationException("Collider-free rock segment occlusion failed.");
+                var body = fixture.AddComponent<DinosaurCoreBody>();
+                body.bands = new[] { new DinosaurCoreBody.Band { layer = 2, bounds = new Bounds(new Vector3(0f, 1.25f, 0f), Vector3.one * .5f) } };
+                if (!settings.PoseBlocked(Vector2.zero, Vector2.up, body)) throw new InvalidOperationException("Large rock did not block movement.");
+                settings.solidObstacles = Array.Empty<Bounds>();
+                if (settings.IsRockSightBlocked(new Vector3(-2f, 1f, 0f), new Vector3(2f, 1f, 0f)))
+                    throw new InvalidOperationException("Unregistered fern collider blocked sight.");
+                Debug.Log($"TREX_LARGE_OBSTACLE_POLICY_PASS: {expected.Length} classified rocks; foliage bounds excluded; collider-free rock movement and segment sight checks.");
+            }
+            finally { settings.solidObstacles = original; Object.DestroyImmediate(fixture); }
         }
 
         private static bool InInteractionSpace(Vector2 point, float reach, float radius)

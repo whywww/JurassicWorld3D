@@ -1174,6 +1174,8 @@ namespace JurassicWorld.Editor
             // 字段名必须逐字符一致（反射写入，编译期无依赖）；飞行单位写 false，不被地面树干阻挡。
             SetField(agent, "groundObstacleAware", t.groundObstacleAware);
             SetField(agent, "playerInteractionEnabled", t.resourcePath == "Dinosaurs/TRex/source/T-Rex");
+            SetField(agent, "species", t.objectName == "Velociraptor" ? DinosaurAgent.DinosaurSpecies.Velociraptor
+                : t.objectName == "Tyrannosaurus Rex" ? DinosaurAgent.DinosaurSpecies.Tyrannosaurus : DinosaurAgent.DinosaurSpecies.Other);
             EditorUtility.SetDirty(agent);
 
             var visualRoot = new GameObject(t.displayName + " Visual Root");
