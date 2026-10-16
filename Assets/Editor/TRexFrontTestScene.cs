@@ -28,6 +28,8 @@ namespace JurassicWorld.Editor
             try
             {
                 if (request == "blocked-test") TRexBlockedInteractionSmoke.Run();
+                else if (request == "interaction-test") TRexFrontTestSmoke.Run();
+                else if (request == "side-test") TRexSideTestSmoke.Run();
                 else if (request == "reservation-test") TRexReservationSmoke.Run();
                 else if (request == "open") Open();
                 else { Create(); if (request == "test") TRexFrontTestSmoke.Run(); }
@@ -65,6 +67,8 @@ namespace JurassicWorld.Editor
             cameraSerialized.ApplyModifiedPropertiesWithoutUndo();
             cameraObject.transform.SetPositionAndRotation(new Vector3(0f, 1.7f, 40f), Quaternion.Euler(4f, 180f, 0f));
             var rexSerialized = new SerializedObject(rex);
+            rexSerialized.FindProperty("interactionProfile").objectReferenceValue =
+                AssetDatabase.LoadAssetAtPath<DinosaurInteractionProfile>(TRexInteractionBake.SideTestProfilePath) ?? TRexInteractionBake.BuildSideTestProfile(rex);
             rexSerialized.FindProperty("viewCamera").objectReferenceValue = camera;
             rexSerialized.FindProperty("roamingMode").enumValueIndex = (int)DinosaurAgent.RoamingMode.Free;
             rexSerialized.ApplyModifiedPropertiesWithoutUndo();
@@ -79,9 +83,10 @@ namespace JurassicWorld.Editor
             RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Flat;
             RenderSettings.ambientLight = new Color(.6f, .65f, .7f); RenderSettings.fog = false; RenderSettings.skybox = null;
             var yellow = SaveAsset(new Material(Shader.Find("Standard")) { color = new Color(1f, .78f, .04f) }, Folder + "/TriggerYellow.mat");
-            Mark("Trigger Zone 30-32m", new Vector3(0f, .015f, 31f), new Vector3(4f, .03f, 2f), yellow);
+            var layout = new GameObject("Approach Layout").transform;
+            Mark("Trigger Zone 30-32m", new Vector3(0f, .015f, 31f), new Vector3(4f, .03f, 2f), yellow, layout);
             for (int z = 34; z <= 38; z += 2)
-                Mark("Approach marker " + z, new Vector3(0f, .015f, z), new Vector3(.18f, .025f, 1f), yellow);
+                Mark("Approach marker " + z, new Vector3(0f, .015f, z), new Vector3(.18f, .025f, 1f), yellow, layout);
 
             var settings = new GameObject("Dinosaur Interaction Settings").AddComponent<DinosaurInteractionSettings>();
             settings.allowOffRouteInteraction = true; settings.navigationRadius = navigationRadius;
@@ -97,6 +102,7 @@ namespace JurassicWorld.Editor
             settings.navigationData = SaveAsset(data, Folder + "/TestNavMesh.asset"); settings.navigationAgentTypeId = build.agentTypeID;
             var test = new GameObject("Front Test Controls").AddComponent<TRexFrontTestController>();
             test.dinosaur = rex; test.playerCamera = camera;
+            test.approachLayout = layout;
             EditorSceneManager.SaveScene(scene, TRexFrontTestController.ScenePath);
             AssetDatabase.SaveAssets();
             Debug.Log("TREX_FRONT_TEST_SCENE_CREATED: fixed rex (0,0,0), player (0,1.7,40), one-shot zone x +/-2 z30..32; independent navigation.");
@@ -108,9 +114,10 @@ namespace JurassicWorld.Editor
             EditorUtility.CopySerialized(asset, existing); UnityEngine.Object.DestroyImmediate(asset); EditorUtility.SetDirty(existing);
             return existing;
         }
-        private static void Mark(string name, Vector3 position, Vector3 size, Material material)
+        private static void Mark(string name, Vector3 position, Vector3 size, Material material, Transform parent)
         {
             var mark = GameObject.CreatePrimitive(PrimitiveType.Cube); mark.name = name;
+            mark.transform.SetParent(parent, false);
             mark.transform.position = position; mark.transform.localScale = size;
             UnityEngine.Object.DestroyImmediate(mark.GetComponent<Collider>());
             mark.GetComponent<Renderer>().sharedMaterial = material;

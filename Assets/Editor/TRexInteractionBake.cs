@@ -16,6 +16,145 @@ namespace JurassicWorld.Editor
         private const string Folder = "Assets/Navigation";
         private const string ProfilePath = Folder + "/TRexCuriosity.asset";
         private const string DataPath = Folder + "/TRexInteractionNavMesh.asset";
+        private const float ReturnTurnDegrees = 170f;
+        public const string SideTestProfilePath = "Assets/Scenes/TRexFrontTestAssets/SideInteractionProfile.asset";
+
+        [MenuItem("Jurassic World/Tests/Bake Side Interaction Animations")]
+        public static void BakeSideTest()
+        {
+            if (EditorApplication.isPlayingOrWillChangePlaymode || UnityEngine.SceneManagement.SceneManager.GetActiveScene().isDirty)
+                throw new InvalidOperationException("Stop Play and save the current scene before baking side animations.");
+            var scene = EditorSceneManager.OpenScene(TRexFrontTestController.ScenePath);
+            var rex = Object.FindObjectOfType<DinosaurAgent>();
+            var profile = BuildSideTestProfile(rex);
+            var serialized = new SerializedObject(rex);
+            serialized.FindProperty("interactionProfile").objectReferenceValue = profile;
+            serialized.ApplyModifiedPropertiesWithoutUndo();
+            EditorSceneManager.SaveScene(scene);
+            AssetDatabase.SaveAssets();
+            Debug.Log("TREX_SIDE_TEST_BAKED: test profile only; shared Main animations and return calibration retained.");
+        }
+
+        public static DinosaurInteractionProfile BuildSideTestProfile(DinosaurAgent rex)
+        {
+            const string folder = "Assets/Scenes/TRexFrontTestAssets";
+            if (!AssetDatabase.IsValidFolder(folder)) AssetDatabase.CreateFolder("Assets/Scenes", "TRexFrontTestAssets");
+            var sourceProfile = AssetDatabase.LoadAssetAtPath<DinosaurInteractionProfile>(ProfilePath);
+            if (sourceProfile == null) throw new InvalidOperationException("Missing calibrated shared profile.");
+            var copy = Object.Instantiate(sourceProfile);
+            copy.name = "SideInteractionProfile";
+            var animation = rex.GetComponentInChildren<Animation>(true);
+            var originalEulerHints = animation.GetComponentsInChildren<Transform>(true).ToDictionary(t => t,
+                t => new SerializedObject(t).FindProperty("m_LocalEulerAnglesHint").vector3Value);
+            var mappings = new[] {
+                (InteractionMotionRole.LookLeft, "look left"), (InteractionMotionRole.LookRight, "look right"),
+                (InteractionMotionRole.SideRoarLeft, "roar left"), (InteractionMotionRole.SideRoarRight, "roar right"),
+                (InteractionMotionRole.SideStartRunLeft, "idle attack to run left"), (InteractionMotionRole.SideStartRunRight, "idle attack to run right") };
+            var motions = new List<DinosaurInteractionProfile.Motion>(copy.motions);
+            var report = new StringBuilder("# Side test calibration\n\nOnly test assets are written. Front and return motions retain their existing calibration.\n");
+            try
+            {
+                foreach (var mapping in mappings)
+                {
+                    var role = mapping.Item1; string name = mapping.Item2;
+                    var source = animation[name]?.clip;
+                    if (source == null) throw new InvalidOperationException("Missing exact side animation: " + name);
+                    var clip = Object.Instantiate(source); clip.name = "SideTest_" + role; clip.legacy = true;
+                    bool locomotion = role == InteractionMotionRole.SideStartRunLeft || role == InteractionMotionRole.SideStartRunRight;
+                    if (locomotion)
+                        foreach (var binding in AnimationUtility.GetCurveBindings(clip))
+                            if ((binding.path == "Hips/jt_Cog_C" || binding.path == "")
+                                && (binding.propertyName == "m_LocalPosition.x" || binding.propertyName == "m_LocalPosition.z"))
+                            {
+                                var curve = AnimationUtility.GetEditorCurve(clip, binding);
+                                AnimationUtility.SetEditorCurve(clip, binding, AnimationCurve.Constant(0f, clip.length, curve.Evaluate(0f)));
+                            }
+                    if (role == InteractionMotionRole.SideStartRunLeft || role == InteractionMotionRole.SideStartRunRight)
+                        HoldSideStartYaw(clip);
+                    var motion = new DinosaurInteractionProfile.Motion { role = role, sourceName = name, clip = clip };
+                    MeasureMotion(rex, animation, source, motion, report);
+                    TRexTurnCalibration.Sample(rex, animation, motion);
+                    if (role == InteractionMotionRole.LookLeft || role == InteractionMotionRole.LookRight)
+                        TRexTurnCalibration.ReconstructTurn(motion);
+                    if (locomotion)
+                    {
+                        float distance = 0f;
+                        for (int i = 1; i < motion.footFrames.Length; i++)
+                        {
+                            var a = motion.footFrames[i - 1]; var b = motion.footFrames[i];
+                            float va = role == InteractionMotionRole.Run ? motion.groundSpeed : Mathf.Max(0f, motion.speed.Evaluate(a.time));
+                            float vb = role == InteractionMotionRole.Run ? motion.groundSpeed : Mathf.Max(0f, motion.speed.Evaluate(b.time));
+                            distance += (va + vb) * .5f * (b.time - a.time);
+                            motion.footFrames[i].rootOffset = new Vector2(0f, distance);
+                        }
+                    }
+                    motion.bodyBands = RouteObstacleClearance.BakeMotionBands(rex, clip);
+                    string path = folder + "/" + clip.name + ".anim";
+                    var existingClip = AssetDatabase.LoadAssetAtPath<AnimationClip>(path);
+                    if (existingClip == null) { AssetDatabase.CreateAsset(clip, path); existingClip = clip; }
+                    else { EditorUtility.CopySerialized(clip, existingClip); Object.DestroyImmediate(clip); EditorUtility.SetDirty(existingClip); }
+                    motion.clip = existingClip;
+                    int index = motions.FindIndex(m => m.role == role);
+                    if (index < 0) motions.Add(motion); else motions[index] = motion;
+                }
+                copy.motions = motions.ToArray();
+                var existingProfile = AssetDatabase.LoadAssetAtPath<DinosaurInteractionProfile>(SideTestProfilePath);
+                if (existingProfile == null) { AssetDatabase.CreateAsset(copy, SideTestProfilePath); existingProfile = copy; }
+                else { EditorUtility.CopySerialized(copy, existingProfile); EditorUtility.SetDirty(existingProfile); }
+                Directory.CreateDirectory("Logs"); File.WriteAllText("Logs/trex-side-test-calibration.md", report.ToString());
+                return existingProfile;
+            }
+            finally
+            {
+                foreach (var hint in originalEulerHints)
+                {
+                    var transformData = new SerializedObject(hint.Key);
+                    transformData.FindProperty("m_LocalEulerAnglesHint").vector3Value = hint.Value;
+                    transformData.ApplyModifiedPropertiesWithoutUndo();
+                }
+                if (!AssetDatabase.Contains(copy)) Object.DestroyImmediate(copy);
+            }
+        }
+        internal static Quaternion SideYawTwist(Quaternion rotation)
+        {
+            float length = Mathf.Sqrt(rotation.y * rotation.y + rotation.w * rotation.w);
+            return length < .00001f ? Quaternion.identity : new Quaternion(0f, rotation.y / length, 0f, rotation.w / length);
+        }
+
+        private static void HoldSideStartYaw(AnimationClip clip)
+        {
+            const string path = "Hips/jt_Cog_C";
+            string[] components = { "x", "y", "z", "w" };
+            var bindings = components.Select(c => EditorCurveBinding.FloatCurve(path, typeof(Transform), "m_LocalRotation." + c)).ToArray();
+            var source = bindings.Select(b => AnimationUtility.GetEditorCurve(clip, b)).ToArray();
+            if (source.Any(c => c == null)) throw new InvalidOperationException("Missing COG quaternion curves: " + clip.name);
+            Quaternion Read(float time) => new Quaternion(source[0].Evaluate(time), source[1].Evaluate(time), source[2].Evaluate(time), source[3].Evaluate(time)).normalized;
+            Quaternion initial = Read(0f), fixedYaw = SideYawTwist(initial), previous = initial;
+            var curves = components.Select(_ => new AnimationCurve()).ToArray();
+            // Preserve source key times and sample between them so pitch/roll retain their motion.
+            var times = new SortedSet<float>(source.SelectMany(c => c.keys.Select(k => k.time)));
+            int count = Mathf.CeilToInt(clip.length * 120f);
+            for (int i = 0; i <= count; i++) times.Add(clip.length * i / count);
+            foreach (float time in times)
+            {
+                Quaternion authored = Read(time);
+                Quaternion swing = Quaternion.Inverse(SideYawTwist(authored)) * authored;
+                Quaternion corrected = (fixedYaw * swing).normalized;
+                if (Quaternion.Dot(previous, corrected) < 0f) corrected = new Quaternion(-corrected.x, -corrected.y, -corrected.z, -corrected.w);
+                previous = corrected;
+                float[] values = { corrected.x, corrected.y, corrected.z, corrected.w };
+                for (int c = 0; c < curves.Length; c++) curves[c].AddKey(new Keyframe(time, values[c]));
+            }
+            for (int c = 0; c < curves.Length; c++)
+            {
+                for (int k = 0; k < curves[c].length; k++)
+                {
+                    AnimationUtility.SetKeyLeftTangentMode(curves[c], k, AnimationUtility.TangentMode.Linear);
+                    AnimationUtility.SetKeyRightTangentMode(curves[c], k, AnimationUtility.TangentMode.Linear);
+                }
+                AnimationUtility.SetEditorCurve(clip, bindings[c], curves[c]);
+            }
+        }
         private static readonly Vector2[] Clearings = { new Vector2(-22f, 8f), new Vector2(23f, 18f), new Vector2(0f, 49f) };
         private static readonly string[] Names = { "look forward", "look left", "look right", "idle to run", "run head loop", "run to stop", "turn 90 left", "turn 90 right", "walk slow loop",
             "idle investigate", "idle investigae out", "Big roar step", "Chase Roar", "ROAR", "mama cave bite", "mama cave bite out", "turn 180 right",
@@ -37,12 +176,13 @@ namespace JurassicWorld.Editor
                 // Keep the existing serialized role so scenes and stepping code need no migration.
                 var motion = new DinosaurInteractionProfile.Motion { role = InteractionMotionRole.Turn180Look, sourceName = "turn 180 right", clip = clip };
                 MeasureMotion(rex, animation, source, motion, report);
+                motion.turnDegrees = ReturnTurnDegrees;
                 TRexTurnCalibration.Sample(rex, animation, motion);
                 motion.bodyBands = RouteObstacleClearance.BakeMotionBands(rex, clip);
                 motion.turnPlaybackSpeed = 1f;
                 var first = motion.footFrames[0]; var last = motion.footFrames[motion.footFrames.Length - 1];
                 float heading = last.yaw + last.authoredYaw;
-                if (Mathf.Abs(Mathf.DeltaAngle(heading, 180f)) > 2f) throw new InvalidOperationException("Calibrated turn is not 180 degrees. Existing turn retained.");
+                if (Mathf.Abs(Mathf.DeltaAngle(heading, ReturnTurnDegrees)) > 2f) throw new InvalidOperationException("Calibrated turn is not 170 degrees. Existing turn retained.");
                 float maximumStep = 0f;
                 for (int i = 1; i < motion.footFrames.Length; i++)
                     maximumStep = Mathf.Max(maximumStep, Vector2.Distance(motion.footFrames[i - 1].rootOffset, motion.footFrames[i].rootOffset));
@@ -60,6 +200,41 @@ namespace JurassicWorld.Editor
                 Debug.Log("TREX_TURN180_RIGHT_BAKED\n" + report);
             }
             finally { if (!AssetDatabase.Contains(clip)) Object.DestroyImmediate(clip); }
+        }
+
+        public static void BakeReturnFootMetadata()
+        {
+            EditorSceneManager.OpenScene(TRexFrontTestController.ScenePath);
+            var rex = Object.FindObjectOfType<DinosaurAgent>(); var animation = rex.GetComponentInChildren<Animation>();
+            var profile = AssetDatabase.LoadAssetAtPath<DinosaurInteractionProfile>(ProfilePath);
+            var lf = TRexTurnCalibration.Bone(animation.transform, "jt_Foot_L"); var rf = TRexTurnCalibration.Bone(animation.transform, "jt_Foot_R");
+            var ls = TRexTurnCalibration.Bone(animation.transform, "jt_ClawMiddle_L"); var rs = TRexTurnCalibration.Bone(animation.transform, "jt_ClawMiddle_R");
+            Vector3 lforward = lf.InverseTransformDirection(ls.position - lf.position).normalized;
+            Vector3 rforward = rf.InverseTransformDirection(rs.position - rf.position).normalized;
+            Transform lk = lf.parent, rk = rf.parent;
+            while (!lk.name.Contains("Knee")) lk = lk.parent;
+            while (!rk.name.Contains("Knee")) rk = rk.parent;
+            var inverse = Quaternion.Inverse(rex.transform.rotation * Quaternion.Euler(0f, rex.VisualYaw, 0f));
+            AnimationMode.StartAnimationMode();
+            try
+            {
+                foreach (var role in new[] { InteractionMotionRole.Walk, InteractionMotionRole.Turn180Look })
+                {
+                    var motion = profile.Find(role);
+                    for (int i = 0; i < motion.footFrames.Length; i++)
+                    {
+                        var frame = motion.footFrames[i];
+                        AnimationMode.BeginSampling(); AnimationMode.SampleAnimationClip(animation.gameObject, motion.clip, frame.time); AnimationMode.EndSampling();
+                        frame.leftHeading = inverse * lf.TransformDirection(lforward); frame.leftHeading.y = 0f; frame.leftHeading.Normalize();
+                        frame.rightHeading = inverse * rf.TransformDirection(rforward); frame.rightHeading.y = 0f; frame.rightHeading.Normalize();
+                        frame.leftKnee = inverse * (lk.position - rex.transform.position); frame.rightKnee = inverse * (rk.position - rex.transform.position);
+                        motion.footFrames[i] = frame;
+                    }
+                }
+            }
+            finally { AnimationMode.StopAnimationMode(); }
+            EditorUtility.SetDirty(profile); AssetDatabase.SaveAssets();
+            Debug.Log("RETURN_FOOT_METADATA_BAKED: headings and knees only; existing walk speed, contacts and curves retained.");
         }
 
         public static void BakeFrontAdditions()
@@ -288,14 +463,15 @@ namespace JurassicWorld.Editor
                 float value = (raw[frame] + raw[Mathf.Min(frame + 1, frames - 1)] + raw[Mathf.Min(frame + 2, frames - 1)]) / 3f;
                 curve.AddKey(frame * dt, Mathf.Min(value, motion.groundSpeed * 1.5f));
             }
-            if (motion.role == InteractionMotionRole.StartRun) { curve.MoveKey(0, new Keyframe(0f, 0f)); curve.AddKey(motion.clip.length, motion.groundSpeed); }
+            if (motion.role == InteractionMotionRole.StartRun || motion.role == InteractionMotionRole.SideStartRunLeft || motion.role == InteractionMotionRole.SideStartRunRight)
+            { curve.MoveKey(0, new Keyframe(0f, 0f)); curve.AddKey(motion.clip.length, motion.groundSpeed); }
             if (motion.role == InteractionMotionRole.StopRun) { curve.MoveKey(0, new Keyframe(0f, motion.groundSpeed)); curve.AddKey(motion.clip.length, 0f); }
             motion.speed = curve;
             float sourceYaw = Vector3.SignedAngle(Vector3.ProjectOnPlane(initialHeading, Vector3.up), Vector3.ProjectOnPlane(endHeading, Vector3.up), Vector3.up);
             // These verified assets are in-place turns (the skeleton returns to its initial heading).
             // Their authored 90-degree turn is supplied once by the locomotion controller.
             motion.turnDegrees = motion.role == InteractionMotionRole.TurnLeft ? -90f : motion.role == InteractionMotionRole.TurnRight ? 90f
-                : motion.role == InteractionMotionRole.Turn180Look ? 180f : 0f;
+                : motion.role == InteractionMotionRole.Turn180Look ? ReturnTurnDegrees : 0f;
             report.AppendLine($"- {source.name}: {source.length:F3}s; support-foot speed {motion.groundSpeed:F3}m/s; measured root yaw {sourceYaw:F1}°; controller turn {motion.turnDegrees:F1}°; planar root held in interaction copy.");
         }
 

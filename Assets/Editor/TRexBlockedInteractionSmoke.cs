@@ -20,11 +20,17 @@ namespace JurassicWorld.Editor
         private static Transform head;
         private static GameObject peerObject, hole;
         private static int scenario, frame, waitFrames;
+        private static int Case => scenario % 7;
+        private static bool Side => scenario >= 7;
         private static float began, waitBegan, minimumWait, lastWaitTime, headMovement;
         private static bool sawWait, sawPass, resumed, released;
         private static Vector3 position;
         private static Quaternion headPose;
-        private static string waitSource;
+        private static string waitSource, waitStage;
+        private static int recoveryPhase;
+        private static float recoveryTime;
+        private static Vector3 recoveryPosition;
+        private static readonly System.Collections.Generic.List<string> recoveryActions = new System.Collections.Generic.List<string>();
         private static readonly System.Text.StringBuilder report = new System.Text.StringBuilder();
         private static object Get(string name) => typeof(DinosaurAgent).GetField(name, Flags).GetValue(rex);
         private static void Set(string name, object value) => typeof(DinosaurAgent).GetField(name, Flags).SetValue(rex, value);
@@ -63,17 +69,24 @@ namespace JurassicWorld.Editor
             Set("peers", new[] { rex });
             rex.transform.SetPositionAndRotation(Vector3.zero, Quaternion.Euler(0f, -rex.VisualYaw, 0f));
             test.playerCamera.transform.position = new Vector3(0f, 1.7f, 24f);
+            Set("sideTestSequence", Side); Set("sideFromLeft", scenario % 2 == 0);
             Call("BeginFrontInteraction"); Set("frontTestWaiting", false); Call("BeginFrontFollow", false);
-            if (scenario == 0 || scenario == 4) Call("BeginFrontEnding");
-            if (scenario == 1) Call("BeginFrontReturn");
-            if (scenario == 3 || scenario == 6)
+            if (scenario >= 14) { PrepareRecovery(); return; }
+            if (Side && Case == 2)
+            {
+                Set("frontStage", Enum.Parse(typeof(DinosaurAgent).GetNestedType("FrontStage", BindingFlags.NonPublic), "Follow"));
+                Call("PlayFrontFollow");
+            }
+            if (Case == 0 || Case == 4) Call("BeginFrontEnding");
+            if (Case == 1) Call("BeginFrontReturn");
+            if (Case == 3 || Case == 6)
             {
                 Call("BeginFrontReturn");
                 Set("frontStage", Enum.Parse(typeof(DinosaurAgent).GetNestedType("FrontStage", BindingFlags.NonPublic), "ReturnWalk"));
                 var trail = (System.Collections.Generic.List<Vector3>)Get("frontTrail"); trail.Clear(); trail.Add(Vector3.forward * 20f);
-                Set("frontReturnIndex", 0); Set("frontReturnWalked", scenario == 3 ? 5f : 0f);
+                Set("frontReturnIndex", 0); Set("frontReturnWalked", Case == 3 ? 5f : 0f);
             }
-            if (scenario == 4 || scenario == 6)
+            if (Case == 4 || Case == 6)
             {
                 peerObject = new GameObject("Blocking peer fixture"); peerObject.transform.position = Vector3.right * 8f;
                 var body = peerObject.AddComponent<DinosaurCoreBody>();
@@ -82,7 +95,7 @@ namespace JurassicWorld.Editor
                 var peer = peerObject.AddComponent<DinosaurAgent>(); peer.enabled = false;
                 typeof(DinosaurAgent).GetField("interactionBody", Flags).SetValue(peer, body); Set("peers", new[] { rex, peer });
             }
-            else if (scenario == 5)
+            else if (Case == 5)
             {
                 hole = new GameObject("Navigation hole fixture"); hole.transform.position = Vector3.up * 2f;
                 var obstacle = hole.AddComponent<NavMeshObstacle>(); obstacle.shape = NavMeshObstacleShape.Box;
@@ -92,27 +105,37 @@ namespace JurassicWorld.Editor
             else settings.solidObstacles = new[] { new Bounds(Vector3.up * 2f, new Vector3(1f, 4f, 1f)) };
             began = Time.time; waitBegan = -1f; minimumWait = 100f; lastWaitTime = headMovement = 0f; waitFrames = 0;
             sawWait = sawPass = resumed = released = false; position = rex.transform.position; headPose = head.localRotation;
-            waitSource = "";
+            waitSource = waitStage = "";
         }
         private static void Tick()
         {
             try
             {
                 if (frame == Time.frameCount) return; frame = Time.frameCount;
+                if (scenario >= 14) { TickRecovery(); return; }
                 float elapsed = Time.time - began; bool waiting = (bool)Get("frontWaiting");
                 Require(Vector3.Distance(position, rex.transform.position) < .4f, "Root teleported."); position = rex.transform.position;
                 sawPass |= (bool)Get("frontStaticPass");
+                string currentStage = Get("frontStage").ToString();
+                if (currentStage == "Follow" || currentStage == "SideStartRun")
+                {
+                    Require(!(bool)Get("frontStaticPass"), "Step 2 enabled static obstacle passing.");
+                    if (sawWait && !resumed) Require(Time.time - waitBegan < 2.1f, "Blocked follow did not end after two seconds.");
+                }
                 if (waiting)
                 {
+                    if (waitStage != currentStage) { lastWaitTime = -1f; waitStage = currentStage; }
                     if (!sawWait) { sawWait = true; waitBegan = Time.time; headPose = head.localRotation; }
                     waitFrames++;
+                    Require(rex.FrontInteractionStage.StartsWith(currentStage + " (", StringComparison.Ordinal)
+                        && !rex.FrontInteractionStage.Contains(":"), "Stage status is not a parenthesized suffix.");
                     Require(rex.CurrentAnimationSourceName.Contains("wait"), "Wait did not use a dedicated animation.");
                     float clock = rex.FrontActionPlaybackTime;
                     Require(clock > lastWaitTime || waitFrames <= 1 || waitSource != rex.CurrentAnimationSourceName,
                         "Waiting animation froze or restarted in case " + scenario + ": " + lastWaitTime + " -> " + clock);
                     lastWaitTime = clock; waitSource = rex.CurrentAnimationSourceName;
                     headMovement = Mathf.Max(headMovement, Quaternion.Angle(headPose, head.localRotation));
-                    if (scenario == 4 || scenario == 6)
+                    if (Case == 4 || Case == 6)
                     {
                         Require(!(bool)Get("frontStaticPass"), "Peer was treated as a passable static obstacle.");
                         Require(Vector3.Distance(rex.transform.position, Vector3.zero) < .01f, "Moved through peer.");
@@ -121,29 +144,115 @@ namespace JurassicWorld.Editor
                     }
                 }
                 else if (sawWait && !resumed) { resumed = true; minimumWait = Time.time - waitBegan; }
-                if ((scenario == 4 || scenario == 6) && elapsed >= 8f && !released)
+                if ((Case == 4 || Case == 6) && elapsed >= 8f && !released)
                 {
                     released = true; UnityEngine.Object.DestroyImmediate(peerObject); Set("peers", new[] { rex });
                 }
-                bool passed = scenario == 0 ? resumed && (float)Get("frontActionTime") > .5f
-                    : scenario == 1 ? resumed && ((float)Get("frontActionTime") > 2.5f || Get("frontStage").ToString() == "ReturnWalk")
-                    : scenario == 3 ? !(bool)Get("frontActive")
-                    : scenario == 4 ? released && resumed && (float)Get("frontActionTime") > .3f
-                    : scenario == 6 ? released && resumed && rex.transform.position.magnitude > .5f
-                    : resumed && (rex.transform.position.magnitude > .5f || (float)Get("frontActionTime") > .5f);
+                bool passed = Case == 0 ? resumed && (float)Get("frontActionTime") > .5f
+                    : Case == 1 ? resumed && ((float)Get("frontActionTime") > 2.5f || currentStage == "ReturnWalk")
+                    : Case == 3 ? !(bool)Get("frontActive")
+                    : Case == 4 ? released && resumed && (float)Get("frontActionTime") > .3f
+                    : Case == 6 ? released && resumed && rex.transform.position.magnitude > .5f
+                    : resumed && currentStage == "Ending" && (float)Get("frontActionTime") > .5f;
                 if (passed)
                 {
                     Require(sawWait && waitFrames > 20 && headMovement > .005f, "Waiting pose did not animate: " + headMovement);
-                    if (scenario != 4 && scenario != 6) Require(sawPass, "Static obstacle never permitted progress.");
-                    if (scenario == 0 || scenario == 1) Require(minimumWait >= .9f && minimumWait < 1.7f, "Action wait was not bounded to approximately one second.");
-                    if (scenario == 2 || scenario == 5) Require(minimumWait >= 1.9f && minimumWait < 2.7f, "Walking wait was not bounded to approximately two seconds.");
-                    if (scenario == 3) Require((bool)Call("FrontClearOfStatic") && !(bool)Get("frontStaticPass"), "Resumed roaming inside a static obstacle.");
+                    if (Case != 2 && Case != 4 && Case != 5 && Case != 6) Require(sawPass, "Static obstacle never permitted progress.");
+                    if (Case == 0 || Case == 1) Require(minimumWait >= .9f && minimumWait < 1.7f, "Action wait was not bounded to approximately one second.");
+                    if (Case == 2 || Case == 5) Require(minimumWait >= 1.9f && minimumWait < 2.1f, "Blocked following did not end at two seconds.");
+                    if (Case == 3) Require((bool)Call("FrontClearOfStatic") && !(bool)Get("frontStaticPass"), "Resumed roaming inside a static obstacle.");
                     report.AppendLine($"PASS case {scenario}: wait={minimumWait:F3}s, animated frames={waitFrames}, head change={headMovement:F4}deg, resumed={resumed}, staticPass={sawPass}");
-                    if (++scenario == 7) { Finish(null); return; } Prepare();
+                    scenario++; Prepare();
                 }
                 Require(elapsed < 25f, "Timeout case " + scenario + ": " + rex.FrontInteractionStage + ", " + rex.FrontBlockingReason);
             }
             catch (Exception error) { Finish(error); }
+        }
+        private static void PrepareRecovery()
+        {
+            Set("frontStage", Enum.Parse(typeof(DinosaurAgent).GetNestedType("FrontStage", BindingFlags.NonPublic), "Follow"));
+            Call("PlayFrontFollow");
+            if (scenario == 16)
+            {
+                var use = Enum.Parse(typeof(DinosaurAgent).GetNestedType("TurnUse", BindingFlags.NonPublic), "FrontFollow");
+                Require((bool)Call("TryBeginSteppingTurn", 90f, use), "Turn fixture could not start.");
+            }
+            if (scenario == 15)
+            {
+                peerObject = new GameObject("Follow peer fixture");
+                var body = peerObject.AddComponent<DinosaurCoreBody>();
+                body.bands = new[] { new DinosaurCoreBody.Band { layer = 2, bounds = new Bounds(Vector3.up * 2f, new Vector3(30f, 4f, 30f)) } };
+                var peer = peerObject.AddComponent<DinosaurAgent>(); peer.enabled = false;
+                typeof(DinosaurAgent).GetField("interactionBody", Flags).SetValue(peer, body); Set("peers", new[] { rex, peer });
+            }
+            else settings.solidObstacles = new[] { new Bounds(rex.transform.position + Vector3.up * 2f, new Vector3(30f, 4f, 30f)) };
+            began = Time.time; waitBegan = -1f; recoveryTime = Time.time; recoveryPhase = 0;
+            recoveryPosition = rex.transform.position; recoveryActions.Clear();
+        }
+        private static void TickRecovery()
+        {
+            string stage = Get("frontStage").ToString();
+            bool waiting = (bool)Get("frontWaiting");
+            float elapsed = Time.time - began;
+            if (stage == "Follow") Require(!(bool)Get("frontStaticPass"), "Follow passed through an obstacle.");
+            if (recoveryPhase == 0)
+            {
+                if (waiting && waitBegan < 0f) waitBegan = Time.time;
+                if (scenario == 14 && waitBegan >= 0f && Time.time - waitBegan >= 1f)
+                { settings.solidObstacles = Array.Empty<Bounds>(); recoveryPhase = 1; }
+                else if (scenario == 15 && waitBegan >= 0f && Time.time - waitBegan >= 3f)
+                {
+                    Require(stage == "Follow", "Peer wait ended the follow.");
+                    UnityEngine.Object.DestroyImmediate(peerObject); Set("peers", new[] { rex }); recoveryPhase = 1;
+                }
+                else if (scenario == 16 && stage == "Ending")
+                {
+                    Require(waitBegan >= 0f && Time.time - waitBegan >= 1.9f && Time.time - waitBegan < 2.1f,
+                        "Blocked follow turn did not exit after two seconds.");
+                    Require(!rex.IsSteppingTurn, "Follow turn still owns the ending.");
+                    settings.solidObstacles = Array.Empty<Bounds>(); recoveryPhase = 3;
+                }
+                else Require(stage == "Follow", "Follow ended before the expected timeout.");
+            }
+            else if (recoveryPhase == 1)
+            {
+                Require(stage == "Follow", "Temporary obstacle did not resume following.");
+                if (!waiting && Vector3.Distance(recoveryPosition, rex.transform.position) > .1f)
+                {
+                    if (scenario == 15) { CompleteRecovery(); return; }
+                    recoveryTime = Time.time; recoveryPhase = 2;
+                    settings.solidObstacles = new[] { new Bounds(rex.transform.position + Vector3.up * 2f, new Vector3(30f, 4f, 30f)) };
+                }
+            }
+            else if (recoveryPhase == 2)
+            {
+                if (stage == "Ending")
+                {
+                    Require(Time.time - recoveryTime >= 1.99f && Time.time - recoveryTime < 2.15f,
+                        "Successful movement did not reset the follow blocker timer.");
+                    settings.solidObstacles = Array.Empty<Bounds>(); recoveryPhase = 3;
+                }
+                else Require(stage == "Follow", "Unexpected stage during repeated blocking.");
+            }
+            else
+            {
+                Require(stage != "Follow" && stage != "Near", "A finished follow resumed.");
+                string action = rex.CurrentAnimationSourceName;
+                if (recoveryActions.Count == 0 || recoveryActions[recoveryActions.Count - 1] != action) recoveryActions.Add(action);
+                if (!(bool)Get("frontActive"))
+                {
+                    Require(recoveryActions.Contains("ROAR") && recoveryActions.Contains("look forward 2")
+                        && recoveryActions.Exists(a => a.StartsWith("bite close", StringComparison.Ordinal))
+                        && recoveryActions.Contains("turn 180 right"), "Blocked exit skipped steps 3-4.");
+                    CompleteRecovery(); return;
+                }
+            }
+            Require(elapsed < 60f, "Recovery scenario timed out: " + scenario + "/" + rex.FrontInteractionStage);
+        }
+        private static void CompleteRecovery()
+        {
+            report.AppendLine("PASS recovery case " + scenario + ": temporary block/reset, peer yielding or blocked turn; ending stays final.");
+            if (++scenario == 17) Finish(null); else Prepare();
         }
         private static void Finish(Exception error)
         {

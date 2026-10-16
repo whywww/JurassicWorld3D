@@ -18,11 +18,17 @@ namespace JurassicWorld.Editor
         {
             int count = Mathf.CeilToInt(motion.clip.length * 60f) + 1;
             var frames = new DinosaurInteractionProfile.FootFrame[count];
+            var leftHeels = new float[count]; var rightHeels = new float[count];
             Transform left = Bone(animation.transform, "jt_ClawMiddle_L"), right = Bone(animation.transform, "jt_ClawMiddle_R");
             Transform cog = Bone(animation.transform, "jt_Cog_C");
             float previousYaw = 0f, authoredYaw = 0f;
             var skin = animation.GetComponentsInChildren<SkinnedMeshRenderer>(true).First(s => s.sharedMesh.boneWeights.Length > 0);
             Transform leftFoot = Bone(animation.transform, "jt_Foot_L"), rightFoot = Bone(animation.transform, "jt_Foot_R");
+            Vector3 leftForward = leftFoot.InverseTransformDirection(left.position - leftFoot.position).normalized;
+            Vector3 rightForward = rightFoot.InverseTransformDirection(right.position - rightFoot.position).normalized;
+            Transform leftKnee = leftFoot.parent, rightKnee = rightFoot.parent;
+            while (!leftKnee.name.Contains("Knee")) leftKnee = leftKnee.parent;
+            while (!rightKnee.name.Contains("Knee")) rightKnee = rightKnee.parent;
             var leftVertices = FootVertices(skin, leftFoot); var rightVertices = FootVertices(skin, rightFoot);
             var mesh = new Mesh(); var vertices = new List<Vector3>();
             var poseWeights = skin.sharedMesh.boneWeights;
@@ -37,6 +43,10 @@ namespace JurassicWorld.Editor
                     AnimationMode.BeginSampling(); AnimationMode.SampleAnimationClip(animation.gameObject, motion.clip, time); AnimationMode.EndSampling();
                     frames[i] = new DinosaurInteractionProfile.FootFrame { time = time,
                         leftSole = inverse * (left.position - agent.transform.position), rightSole = inverse * (right.position - agent.transform.position) };
+                    leftHeels[i] = leftFoot.position.y - agent.MovementHeight; rightHeels[i] = rightFoot.position.y - agent.MovementHeight;
+                    frames[i].leftHeading = inverse * leftFoot.TransformDirection(leftForward); frames[i].leftHeading.y = 0f; frames[i].leftHeading.Normalize();
+                    frames[i].rightHeading = inverse * rightFoot.TransformDirection(rightForward); frames[i].rightHeading.y = 0f; frames[i].rightHeading.Normalize();
+                    frames[i].leftKnee = inverse * (leftKnee.position - agent.transform.position); frames[i].rightKnee = inverse * (rightKnee.position - agent.transform.position);
                     Vector3 facing = inverse * cog.forward; facing.y = 0f;
                     float sampleYaw = Vector3.SignedAngle(Vector3.forward, facing, Vector3.up);
                     if (i > 0) authoredYaw += Mathf.DeltaAngle(previousYaw, sampleYaw);
@@ -67,7 +77,20 @@ namespace JurassicWorld.Editor
                 frames[i].leftContact = frames[i].leftGroundHeight <= lowLeft + .08f;
                 frames[i].rightContact = frames[i].rightGroundHeight <= lowRight + .08f;
             }
-            if (motion.role == InteractionMotionRole.Walk || motion.role == InteractionMotionRole.FollowWalk || motion.role == InteractionMotionRole.Run || motion.role == InteractionMotionRole.ChaseRoar)
+            if (motion.role == InteractionMotionRole.Turn180Look)
+            {
+                // A curled claw can stay low while the heel lifts and rolls. That is not a flat
+                // planted foot: retaining its old yaw then corrupts the subsequent walk entry.
+                float lh = leftHeels.Min(), rh = rightHeels.Min();
+                float lt = frames.Min(f => f.leftSole.y), rt = frames.Min(f => f.rightSole.y);
+                for (int i = 0; i < count; i++)
+                {
+                    frames[i].leftContact &= leftHeels[i] <= lh + .07f && frames[i].leftSole.y <= lt + .06f;
+                    frames[i].rightContact &= rightHeels[i] <= rh + .07f && frames[i].rightSole.y <= rt + .06f;
+                }
+            }
+            if (motion.role == InteractionMotionRole.Walk || motion.role == InteractionMotionRole.FollowWalk || motion.role == InteractionMotionRole.Run
+                || motion.role == InteractionMotionRole.ChaseRoar)
             {
                 // A curled toe/heel mesh extremum can be low while its foot is swinging.
                 // Use the sole marker's stable height and backwards stance travel for walking.
@@ -101,7 +124,7 @@ namespace JurassicWorld.Editor
                 || motion.role == InteractionMotionRole.BigRoarStep || motion.role == InteractionMotionRole.Roar
                 || motion.role == InteractionMotionRole.CaveBite || motion.role == InteractionMotionRole.CaveBiteOut
                 || motion.role == InteractionMotionRole.BiteCloseLeft || motion.role == InteractionMotionRole.BiteCloseRight || motion.role == InteractionMotionRole.IdleAttack
-                || motion.role == InteractionMotionRole.LookForwardTwo)
+                || motion.role == InteractionMotionRole.LookForwardTwo || motion.role == InteractionMotionRole.SideRoarLeft || motion.role == InteractionMotionRole.SideRoarRight)
                 ReconstructTurn(motion);
         }
 
@@ -168,7 +191,7 @@ namespace JurassicWorld.Editor
             float a = yaw * Mathf.Deg2Rad;
             return new Vector2(p.x * Mathf.Cos(a) + p.y * Mathf.Sin(a), -p.x * Mathf.Sin(a) + p.y * Mathf.Cos(a));
         }
-        private static void ReconstructTurn(DinosaurInteractionProfile.Motion motion)
+        internal static void ReconstructTurn(DinosaurInteractionProfile.Motion motion)
         {
             var frames = motion.footFrames;
             var weights = new float[frames.Length];

@@ -282,7 +282,23 @@ namespace JurassicWorld
         public bool ApplyFootRootCorrection(Vector3 correction)
         {
             correction.y = 0f;
+            if ((!IsSteppingTurn && SideHandoffMoving) || (ReturnFootHandoffMoving && frontFeet != null && frontFeet.ReturnHandoffActive))
+            {
+                correction = Vector3.ClampMagnitude(correction, 2.4f * Mathf.Min(Time.deltaTime, .05f));
+                Vector3 position = transform.position + correction;
+                if (!FrontPoseSafe(transform.position, position, transform.rotation, transform.rotation)) return false;
+                transform.position = position;
+                return true;
+            }
             if (!IsSteppingTurn || correction.magnitude > .4f) return false;
+            if (frontActive)
+            {
+                correction = Vector3.ClampMagnitude(correction, 2.4f * Mathf.Min(Time.deltaTime, .05f));
+                Vector3 position = transform.position + correction;
+                if (!FrontPoseSafe(transform.position, position, transform.rotation, transform.rotation)) return false;
+                transform.position = position; stepTurnOrigin += correction;
+                return true;
+            }
             Vector3 target = transform.position + correction;
             if (!StepPoseSafe(transform.position, target, transform.rotation, transform.rotation, stepTurnUse == TurnUse.Route)) return false;
             transform.position = target;

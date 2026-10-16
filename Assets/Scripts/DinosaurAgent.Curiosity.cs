@@ -33,6 +33,7 @@ namespace JurassicWorld
 
         private void BindCuriosityAnimations()
         {
+            BindSideHandoffBones();
             if (curiosityBound || !playerInteractionEnabled || legacyAnimation == null) return;
             curiosityBound = true;
             interactionSettings = FindObjectOfType<DinosaurInteractionSettings>();
@@ -57,9 +58,12 @@ namespace JurassicWorld
             Vector3 offset = viewCamera.transform.position - transform.position;
             offset.y = 0f;
             float angle = Vector3.Angle(GetVisualForward(), offset);
-            float baseRange = frontActive || angle <= 20f ? frontDetectionDistance : detectionDistance;
+            bool waitingForTest = frontTestControlled && InteractionPhase == PlayerInteractionPhase.Inactive;
+            float baseRange = waitingForTest || frontActive || angle <= 20f ? frontDetectionDistance : detectionDistance;
             float range = IsOffRouteInteraction ? baseRange * 1.5f : baseRange;
-            if (offset.sqrMagnitude > range * range || Vector3.Angle(GetVisualForward(), offset) > detectionAngle * .5f) return false;
+            float maxAngle = waitingForTest || sideTestSequence && frontActive ? 90f : detectionAngle * .5f;
+            // Quaternion-derived headings can put an exact 90-degree bearing a few float ULPs over the limit.
+            if (offset.sqrMagnitude > range * range || angle > maxAngle + .0001f) return false;
             Vector3 eye = transform.position + Vector3.up * ViewFocusHeight;
             Vector3 sight = viewCamera.transform.position - eye;
             if (TerrainTreeObstacleRegistry.IsSightBlocked(eye, viewCamera.transform.position)) return false;
@@ -108,6 +112,7 @@ namespace JurassicWorld
 
         private void StartInteraction()
         {
+            frontFeet?.EndReturnHandoff();
             Vector3 playerDirection = viewCamera.transform.position - transform.position; playerDirection.y = 0f;
             if (Vector3.Angle(GetVisualForward(), playerDirection) <= 20f && FrontActionsAvailable()) { BeginFrontInteraction(); return; }
             CurrentState = DinosaurState.RandomWalk;
@@ -219,7 +224,7 @@ namespace JurassicWorld
             direction.y = 0f;
             if (direction.sqrMagnitude < .0001f) return false;
             float turnAngle = Vector3.SignedAngle(GetVisualForward(), direction, Vector3.up);
-            if (Mathf.Abs(turnAngle) >= 40f)
+            if (Mathf.Abs(turnAngle) >= 40f && !FinishingReturnFootsteps)
             {
                 bool wander = IsFreeRoaming && InteractionPhase == PlayerInteractionPhase.Inactive;
                 if (!TryBeginSteppingTurn(turnAngle, wander ? TurnUse.Wander : isReturning ? TurnUse.Return : TurnUse.Follow))
@@ -229,7 +234,7 @@ namespace JurassicWorld
                 return false;
             }
             Quaternion desired = Quaternion.LookRotation(direction.normalized) * Quaternion.Euler(0f, -VisualYaw, 0f);
-            Quaternion rotation = Quaternion.RotateTowards(transform.rotation, desired, 65f * Time.deltaTime);
+            Quaternion rotation = Quaternion.RotateTowards(transform.rotation, desired, (FinishingReturnFootsteps ? 20f : 65f) * Time.deltaTime);
             Vector3 heading = rotation * Quaternion.Euler(0f, VisualYaw, 0f) * Vector3.forward;
             Vector2 from = new Vector2(transform.position.x, transform.position.z);
             float step = Mathf.Min(Mathf.Max(0f, speed) * Time.deltaTime, direction.magnitude);
@@ -322,11 +327,18 @@ namespace JurassicWorld
                 && InteractionPhase != PlayerInteractionPhase.Turning) RecoverInterruptedTurn();
             if (InteractionPhase == PlayerInteractionPhase.Inactive)
             {
-                if (frontTestControlled) return false;
                 if (Time.time < cooldownUntil || CurrentState == DinosaurState.Approaching) { visibleTime = 0f; return false; }
                 visibleTime = CanSeePlayer() ? visibleTime + Time.deltaTime : 0f;
                 if (visibleTime < detectionHold) return false;
-                StartInteraction();
+                if (frontTestControlled)
+                {
+                    Vector3 direction = viewCamera.transform.position - transform.position; direction.y = 0f;
+                    bool started = PlayerInteractionAngle <= 20f ? TriggerFrontInteractionTest()
+                        : TriggerSideInteractionTest(Vector3.SignedAngle(GetVisualForward(), direction, Vector3.up) < 0f);
+                    if (!started) return false;
+                    visibleTime = 0f;
+                }
+                else StartInteraction();
             }
             if (frontActive) return TickFrontInteraction();
             bool following = !isReturning && InteractionPhase != PlayerInteractionPhase.Returning && InteractionPhase != PlayerInteractionPhase.Looking

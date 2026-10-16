@@ -25,6 +25,33 @@ namespace JurassicWorld
         private float frontWaitBegan, frontSavedReturnTime;
         private int frontWaitReplans;
         private string frontWaitReason;
+        private float frontFollowBlockedAt = -1f;
+        private bool IsFrontFollowing => frontStage == FrontStage.Follow || IsSideLocomotion;
+        private void NoteFrontFollowBlock()
+        {
+            if (!IsFrontFollowing) return;
+            if (FrontStaticBlock(frontBlockReason))
+            {
+                if (frontFollowBlockedAt < 0f) frontFollowBlockedAt = Time.time;
+            }
+            else if (frontBlockReason != null) frontFollowBlockedAt = -1f;
+        }
+        private bool EndBlockedFrontFollow()
+        {
+            if (!IsFrontFollowing || frontFollowBlockedAt < 0f || Time.time - frontFollowBlockedAt < 2f) return false;
+            if (IsSteppingTurn)
+            {
+                if (stepTurnState != null) stepTurnState.enabled = false;
+                ClearSteppingTurn();
+            }
+            GetComponentInChildren<DinosaurFootLock>()?.HoldSupportDuringRecovery(.35f);
+            frontWaiting = frontWaitPlaying = frontStaticPass = false;
+            frontWaitReason = frontBlockReason = null;
+            frontSpaceExit = frontExitPending = true; frontNearPending = false;
+            actualInteractionSpeed = 0f; interactionMoved = false;
+            BeginFrontEnding();
+            return true;
+        }
         private Terrain[] frontGround;
         private float frontTurnResumeAt = -10f;
         private string frontWaitClip;
@@ -196,10 +223,13 @@ namespace JurassicWorld
             if (frontBiteMask == 0)
             {
                 if (!FrontStaticBlock(frontBlockReason)) return false;
+                if (frontWaiting && IsFrontFollowing) return false;
                 frontSpaceExit = frontExitPending = true;
                 frontBiteMask = 3; // Prediction requests an ending; it no longer freezes walking.
                 return true;
             }
+            // A temporary blocker gets the full follow retry window before prediction can end it.
+            if (frontWaiting && IsFrontFollowing) { frontBlockReason = null; return true; }
             Vector3 position = transform.position; Quaternion heading = transform.rotation;
             float remaining = Mathf.Max(4f, FrontFollowSpeed * 2f);
             if (hasCuriosityPath)
@@ -244,8 +274,9 @@ namespace JurassicWorld
         }
         private void BeginFrontSpaceWait()
         {
+            NoteFrontFollowBlock();
             if (frontWaiting) return;
-            if (frontStage == FrontStage.Follow && frontFollowMotion != null)
+            if ((frontStage == FrontStage.Follow || IsSideLocomotion) && frontFollowMotion != null)
                 frontSavedWalkTime = legacyAnimation[frontFollowMotion.StateName].time;
             frontSavedReturnTime = moveState != null ? moveState.time : 0f;
             frontWaiting = true; frontRetryAt = Time.time + .5f; frontWaitBegan = Time.time; frontWaitReplans = 0;
@@ -274,6 +305,12 @@ namespace JurassicWorld
                 frontProbeBody.bands = stepTurnMotion.bodyBands;
                 return FrontStepSafe(p, next, q, heading, frontProbeBody, frame.playerBodyBands);
             }
+            if (sideTestSequence && IsSideLocomotion)
+            {
+                if (!hasCuriosityPath || frontWaitReplans++ < 2)
+                    if (!PlanFrontFollow()) return false;
+                return (!hasCuriosityPath || FrontPathNextSafe()) && FrontStepSafe(p, p, q, q, interactionBody);
+            }
             if (frontStage == FrontStage.Follow)
             {
                 if (frontWaitReplans < 2) { frontWaitReplans++; if (!PlanFrontFollow()) return false; }
@@ -290,7 +327,7 @@ namespace JurassicWorld
             }
             if (frontStage == FrontStage.TurnBack && frontAction == null && !FrontTurnSpace(p, q)) return false;
             var role = frontStage == FrontStage.TurnBack ? InteractionMotionRole.Turn180Look
-                : frontStage == FrontStage.Intro ? FrontIntro[frontActionIndex] : FrontExitSequence(frontNearBite)[frontActionIndex];
+                : frontStage == FrontStage.Intro ? ActiveIntroSequence[frontActionIndex] : FrontExitSequence(frontNearBite)[frontActionIndex];
             var motion = frontAction ?? interactionProfile.Find(role);
             var sample = SampleFootFrame(motion, frontAction == null ? 0f : Mathf.Min(FrontActionDuration(motion), frontActionTime + 1f / 60f));
             Vector3 position = frontAction == null ? p : frontActionOrigin + frontActionRotation * Quaternion.Euler(0f, VisualYaw, 0f)
@@ -304,7 +341,7 @@ namespace JurassicWorld
             if (PathFinished()) return true;
             Vector3 direction = curiosityCorners[curiosityCorner] - transform.position; direction.y = 0f;
             float angle = Vector3.SignedAngle(GetVisualForward(), direction, Vector3.up);
-            if (Mathf.Abs(angle) >= FrontSteppingTurnAngle)
+            if (Mathf.Abs(angle) >= FrontSteppingTurnAngle && !IsSideLocomotion)
                 return TryBeginSteppingTurn(angle, frontStage == FrontStage.ReturnWalk ? TurnUse.FrontReturn : TurnUse.FrontFollow);
             Quaternion rotation = direction.sqrMagnitude < .001f ? transform.rotation
                 : Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(direction) * Quaternion.Euler(0f, -VisualYaw, 0f), 1f);
@@ -312,15 +349,17 @@ namespace JurassicWorld
         }
         private bool TickFrontSpaceWait()
         {
+            if (EndBlockedFrontFollow()) return true;
             if (frontStage == FrontStage.Near && !CanSeePlayer())
             { invisibleTime += Time.deltaTime; if (invisibleTime >= lostSightGrace) { frontExitPending = true; frontStage = FrontStage.Ending; } }
             if (Time.time >= frontRetryAt)
             {
                 frontRetryAt = Time.time + .5f;
                 bool resume = FrontWaitCanResume();
+                if (!resume) NoteFrontFollowBlock();
                 float limit = IsSteppingTurn || frontAction != null || frontStage == FrontStage.TurnBack || frontStage == FrontStage.Intro
                     || frontStage == FrontStage.Near || frontStage == FrontStage.Ending ? 1f : 2f;
-                if (!resume && Time.time - frontWaitBegan >= limit && FrontStaticBlock(frontBlockReason))
+                if (!resume && !IsFrontFollowing && Time.time - frontWaitBegan >= limit && FrontStaticBlock(frontBlockReason))
                 {
                     frontStaticPass = true; frontWaitReplans = 0;
                     resume = FrontWaitCanResume();
@@ -340,8 +379,9 @@ namespace JurassicWorld
                         UseFrontEnvelope(frontAction); legacyAnimation.CrossFade(frontAction.StateName, .2f);
                         legacyAnimation[frontAction.StateName].time = frontActionTime; activeClip = frontAction.StateName;
                     }
-                    else if (frontStage == FrontStage.Follow)
+                    else if (frontStage == FrontStage.Follow || IsSideLocomotion)
                     {
+                        if (ResumeSideWalkBlend()) return true;
                         UseFrontEnvelope(frontFollowMotion);
                         var state = legacyAnimation[frontFollowMotion.StateName];
                         legacyAnimation.CrossFade(frontFollowMotion.StateName, .15f);

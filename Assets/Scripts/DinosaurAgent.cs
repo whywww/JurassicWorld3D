@@ -370,7 +370,12 @@ namespace JurassicWorld
 
         private void Update()
         {
-            if (frontTestWaiting) { PlayClip(idleClip); return; }
+            RestoreSideHeadPose();
+            if (frontTestWaiting)
+            {
+                if (!UpdatePlayerInteraction()) PlayClip(idleClip);
+                return;
+            }
             if (SummonEnabled && Input.GetKeyDown(KeyCode.Space))
                 TrySummonVisibleDinosaur();
 

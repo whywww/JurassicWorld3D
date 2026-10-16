@@ -5,7 +5,8 @@ namespace JurassicWorld
 {
     public enum InteractionMotionRole { LookForward, LookLeft, LookRight, StartRun, Run, StopRun, TurnLeft, TurnRight, Walk,
         Investigate, InvestigateOut, BigRoarStep, ChaseRoar, Roar, CaveBite, CaveBiteOut, Turn180Look,
-        FollowWalk, BiteCloseLeft, BiteCloseRight, IdleAttack, LookForwardTwo }
+        FollowWalk, BiteCloseLeft, BiteCloseRight, IdleAttack, LookForwardTwo,
+        SideRoarLeft, SideRoarRight, SideStartRunLeft, SideStartRunRight, SideRunLow }
 
     [CreateAssetMenu(menuName = "Jurassic World/Interaction Animation Profile")]
     public sealed class DinosaurInteractionProfile : ScriptableObject
@@ -32,6 +33,7 @@ namespace JurassicWorld
         {
             public float time;
             public Vector3 leftSole, rightSole;
+            public Vector3 leftHeading, rightHeading, leftKnee, rightKnee;
             public float leftGroundHeight, rightGroundHeight;
             public bool leftContact, rightContact;
             public Vector2 rootOffset;

@@ -12,7 +12,7 @@ namespace JurassicWorld.Editor
     {
         private const string Key = "JurassicWorld.ReturnBendSmoke";
         private const BindingFlags Flags = BindingFlags.Instance | BindingFlags.NonPublic;
-        private static readonly float[] Angles = { -40f, -45f, -50f, -55f, 45f, 50f, -65f, 65f, -80f, 80f };
+        private static readonly float[] Angles = { -40f, -45f, -50f, -55f, 45f, 50f, -65f, 65f, -80f, 80f, 45f };
         private static DinosaurAgent rex;
         private static TRexFrontTestController test;
         private static int scenario, frame, movingFrames;
@@ -54,7 +54,14 @@ namespace JurassicWorld.Editor
             var trail = (System.Collections.Generic.List<Vector3>)Get("frontTrail"); trail.Clear();
             float length = scenario < 4 ? 3f : 20f;
             trail.Add(Quaternion.Euler(0f, Angles[scenario], 0f) * Vector3.forward * length);
-            Set("frontReturnIndex", 0); Set("frontReturnWalked", 0f); Set("hasCuriosityPath", false);
+            if (scenario == 10)
+            {
+                // The closest earlier bend must win even when a farther point is straight ahead.
+                trail[0] = Vector3.forward * 20f;
+                trail.Add(Quaternion.Euler(0f, 45f, 0f) * Vector3.forward * 6f);
+            }
+            Set("frontReturnIndex", trail.Count - 1); Set("frontReturnWalked", 0f); Set("hasCuriosityPath", false);
+            Set("frontReturnAligning", true);
             var profile = (DinosaurInteractionProfile)Get("interactionProfile"); Call("UseFrontEnvelope", profile.Find(InteractionMotionRole.Walk));
             began = Time.time; waited = walked = 0f; movingFrames = 0; previous = rex.transform.position;
         }
@@ -64,7 +71,16 @@ namespace JurassicWorld.Editor
             {
                 if (frame == Time.frameCount) return; frame = Time.frameCount;
                 float step = Vector3.Distance(previous, rex.transform.position); previous = rex.transform.position;
+                if (scenario == 10 && movingFrames == 0 && step > .001f && (int)Get("frontReturnIndex") != 1)
+                    throw new InvalidOperationException("Return skipped the nearest recorded bend to favour its current heading.");
                 if (step > .001f) movingFrames++;
+                if (step > .001f && (bool)Get("frontActive") && Get("frontStage").ToString() == "ReturnWalk"
+                    && !(bool)Get("frontWaiting") && rex.CurrentAnimationSourceName == "walk slow loop")
+                {
+                    var state = rex.GetComponentInChildren<Animation>()["walk slow loop"];
+                    if (Mathf.Abs(state.speed - rex.WalkSpeed / rex.MoveAnimationGroundSpeed) > .01f)
+                        throw new InvalidOperationException("Return bend slowed foot cadence: " + state.speed);
+                }
                 if (step > .4f) throw new InvalidOperationException("Root jumped during return.");
                 walked = Mathf.Max(walked, (float)Get("frontReturnWalked"));
                 if ((bool)Get("frontWaiting")) waited += Time.deltaTime;

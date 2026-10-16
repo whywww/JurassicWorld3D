@@ -16,10 +16,53 @@ namespace JurassicWorld
             public Vector3 seamOffset;
             public float seamTime = .1f;
             public float seamDuration = .1f;
+            public bool handoffReleased;
+            public Vector3 releaseHeading;
+            public Vector3 soleForward;
+            public bool stableHeading;
         }
         private SupportFoot leftSupport, rightSupport;
         private float supportRecoveryUntil;
         private bool recoverLeftSupport, recoverRightSupport;
+        private bool returnHandoff;
+        private int returnLandings;
+        private bool sideHandoff, sideLeftReleased, sideRightReleased;
+        private int sideLandings;
+        public int SideHandoffLandings => sideLandings;
+        public Vector3 LeftSolePosition => leftSupport != null ? leftSupport.sole.position : transform.position;
+        public Vector3 RightSolePosition => rightSupport != null ? rightSupport.sole.position : transform.position;
+        public void BeginSideHandoff()
+        {
+            sideHandoff = true; sideLandings = 0;
+            sideLeftReleased = sideRightReleased = false;
+            supportRecoveryUntil = 0f;
+        }
+        public void EndSideHandoff() => sideHandoff = false;
+        public bool TrySideHandoffPivot(out Vector3 pivot)
+        {
+            pivot = Vector3.zero;
+            if (!sideHandoff || LeftPlanted == RightPlanted) return false;
+            pivot = LeftPlanted ? leftSupport.anchor : rightSupport.anchor;
+            return true;
+        }
+        public bool ReturnHandoffActive => returnHandoff;
+        public void GetReturnSoleHeadings(out Vector3 left, out Vector3 right)
+        {
+            left = leftSupport.planted ? leftSupport.heading : leftSupport.foot.TransformDirection(leftSupport.soleForward);
+            right = rightSupport.planted ? rightSupport.heading : rightSupport.foot.TransformDirection(rightSupport.soleForward);
+        }
+        public void BeginReturnHandoff()
+        {
+            returnHandoff = true; returnLandings = 0; supportRecoveryUntil = 0f;
+            if (leftSupport != null) leftSupport.handoffReleased = false;
+            if (rightSupport != null) rightSupport.handoffReleased = false;
+        }
+        public void EndReturnHandoff()
+        {
+            returnHandoff = false;
+            if (leftSupport != null) leftSupport.handoffReleased = false;
+            if (rightSupport != null) rightSupport.handoffReleased = false;
+        }
         public bool LeftPlanted => leftSupport != null && leftSupport.planted;
         public bool RightPlanted => rightSupport != null && rightSupport.planted;
         public Vector3 LeftAnchor => leftSupport != null ? leftSupport.anchor : Vector3.zero;
@@ -32,6 +75,8 @@ namespace JurassicWorld
 
         public void ResetSupportAnchors()
         {
+            EndReturnHandoff();
+            EndSideHandoff();
             supportRecoveryUntil = 0f;
             recoverLeftSupport = recoverRightSupport = false;
             foreach (var support in new[] { leftSupport, rightSupport })
@@ -70,11 +115,13 @@ namespace JurassicWorld
             Transform knee = foot.parent;
             while (knee != null && !knee.name.Contains("Knee")) knee = knee.parent;
             if (knee == null || knee.parent == null) return null;
-            return new SupportFoot { foot = foot, sole = sole, knee = knee, thigh = knee.parent };
+            return new SupportFoot { foot = foot, sole = sole, knee = knee, thigh = knee.parent,
+                soleForward = foot.InverseTransformDirection(sole.position - foot.position).normalized };
         }
         private static Vector3 GroundHeading(SupportFoot support)
         {
-            Vector3 direction = support.sole.position - support.foot.position; direction.y = 0f;
+            Vector3 direction = support.stableHeading ? support.foot.TransformDirection(support.soleForward)
+                : support.sole.position - support.foot.position; direction.y = 0f;
             return direction.sqrMagnitude > .00001f ? direction.normalized : Vector3.forward;
         }
         private static void UpdateContact(SupportFoot support, float weight)
@@ -94,14 +141,31 @@ namespace JurassicWorld
         }
         private void UpdateTRexFeet()
         {
+            SetReturnHeadingMode(leftSupport, agent.UseReturnSoleHeading || sideHandoff);
+            SetReturnHeadingMode(rightSupport, agent.UseReturnSoleHeading || sideHandoff);
             agent.GetFootPhase(out float left, out float right);
             if (Time.time < supportRecoveryUntil)
             {
                 if (recoverLeftSupport) left = 1f;
                 if (recoverRightSupport) right = 1f;
             }
+            bool wasLeft = leftSupport.planted, wasRight = rightSupport.planted;
             UpdateContact(leftSupport, left); UpdateContact(rightSupport, right);
-            if (agent.IsSteppingTurn)
+            if (sideHandoff && agent.SideHandoffMoving)
+            {
+                if (wasLeft && !leftSupport.planted) sideLeftReleased = true;
+                if (wasRight && !rightSupport.planted) sideRightReleased = true;
+                if (!wasLeft && leftSupport.planted && sideLeftReleased) { sideLandings++; sideLeftReleased = false; }
+                if (!wasRight && rightSupport.planted && sideRightReleased) { sideLandings++; sideRightReleased = false; }
+            }
+            if (returnHandoff && agent.ReturnFootHandoffMoving)
+            {
+                if (wasLeft && !leftSupport.planted) { leftSupport.handoffReleased = true; leftSupport.releaseHeading = leftSupport.heading; }
+                if (wasRight && !rightSupport.planted) { rightSupport.handoffReleased = true; rightSupport.releaseHeading = rightSupport.heading; }
+                if (!wasLeft && leftSupport.planted && leftSupport.handoffReleased) { returnLandings++; leftSupport.handoffReleased = false; }
+                if (!wasRight && rightSupport.planted && rightSupport.handoffReleased) { returnLandings++; rightSupport.handoffReleased = false; }
+            }
+            if (agent.IsSteppingTurn || sideHandoff && agent.SideHandoffMoving || returnHandoff && agent.ReturnFootHandoffMoving)
             {
                 Vector3 correction = Vector3.zero; int count = 0;
                 if (leftSupport.planted) { correction += leftSupport.anchor - leftSupport.sole.position; count++; }
@@ -109,6 +173,17 @@ namespace JurassicWorld
                 if (count != 0) agent.ApplyFootRootCorrection(correction / count);
             }
             SolveSupport(leftSupport); SolveSupport(rightSupport);
+            if (returnHandoff && returnLandings >= 2) EndReturnHandoff();
+        }
+        private static void SetReturnHeadingMode(SupportFoot support, bool stable)
+        {
+            if (support.stableHeading == stable) return;
+            Vector3 previous = GroundHeading(support);
+            support.stableHeading = stable;
+            float delta = Vector3.SignedAngle(previous, GroundHeading(support), Vector3.up);
+            // Changing the measurement axis must not rotate an already planted ankle.
+            support.heading = Quaternion.AngleAxis(delta, Vector3.up) * support.heading;
+            support.releaseHeading = Quaternion.AngleAxis(delta, Vector3.up) * support.releaseHeading;
         }
 
         private static void SolveSupport(SupportFoot support)
@@ -123,9 +198,16 @@ namespace JurassicWorld
             if (support.releasing)
             {
                 support.releaseTime += Time.deltaTime;
-                float amount = 1f - Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(support.releaseTime / .1f));
+                float amount = 1f - Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(support.releaseTime / (support.handoffReleased ? .2f : .1f)));
                 soleTarget = authoredSole + support.lastOffset * amount;
                 yaw = support.lastYaw * amount;
+                if (support.handoffReleased)
+                {
+                    // Blend world headings rather than carrying a correction relative to the old torso pose.
+                    Vector3 authoredHeading = GroundHeading(support);
+                    Vector3 desired = Vector3.Slerp(support.releaseHeading, authoredHeading, 1f - amount);
+                    yaw = Vector3.SignedAngle(authoredHeading, desired, Vector3.up);
+                }
                 if (amount <= 0f)
                 {
                     support.releasing = false;
