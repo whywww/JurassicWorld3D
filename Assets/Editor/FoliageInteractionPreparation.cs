@@ -313,8 +313,7 @@ namespace JurassicWorld.Editor
             string path = AssetsRoot + "/Meshes/" + source.name.Replace('/', '_') + "_" + key + ".asset";
             Mesh result = AssetDatabase.LoadAssetAtPath<Mesh>(path);
             bool created = result == null;
-            if (created) result = new Mesh(); else result.Clear(false);
-            result.name = source.name + " Flexibility"; result.indexFormat = source.indexFormat;
+            if (created) result = new Mesh();
             Vector3[] vertices = source.vertices;
             var mask = new List<Vector2>(Enumerable.Repeat(Vector2.zero, vertices.Length));
             var assigned = new bool[vertices.Length];
@@ -373,7 +372,17 @@ namespace JurassicWorld.Editor
                     else mask[index] = new Vector2(Mathf.Min(mask[index].x, value.x), Mathf.Max(mask[index].y, value.y));
                 }
             }
-            result.vertices = vertices; result.SetUVs(3, mask);
+            var previousMask = new List<Vector2>();
+            if (!created) result.GetUVs(3, previousMask);
+            // Root/world matrix cancellation introduces micrometre-scale rounding differences
+            // when a new tree changes traversal order. Preserve the shared asset in that case.
+            bool unchanged = !created && result.vertexCount == vertices.Length && result.vertices.SequenceEqual(vertices)
+                && previousMask.Count == mask.Count && previousMask.Select((v, i) => (v - mask[i]).sqrMagnitude).All(v => v <= 1e-8f);
+            if (!unchanged)
+            {
+                result.Clear(false); result.name = source.name + " Flexibility"; result.indexFormat = source.indexFormat;
+                result.vertices = vertices; result.SetUVs(3, mask);
+            }
             Bounds flexibleBounds = new Bounds(); bool flexibleFirst = true;
             for (int i = 0; i < vertices.Length; i++)
                 if (mask[i].x > .05f)
@@ -384,8 +393,8 @@ namespace JurassicWorld.Editor
             FlexibleBounds.Add(result, flexibleFirst ? source.bounds : flexibleBounds);
             Bounds bounds = source.bounds;
             // The per-instance renderer bounds are expanded in Awake, including child and nonuniform scaling.
-            result.bounds = bounds;
-            if (created) AssetDatabase.CreateAsset(result, path); else EditorUtility.SetDirty(result);
+            if (!unchanged) result.bounds = bounds;
+            if (created) AssetDatabase.CreateAsset(result, path); else if (!unchanged) EditorUtility.SetDirty(result);
             Meshes.Add(key, result); return result;
         }
 

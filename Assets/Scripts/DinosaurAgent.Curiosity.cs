@@ -52,22 +52,25 @@ namespace JurassicWorld
                 Debug.LogWarning("[T-Rex curiosity] Bake the interaction navigation and animation profile before enabling curiosity.", this);
         }
 
-        private bool CanSeePlayer()
+        private bool CanSeePlayer() => PlayerVisibilityFailure() == null;
+
+        private string PlayerVisibilityFailure()
         {
-            if (viewCamera == null) return false;
+            if (viewCamera == null) return "No player";
             Vector3 offset = viewCamera.transform.position - transform.position;
             offset.y = 0f;
             float angle = Vector3.Angle(GetVisualForward(), offset);
-            bool waitingForTest = frontTestControlled && InteractionPhase == PlayerInteractionPhase.Inactive;
-            float baseRange = waitingForTest || frontActive || FrontActionsAvailable() || angle <= 20f ? frontDetectionDistance : detectionDistance;
-            float range = IsOffRouteInteraction ? baseRange * 1.5f : baseRange;
-            float maxAngle = waitingForTest || sideTestSequence && frontActive || SideActionsAvailable()
-                ? (frontActive ? 90f : 50f) : detectionAngle * .5f;
+            bool frontRules = frontActive || FrontActionsAvailable();
+            float baseRange = angle <= 20f ? frontDetectionDistance : detectionDistance;
+            float range = frontRules ? frontDetectionDistance : IsOffRouteInteraction ? baseRange * 1.5f : baseRange;
+            float maxAngle = frontRules ? 50f : detectionAngle * .5f;
             // Quaternion-derived headings can put an exact boundary a few float ULPs over the limit.
-            if (offset.sqrMagnitude > range * range || angle > maxAngle + .0001f) return false;
+            if (offset.sqrMagnitude > range * range) return "OutOfRange";
+            if (angle > maxAngle + .0001f) return "OutOfAngle";
             Vector3 eye = transform.position + Vector3.up * ViewFocusHeight;
-            if (TerrainTreeObstacleRegistry.IsSightBlocked(eye, viewCamera.transform.position)) return false;
-            return interactionSettings == null || !interactionSettings.IsRockSightBlocked(eye, viewCamera.transform.position);
+            if (TerrainTreeObstacleRegistry.IsSightBlocked(eye, viewCamera.transform.position)) return "TreeOcclusion";
+            return interactionSettings != null && interactionSettings.IsRockSightBlocked(eye, viewCamera.transform.position)
+                ? "RockOcclusion" : null;
         }
 
         private void PlayCuriosity(InteractionMotionRole role, bool loop = false)
@@ -127,8 +130,9 @@ namespace JurassicWorld
             areaMask = 1 << 0
         };
 
-        private bool PlanCuriosityPath(Vector3 target, bool completeOnly)
+        private bool PlanCuriosityPath(Vector3 target, bool completeOnly, bool skipRoamingPathFits = false)
         {
+            RoamingBlockReason = "";
             target.y = MovementHeight;
             var filter = NavigationFilter;
             hasCuriosityPath = false;
@@ -137,7 +141,10 @@ namespace JurassicWorld
                 || !NavMesh.CalculatePath(start.position, end.position, filter, curiosityPath)
                 || curiosityPath.status == NavMeshPathStatus.PathInvalid
                 || (completeOnly && curiosityPath.status != NavMeshPathStatus.PathComplete)) return false;
-            curiosityCorners = curiosityPath.corners;
+            curiosityCorners = InsetNavigationCorners(curiosityPath.corners);
+            // Interaction follow/return connectors check every accepted step instead of
+            // rejecting the whole route here; ordinary roaming keeps the full preflight.
+            if (!skipRoamingPathFits && IsFreeRoaming && !RoamingPathFits(transform.position, transform.rotation, curiosityCorners)) return false;
             if (!SafetyPathAllowed(curiosityCorners, IsAvoidingTyrannosaurus)) return false;
             curiosityCorner = 0;
             hasCuriosityPath = curiosityCorners.Length != 0;
@@ -187,7 +194,16 @@ namespace JurassicWorld
         private bool PathFinished()
         {
             while (hasCuriosityPath && curiosityCorner < curiosityCorners.Length
-                && FlatDistance(transform.position, curiosityCorners[curiosityCorner]) <= .08f) curiosityCorner++;
+                && FlatDistance(transform.position, curiosityCorners[curiosityCorner]) <= .08f)
+            {
+                // Arrival tolerance cannot cut a tight navigation corner. Replanning
+                // used to discard that same near corner repeatedly, leaving the
+                // next segment blocked forever despite a complete path.
+                if (curiosityCorner + 1 < curiosityCorners.Length
+                    && FlatDistance(transform.position, curiosityCorners[curiosityCorner]) > .001f
+                    && !NavigationStepFits(transform.position, curiosityCorners[curiosityCorner + 1])) break;
+                curiosityCorner++;
+            }
             return hasCuriosityPath && curiosityCorner >= curiosityCorners.Length;
         }
 
@@ -216,7 +232,7 @@ namespace JurassicWorld
             if (!hasCuriosityPath || PathFinished()) return false;
             Vector3 direction = curiosityCorners[curiosityCorner] - transform.position;
             direction.y = 0f;
-            if (direction.sqrMagnitude < .0001f) return false;
+            if (direction.sqrMagnitude < .00000001f) return false;
             float turnAngle = Vector3.SignedAngle(GetVisualForward(), direction, Vector3.up);
             if (Mathf.Abs(turnAngle) >= 40f && !FinishingReturnFootsteps)
             {
@@ -246,10 +262,7 @@ namespace JurassicWorld
                 || FindBlockingStep(from, to) != null;
             if (!blocked && (to - from).sqrMagnitude > .000001f)
             {
-                var filter = NavigationFilter;
-                blocked = !NavMesh.SamplePosition(new Vector3(to.x, MovementHeight, to.y), out var hit, .3f, filter)
-                    || Vector2.Distance(to, new Vector2(hit.position.x, hit.position.z)) > .12f
-                    || NavMesh.Raycast(transform.position, new Vector3(to.x, MovementHeight, to.y), out _, filter);
+                blocked = !NavigationStepFits(transform.position, new Vector3(to.x, MovementHeight, to.y));
             }
             if (blocked) { curiosityBlockedTime += Time.deltaTime; return false; }
             transform.SetPositionAndRotation(new Vector3(to.x, MovementHeight, to.y), rotation);

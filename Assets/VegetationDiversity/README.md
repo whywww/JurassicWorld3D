@@ -14,19 +14,19 @@ All 18 observation segments now have trees on both sides within 12m. Median left
 
 Density accounting preserves the approved 7084m² denominator and 399-tree total: **65.1%** of the original perimeter reference. The relaxed core clearance makes 10608m² available, where the same trees yield **43.5%**. These are different denominators, both explicitly reported. Reaching 65% with the new denominator would require 198 additional trees; this revision follows the approved instruction not to increase the central total.
 
-Reports in `Tools/VegetationDiversity/CentralForest`: `DensityReport.md`, `NorthwestRegion.md`, `RouteEdges.md` / `RouteEdgesBeforeCoreRevision.md`, and `PlayPerformance.md` / `PlayPerformanceBeforeCoreRevision.md`. Revision checkpoints are `Main_BeforeCoreRouteRevision.unity` and `MainCreekTerrain_BeforeCoreRouteRevision.asset` under `Tools/VegetationDiversity/Checkpoints`; restore both for the exact pre-revision state. `CentralForestStage.json` persists layout version 4, stage 1, seed and the 337-tree baseline, so repeat builds/Bake do not halve the count again. Remove restores the original pre-densification vegetation; Stage Two has not run.
+Reports in `Tools/VegetationDiversity/CentralForest`: `DensityReport.md`, `NorthwestRegion.md`, `RouteEdges.md`, and `PlayPerformance.md`. `CentralForestStage.json` persists layout version 4, stage 1, seed and the 337-tree baseline, so repeat builds/Bake do not halve the count again. Remove restores the original pre-densification vegetation; Stage Two has not run.
 
 ## Original five-tree comparison workflow
 
 The original **Poly Haven Five Tree Preview** showed one each of Island Tree 01, Island Tree 03, Tree Small 02, Jacaranda Tree, and Fir Tree 01 (variant A). Prefabs retain native model sizes; the original Jacaranda comparison instance used 65% scale and the other four used 100%. This comparison was approved before forest distribution and is now retained as an inactive backup.
 
-The comparison build, validation and capture commands have been retired. Existing inactive preview backups, reports and images in `Tools/VegetationDiversity/FiveTreePreview` are historical records and remain available. Prepare the approved species through **Jurassic World > Assets > Prepare Five Forest Tree Species**; use the Central Forest commands for production planting.
+The comparison build, validation and capture commands have been retired. Existing inactive preview backups remain as historical records. Prepare the approved species through **Jurassic World > Assets > Prepare Five Forest Tree Species**; use the Central Forest commands for production planting.
 
 To reproduce the new assets, run `Download-FiveTreePreview.ps1`, then run `prepare_five_tree_preview.py` and `reduce_preview_foliage_lods.py` with Blender in background mode and the project directory after `--`. Source hashes are in each downloaded asset's manifest; triangle counts and native dimensions are in `Tools/VegetationDiversity/five-tree-model-report.json`.
 
 The base **Phase 2 Biome Vegetation** pass adds 30 vegetation groups, one banana grove, 60 trees and 180 fern/bush instances. Its original west-autumn/east-tropical arrangement is subsequently corrected by the northwest regional pass during Bake. The 12 banana trees remain in the southeast grove (x=50–70, z=-65 to -35). Use the Central Forest commands for the revised layout; a full Bake reapplies the region and confirmed stage after the base passes.
 
-The scene includes the previously reviewed 15-group layout plus 15 added groups to fill more of the player exploration area. The saved first-stage scene is `Tools/VegetationDiversity/Checkpoints/Main_Phase2_Stage1Review.unity`; the pre-Phase-2 scene is `Tools/VegetationDiversity/Checkpoints/Main_BeforePhase2.unity`.
+The scene includes the previously reviewed 15-group layout plus 15 added groups to fill more of the player exploration area.
 
 The Sketchfab Banana Tree source is supplied as `Palm.fbx`. Its bark vertices are widened 1.7× in the prepared `BananaTree.fbx` so the trunk remains visible at the scene's 2.8–4.0 m scale. Leaves, UVs, and bark material remain from the source. Regenerate it with `prepare_models.py banana <source Palm.fbx> <prepared BananaTree.fbx>` if needed.
 

@@ -123,12 +123,15 @@ namespace JurassicWorld
         {
             if (!hasCuriosityPath || PathFinished()) return false;
             Vector3 direction = curiosityCorners[curiosityCorner] - transform.position; direction.y = 0f;
-            if (direction.sqrMagnitude < .0001f) return false;
+            if (direction.sqrMagnitude < .00000001f) return false;
             Quaternion desired = Quaternion.LookRotation(direction) * Quaternion.Euler(0f, -VisualYaw, 0f);
             Quaternion rotation = Quaternion.RotateTowards(transform.rotation, desired, 120f * Time.deltaTime);
             Vector3 heading = rotation * Quaternion.Euler(0f, VisualYaw, 0f) * Vector3.forward;
             float angle = Vector3.Angle(heading, direction);
-            float step = angle > 60f ? 0f : Mathf.Min(WalkSpeed * Time.deltaTime, direction.magnitude);
+            // The validated path rotates at a corner before translating. Advancing
+            // while still facing up to 60 degrees away cuts outside that swept body
+            // corridor and can wedge the animal against the very tree it avoided.
+            float step = angle > 1f ? 0f : Mathf.Min(WalkSpeed * Time.deltaTime, direction.magnitude);
             Vector3 position = transform.position + heading * step;
             Vector2 from = new Vector2(transform.position.x, transform.position.z), to = new Vector2(position.x, position.z);
             // During a sharp retreat turn, rotate safely in place until translation increases separation.

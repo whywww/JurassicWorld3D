@@ -88,6 +88,4 @@
 
 操作入口：Jurassic World → Central Forest；Remove 撤销加密和西北区域转换，并恢复保留的五树预览及被替换的原树。
 
-检查点：Tools/VegetationDiversity/Checkpoints/Main_BeforeCoreRouteRevision.unity 及对应地形 asset。
-
 外围原型区间、地形高度和溪流数据保持原值；原树等量区域转换有完整备份。见 NorthwestRegion.md 和 RouteEdges.md。

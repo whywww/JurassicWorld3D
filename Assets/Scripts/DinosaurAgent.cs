@@ -1270,6 +1270,7 @@ namespace JurassicWorld
         {
             if (legacyAnimation == null || string.IsNullOrEmpty(clipName))
                 return;
+            if (frontWaitHoldingPose) { frontWaitHoldingPose = false; activeClip = null; }
 
             AnimationState state = legacyAnimation[clipName];
             if (state == null)

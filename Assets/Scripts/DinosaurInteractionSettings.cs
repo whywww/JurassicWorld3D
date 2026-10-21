@@ -9,6 +9,24 @@ namespace JurassicWorld
     {
         [InspectorName("允许玩家互动"), Tooltip("仅启动时读取；关闭后保留恐龙所选的日常漫游方式。")]
         public bool allowOffRouteInteraction = true;
+        [Tooltip("0 uses a new seed on Play; any other value replays the same spawn layout.")]
+        public int spawnSeed;
+        [Header("Forest interaction space")]
+        [Min(.1f)] public float spaceSearchInterval = .5f;
+        [Min(.5f)] public float spaceFailureTimeout = 2f;
+        public float[] spaceSearchRadii = { 4f, 8f, 12f, 16f };
+        [Min(4)] public int spaceSearchDirections = 8;
+        [Min(.5f)] public float safeExitRetryInterval = 2f;
+        [Header("Follow exit reservation")]
+        [Min(.1f)] public float exitReviewInterval = .5f;
+        [Min(2f)] public float exitLookAhead = 8f;
+        [Min(.5f)] public float exitSampleSpacing = 2f;
+        [Min(.1f)] public float exitRouteDeviation = 1f;
+        [Range(1f, 90f)] public float exitHeadingChange = 15f;
+        [Min(.05f)] public float exitPlanningBudgetMs = .5f;
+        [Min(1)] public int exitPathQueriesPerFrame = 2;
+        [Min(1)] public int exitPoseChecksPerFrame = 32;
+        public float[] exitAngles = { 0f, 15f, 30f, 45f, 60f, 90f, 135f, 180f };
         [HideInInspector] public NavMeshData navigationData;
         [HideInInspector] public Bounds[] solidObstacles = Array.Empty<Bounds>();
         [HideInInspector] public float navigationRadius;
@@ -17,6 +35,7 @@ namespace JurassicWorld
         public bool NavigationReady => navigationInstance.valid;
         private NavMeshDataInstance navigationInstance;
         internal Rect? activityBoundsOverride;
+        public string LastPoseObstacle { get; private set; }
 
         private void Awake() => EnabledAtStartup = allowOffRouteInteraction;
         private void OnEnable()
@@ -44,8 +63,9 @@ namespace JurassicWorld
             return false;
         }
 
-        public string PoseBlockReason(Vector2 position, Vector2 forward, DinosaurCoreBody body, bool ignoreStaticObstacles = false)
+        public string PoseBlockReason(Vector2 position, Vector2 forward, DinosaurCoreBody body)
         {
+            LastPoseObstacle = null;
             Vector2 right = new Vector2(forward.y, -forward.x);
             Rect area = activityBoundsOverride.HasValue ? activityBoundsOverride.Value : WorldBounds.DinosaurActivityXZ;
             foreach (var band in body.bands)
@@ -56,7 +76,6 @@ namespace JurassicWorld
                     Mathf.Abs(right.y) * b.extents.x + Mathf.Abs(forward.y) * b.extents.z);
                 if (center.x - extent.x < area.xMin || center.x + extent.x > area.xMax
                     || center.y - extent.y < area.yMin || center.y + extent.y > area.yMax) return "Boundary";
-                if (ignoreStaticObstacles) continue;
                 foreach (Bounds obstacle in solidObstacles)
                 {
                     if (obstacle.max.y <= band.layer * .5f || obstacle.min.y >= (band.layer + 1) * .5f) continue;
@@ -64,13 +83,19 @@ namespace JurassicWorld
                     if (Mathf.Abs(delta.x) >= extent.x + obstacle.extents.x || Mathf.Abs(delta.y) >= extent.y + obstacle.extents.z) continue;
                     if (Mathf.Abs(Vector2.Dot(delta, right)) >= b.extents.x + Mathf.Abs(right.x) * obstacle.extents.x + Mathf.Abs(right.y) * obstacle.extents.z) continue;
                     if (Mathf.Abs(Vector2.Dot(delta, forward)) >= b.extents.z + Mathf.Abs(forward.x) * obstacle.extents.x + Mathf.Abs(forward.y) * obstacle.extents.z) continue;
+                    LastPoseObstacle = $"Solid at {obstacle.center:F2}";
                     return "Rock / solid obstacle";
                 }
             }
-            return !ignoreStaticObstacles && TerrainTreeObstacleRegistry.IsCoreBlocked(position, forward, body) ? "Tree" : null;
+            if (!TerrainTreeObstacleRegistry.IsCoreBlocked(position, forward, body)) return null;
+            LastPoseObstacle = TerrainTreeObstacleRegistry.LastCoreObstacle;
+            return "Tree";
         }
 
         public bool StepBlocked(Vector2 from, Vector2 to, Vector2 fromForward, Vector2 toForward, DinosaurCoreBody body)
+            => StepBlockReason(from, to, fromForward, toForward, body) != null;
+
+        public string StepBlockReason(Vector2 from, Vector2 to, Vector2 fromForward, Vector2 toForward, DinosaurCoreBody body)
         {
             float angle = Vector2.SignedAngle(fromForward, toForward);
             int samples = Mathf.Max(1, Mathf.CeilToInt(Vector2.Distance(from, to) / .1f), Mathf.CeilToInt(Mathf.Abs(angle) / 2f));
@@ -79,9 +104,10 @@ namespace JurassicWorld
                 float t = i / (float)samples, radians = angle * t * Mathf.Deg2Rad;
                 Vector2 heading = new Vector2(fromForward.x * Mathf.Cos(radians) - fromForward.y * Mathf.Sin(radians),
                     fromForward.x * Mathf.Sin(radians) + fromForward.y * Mathf.Cos(radians));
-                if (PoseBlocked(Vector2.Lerp(from, to, t), heading, body)) return true;
+                string reason = PoseBlockReason(Vector2.Lerp(from, to, t), heading, body);
+                if (reason != null) return reason;
             }
-            return false;
+            return null;
         }
     }
 }

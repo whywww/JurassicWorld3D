@@ -165,7 +165,7 @@ namespace JurassicWorld
                 if (!wasLeft && leftSupport.planted && leftSupport.handoffReleased) { returnLandings++; leftSupport.handoffReleased = false; }
                 if (!wasRight && rightSupport.planted && rightSupport.handoffReleased) { returnLandings++; rightSupport.handoffReleased = false; }
             }
-            if (agent.IsSteppingTurn || sideHandoff && agent.SideHandoffMoving || returnHandoff && agent.ReturnFootHandoffMoving)
+            if (agent.IsSteppingTurn || agent.ForestPerformanceSupport || sideHandoff && agent.SideHandoffMoving || returnHandoff && agent.ReturnFootHandoffMoving)
             {
                 Vector3 correction = Vector3.zero; int count = 0;
                 if (leftSupport.planted) { correction += leftSupport.anchor - leftSupport.sole.position; count++; }

@@ -8,7 +8,7 @@ namespace JurassicWorld
     public sealed class MovementCorridorDebug : MonoBehaviour
     {
         public const string RootNodeName = "Movement Corridor (Debug)";
-        public const bool ShowMarkersDefault = true;
+        public const bool ShowMarkersDefault = false;
         private static readonly Color[] Colors =
         {
             new Color(0.15f, 1f, 1f),

@@ -21,8 +21,8 @@ namespace JurassicWorld.Editor
         private readonly TreeInstance[] trees;
         private float samplePadding, bodyBottom = float.MaxValue, bodyTop = float.MinValue;
 
-        private sealed class Sweep { internal Vector2 Center, Right, Forward, Extents; internal int Layer; internal bool Core; }
-        private sealed class BodyEnvelope { internal bool Core; internal Bounds Full; internal readonly Dictionary<int, Bounds> Layers = new Dictionary<int, Bounds>(); }
+        private sealed class Sweep { internal Vector2 Center, Right, Forward, Extents; internal int Layer; internal bool Core; internal DinosaurAgent Owner; }
+        private sealed class BodyEnvelope { internal bool Core; internal DinosaurAgent Owner; internal Bounds Full; internal readonly Dictionary<int, Bounds> Layers = new Dictionary<int, Bounds>(); }
         private static readonly Dictionary<string, BodyEnvelope> BodyCache = new Dictionary<string, BodyEnvelope>();
         private sealed class Obstacle
         {
@@ -33,6 +33,7 @@ namespace JurassicWorld.Editor
             internal float RuntimeTrunkRadius, Reach;
             internal string Name;
             internal readonly Dictionary<int, List<Vector2>> StemPoints = new Dictionary<int, List<Vector2>>();
+            internal readonly Dictionary<Vector3Int, Bounds> WoodCells = new Dictionary<Vector3Int, Bounds>();
             internal readonly List<Vector2[]> Shapes = new List<Vector2[]>();
             internal readonly Dictionary<Vector2[], int> ShapeLayers = new Dictionary<Vector2[], int>();
             internal readonly List<TreeTrunkSection> Sections = new List<TreeTrunkSection>();
@@ -75,7 +76,7 @@ namespace JurassicWorld.Editor
                     float radius = Mathf.Max(new Vector2(body.min.x, body.min.z).magnitude, new Vector2(body.max.x, body.max.z).magnitude);
                     float padding = (envelope.Core ? 0f : SafetyMargin) + gap + radius * angle;
                     var sweep = new Sweep { Center = sample.Position + right * body.center.x + forward * body.center.z,
-                        Right = right, Forward = forward, Extents = new Vector2(body.extents.x + padding, body.extents.z + padding), Layer = layer.Key, Core = envelope.Core };
+                        Right = right, Forward = forward, Extents = new Vector2(body.extents.x + padding, body.extents.z + padding), Layer = layer.Key, Core = envelope.Core, Owner = envelope.Owner };
                     float reach = sweep.Extents.magnitude;
                     AddSweep(sweep, sweep.Center - Vector2.one * reach, sweep.Center + Vector2.one * reach);
                 }
@@ -100,12 +101,13 @@ namespace JurassicWorld.Editor
         internal static DinosaurCoreBody BakeInteractionBody(DinosaurAgent agent, AnimationClip[] clips)
         {
             BodyCache.Clear();
-            // Off-route turns need the head, legs and tail envelope as well as torso/hips.
-            var envelope = MeasureBody(agent, false, clips);
+            // T-Rex interaction clearance follows its torso/head, with no tail or limb reservation.
+            var envelope = agent.name == "Tyrannosaurus Rex" ? null : MeasureBody(agent, false, clips);
             Transform child = agent.transform.Find("Interaction Body");
             if (child == null) { child = new GameObject("Interaction Body").transform; child.SetParent(agent.transform, false); }
             var body = child.GetComponent<DinosaurCoreBody>() ?? child.gameObject.AddComponent<DinosaurCoreBody>();
-            body.bands = envelope.Layers.OrderBy(l => l.Key).Select(l => new DinosaurCoreBody.Band { layer = l.Key, bounds = l.Value }).ToArray();
+            body.bands = envelope != null ? envelope.Layers.OrderBy(l => l.Key).Select(l => new DinosaurCoreBody.Band { layer = l.Key, bounds = l.Value }).ToArray()
+                : TRexBodyEnvelopeBake.Bake(agent, new DinosaurInteractionProfile.Motion { clip = clips.First(c => c.name.IndexOf("walk", StringComparison.OrdinalIgnoreCase) >= 0) });
             body.coreBones = CoreBones(agent);
             return body;
         }
@@ -128,7 +130,7 @@ namespace JurassicWorld.Editor
             GameObject model = UnityEngine.Object.Instantiate(loader.ModelRoot, holder.transform, false);
             model.hideFlags = HideFlags.HideAndDontSave;
             Bounds bounds = new Bounds(); bool first = true;
-            var envelope = new BodyEnvelope { Core = core };
+            var envelope = new BodyEnvelope { Core = core, Owner = agent };
             float margin = core ? 0f : interactionClips != null ? .15f : SafetyMargin;
             string[] coreBones = core ? CoreBones(agent) : Array.Empty<string>();
             Quaternion visualCorrection = Quaternion.Euler(0f, -agent.VisualYaw, 0f);
@@ -296,6 +298,8 @@ namespace JurassicWorld.Editor
                         for (int layer = bottom; layer <= top; layer++)
                         {
                             var clipped = ClipHeight(ClipHeight(triangle, layer * HeightLayer, true), (layer + 1) * HeightLayer, false);
+                            if (woodOnly && root.GetComponent<SceneTreeObstacle>()?.includeHardBranches == true)
+                                AddWoodCells(item, clipped, layer);
                             if (!layerPoints.TryGetValue(layer, out var points)) layerPoints[layer] = points = new List<Vector2>();
                             foreach (Vector3 point in clipped) points.Add(new Vector2(point.x, point.z) - item.Position);
                         }
@@ -319,6 +323,45 @@ namespace JurassicWorld.Editor
                 bool insideA = above ? a.y >= height : a.y <= height, insideB = above ? b.y >= height : b.y <= height;
                 if (insideA) result.Add(a);
                 if (insideA != insideB) result.Add(Vector3.Lerp(a, b, (height - a.y) / (b.y - a.y)));
+            }
+            return result;
+        }
+
+        // Keep separate branches separate. A single circle around an entire height
+        // layer filled the empty space between branches, sometimes sealing a trail.
+        private static void AddWoodCells(Obstacle item, List<Vector3> polygon, int layer)
+        {
+            if (polygon.Count == 0) return;
+            var points = polygon.Select(p => new Vector2(p.x, p.z) - item.Position).ToList();
+            int x0 = Mathf.FloorToInt(points.Min(p => p.x)), x1 = Mathf.FloorToInt(points.Max(p => p.x));
+            int z0 = Mathf.FloorToInt(points.Min(p => p.y)), z1 = Mathf.FloorToInt(points.Max(p => p.y));
+            for (int x = x0; x <= x1; x++) for (int z = z0; z <= z1; z++)
+            {
+                var clipped = ClipHorizontal(ClipHorizontal(ClipHorizontal(ClipHorizontal(points,
+                    x, true, true), x + 1f, true, false), z, false, true), z + 1f, false, false);
+                if (clipped.Count == 0) continue;
+                var key = new Vector3Int(x, layer, z);
+                bool hasBounds = item.WoodCells.TryGetValue(key, out var bounds);
+                foreach (var point in clipped)
+                {
+                    var p = new Vector3(point.x, 0f, point.y);
+                    if (!hasBounds) { bounds = new Bounds(p, Vector3.zero); hasBounds = true; }
+                    else bounds.Encapsulate(p);
+                }
+                item.WoodCells[key] = bounds;
+            }
+        }
+
+        private static List<Vector2> ClipHorizontal(List<Vector2> polygon, float edge, bool xAxis, bool above)
+        {
+            var result = new List<Vector2>();
+            for (int i = 0; i < polygon.Count; i++)
+            {
+                Vector2 a = polygon[i], b = polygon[(i + 1) % polygon.Count];
+                float av = xAxis ? a.x : a.y, bv = xAxis ? b.x : b.y;
+                bool ai = above ? av >= edge : av <= edge, bi = above ? bv >= edge : bv <= edge;
+                if (ai) result.Add(a);
+                if (ai != bi) result.Add(Vector2.Lerp(a, b, (edge - av) / (bv - av)));
             }
             return result;
         }
@@ -350,8 +393,20 @@ namespace JurassicWorld.Editor
             Vector3 origin = matrix.MultiplyPoint3x4(Vector3.zero);
             Vector2 center = new Vector2(origin.x, origin.z) - item.Position;
             var sections = new List<TreeTrunkSection>();
+            if (root.GetComponent<SceneTreeObstacle>()?.includeHardBranches == true)
+            foreach (var cell in wood.WoodCells.OrderBy(c => c.Key.y).ThenBy(c => c.Key.x).ThenBy(c => c.Key.z))
+            {
+                Bounds b = cell.Value;
+                var section = new TreeTrunkSection { center = new Vector2(b.center.x, b.center.z),
+                    radius = Mathf.Max(.04f, new Vector2(b.extents.x, b.extents.z).magnitude + .02f),
+                    bottom = cell.Key.y * HeightLayer, top = (cell.Key.y + 1) * HeightLayer };
+                sections.Add(section);
+                int before = item.Shapes.Count; AddCircle(item, section.center, section.radius);
+                item.ShapeLayers[item.Shapes[before]] = cell.Key.y;
+            }
             foreach (var layer in wood.StemPoints)
             {
+                if (wood.WoodCells.Count > 0) continue;
                 // Clip the wood section to the central stem column. Hulls include branches, so
                 // only central-column vertices define a stem radius, capped at its authored width.
                 var points = layer.Value.Where(p => (p - center).sqrMagnitude <= radius * radius * 2.25f).ToArray();
@@ -453,7 +508,7 @@ namespace JurassicWorld.Editor
             }
             return true;
         }
-        private bool IsClear(Obstacle item, Vector2 position)
+        private bool IsClear(Obstacle item, Vector2 position, DinosaurAgent fullBodyAgent = null)
         {
             Vector2Int a = Cell(position - Vector2.one * item.Reach), b = Cell(position + Vector2.one * item.Reach);
             var visited = new HashSet<Sweep>();
@@ -462,7 +517,8 @@ namespace JurassicWorld.Editor
                 if (!cells.TryGetValue(new Vector2Int(x, z), out var sweeps)) continue;
                 foreach (Sweep sweep in sweeps)
                 {
-                    if (sweep.Core != item.IsTree || !visited.Add(sweep)) continue;
+                    if ((sweep.Core != item.IsTree && !(item.IsTree && !sweep.Core && fullBodyAgent != null && sweep.Owner == fullBodyAgent))
+                        || !visited.Add(sweep)) continue;
                     if (item.IsTree)
                     {
                         foreach (var section in item.Sections)
@@ -563,7 +619,7 @@ namespace JurassicWorld.Editor
 
         // Reuse the animated body sweeps while checking candidates at their actual ground height,
         // scale and orientation. Never relocate existing scene obstacles during planting.
-        internal static Func<Transform, bool> CreateTreeCandidateProbe(Terrain terrain)
+        internal static Func<Transform, bool> CreateTreeCandidateProbe(Terrain terrain, DinosaurAgent fullBodyAgent = null)
         {
             var clearance = new RouteObstacleClearance(terrain, false);
             return tree =>
@@ -573,7 +629,7 @@ namespace JurassicWorld.Editor
                     RuntimeTrunkRadius = marker.Radius, Name = tree.name };
                 clearance.AddStemSections(item, tree, tree.localToWorldMatrix, marker.Radius);
                 foreach (var shape in item.Shapes) foreach (var p in shape) item.Reach = Mathf.Max(item.Reach, p.magnitude);
-                return clearance.IsClear(item, item.Position);
+                return clearance.IsClear(item, item.Position, fullBodyAgent);
             };
         }
 

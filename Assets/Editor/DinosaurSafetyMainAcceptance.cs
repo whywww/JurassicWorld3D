@@ -21,11 +21,16 @@ namespace JurassicWorld.Editor
         private static float began, travelled;
         private static int frame;
         private static bool coupled, sawPeerWait;
+        private static Vector3 returnOrigin;
         private static Vector3 previous;
         private static readonly StringBuilder Report = new StringBuilder();
         private static object Get(DinosaurAgent agent, string field) => typeof(DinosaurAgent).GetField(field, Private).GetValue(agent);
         private static object Call(DinosaurAgent agent, string method, params object[] args)
             => typeof(DinosaurAgent).GetMethod(method, Private).Invoke(agent, args);
+        private static bool PeerPoseBlocked(DinosaurAgent agent, Vector3 position, Quaternion rotation, DinosaurCoreBody body)
+            => (bool)typeof(DinosaurAgent).GetMethod("FrontPeerPoseBlocked", Private, null,
+                new[] { typeof(Vector3), typeof(Quaternion), typeof(DinosaurCoreBody) }, null)
+                .Invoke(agent, new object[] { position, rotation, body });
 
         static DinosaurSafetyMainAcceptance()
         {
@@ -68,11 +73,11 @@ namespace JurassicWorld.Editor
                 raptor = agents.Single(a => a.Species == DinosaurAgent.DinosaurSpecies.Velociraptor);
                 foreach (var agent in agents) agent.enabled = false;
                 settings = UnityEngine.Object.FindObjectOfType<DinosaurInteractionSettings>();
+                Report.Clear();
                 // Captured from the reported TurnBack/YieldingToPeer deadlock in Main.
-                rex.transform.SetPositionAndRotation(new Vector3(22.518f, 0f, 1.4223f), Quaternion.Euler(0f, -82.47f, 0f));
-                raptor.transform.SetPositionAndRotation(new Vector3(30.571f, 0f, 8.6561f), Quaternion.Euler(0f, -101.2f, 0f));
+                PlaceEncounter();
                 Call(raptor, "FreeIdle", 100f);
-                Report.Clear(); travelled = 0f; previous = raptor.transform.position; coupled = sawPeerWait = false;
+                travelled = 0f; previous = raptor.transform.position; coupled = sawPeerWait = false;
                 Time.captureDeltaTime = 1f / 60f; began = Time.time; frame = -1;
                 Call(raptor, "UpdateFreeRoaming");
                 Diagnose();
@@ -111,6 +116,49 @@ namespace JurassicWorld.Editor
             File.WriteAllText("Logs/dinosaur-main-encounter-result.txt", Report.ToString());
         }
         private static Vector3 awayDirection() => (raptor.transform.position - rex.transform.position).normalized;
+        private static bool StaticPoseClear(DinosaurAgent agent)
+        {
+            Vector3 forward = agent.transform.rotation * Quaternion.Euler(0f, agent.VisualYaw, 0f) * Vector3.forward;
+            return !settings.PoseBlocked(new Vector2(agent.transform.position.x, agent.transform.position.z),
+                new Vector2(forward.x, forward.z), (DinosaurCoreBody)Get(agent, "interactionBody"));
+        }
+        private static void PlaceEncounter()
+        {
+            Vector3 oldRex = new Vector3(22.518f, 0f, 1.4223f), oldRaptor = new Vector3(30.571f, 0f, 8.6561f);
+            Quaternion oldRotation = Quaternion.Euler(0f, -82.47f, 0f), oldPeerRotation = Quaternion.Euler(0f, -101.2f, 0f);
+            rex.transform.SetPositionAndRotation(oldRex, oldRotation);
+            raptor.transform.SetPositionAndRotation(oldRaptor, oldPeerRotation);
+            if (!StaticPoseClear(rex) || !StaticPoseClear(raptor))
+            {
+                var layout = UnityEngine.Object.FindObjectOfType<RainforestSampleLayout>();
+                bool found = false;
+                if (layout != null)
+                for (int i = 0; i < layout.clearingPositions.Length && !found; i++)
+                {
+                    var origin = layout.clearingPositions[i]; origin.y = rex.MovementHeight;
+                    var rotation = layout.clearingRotations[i];
+                    rex.transform.SetPositionAndRotation(origin, rotation);
+                    if (!StaticPoseClear(rex)) continue;
+                    for (int bearing = 0; bearing < 8; bearing++)
+                    {
+                        Quaternion delta = Quaternion.Euler(0f, bearing * 45f, 0f) * rotation * Quaternion.Inverse(oldRotation);
+                        Vector3 peer = origin + delta * (oldRaptor - oldRex); peer.y = raptor.MovementHeight;
+                        raptor.transform.SetPositionAndRotation(peer, delta * oldPeerRotation);
+                        if (!StaticPoseClear(raptor)) continue;
+                        if (!NavMesh.SamplePosition(peer, out var hit, .25f, new NavMeshQueryFilter
+                            { agentTypeID = settings.navigationAgentTypeId, areaMask = 1 })
+                            || Vector2.Distance(new Vector2(peer.x, peer.z), new Vector2(hit.position.x, hit.position.z)) > .12f) continue;
+                        if (PeerPoseBlocked(rex, origin, rotation, (DinosaurCoreBody)Get(rex, "interactionBody"))) continue;
+                        found = true; break;
+                    }
+                }
+                if (!found) throw new InvalidOperationException("Captured encounter is occupied and no equivalent safe clearing fixture exists.");
+                Report.AppendLine("Captured coordinates are occupied by the restored forest; replaying the same encounter distance/orientations in a validated clearing.");
+            }
+            rex.GetComponent<DinosaurFootLock>()?.ResetSupportAnchors();
+            raptor.GetComponent<DinosaurFootLock>()?.ResetSupportAnchors();
+            returnOrigin = rex.transform.position;
+        }
         private static void Tick()
         {
             if (frame == Time.frameCount) return;
@@ -121,21 +169,23 @@ namespace JurassicWorld.Editor
                 travelled += Vector3.Distance(previous, raptor.transform.position); previous = raptor.transform.position;
                 if (coupled)
                 {
-                    Call(rex, "TickFrontInteraction");
+                    if (rex.IsOffRouteInteraction) Call(rex, "TickFrontInteraction");
+                    else Call(rex, "Update");
                     sawPeerWait |= rex.FrontActionWaitingForSpace && rex.FrontBlockingReason == "Peer";
+                    if (!StaticPoseClear(rex) || !StaticPoseClear(raptor))
+                        throw new InvalidOperationException("Encounter entered a hard obstacle.");
                 }
                 float elapsed = Time.time - began, distance = Vector3.Distance(previous, rex.transform.position);
-                if (coupled && !rex.FrontInteractionStage.StartsWith("TurnBack"))
+                if (coupled && !rex.IsOffRouteInteraction && Vector3.Distance(returnOrigin, rex.transform.position) > 1f)
                 {
-                    Report.AppendLine($"PASS coupled Main return: left TurnBack in {elapsed:F2}s; peerWait={sawPeerWait}; raptor travelled={travelled:F2}m; rexStage={rex.FrontInteractionStage}.");
+                    Report.AppendLine($"PASS coupled Main return: resumed actual roaming in {elapsed:F2}s; rex moved={Vector3.Distance(returnOrigin, rex.transform.position):F2}m; peerWait={sawPeerWait}; raptor travelled={travelled:F2}m; rexStage={rex.FrontInteractionStage}.");
                     Finish(null); return;
                 }
                 if (!coupled && distance >= 20f)
                 {
                     Report.AppendLine($"PASS Main captured encounter: released in {elapsed:F2}s, travelled={travelled:F2}m, distance={distance:F2}m.");
                     coupled = true; travelled = 0f;
-                    rex.transform.SetPositionAndRotation(new Vector3(22.518f, 0f, 1.4223f), Quaternion.Euler(0f, -82.47f, 0f));
-                    raptor.transform.SetPositionAndRotation(new Vector3(30.571f, 0f, 8.6561f), Quaternion.Euler(0f, -101.2f, 0f));
+                    PlaceEncounter();
                     Call(raptor, "FreeIdle", 100f);
                     Call(rex, "BeginFrontInteraction"); Call(rex, "BeginFrontReturn");
                     began = Time.time; previous = raptor.transform.position;

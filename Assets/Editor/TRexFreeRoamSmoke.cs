@@ -140,7 +140,8 @@ namespace JurassicWorld.Editor
                 float elapsed = Time.time - started;
                 if (stage == 0 && elapsed >= 35f)
                 {
-                    Require(travelled > 5f && goals > 0 && maximumDeparture > 2f, "Free roaming did not make off-route progress.");
+                    Require(travelled > 5f && goals > 0 && maximumDeparture > 2f,
+                        $"Free roaming did not make off-route progress. seed={DinosaurSpawnRandomizer.LastSpawnSeed}, position={position}, travelled={travelled:F3}, goals={goals}, turn={rex.IsSteppingTurn}, turnTime={rex.StepTurnClipTime:F5}, clip={Get("activeClip")}, blocked={Get("curiosityBlockedTime")}");
                     if (disabled) { Finish(null); return; }
                     if (rex.IsSteppingTurn) return;
                     typeof(DinosaurAgent).GetMethod("BeginCuriosityStop", Private).Invoke(rex, null);

@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -6,27 +5,25 @@ namespace JurassicWorld
 {
     public sealed partial class DinosaurAgent
     {
-        private DinosaurInteractionProfile.FootFrame[] frontTurnKeys;
-        private DinosaurCoreBody.Band[] frontTurnBands;
-        private int frontAheadFailures;
-        private float frontAheadFailureAt;
-        private float frontSavedWalkTime;
-        private readonly Dictionary<int, DinosaurCoreBody.Band[]> frontBlendBands = new Dictionary<int, DinosaurCoreBody.Band[]>();
+        private float frontSavedWalkTime, frontSavedReturnTime;
         private DinosaurCoreBody frontProbeBody;
-        private float frontReservationAt, frontRetryAt, frontWaitTime;
-        private Vector3 frontReservationOrigin;
-        private int frontBiteMask;
-        private bool frontSpaceExit, frontWaiting, frontWaitPlaying;
+        private float frontRetryAt, frontWaitTime, frontTurnResumeAt;
+        private bool frontWaiting, frontWaitPlaying;
         private string frontBlockReason;
-        public string FrontBlockingReason => frontBlockReason ?? "";
+        public string FrontBlockingReason => frontBlockReason ?? frontWaitReason ?? "";
+        public string LastFrontSpaceFailure => frontLastSpaceFailure ?? "--";
         private const string WaitClip = "FrontSpaceWait";
-        private const string WaitIdleClip = "FrontSpaceIdle";
-        private bool frontStaticPass;
-        private float frontWaitBegan, frontSavedReturnTime;
+        private float frontWaitBegan;
         private int frontWaitReplans;
         private string frontWaitReason;
         private float frontFollowBlockedAt = -1f;
+        private float frontReturnBlockedAt = -1f;
+        private DinosaurAgent frontBlockingPeer;
+        private bool frontPeerClearing, frontPeerYielding;
+        private Vector3 frontPeerGoal;
+        private float frontPeerRetryAt, frontPeerClearBegan, frontPeerBlockedTime;
         private bool IsFrontFollowing => frontStage == FrontStage.Follow || IsSideLocomotion;
+
         private void NoteFrontFollowBlock()
         {
             if (!IsFrontFollowing) return;
@@ -38,89 +35,74 @@ namespace JurassicWorld
         }
         private bool EndBlockedFrontFollow()
         {
-            if (!IsFrontFollowing || frontFollowBlockedAt < 0f || Time.time - frontFollowBlockedAt < 2f) return false;
+            if (!IsFrontFollowing || frontFollowBlockedAt < 0f || Time.time - frontFollowBlockedAt < interactionSettings.spaceFailureTimeout) return false;
+            // One last attempt from the actual pose. A peer yield is not static unreachability.
+            bool planned = PlanFrontFollow();
+            if (planned)
+            {
+                frontFollowBlockedAt = -1f; frontWaitReplans = 0;
+                return false;
+            }
             if (IsSteppingTurn)
             {
                 if (stepTurnState != null) stepTurnState.enabled = false;
                 ClearSteppingTurn();
             }
             GetComponentInChildren<DinosaurFootLock>()?.HoldSupportDuringRecovery(.35f);
-            frontWaiting = frontWaitPlaying = frontStaticPass = false;
-            frontWaitReason = frontBlockReason = null;
-            frontSpaceExit = frontExitPending = true; frontNearPending = false;
+            frontWaiting = frontWaitPlaying = false;
+            frontPeerClearing = frontPeerYielding = false; frontBlockingPeer = null;
+            Debug.Log($"[T-Rex front] Follow blocked: reason={frontBlockReason ?? frontWaitReason}, position={transform.position:F3}, walked={frontFollowElapsed:F3}s", this);
+            frontEndReason = "Static path unreachable";
+            frontExitPending = true; frontNearPending = false;
             actualInteractionSpeed = 0f; interactionMoved = false;
             BeginFrontEnding();
             return true;
         }
-        private Terrain[] frontGround;
-        private float frontTurnResumeAt = -10f;
         private string frontWaitClip;
-        private bool FrontStaticBlock(string reason) => reason == "Tree" || reason == "Rock / solid obstacle" || reason == "NavMesh";
-        private bool FrontGroundValid(Vector3 position)
-        {
-            if (frontGround == null) frontGround = Terrain.activeTerrains;
-            foreach (var terrain in frontGround)
-            {
-                Vector3 local = position - terrain.transform.position, size = terrain.terrainData.size;
-                if (local.x < 0f || local.z < 0f || local.x > size.x || local.z > size.z) continue;
-                float height = terrain.SampleHeight(position) + terrain.transform.position.y;
-                return !float.IsNaN(height) && Mathf.Abs(height - MovementHeight) <= .5f;
-            }
-            return false;
-        }
-        private bool FrontClearOfStatic()
-            => FrontBodyClear(interactionBody);
-        private bool FrontReadyToRoam()
-            => FrontBodyClear(frontOriginalBody != null ? frontOriginalBody : interactionBody) && FrontClearOfStatic();
-        private bool FrontBodyClear(DinosaurCoreBody body)
-        {
-            Vector3 f = GetVisualForward();
-            return interactionSettings.PoseBlockReason(new Vector2(transform.position.x, transform.position.z), new Vector2(f.x, f.z), body) == null
-                && NavMesh.SamplePosition(transform.position, out var hit, .25f, NavigationFilter) && FlatDistance(transform.position, hit.position) <= .12f;
-        }
+        private bool frontWaitHoldingPose;
+        private bool FrontWaitBlendActive => frontWaitPlaying && !frontWaitHoldingPose && !string.IsNullOrEmpty(frontWaitClip)
+            && legacyAnimation[frontWaitClip] != null && legacyAnimation[frontWaitClip].enabled && legacyAnimation[frontWaitClip].weight > .01f;
+        private bool FrontStaticBlock(string reason) => reason != null && reason != "Peer";
+
         private bool PlanFrontConnection(Vector3 target, bool completeOnly)
         {
-            if (PlanCuriosityPath(target, completeOnly)) return true;
-            frontBlockReason = "NavMesh";
-            if (!frontStaticPass || !FrontGroundValid(target)) return false;
-            curiosityCorners = new[] { transform.position, new Vector3(target.x, MovementHeight, target.z) };
-            curiosityCorner = 1; hasCuriosityPath = true;
-            return true;
+            frontExitQueriesTotal++; frontExitQueriesThisFrame++;
+            frontReturnConnection = transform.position;
+            if (PlanCuriosityPath(target, completeOnly, true)) { frontExitFailure = null; return true; }
+            frontExitSearches++;
+            frontExitFailure = string.IsNullOrEmpty(RoamingBlockReason) ? "NavMesh" : RoamingBlockReason;
+            frontBlockReason = string.IsNullOrEmpty(RoamingBlockReason) ? "NavMesh" : RoamingBlockReason;
+            return false;
         }
         private bool FindFrontClearReturnPoint()
         {
             Vector3 forward = GetVisualForward();
+            var body = frontOriginalBody != null ? frontOriginalBody : interactionBody;
             for (int ring = 1; ring <= 8; ring++) for (int bearing = 0; bearing < 8; bearing++)
             {
                 Vector3 candidate = transform.position + Quaternion.Euler(0f, bearing * 45f, 0f) * forward * (ring * 4f);
-                if (!NavMesh.SamplePosition(candidate, out var hit, 2f, NavigationFilter) || !FrontGroundValid(hit.position)) continue;
-                Vector3 direction = hit.position - transform.position; direction.y = 0f; direction.Normalize();
+                if (!NavMesh.SamplePosition(candidate, out var hit, 2f, NavigationFilter)) continue;
+                Vector3 direction = hit.position - transform.position; direction.y = 0f;
+                if (direction.sqrMagnitude < .01f) continue;
+                direction.Normalize();
                 Quaternion heading = Quaternion.LookRotation(direction) * Quaternion.Euler(0f, -VisualYaw, 0f);
-                if (interactionSettings.PoseBlockReason(new Vector2(hit.position.x, hit.position.z), new Vector2(direction.x, direction.z), frontOriginalBody != null ? frontOriginalBody : interactionBody) != null
-                    || interactionSettings.PoseBlockReason(new Vector2(hit.position.x, hit.position.z), new Vector2(direction.x, direction.z), interactionBody) != null
-                    || FrontPeerPoseBlocked(hit.position, heading, interactionBody)) continue;
-                frontTrail.Insert(0, hit.position); frontReturnIndex = 0; hasCuriosityPath = false;
+                if (interactionSettings.PoseBlocked(new Vector2(hit.position.x, hit.position.z), new Vector2(direction.x, direction.z), body)
+                    || interactionSettings.PoseBlocked(new Vector2(hit.position.x, hit.position.z), new Vector2(direction.x, direction.z), interactionBody)
+                    || FrontPeerPoseBlocked(hit.position, heading, body)) continue;
+                var path = new NavMeshPath();
+                if (!NavMesh.CalculatePath(transform.position, hit.position, NavigationFilter, path)
+                    || path.status != NavMeshPathStatus.PathComplete) continue;
+                // Fallback routes are only useful if the whole walk already passes the static
+                // clearance test; otherwise the first step stalls at the same obstruction.
+                if (!PlanCuriosityPath(hit.position, true)) continue;
+                frontTrail.Insert(0, hit.position); frontReturnIndex = 0;
+                frontReturnConnection = transform.position;
                 return true;
             }
             return false;
         }
 
-        private DinosaurCoreBody.Band[] FrontBands(DinosaurInteractionProfile.Motion incoming, DinosaurInteractionProfile.Motion outgoing)
-        {
-            if (outgoing == null || outgoing == incoming) return incoming.bodyBands;
-            int key = (int)incoming.role * 100 + (int)outgoing.role;
-            if (frontBlendBands.TryGetValue(key, out var cached)) return cached;
-            var bounds = new Dictionary<int, Bounds>();
-            foreach (var band in outgoing.bodyBands) bounds[band.layer] = band.bounds;
-            foreach (var band in incoming.bodyBands)
-            {
-                if (bounds.TryGetValue(band.layer, out var b)) { b.Encapsulate(band.bounds); bounds[band.layer] = b; }
-                else bounds[band.layer] = band.bounds;
-            }
-            var result = new List<DinosaurCoreBody.Band>();
-            foreach (var item in bounds) result.Add(new DinosaurCoreBody.Band { layer = item.Key, bounds = item.Value });
-            return frontBlendBands[key] = result.ToArray();
-        }
+        /// <summary>Walking gate: trees, solid obstacles, activity bounds, NavMesh and peer bodies.</summary>
         private bool FrontStepSafe(Vector3 from, Vector3 to, Quaternion fromRotation, Quaternion toRotation, DinosaurCoreBody body,
             DinosaurCoreBody.Band[] playerBands = null)
         {
@@ -131,21 +113,39 @@ namespace JurassicWorld
                 Vector3 p = Vector3.Lerp(from, to, (float)i / count);
                 Quaternion q = Quaternion.Slerp(fromRotation, toRotation, (float)i / count);
                 Vector3 f = q * Quaternion.Euler(0f, VisualYaw, 0f) * Vector3.forward;
-                if (FrontPeerPoseBlocked(p, q, body)) { frontBlockReason = "Peer"; return false; }
-                string reason = interactionSettings.PoseBlockReason(new Vector2(p.x, p.z), new Vector2(f.x, f.z), body, frontActive && frontStaticPass);
-                if (reason != null) { frontBlockReason = reason; return false; }
-                if (frontStaticPass && !FrontGroundValid(p)) { frontBlockReason = "Ground"; return false; }
+                if (FrontPeerPoseBlocked(p, q, body, out var blocker)) { frontBlockingPeer = blocker; frontBlockReason = "Peer"; return false; }
+                string reason = interactionSettings.PoseBlockReason(new Vector2(p.x, p.z), new Vector2(f.x, f.z), body);
+                if (reason != null) { RememberFrontSpaceFailure(reason, p); return false; }
             }
-            if (FindBlockingStep(new Vector2(from.x, from.z), new Vector2(to.x, to.z)) != null)
-            { frontBlockReason = "Peer"; return false; }
-            if (!frontStaticPass && (!NavMesh.SamplePosition(to, out var hit, .25f, NavigationFilter)
-                || FlatDistance(to, hit.position) > .12f || NavMesh.Raycast(from, to, out _, NavigationFilter))
-                )
+            var blockingStep = FindBlockingStep(new Vector2(from.x, from.z), new Vector2(to.x, to.z));
+            if (blockingStep != null) { frontBlockingPeer = blockingStep; frontBlockReason = "Peer"; return false; }
+            // Performances may end with the root slightly outside the baked mesh;
+            // front walking may step back onto it but never farther away.
+            if (!NavigationStepFits(from, to, frontActive))
             { frontBlockReason = "NavMesh"; return false; }
             return true;
         }
-        private bool FrontPeerPoseBlocked(Vector3 position, Quaternion rotation, DinosaurCoreBody body)
+
+        /// <summary>Animation gate: other dinosaur bodies only. Static clipping is accepted for performances.</summary>
+        private bool FrontAnimationPoseSafe(Vector3 from, Vector3 to, Quaternion fromRotation, Quaternion toRotation, DinosaurCoreBody body)
         {
+            int count = Mathf.Max(1, Mathf.CeilToInt(Vector3.Distance(from, to) / .1f), Mathf.CeilToInt(Quaternion.Angle(fromRotation, toRotation) / 2f));
+            for (int i = 0; i <= count; i++)
+            {
+                Vector3 p = Vector3.Lerp(from, to, (float)i / count);
+                Quaternion q = Quaternion.Slerp(fromRotation, toRotation, (float)i / count);
+                if (FrontPeerPoseBlocked(p, q, body, out var blocker))
+                { frontBlockingPeer = blocker; frontBlockReason = "Peer"; return false; }
+            }
+            return true;
+        }
+
+        private bool FrontPeerPoseBlocked(Vector3 position, Quaternion rotation, DinosaurCoreBody body)
+            => FrontPeerPoseBlocked(position, rotation, body, out _);
+        private bool FrontPeerPoseBlocked(Vector3 position, Quaternion rotation, DinosaurCoreBody body, out DinosaurAgent blocker)
+        {
+            blocker = null;
+            if (body == null) return false;
             Vector3 forward3 = rotation * Quaternion.Euler(0f, VisualYaw, 0f) * Vector3.forward;
             Vector2 forward = new Vector2(forward3.x, forward3.z), right = new Vector2(forward.y, -forward.x);
             foreach (var peer in peers)
@@ -165,7 +165,8 @@ namespace JurassicWorld
                     if (FrontBoxesOverlap(d, right, right, forward, a.bounds.extents, pr, pf, b.bounds.extents)
                         && FrontBoxesOverlap(d, forward, right, forward, a.bounds.extents, pr, pf, b.bounds.extents)
                         && FrontBoxesOverlap(d, pr, right, forward, a.bounds.extents, pr, pf, b.bounds.extents)
-                        && FrontBoxesOverlap(d, pf, right, forward, a.bounds.extents, pr, pf, b.bounds.extents)) return true;
+                        && FrontBoxesOverlap(d, pf, right, forward, a.bounds.extents, pr, pf, b.bounds.extents))
+                    { blocker = peer; return true; }
                 }
             }
             return false;
@@ -176,86 +177,10 @@ namespace JurassicWorld
         private void EnsureFrontProbe()
         {
             if (frontProbeBody != null) return;
-            var holder = new GameObject("Front reservation probe") { hideFlags = HideFlags.DontSave };
+            var holder = new GameObject("Front interaction probe") { hideFlags = HideFlags.DontSave };
             holder.transform.SetParent(transform, false); frontProbeBody = holder.AddComponent<DinosaurCoreBody>();
         }
-        private void PrepareFrontTurnPrediction()
-        {
-            if (frontTurnKeys != null) return;
-            var turn = interactionProfile.Find(InteractionMotionRole.Turn180Look);
-            frontTurnKeys = new DinosaurInteractionProfile.FootFrame[6];
-            for (int i = 0; i < 6; i++) frontTurnKeys[i] = SampleFootFrame(turn, turn.clip.length * i / 5f);
-            frontTurnBands = (DinosaurCoreBody.Band[])turn.bodyBands.Clone();
-            for (int i = 0; i < frontTurnBands.Length; i++)
-            {
-                var bounds = frontTurnBands[i].bounds; bounds.Expand(new Vector3(.6f, 0f, .6f));
-                frontTurnBands[i].bounds = bounds;
-            }
-            EnsureFrontProbe();
-        }
-        private bool FrontTurnSpace(Vector3 origin, Quaternion heading)
-        {
-            if (frontStaticPass) return true; // Actual execution still checks peers, boundary and ground.
-            PrepareFrontTurnPrediction(); frontProbeBody.bands = frontTurnBands;
-            Vector3 previous = origin;
-            foreach (var sample in frontTurnKeys)
-            {
-                Vector3 p = origin + heading * Quaternion.Euler(0f, VisualYaw, 0f) * new Vector3(sample.rootOffset.x, 0f, sample.rootOffset.y);
-                p.y = MovementHeight;
-                Vector3 forward = Quaternion.Euler(0f, sample.yaw, 0f) * heading * Quaternion.Euler(0f, VisualYaw, 0f) * Vector3.forward;
-                string reason = interactionSettings.PoseBlockReason(new Vector2(p.x, p.z), new Vector2(forward.x, forward.z), frontProbeBody);
-                if (reason != null) { frontBlockReason = reason; return false; }
-                if (!NavMesh.SamplePosition(p, out var hit, .25f, NavigationFilter) || FlatDistance(p, hit.position) > .12f
-                    || NavMesh.Raycast(previous, p, out _, NavigationFilter))
-                { frontBlockReason = "NavMesh"; return false; }
-                previous = p;
-            }
-            return true;
-        }
-        // Kept as a small diagnostic seam for existing editor acceptance fixtures. No bite simulation.
-        private int FrontExitMask(Vector3 position, Quaternion rotation) => FrontTurnSpace(position, rotation) ? 3 : 0;
-        private bool RefreshFrontReservation(bool force = false)
-        {
-            if (!force && Time.time < frontReservationAt && FlatDistance(frontReservationOrigin, transform.position) < .5f)
-                return frontBiteMask != 0;
-            frontReservationAt = Time.time + .5f; frontReservationOrigin = transform.position;
-            frontBiteMask = FrontExitMask(transform.position, transform.rotation);
-            if (frontBiteMask == 0)
-            {
-                if (!FrontStaticBlock(frontBlockReason)) return false;
-                if (frontWaiting && IsFrontFollowing) return false;
-                frontSpaceExit = frontExitPending = true;
-                frontBiteMask = 3; // Prediction requests an ending; it no longer freezes walking.
-                return true;
-            }
-            // A temporary blocker gets the full follow retry window before prediction can end it.
-            if (frontWaiting && IsFrontFollowing) { frontBlockReason = null; return true; }
-            Vector3 position = transform.position; Quaternion heading = transform.rotation;
-            float remaining = Mathf.Max(4f, FrontFollowSpeed * 2f);
-            if (hasCuriosityPath)
-            {
-                for (int corner = curiosityCorner; corner < curiosityCorners.Length && remaining > .01f; corner++)
-                {
-                    Vector3 delta = curiosityCorners[corner] - position; delta.y = 0f;
-                    if (delta.magnitude < .01f) continue;
-                    float length = Mathf.Min(remaining, delta.magnitude);
-                    heading = Quaternion.RotateTowards(heading, Quaternion.LookRotation(delta) * Quaternion.Euler(0f, -VisualYaw, 0f),
-                        65f * length / Mathf.Max(.1f, FrontFollowSpeed));
-                    position += delta.normalized * length; remaining -= length;
-                }
-            }
-            if (FlatDistance(position, transform.position) > .1f && !FrontTurnSpace(position, heading))
-            {
-                if (Time.time - frontAheadFailureAt >= .1f)
-                {
-                    frontAheadFailureAt = Time.time;
-                    if (++frontAheadFailures >= 2) frontSpaceExit = frontExitPending = true;
-                }
-            }
-            else frontAheadFailures = 0;
-            if (!frontSpaceExit) frontBlockReason = null;
-            return true;
-        }
+
         private bool ChooseFrontBite()
         {
             frontNearBite = Random.value < .5f ? InteractionMotionRole.BiteCloseLeft : InteractionMotionRole.BiteCloseRight;
@@ -269,41 +194,200 @@ namespace JurassicWorld
             => bite == InteractionMotionRole.BiteCloseLeft ? FrontLeftExit : FrontRightExit;
         private bool CanResumeFrontFollow()
         {
-            if (frontSpaceExit || !PlanFrontFollow()) return false;
-            return RefreshFrontReservation(true) && !frontSpaceExit;
+            if (frontExitPending || frontStopPending || !CanSeePlayer() || !PlanFrontFollow()) return false;
+            return true;
         }
+
         private void BeginFrontSpaceWait()
         {
             NoteFrontFollowBlock();
             if (frontWaiting) return;
+            // A lower-priority dinosaur actively yields instead of holding the interaction.
+            if (frontBlockReason == "Peer" && frontBlockingPeer != null && !HasRightOfWay(frontBlockingPeer))
+            { BeginFrontPeerClearance(frontBlockingPeer, true); return; }
             if ((frontStage == FrontStage.Follow || IsSideLocomotion) && frontFollowMotion != null)
                 frontSavedWalkTime = legacyAnimation[frontFollowMotion.StateName].time;
             frontSavedReturnTime = moveState != null ? moveState.time : 0f;
-            frontWaiting = true; frontRetryAt = Time.time + .5f; frontWaitBegan = Time.time; frontWaitReplans = 0;
-            frontWaitReason = frontBlockReason; frontWaitPlaying = false;
+            frontWaiting = true; frontRetryAt = Time.time + Mathf.Max(.05f, interactionSettings.spaceSearchInterval);
+            frontWaitBegan = Time.time; frontWaitReplans = 0;
+            frontWaitReason = frontBlockReason;
+            if (frontStage == FrontStage.ReturnWalk && FrontStaticBlock(frontWaitReason) && frontReturnBlockedAt < 0f)
+                frontReturnBlockedAt = Time.time;
+            frontWaitPlaying = false; frontPeerBlockedTime = 0f;
             if (frontFollowMotion != null) legacyAnimation[frontFollowMotion.StateName].speed = 0f;
             if (moveState != null) moveState.speed = 0f;
-            SelectFrontWaitAnimation();
+            if (frontAction != null || IsSteppingTurn)
+            {
+                // Hold the last accepted performance pose; its clock does not advance.
+                foreach (AnimationState frozen in legacyAnimation) frozen.speed = 0f;
+                legacyAnimation.Sample();
+                frontWaitHoldingPose = true; frontWaitClip = null;
+            }
+            else
+            {
+                frontWaitHoldingPose = false;
+                SelectFrontWaitAnimation();
+            }
+        }
+        private void CancelFrontWait()
+        {
+            frontWaiting = false; frontWaitPlaying = false; frontWaitHoldingPose = false;
+            frontWaitReason = frontBlockReason = null; frontBlocked = 0f; frontPeerBlockedTime = 0f;
+            if (!string.IsNullOrEmpty(frontWaitClip) && legacyAnimation != null && legacyAnimation[frontWaitClip] != null)
+                legacyAnimation[frontWaitClip].enabled = false;
+            frontWaitClip = null;
         }
         private void SelectFrontWaitAnimation()
         {
+            frontWaitHoldingPose = false;
+            if (frontWaitPlaying && frontWaitClip == WaitClip) return;
             var look = interactionProfile.Find(InteractionMotionRole.LookForward);
-            EnsureFrontProbe(); frontProbeBody.bands = look.bodyBands;
-            string clip = FrontPeerPoseBlocked(transform.position, transform.rotation, frontProbeBody) ? WaitIdleClip : WaitClip;
-            if (frontWaitPlaying && frontWaitClip == clip) return;
-            if (legacyAnimation[clip] == null) legacyAnimation.AddClip(clip == WaitClip ? look.clip : legacyAnimation[idleClip].clip, clip);
-            var state = legacyAnimation[clip]; state.time = 0f; state.speed = 0f; state.wrapMode = WrapMode.Loop;
-            legacyAnimation.CrossFade(clip, .2f); frontWaitTime = 0f; frontWaitPlaying = true; frontWaitClip = activeClip = clip;
+            if (look == null) { frontWaitPlaying = false; return; }
+            if (legacyAnimation[WaitClip] == null) legacyAnimation.AddClip(look.clip, WaitClip);
+            var state = legacyAnimation[WaitClip]; state.time = 0f; state.speed = 0f; state.wrapMode = WrapMode.Loop;
+            legacyAnimation.CrossFade(WaitClip, .2f); frontWaitTime = 0f; frontWaitPlaying = true; frontWaitClip = activeClip = WaitClip;
         }
+
+        private void BeginFrontPeerClearance(DinosaurAgent blocker, bool yielding)
+        {
+            if (frontPeerClearing || blocker == null) return;
+            frontWaiting = false; frontWaitPlaying = false; frontWaitHoldingPose = false;
+            frontWaitReason = frontBlockReason = null; frontPeerBlockedTime = 0f;
+            if ((frontStage == FrontStage.Follow || IsSideLocomotion) && frontFollowMotion != null)
+                frontSavedWalkTime = legacyAnimation[frontFollowMotion.StateName].time;
+            frontSavedReturnTime = moveState != null ? moveState.time : 0f;
+            if (IsSteppingTurn)
+            {
+                GetComponentInChildren<DinosaurFootLock>()?.HoldSupportDuringRecovery(.35f);
+                ClearSteppingTurn();
+            }
+            frontPeerClearing = true; frontPeerYielding = yielding; frontBlockingPeer = blocker;
+            frontPeerClearBegan = Time.time; frontPeerRetryAt = 0f;
+            frontWaitReason = yielding ? "PeerYield" : "PeerPassAround";
+            frontPeerGoal = FrontPeerDetourGoal(blocker, yielding);
+            TryPlanFrontPeerClearance();
+        }
+        private void TryPlanFrontPeerClearance()
+        {
+            if (PlanFrontConnection(frontPeerGoal, true)) return;
+            frontPeerRetryAt = Time.time + Mathf.Max(.25f, interactionSettings.spaceSearchInterval);
+        }
+        private Vector3 FrontPeerDetourGoal(DinosaurAgent blocker, bool yielding)
+        {
+            Vector2 current = new Vector2(transform.position.x, transform.position.z);
+            Vector2 candidate = yielding ? ComputeYieldTarget(current, blocker) : ComputePassAroundTarget(current, blocker);
+            Vector3 world = new Vector3(candidate.x, MovementHeight, candidate.y);
+            if (!IsPeerBlocked(candidate) && FlatDistance(transform.position, world) > .75f
+                && NavMesh.SamplePosition(world, out var hit, .75f, NavigationFilter)) return new Vector3(hit.position.x, MovementHeight, hit.position.z);
+
+            Vector3 away = transform.position - blocker.transform.position; away.y = 0f;
+            if (away.sqrMagnitude < .01f) away = -GetVisualForward();
+            away.Normalize();
+            var body = interactionBody != null ? interactionBody : frontOriginalBody;
+            for (int ring = 1; ring <= 3; ring++)
+            {
+                float radius = 2f + ring * 2f;
+                for (int step = 0; step < 8; step++)
+                {
+                    float signed = step == 0 ? 0f : (step % 2 == 1 ? 1f : -1f) * ((step + 1) / 2) * 45f;
+                    Vector3 direction = Quaternion.Euler(0f, signed, 0f) * away;
+                    Vector3 point = transform.position + direction * radius;
+                    if (!NavMesh.SamplePosition(point, out var sample, 1f, NavigationFilter)) continue;
+                    Vector2 xz = new Vector2(sample.position.x, sample.position.z);
+                    if (IsPeerBlocked(xz)) continue;
+                    if (body != null && interactionSettings.PoseBlocked(xz, new Vector2(direction.x, direction.z), body)) continue;
+                    return new Vector3(sample.position.x, MovementHeight, sample.position.z);
+                }
+            }
+            return transform.position + away * 4f;
+        }
+        private void CancelFrontPeerClearance()
+        {
+            frontPeerClearing = false; frontPeerYielding = false; frontBlockingPeer = null;
+            frontPeerGoal = default; frontPeerRetryAt = 0f; frontPeerBlockedTime = 0f;
+            frontBlocked = 0f; frontBlockReason = frontWaitReason = null; hasCuriosityPath = false;
+        }
+        private void FinishFrontPeerClearance()
+        {
+            bool stageFollow = frontStage == FrontStage.Follow || IsSideLocomotion;
+            bool stageReturn = frontStage == FrontStage.ReturnWalk;
+            CancelFrontPeerClearance();
+            if (moveState != null) moveState.speed = 0f;
+            if (stageReturn)
+            {
+                PlayMovementClip(WalkSpeed);
+                if (moveState != null) moveState.speed = 0f;
+                return;
+            }
+            if (frontAction != null)
+            {
+                RebaseFrontActionOrigin();
+                UseFrontEnvelope(frontAction);
+                var state = legacyAnimation[frontAction.StateName];
+                state.enabled = false; state.weight = 0f;
+                state.time = frontActionTime; state.speed = 0f; state.wrapMode = WrapMode.ClampForever;
+                legacyAnimation.CrossFade(frontAction.StateName, .2f);
+                state.enabled = true; state.time = frontActionTime;
+                activeClip = frontAction.StateName;
+                return;
+            }
+            if (stageFollow && frontFollowMotion != null)
+            {
+                UseFrontEnvelope(frontFollowMotion);
+                var state = legacyAnimation[frontFollowMotion.StateName];
+                state.enabled = true; state.time = frontSavedWalkTime;
+                state.speed = 0f; state.wrapMode = WrapMode.ClampForever;
+                legacyAnimation.CrossFade(frontFollowMotion.StateName, .15f);
+                activeClip = frontFollowMotion.StateName;
+                if (!PlanFrontFollow()) BeginFrontSpaceWait();
+            }
+        }
+        private bool TickFrontPeerClearance()
+        {
+            actualInteractionSpeed = 0f;
+            if (IsSteppingTurn) { TickSteppingTurn(); return true; }
+            if (!frontPeerClearing) return true;
+            if (frontBlockingPeer == null) { FinishFrontPeerClearance(); return true; }
+            if (Time.time >= frontPeerRetryAt && (!hasCuriosityPath || PathFinished()))
+            {
+                frontPeerRetryAt = Time.time + Mathf.Max(.25f, interactionSettings.spaceSearchInterval);
+                TryPlanFrontPeerClearance();
+            }
+            if (hasCuriosityPath && !PathFinished())
+            {
+                bool returning = frontStage == FrontStage.ReturnWalk;
+                if (MoveFrontPath(WalkSpeed, returning, true))
+                {
+                    PlayMovementClip(WalkSpeed);
+                    if (!returning) RecordFrontTrail();
+                }
+                else if (!IsSteppingTurn && Time.time - frontPeerClearBegan > Mathf.Max(4f, interactionSettings.spaceFailureTimeout * 2f))
+                    FinishFrontPeerClearance();
+                return true;
+            }
+            if (Time.time - frontPeerClearBegan > .25f) FinishFrontPeerClearance();
+            return true;
+        }
+        private void RebaseFrontActionOrigin()
+        {
+            if (frontAction == null) return;
+            var sample = SampleFootFrame(frontAction, frontActionTime);
+            frontActionRotation = Quaternion.Euler(0f, -sample.yaw, 0f) * transform.rotation;
+            Vector3 offset = frontActionRotation * Quaternion.Euler(0f, VisualYaw, 0f)
+                * new Vector3(sample.rootOffset.x, 0f, sample.rootOffset.y);
+            frontActionOrigin = transform.position - offset;
+            frontActionOrigin.y = MovementHeight;
+        }
+
         private bool FrontWaitCanResume()
         {
             Vector3 p = transform.position; Quaternion q = transform.rotation;
             if (IsSteppingTurn)
             {
-                var frame = SampleFootFrame(stepTurnMotion, Mathf.Min(stepTurnEnd, stepTurnTime + 1f / 60f * stepTurnMotion.turnPlaybackSpeed));
+                float nextTime = Mathf.Min(stepTurnEnd, stepTurnTime + Time.deltaTime * stepTurnMotion.turnPlaybackSpeed);
+                var frame = SampleFootFrame(stepTurnMotion, nextTime);
                 TurnPose(frame, out var next, out var heading);
-                frontProbeBody.bands = stepTurnMotion.bodyBands;
-                return FrontStepSafe(p, next, q, heading, frontProbeBody, frame.playerBodyBands);
+                return FrontWalkAnimatedStep(stepTurnMotion, stepTurnTime, nextTime, p, next, q, heading);
             }
             if (sideTestSequence && IsSideLocomotion)
             {
@@ -315,7 +399,7 @@ namespace JurassicWorld
             {
                 if (frontWaitReplans < 2) { frontWaitReplans++; if (!PlanFrontFollow()) return false; }
                 if (!hasCuriosityPath) { frontBlockReason = "NavMesh"; return false; }
-                return RefreshFrontReservation(true) && FrontPathNextSafe();
+                return FrontPathNextSafe();
             }
             if (frontStage == FrontStage.ReturnWalk)
             {
@@ -325,16 +409,19 @@ namespace JurassicWorld
                 if (!hasCuriosityPath) { frontBlockReason = "NavMesh"; return false; }
                 return FrontPathNextSafe();
             }
-            if (frontStage == FrontStage.TurnBack && frontAction == null && !FrontTurnSpace(p, q)) return false;
+            if (frontStage == FrontStage.TurnBack && frontAction == null) return true;
             var role = frontStage == FrontStage.TurnBack ? InteractionMotionRole.Turn180Look
                 : frontStage == FrontStage.Intro ? ActiveIntroSequence[frontActionIndex] : FrontExitSequence(frontNearBite)[frontActionIndex];
             var motion = frontAction ?? interactionProfile.Find(role);
-            var sample = SampleFootFrame(motion, frontAction == null ? 0f : Mathf.Min(FrontActionDuration(motion), frontActionTime + 1f / 60f));
+            if (motion == null) return false;
+            var sample = SampleFootFrame(motion, frontAction == null ? 0f
+                : Mathf.Min(FrontActionDuration(motion), frontActionTime + Time.deltaTime));
             Vector3 position = frontAction == null ? p : frontActionOrigin + frontActionRotation * Quaternion.Euler(0f, VisualYaw, 0f)
                 * new Vector3(sample.rootOffset.x, 0f, sample.rootOffset.y);
+            position.y = MovementHeight;
             Quaternion rotation = frontAction == null ? q : Quaternion.Euler(0f, sample.yaw, 0f) * frontActionRotation;
-            frontProbeBody.bands = motion.bodyBands;
-            return FrontStepSafe(p, position, q, rotation, frontProbeBody, sample.playerBodyBands);
+            frontProbeBody.bands = FrontPoseBands(motion, sample.time);
+            return FrontAnimationPoseSafe(p, position, q, rotation, frontProbeBody);
         }
         private bool FrontPathNextSafe()
         {
@@ -350,24 +437,46 @@ namespace JurassicWorld
         private bool TickFrontSpaceWait()
         {
             if (EndBlockedFrontFollow()) return true;
-            if (frontStage == FrontStage.Near && !CanSeePlayer())
-            { invisibleTime += Time.deltaTime; if (invisibleTime >= lostSightGrace) { frontExitPending = true; frontStage = FrontStage.Ending; } }
+            // The reversed trail is only the preferred route. When a static block persists,
+            // drop the stuck connector/turn and continue from the nearest checked clearing point.
+            if (frontStage == FrontStage.ReturnWalk && frontReturnBlockedAt >= 0f
+                && Time.time - frontReturnBlockedAt >= interactionSettings.spaceFailureTimeout)
+            {
+                GetComponentInChildren<DinosaurFootLock>()?.HoldSupportDuringRecovery(.35f);
+                if (IsSteppingTurn) ClearSteppingTurn();
+                hasCuriosityPath = false; frontWaitReplans = 0; frontReturnBlockedAt = Time.time;
+                bool fallback = FindFrontClearReturnPoint();
+                Debug.Log($"[T-Rex front] Return blocked: reason={frontWaitReason ?? frontBlockReason}, fallback={fallback}, position={transform.position:F3}", this);
+                if (fallback)
+                {
+                    frontWaiting = false; frontWaitPlaying = false; frontWaitHoldingPose = false;
+                    frontBlockReason = frontWaitReason = null; frontBlocked = 0f;
+                    if (moveState != null) moveState.speed = 0f;
+                    return true;
+                }
+                frontBlockReason = "NavMesh";
+            }
+            if (frontWaitReason == "Peer" && frontBlockingPeer != null)
+            {
+                frontPeerBlockedTime += Time.deltaTime;
+                if (frontPeerBlockedTime >= RightOfWayGraceSeconds)
+                {
+                    frontPeerBlockedTime = 0f;
+                    BeginFrontPeerClearance(frontBlockingPeer, !HasRightOfWay(frontBlockingPeer));
+                    return true;
+                }
+            }
             if (Time.time >= frontRetryAt)
             {
-                frontRetryAt = Time.time + .5f;
+                frontRetryAt = Time.time + Mathf.Max(.1f, interactionSettings.spaceSearchInterval);
                 bool resume = FrontWaitCanResume();
                 if (!resume) NoteFrontFollowBlock();
-                float limit = IsSteppingTurn || frontAction != null || frontStage == FrontStage.TurnBack || frontStage == FrontStage.Intro
-                    || frontStage == FrontStage.Near || frontStage == FrontStage.Ending ? 1f : 2f;
-                if (!resume && !IsFrontFollowing && Time.time - frontWaitBegan >= limit && FrontStaticBlock(frontBlockReason))
-                {
-                    frontStaticPass = true; frontWaitReplans = 0;
-                    resume = FrontWaitCanResume();
-                }
                 frontWaitReason = frontBlockReason;
                 if (resume)
                 {
+                    frontWaitHoldingPose = false;
                     frontWaiting = false; frontBlocked = 0f; frontBlockReason = null;
+                    frontBlockingPeer = null; frontPeerBlockedTime = 0f;
                     if (IsSteppingTurn)
                     {
                         legacyAnimation.CrossFade(stepTurnMotion.StateName, .2f); frontTurnResumeAt = Time.time;
@@ -395,9 +504,9 @@ namespace JurassicWorld
                     }
                     return true;
                 }
-                SelectFrontWaitAnimation();
+                if (frontAction == null && !IsSteppingTurn) SelectFrontWaitAnimation();
             }
-            if (frontWaitPlaying)
+            if (frontWaitPlaying && !frontWaitHoldingPose && frontWaitClip != null && legacyAnimation[frontWaitClip] != null)
             {
                 frontWaitTime += Time.deltaTime;
                 legacyAnimation[frontWaitClip].time = Mathf.Repeat(frontWaitTime, legacyAnimation[frontWaitClip].length);
@@ -407,4 +516,3 @@ namespace JurassicWorld
         }
     }
 }
-

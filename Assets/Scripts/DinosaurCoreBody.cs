@@ -6,7 +6,7 @@ namespace JurassicWorld
     // Baked animation envelope in route-forward coordinates, in world metres.
     public sealed class DinosaurCoreBody : MonoBehaviour
     {
-        [Serializable] public struct Band { public int layer; public Bounds bounds; }
+        [Serializable] public struct Band { public int layer; public Bounds bounds; public int part; }
         public Band[] bands = Array.Empty<Band>();
         public string[] coreBones = Array.Empty<string>();
         public float BroadRadius

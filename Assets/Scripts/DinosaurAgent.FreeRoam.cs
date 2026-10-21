@@ -24,6 +24,141 @@ namespace JurassicWorld
         private Vector3 freeGoal;
         private int freeReplanFailures;
         private bool freeTurnRelocation, freeNavigationWarning, freeRetryGoal;
+        private float roamingWalkBlendUntil;
+        public string RoamingBlockReason { get; private set; } = "";
+        public string LastMovementBlock { get; private set; } = "";
+
+        private bool NavigationStepFits(Vector3 from, Vector3 to, bool recoverOffMesh = false)
+        {
+            // Rasterized NavMesh edges need not coincide exactly with the safe
+            // geometry pose. Query the two nearby nav points, while the separate
+            // body sweep continues to validate the actual, unsnapped root motion.
+            // Raycasting from the unsnapped root can report an immediate edge hit
+            // even for an in-place rotation, permanently trapping the animal.
+            if (!NavMesh.SamplePosition(from, out var start, .25f, NavigationFilter)
+                || !NavMesh.SamplePosition(to, out var end, .25f, NavigationFilter)
+                || FlatDistance(from, start.position) > .12f || FlatDistance(to, end.position) > .12f)
+            {
+                // An accepted performance may legally leave the root just outside the
+                // baked mesh. Recovery steps may only shorten that distance, so the
+                // animal walks back onto navigation instead of being trapped at the
+                // start pose; normal walking still requires both endpoints on the mesh.
+                if (recoverOffMesh && NavMesh.SamplePosition(from, out start, 1f, NavigationFilter)
+                    && NavMesh.SamplePosition(to, out end, 1f, NavigationFilter))
+                {
+                    float fromOff = FlatDistance(from, start.position), toOff = FlatDistance(to, end.position);
+                    if (fromOff <= 1f && toOff <= Mathf.Max(.12f, fromOff) + .002f) return true;
+                }
+                LastMovementBlock = "NavMesh endpoint"; return false;
+            }
+            if (FlatDistance(start.position, end.position) > .001f && NavMesh.Raycast(start.position, end.position, out _, NavigationFilter))
+            {
+                // At a shared polygon vertex the ray query can select the other
+                // incident polygon. Require an independently calculated, complete
+                // path along this very segment (two millimetres of raster error),
+                // never an arbitrary straight-line fallback across an obstacle.
+                var edgePath = new NavMeshPath();
+                if (!NavMesh.CalculatePath(start.position, end.position, NavigationFilter, edgePath)
+                    || edgePath.status != NavMeshPathStatus.PathComplete)
+                { LastMovementBlock = "NavMesh projected segment"; return false; }
+                float length = 0f;
+                var corners = edgePath.corners;
+                if (corners.Length < 2) { LastMovementBlock = "NavMesh empty segment"; return false; }
+                Vector2 a = new Vector2(start.position.x, start.position.z), b = new Vector2(end.position.x, end.position.z);
+                Vector2 segment = b - a;
+                foreach (var corner in corners)
+                {
+                    Vector2 p = new Vector2(corner.x, corner.z);
+                    float t = Mathf.Clamp01(Vector2.Dot(p - a, segment) / segment.sqrMagnitude);
+                    if (Vector2.Distance(p, a + segment * t) > .002f)
+                    { LastMovementBlock = "NavMesh detour required"; return false; }
+                }
+                for (int i = 1; i < corners.Length; i++) length += FlatDistance(corners[i - 1], corners[i]);
+                if (length > FlatDistance(start.position, end.position) + .002f)
+                { LastMovementBlock = "NavMesh detour required"; return false; }
+            }
+            return true;
+        }
+
+        private Vector3[] InsetNavigationCorners(Vector3[] corners)
+        {
+            for (int i = 1; i + 1 < corners.Length; i++)
+            {
+                Vector3 inward = (corners[i - 1] - corners[i]).normalized + (corners[i + 1] - corners[i]).normalized;
+                inward.y = 0f;
+                if (inward.sqrMagnitude < .0001f) continue;
+                foreach (float inset in new[] { .04f, .02f, .01f })
+                {
+                    Vector3 candidate = corners[i] + inward.normalized * inset;
+                    if (!NavMesh.SamplePosition(candidate, out var hit, .05f, NavigationFilter)
+                        || FlatDistance(candidate, hit.position) > .002f
+                        || !NavigationStepFits(corners[i - 1], hit.position)
+                        || !NavigationStepFits(hit.position, corners[i + 1])) continue;
+                    corners[i] = hit.position; break;
+                }
+            }
+            return corners;
+        }
+
+        private bool NavigationRestPoint(Vector3 point)
+            => NavMesh.FindClosestEdge(point, out var edge, NavigationFilter) && edge.distance >= .05f;
+
+        // Navigation is shared with smaller animals. A complete root path alone is
+        // insufficient: check the entire body's translations and corner rotations.
+        private bool RoamingPathFits(Vector3 origin, Quaternion rotation, Vector3[] corners)
+        {
+            Vector2 previous = new Vector2(origin.x, origin.z);
+            Vector3 visual = rotation * Quaternion.Euler(0f, VisualYaw, 0f) * Vector3.forward;
+            Vector2 heading = new Vector2(visual.x, visual.z);
+            foreach (Vector3 corner in corners)
+            {
+                Vector2 next = new Vector2(corner.x, corner.z), delta = next - previous;
+                if (delta.sqrMagnitude < .0064f) continue;
+                Vector2 direction = delta.normalized;
+                string reason = interactionSettings.StepBlockReason(previous, previous, heading, direction, interactionBody)
+                    ?? interactionSettings.StepBlockReason(previous, next, direction, direction, interactionBody);
+                if (reason != null) { RoamingBlockReason = reason + " / path clearance"; return false; }
+                heading = direction; previous = next;
+            }
+            RoamingBlockReason = "";
+            return true;
+        }
+
+        private bool SpawnExitFits(Vector3 origin, Vector3 forward, out Vector3 exit)
+        {
+            exit = origin + forward * 6f;
+            if (!NavMesh.SamplePosition(exit, out var hit, .25f, NavigationFilter)
+                || FlatDistance(exit, hit.position) > .12f
+                || !NavigationRestPoint(hit.position) || !NavigationStepFits(origin, hit.position)) return false;
+            var from = new Vector2(origin.x, origin.z);
+            var to = new Vector2(exit.x, exit.z);
+            var heading = new Vector2(forward.x, forward.z);
+            if (interactionSettings.StepBlocked(from, to, heading, heading, interactionBody)
+                || !SafetySegmentAllowed(from, to, false)) return false;
+            exit = hit.position;
+            Quaternion rotation = Quaternion.LookRotation(forward) * Quaternion.Euler(0f, -VisualYaw, 0f);
+            return HasRoamingTurnExit(exit, rotation);
+        }
+
+        private bool HasRoamingTurnExit(Vector3 origin, Quaternion rotation)
+        {
+            if (species != DinosaurSpecies.Tyrannosaurus) return true;
+            // A point at the end of a narrow passage is not a usable walking goal.
+            // Reserve an actual two-step turn there, using the existing root tracks,
+            // rather than walking into a pocket and only then discovering no exit.
+            foreach (float angle in new[] { -90f, 90f })
+            {
+                if (!FreeTurnFitsAt(origin, rotation, angle)) continue;
+                var motion = interactionProfile.Find(angle < 0f ? InteractionMotionRole.TurnLeft : InteractionMotionRole.TurnRight);
+                var last = SampleFootFrame(motion, motion.clip.length);
+                Vector3 end = origin + rotation * Quaternion.Euler(0f, VisualYaw, 0f)
+                    * new Vector3(last.rootOffset.x, 0f, last.rootOffset.y);
+                end.y = MovementHeight;
+                Quaternion heading = Quaternion.Euler(0f, last.yaw, 0f) * rotation;
+                if (FreeTurnFitsAt(end, heading, angle)) return true;
+            }
+            return false;
+        }
 
         private bool FreeNavigationReady()
         {
@@ -45,6 +180,7 @@ namespace JurassicWorld
                     Mathf.Lerp(area.yMin, area.yMax, (float)spawnRandom.NextDouble()));
                 if (!NavMesh.SamplePosition(candidate, out var hit, 2f, NavigationFilter)) continue;
                 Vector2 p = new Vector2(hit.position.x, hit.position.z);
+                if (!NavigationRestPoint(hit.position)) continue;
                 if (hasCamera && Vector2.Distance(p, camera) < 25f) continue;
                 if (!SafetySegmentAllowed(p, p, false)) continue;
                 bool overlap = false;
@@ -54,8 +190,19 @@ namespace JurassicWorld
                 float yaw = (float)spawnRandom.NextDouble() * 360f;
                 Vector3 forward = Quaternion.Euler(0f, yaw, 0f) * Vector3.forward;
                 if (interactionSettings.PoseBlocked(p, new Vector2(forward.x, forward.z), interactionBody)) continue;
+                var origin = new Vector3(p.x, MovementHeight, p.y);
+                if (!SpawnExitFits(origin, forward, out var exit)) continue;
+                for (int i = 0; i < occupied.Count; i++)
+                {
+                    Vector2 delta = new Vector2(exit.x, exit.z) - p;
+                    float t = Mathf.Clamp01(Vector2.Dot(occupied[i] - p, delta) / delta.sqrMagnitude);
+                    if (Vector2.Distance(p + delta * t, occupied[i]) < CollisionRadius + radii[i] + 6f) overlap = true;
+                }
+                if (overlap) continue;
                 transform.SetPositionAndRotation(new Vector3(p.x, MovementHeight, p.y), Quaternion.Euler(0f, yaw - VisualYaw, 0f));
                 spawnPoint = transform.position;
+                freeGoal = exit;
+                freeRetryGoal = true;
                 MovementCorridorCrossings.Release(this);
                 GetComponentInChildren<DinosaurFootLock>()?.ResetSupportAnchors();
                 position = p;
@@ -66,6 +213,8 @@ namespace JurassicWorld
 
         private void FreeIdle(float delay)
         {
+            roamingWalkBlendUntil = 0f;
+            frontFeet?.EndReturnHandoff();
             hasCuriosityPath = false;
             freeTurnRelocation = false;
             freeRetryGoal = false;
@@ -78,18 +227,25 @@ namespace JurassicWorld
         private bool PickFreeGoal()
         {
             Vector3 forward = GetVisualForward();
-            for (int attempt = 0; attempt < 8; attempt++)
+            for (int attempt = 0; attempt < 32; attempt++)
             {
-                float angle = random.NextDouble() < .7 ? Range(-75f, 75f) : Range(-180f, 180f);
-                Vector3 candidate = transform.position + Quaternion.Euler(0f, angle, 0f) * forward * Range(12f, 30f);
+                // Try forward progress first, then explore other reachable headings.
+                float angle = attempt < 8 ? (attempt / 2 + 1) * 7f * (attempt % 2 == 0 ? 1f : -1f) : Range(-180f, 180f);
+                Vector3 candidate = transform.position + Quaternion.Euler(0f, angle, 0f) * forward * (attempt < 8 ? Range(4f, 16f) : Range(12f, 30f));
                 if (!NavMesh.SamplePosition(candidate, out var hit, 2f, NavigationFilter)) continue;
+                if (!NavigationRestPoint(hit.position)) continue;
                 float distance = FlatDistance(transform.position, hit.position);
-                if (distance < 12f || distance > 30f) continue;
+                if (distance < 4f || distance > 30f) continue;
                 Vector3 arrival = hit.position - transform.position; arrival.y = 0f;
                 arrival.Normalize();
                 if (interactionSettings.PoseBlocked(new Vector2(hit.position.x, hit.position.z), new Vector2(arrival.x, arrival.z), interactionBody)
                     || FindBlockingPeer(new Vector2(hit.position.x, hit.position.z)) != null) continue;
                 if (!PlanCuriosityPath(hit.position, true)) continue;
+                Vector3 endHeading = curiosityCorners.Length > 1
+                    ? curiosityCorners[curiosityCorners.Length - 1] - curiosityCorners[curiosityCorners.Length - 2] : arrival;
+                endHeading.y = 0f;
+                if (endHeading.sqrMagnitude < .000001f || !HasRoamingTurnExit(hit.position,
+                    Quaternion.LookRotation(endHeading) * Quaternion.Euler(0f, -VisualYaw, 0f))) continue;
                 freeGoal = hit.position;
                 freeReplanFailures = 0;
                 freeTurnRelocation = false;
@@ -99,6 +255,7 @@ namespace JurassicWorld
                 return true;
             }
             FreeIdle(2f);
+            RoamingBlockReason = "Waiting for safe exit";
             return false;
         }
 
@@ -129,6 +286,11 @@ namespace JurassicWorld
             {
                 PlayClip(idleClip);
                 if (!freeNavigationWarning) { Debug.LogWarning("[Free roaming] Missing navigation/body/foot data; waiting safely.", this); freeNavigationWarning = true; }
+                return true;
+            }
+            if (Time.time < roamingWalkBlendUntil)
+            {
+                if (moveState != null) moveState.speed = 0f;
                 return true;
             }
             if (UpdateSafetyAvoidance()) return true;

@@ -17,6 +17,8 @@ namespace JurassicWorld.Editor
         private static Vector3[] previous;
         private static float[] travelled;
         private static float[] lastProgress;
+        private static float[] previousAnimationTravel;
+        private static bool[] wasRejoining;
         private static float startTime;
         private static float previousSampleTime;
         private static double deadline;
@@ -164,9 +166,10 @@ namespace JurassicWorld.Editor
         }
 
         // Batch entry: omit -quit so the asynchronous Play Mode verification can finish.
-        public static void Run() => StartMovementCheck(true);
+        public static void Run() { SessionState.SetInt(RunningKey + ".FirstPair", 0); StartMovementCheck(true); }
 
-        public static void RunWithoutImages() => StartMovementCheck(false);
+        public static void RunWithoutImages() { SessionState.SetInt(RunningKey + ".FirstPair", 0); StartMovementCheck(false); }
+        public static void RunLastPair() { SessionState.SetInt(RunningKey + ".FirstPair", 2); StartMovementCheck(false); }
 
         private static void StartMovementCheck(bool images)
         {
@@ -208,8 +211,20 @@ namespace JurassicWorld.Editor
                 return;
             }
             previous = new Vector3[agents.Length];
+            previousAnimationTravel = new float[agents.Length];
+            foreach (var agent in agents)
+            {
+                const BindingFlags runtime = BindingFlags.Instance | BindingFlags.NonPublic;
+                // Main now defaults to free roaming. This fixture explicitly measures route
+                // traffic; otherwise a valid free-roam step is incorrectly reported off-route.
+                typeof(DinosaurAgent).GetField("roamingMode", runtime).SetValue(agent, DinosaurAgent.RoamingMode.Route);
+                typeof(DinosaurAgent).GetField("startupRoamingMode", runtime).SetValue(agent, DinosaurAgent.RoamingMode.Route);
+                typeof(DinosaurAgent).GetField("playerInteractionEnabled", runtime).SetValue(agent, false);
+                typeof(DinosaurAgent).GetField("interactionReady", runtime).SetValue(agent, false);
+            }
             travelled = new float[agents.Length];
             lastProgress = new float[agents.Length];
+            wasRejoining = new bool[agents.Length];
             startTime = Time.time;
             previousSampleTime = Time.time;
             deadline = EditorApplication.timeSinceStartup + 150;
@@ -230,6 +245,9 @@ namespace JurassicWorld.Editor
             {
                 // This regression measures route traffic. Player-triggered rests are verified separately.
                 typeof(DinosaurAgent).GetField("interactionReady", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(agents[i], false);
+                typeof(DinosaurAgent).GetMethod("ClearSteppingTurn", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(agents[i], null);
+                typeof(DinosaurAgent).GetField("routeRejoining", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(agents[i], false);
+                wasRejoining[i] = false;
                 int route = RoutePairs[index, i];
                 bool placed = false;
                 for (int sample = 0; sample < MovementCorridor.SampleCount(route); sample++)
@@ -245,8 +263,11 @@ namespace JurassicWorld.Editor
                     }
                     if (overlaps) continue;
                     agents[i].ApplySpawnPlacement(point, route);
+                    agents[i].GetComponentInChildren<DinosaurFootLock>()?.ResetSupportAnchors();
+                    agents[i].GetComponent<DinosaurFoliageInteractor>()?.ResetHistory();
                     agents[i].SendMessage("BeginRandomWalk");
                     previous[i] = agents[i].transform.position;
+                    previousAnimationTravel[i] = agents[i].AnimationRootTravel;
                     travelled[i] = 0f;
                     lastProgress[i] = Time.time;
                     placed = true;
@@ -278,7 +299,7 @@ namespace JurassicWorld.Editor
                 if (scenario < 0)
                 {
                     if (Time.time - startTime < 3f) return;
-                    BeginScenario(0);
+                    BeginScenario(SessionState.GetInt(RunningKey + ".FirstPair", 0));
                     return;
                 }
                 if (SessionState.GetBool(ImagesKey, true) && nav != null && nav.MapReady && !File.Exists("Logs/routes-map.png"))
@@ -294,12 +315,25 @@ namespace JurassicWorld.Editor
                     }
                     float step = Vector3.Distance(previous[i], position);
                     float maxStep = Mathf.Max(agents[i].WalkSpeed, agents[i].ApproachSpeed) * (Time.time - previousSampleTime) + .1f;
-                    Require(step <= maxStep, $"Agent teleported: {agents[i].DisplayName}, step={step:F2}m, limit={maxStep:F2}m.");
+                    float authored = agents[i].AnimationRootTravel - previousAnimationTravel[i];
+                    // Walking retains the locomotion limit. A performance additionally follows
+                    // its sampled track, with only the separately bounded LateUpdate foot correction.
+                    if (authored > 0f)
+                        maxStep += authored + Mathf.Min(2.4f, Mathf.Max(agents[i].WalkSpeed, agents[i].ApproachSpeed) * .8f)
+                            * Mathf.Min(Time.deltaTime, .05f);
+                    previousAnimationTravel[i] = agents[i].AnimationRootTravel;
+                    Require(step <= maxStep, $"Agent teleported: {agents[i].DisplayName}, step={step:F2}m, limit={maxStep:F2}m, elapsed={Time.time-startTime:F2}, turn={agents[i].IsSteppingTurn}, clip={agents[i].CurrentAnimationSourceName}.");
                     travelled[i] += step;
                     if (step > .01f) lastProgress[i] = Time.time;
                     if (Time.time - lastProgress[i] >= 120f) DumpTraffic();
                     Require(Time.time - lastProgress[i] < 120f, "Agent stuck: " + agents[i].DisplayName);
-                    Require(MovementCorridor.MinDistanceToRoute(new Vector2(position.x, position.z), agents[i].RouteIndex) < .02f, "Agent left route.");
+                    bool rejoining = (bool)typeof(DinosaurAgent).GetField("routeRejoining", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(agents[i]);
+                    // Authored foot-pivot turns have a lateral step, then reconnect to the
+                    // centreline. Keep exact line checks outside that explicitly bounded phase.
+                    float routeLimit = agents[i].IsSteppingTurn || rejoining || wasRejoining[i] ? 2.01f : .02f;
+                    float lateral = MovementCorridor.MinDistanceToRoute(new Vector2(position.x, position.z), agents[i].RouteIndex);
+                    Require(lateral < routeLimit, $"Agent left route: {agents[i].DisplayName}, lateral={lateral:F3}, limit={routeLimit:F3}, turn={agents[i].IsSteppingTurn}, rejoining={rejoining}.");
+                    wasRejoining[i] = rejoining;
                     previous[i] = position;
                 }
                 previousSampleTime = Time.time;
@@ -314,7 +348,7 @@ namespace JurassicWorld.Editor
                     Require(travelled[i] > MovementCorridor.Length(agents[i].RouteIndex) * 2f, "Agent did not complete route.");
                 }
                 if (scenario < RoutePairs.GetLength(0) - 1) { BeginScenario(scenario + 1); return; }
-                Debug.Log("DINOSAUR_ROUTE_MOVEMENT_OK: all six routes; 1800 simulated seconds; full routes, continuous movement, peer clearance, no stuck agents.");
+                Debug.Log("DINOSAUR_ROUTE_MOVEMENT_OK: requested route pairs completed; full routes, continuous movement, peer clearance, no stuck agents.");
                 Finish(null);
             }
             catch (Exception error) { Finish(error); }
@@ -343,6 +377,7 @@ namespace JurassicWorld.Editor
                 bool trunk = TerrainTreeObstacleRegistry.IsCoreStepBlocked(position, next, new Vector2(forward.x, forward.z), tangent, agent.GetComponent<DinosaurCoreBody>());
                 var blocker = typeof(DinosaurAgent).GetMethod("FindBlockingPeer", flags).Invoke(agent, new object[] { next }) as DinosaurAgent;
                 Debug.Log($"ROUTE_WAIT {agent.name} route={agent.RouteIndex} arc={agent.RouteArc:F1} position={agent.transform.position} travelled={travelled[index]:F1} lastProgress={Time.time-lastProgress[index]:F1}s trunk={trunk} peer={(blocker != null ? blocker.name : "none")} state={agent.CurrentState} waiting={typeof(DinosaurAgent).GetField("waitingAtCrossing", flags).GetValue(agent)}");
+                Debug.Log($"ROUTE_MOTION {agent.name}: turn={agent.IsSteppingTurn} time={agent.StepTurnClipTime:F4} end={typeof(DinosaurAgent).GetField("stepTurnEnd", flags).GetValue(agent)} join={typeof(DinosaurAgent).GetField("routeRejoining", flags).GetValue(agent)} target={typeof(DinosaurAgent).GetField("routeJoinPoint", flags).GetValue(agent)} block={agent.LastMovementBlock} clip={agent.CurrentAnimationSourceName}");
             }
             var gates = (Array)typeof(MovementCorridorCrossings).GetField("Gates", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null);
             foreach (object gate in gates)

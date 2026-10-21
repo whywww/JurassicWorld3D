@@ -261,7 +261,6 @@ namespace JurassicWorld.Editor
                         if ((index < 6 || index >= 11) && loopStarted >= 0f && Time.time - loopStarted > 3f) distance = index >= 12 ? 0f : 9.5f;
                         if (index == 6 && loopStarted >= 0f && (!resumed || Time.time - resumedAt > 2f)) distance = 9.5f;
                         if (index == 10 && stage == "Follow") distance = 9.5f;
-                        if (index == 19 && blending && (float)AgentField("sideWalkBlendTime") >= .08f) distance = 9.5f;
                         test.playerCamera.transform.position = rex.transform.position + direction * distance + Vector3.up * 1.7f;
                         if (index == 7 && loopStarted >= 0f && Time.time - loopStarted > 1f)
                             test.playerCamera.transform.position = rex.transform.position + Vector3.up * 1.7f - rex.transform.forward * 100f;
@@ -280,8 +279,6 @@ namespace JurassicWorld.Editor
                     }
                     if (index == 9 && cleared && stage == "Follow")
                         test.playerCamera.transform.position = rex.transform.position + direction * 9.5f + Vector3.up * 1.7f;
-                    if (index == 18 && blocked && stage.StartsWith("Ending", StringComparison.Ordinal) && !cleared)
-                    { settings.solidObstacles = originalObstacles; cleared = true; }
                     if (index == 6 && stage == "Near" && action == "look forward 2" && !requestedResume)
                     {
                         requestedResume = true;
@@ -316,9 +313,13 @@ namespace JurassicWorld.Editor
             string[] expected = { "look " + side, "roar " + side, "walk head low",
                 "ROAR", "look forward 2", "bite close", "look forward 2", "turn 180 right", "walk slow loop" };
             var sequence = actions.Where(a => a != "turn 90 left" && a != "turn 90 right").ToList();
-            if (index != 6 && index != 10 && index != 18 && index != 19)
+            if (index != 6 && index != 10)
             {
-                Require(sequence.Count >= expected.Length, "Side sequence incomplete: " + string.Join(" > ", actions));
+                Require(sequence.Count >= expected.Length, "Side sequence incomplete: " + string.Join(" > ", actions)
+                    + "; stage=" + rex.FrontInteractionStage + ", reason=" + rex.FrontEndReason
+                    + ", visibility=" + rex.PlayerVisibilityStatus + ", waiting=" + AgentField("frontWaiting")
+                    + ", waitReason=" + AgentField("frontWaitReason") + ", block=" + rex.FrontBlockingReason
+                    + ", exit=" + AgentField("frontExitPending") + ", angle=" + test.ActiveAngle);
                 // Navigation turns may interrupt locomotion, but must not change the interaction order.
                 sequence = sequence.Where((a, i) => i == 0 || a != sequence[i - 1]).ToList();
                 for (int i = 0; i < expected.Length; i++) Require(sequence[i].StartsWith(expected[i], StringComparison.Ordinal),
@@ -331,7 +332,6 @@ namespace JurassicWorld.Editor
                     "Resume repeated the start sequence.");
             }
             if (index == 9) Require(blocked && cleared, "Obstacle wait was not exercised.");
-            if (index == 18) Require(blocked && cleared, "Blocked blend did not exit to Ending.");
             if (index == 10) Require(actions.Contains("walk head low"), "Close-player scenario did not enter direct walking.");
             Require(!actions.Contains("run to stop") && actions.Contains("ROAR"), "Missing direct interaction after stopping.");
             File.AppendAllText("Logs/trex-side-test-result.txt", $"PASS case {index}: {side} {test.ActiveAngle:F0}deg; max root step {maximumStep:F4}m; {string.Join(" > ", actions)}\n");

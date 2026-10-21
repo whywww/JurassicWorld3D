@@ -69,10 +69,11 @@ namespace JurassicWorld.Editor
             GroundEcologyPass.SeedSurface(UnityEngine.Object.FindObjectOfType<Terrain>());
             CentralForestDensification.SeedConfiguredStage();
             LocalForestRepair.SeedConfigured();
-            FoliageInteractionPreparation.SeedConfigured();
             // Dense Jungle Phase 1：可开关的通道 debug 标注（纯场景线段，不动 TerrainData / 植被 Pass）。
             BuildMovementCorridorDebug();
-            TRexInteractionBake.BakeCurrentScene();
+            TRexInteractionBake.BakeCurrentScene(false);
+            RainforestSample.SeedConfigured();
+            FoliageInteractionPreparation.SeedConfigured();
         }
 
         // ---------------------------------------------------------------- 通道 debug 标注（Phase 1）

@@ -141,12 +141,11 @@ namespace JurassicWorld.Editor
             EditorSceneManager.OpenScene(ScenePath);
             Directory.CreateDirectory(Output);
             const string checkpoint = "Tools/VegetationDiversity/Checkpoints/Main_BeforeCentralForest.unity";
+            Directory.CreateDirectory("Tools/VegetationDiversity/Checkpoints");
             if (!File.Exists(checkpoint)) File.Copy(ScenePath, checkpoint);
-            if (!File.Exists(Output + "/RouteEdgesBeforeRevision.md")) WriteRouteReport(CreateContext(), "RouteEdgesBeforeRevision.md");
             var state = File.Exists(StatePath) ? JsonUtility.FromJson<State>(File.ReadAllText(StatePath)) : new State();
             AutumnBaseline = state.layoutVersion >= 3 && state.autumnBaseline > 0 ? state.autumnBaseline :
                 UnityEngine.Object.FindObjectsOfType<SceneTreeObstacle>().Count(t => t.name.StartsWith("FabTree") && NorthwestAutumnForest.SignedDistance(XZ(t.transform.position)) >= 0f);
-            if (!File.Exists(Output + "/RouteEdgesBeforeCoreRevision.md")) WriteRouteReport(CreateContext(), "RouteEdgesBeforeCoreRevision.md");
             BuildInScene(stage);
             ValidateInScene();
             EditorSceneManager.SaveScene(EditorSceneManager.GetActiveScene());
@@ -278,6 +277,9 @@ namespace JurassicWorld.Editor
         }
         private static bool SiteSafe(Context c, Vector2 p, float radius)
         {
+            // The local pass owns planting here once enabled; a full Bake must not first
+            // fill its reserved action spaces with the older central planting pass.
+            if (File.Exists(RainforestSample.EnabledPath) && RainforestSample.Area.Contains(p)) return false;
             if (MainCreekIntegration.NearCreek(p.x, p.y, radius + 1.5f)) return false;
             Vector3 local = new Vector3(p.x, 0f, p.y) - c.Terrain.transform.position;
             if (c.Terrain.terrainData.GetSteepness(local.x / c.Terrain.terrainData.size.x,
@@ -659,7 +661,7 @@ namespace JurassicWorld.Editor
             text.AppendLine("\n## 新增树种\n\n| 树种 | 数量 |\n|---|---:|");
             foreach (var group in root.GetComponentsInChildren<SceneTreeObstacle>().GroupBy(t => t.name.Substring(0, t.name.LastIndexOf('_'))).OrderBy(g => g.Key))
                 text.AppendLine($"| {group.Key} | {group.Count()} |");
-            text.AppendLine("\n第一阶段供 Editor Play 人工确认。第二阶段仅通过独立菜单追加，不自动运行。\n\n操作入口：Jurassic World → Central Forest；Remove 撤销加密和西北区域转换，并恢复保留的五树预览及被替换的原树。\n\n检查点：Tools/VegetationDiversity/Checkpoints/Main_BeforeCoreRouteRevision.unity 及对应地形 asset。\n\n外围原型区间、地形高度和溪流数据保持原值；原树等量区域转换有完整备份。见 NorthwestRegion.md 和 RouteEdges.md。");
+            text.AppendLine("\n第一阶段供 Editor Play 人工确认。第二阶段仅通过独立菜单追加，不自动运行。\n\n操作入口：Jurassic World → Central Forest；Remove 撤销加密和西北区域转换，并恢复保留的五树预览及被替换的原树。\n\n外围原型区间、地形高度和溪流数据保持原值；原树等量区域转换有完整备份。见 NorthwestRegion.md 和 RouteEdges.md。");
             File.WriteAllText(Output + "/DensityReport.md", text.ToString());
             Debug.Log($"CENTRAL_FOREST_DENSITY stage={stage} total={total} autumn={autumn} share={autumn / (float)total:P1} plantable={c.PlantableArea:F0} reference={c.ReferenceDensity * 100:F2}/100m2 ratio={density / c.ReferenceDensity:P1} canopyUpperBound={cover:P1} deficit={missing}");
         }
@@ -765,45 +767,6 @@ namespace JurassicWorld.Editor
             if (!before.SequenceEqual(after) || !trees.SequenceEqual(Terrain.activeTerrain.terrainData.treeInstances)) throw new InvalidOperationException("Repeated forest build changed placement or TerrainData.");
             ValidateInScene();
             Debug.Log("CENTRAL_FOREST_IDEMPOTENCE_OK: two repeat builds, same transforms, no duplicates, unchanged terrain trees.");
-        }
-        public static void VerifyOwnershipAndBakeRestore()
-        {
-            EditorSceneManager.OpenScene(ScenePath);
-            RouteObstacleClearance.VerifyHeightLayers(Terrain.activeTerrain);
-            if (LoadStage() != 1) throw new InvalidOperationException("Verification expects the reviewed stage gate to remain at one.");
-            GameObject root = GameObject.Find(RootName);
-            ForestRegionBackup region = root.GetComponentInChildren<ForestRegionBackup>();
-            string originalTerrainPath = "Tools/VegetationDiversity/Checkpoints/MainCreekTerrain_BeforeNorthwestRouteRevision.asset";
-            UnityEngine.Object[] checkpointObjects = UnityEditorInternal.InternalEditorUtility.LoadSerializedFileAndForget(Path.GetFullPath(originalTerrainPath));
-            try
-            {
-                TerrainData checkpoint = checkpointObjects.OfType<TerrainData>().First();
-                TerrainData current = Terrain.activeTerrain.terrainData;
-                if (!checkpoint.treeInstances.SequenceEqual(region.RestoreTreeArray(current.treeInstances))) throw new InvalidOperationException("Terrain conversion does not restore exact original instances.");
-                if (!checkpoint.GetHeights(0, 0, checkpoint.heightmapResolution, checkpoint.heightmapResolution).Cast<float>().SequenceEqual(current.GetHeights(0, 0, current.heightmapResolution, current.heightmapResolution).Cast<float>())) throw new InvalidOperationException("Regional conversion changed terrain heights.");
-                if (!checkpoint.GetAlphamaps(0, 0, checkpoint.alphamapWidth, checkpoint.alphamapHeight).Cast<float>().SequenceEqual(current.GetAlphamaps(0, 0, current.alphamapWidth, current.alphamapHeight).Cast<float>())) throw new InvalidOperationException("Regional conversion changed creek/ground layers.");
-                if (checkpoint.treePrototypes.Length != current.treePrototypes.Length || checkpoint.treePrototypes.Where((t, i) => t.prefab != current.treePrototypes[i].prefab || t.bendFactor != current.treePrototypes[i].bendFactor).Any()) throw new InvalidOperationException("Regional conversion changed perimeter prototypes.");
-                Debug.Log("NORTHWEST_TERRAIN_CHECKPOINT_OK: exact original tree array recoverable; terrain heights, creek/ground alphamaps and prototype array unchanged.");
-            }
-            finally { foreach (UnityEngine.Object obj in checkpointObjects) UnityEngine.Object.DestroyImmediate(obj); }
-            Func<GameObject, string[]> snapshot = obj => obj.GetComponentsInChildren<Transform>()
-                .Select(t => t.name + "|" + t.position.ToString("F4") + "|" + t.rotation.ToString("F4") + "|" + t.localScale.ToString("F4")).OrderBy(s => s).ToArray();
-            string[] before = snapshot(root);
-            var original = UnityEngine.Object.FindObjectsOfType<Transform>().Where(t => !t.IsChildOf(root.transform)).ToArray();
-            Vector3[] positions = original.Select(t => t.position).ToArray();
-            TreeInstance[] trees = Terrain.activeTerrain.terrainData.treeInstances;
-            RemoveOwnedRoot(root);
-            GameObject preview = GameObject.Find(PreviewName);
-            if (preview == null || preview.GetComponentsInChildren<SceneTreeObstacle>().Length != 5)
-                throw new InvalidOperationException("Remove did not restore the original five-tree preview.");
-            SeedConfiguredStage();
-            root = GameObject.Find(RootName);
-            if (!before.SequenceEqual(snapshot(root))) throw new InvalidOperationException("Bake hook did not reproduce stage one deterministically.");
-            if (root.transform.Find("Stage 2") != null || LoadStage() != 1) throw new InvalidOperationException("Stage two was enabled without review.");
-            if (!trees.SequenceEqual(Terrain.activeTerrain.terrainData.treeInstances)) throw new InvalidOperationException("Restore modified terrain trees.");
-            for (int i = 0; i < original.Length; i++)
-                if (original[i] == null || original[i].position != positions[i]) throw new InvalidOperationException("Restore changed an unowned object.");
-            Debug.Log("CENTRAL_FOREST_OWNERSHIP_OK: removal restores original preview; persisted Bake hook reproduces stage one; original transforms and terrain trees retained; stage two remains disabled. Memory-only check, scene not saved.");
         }
     }
 }

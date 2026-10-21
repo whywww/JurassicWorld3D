@@ -45,7 +45,6 @@ namespace JurassicWorld
             sideWalkBlendTime = 0f; sideWalkBlendLength = Mathf.Max(.001f, remaining);
             sideWalkResumeTime = sideWalkResumeLength = .15f;
             UseFrontEnvelope(sideWalkMotion);
-            frontEnvelopeBlendUntil = float.PositiveInfinity;
         }
         private bool ResumeSideWalkBlend()
         {
@@ -61,7 +60,7 @@ namespace JurassicWorld
             sideWalkResumeTime = 0f;
             sideWalkResumeLength = Mathf.Max(.001f, Mathf.Min(.15f,
                 (frontFollowMotion.clip.length - outgoingTime) / Mathf.Max(.01f, sideStartRunPlaybackSpeed)));
-            UseFrontEnvelope(sideWalkMotion); frontEnvelopeBlendUntil = float.PositiveInfinity;
+            UseFrontEnvelope(sideWalkMotion);
             activeClip = frontFollowMotion.StateName;
             return true;
         }
@@ -85,7 +84,10 @@ namespace JurassicWorld
 
         public bool TriggerSideInteractionTest(bool fromLeft)
         {
-            if (!frontTestControlled || !IsWaitingForInteraction || !interactionReady || !SideActionsAvailable()) return false;
+            if (!frontTestControlled || !IsWaitingForInteraction || !interactionReady || !SideActionsAvailable()
+                || !CanSeePlayer() || PlayerInteractionAngle <= 20f) return false;
+            Vector3 direction = viewCamera.transform.position - transform.position;
+            if ((Vector3.SignedAngle(GetVisualForward(), direction, Vector3.up) < 0f) != fromLeft) return false;
             frontTestWaiting = false;
             FrontTestInteractionCount++;
             BeginInteractionSequence(true, fromLeft);
@@ -105,6 +107,7 @@ namespace JurassicWorld
         {
             ClearSideWalkBlend();
             frontStage = stage; frontAction = null;
+            frontTimingFollow = true;
             frontFollowMotion = interactionProfile.Find(role);
             UseFrontEnvelope(frontFollowMotion);
             var state = legacyAnimation[frontFollowMotion.StateName];
@@ -124,7 +127,6 @@ namespace JurassicWorld
             {
                 if (!PlanFrontFollow()) { BeginFrontSpaceWait(); return true; }
             }
-            if (IsSideChasing && !RefreshFrontReservation()) { BeginFrontSpaceWait(); return true; }
             var state = legacyAnimation[frontFollowMotion.StateName];
             float rate = Mathf.Max(.01f, sideStartRunPlaybackSpeed);
             float remaining = (frontFollowMotion.clip.length - state.time) / rate;
@@ -148,7 +150,7 @@ namespace JurassicWorld
             if (speed > .001f && hasCuriosityPath && !PathFinished()) moving = MoveFrontPath(speed, false);
             if (frontWaiting || IsSteppingTurn) return true;
             var pose = SampleFootFrame(frontFollowMotion, next);
-            if (!FrontPoseSafe(previous, transform.position, previousRotation, transform.rotation, pose.playerBodyBands))
+            if (!FrontWalkAnimatedStep(frontFollowMotion, state.time, next, previous, transform.position, previousRotation, transform.rotation))
             {
                 transform.SetPositionAndRotation(previous, previousRotation);
                 actualInteractionSpeed = 0f; interactionMoved = false;
@@ -160,7 +162,6 @@ namespace JurassicWorld
                 else BeginFrontSpaceWait();
                 return true;
             }
-            if (moving && IsSideChasing) frontFollowElapsed += Time.deltaTime;
             if (sideWalkMotion != null) SampleSideWalkBlend(next, walkTime, blendTime, gameDelta);
             else { state.time = next; state.speed = 0f; legacyAnimation.Sample(); }
             if (next < frontFollowMotion.clip.length - .0001f) return true;

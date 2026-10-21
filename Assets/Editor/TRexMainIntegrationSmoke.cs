@@ -26,6 +26,9 @@ namespace JurassicWorld.Editor
         private static Vector3 peerWaitPosition;
         private static Vector3 direction;
         private static bool sawIntro, sawWalk, sawEnding, sawTurn, sawReturn;
+        private static float followBegan;
+        private static bool nearSetup;
+        private static Vector3 playerOffset;
         private static object Get(string name) => typeof(DinosaurAgent).GetField(name, Private).GetValue(rex);
         private static void Set(string name, object value) => typeof(DinosaurAgent).GetField(name, Private).SetValue(rex, value);
         private static object Call(string name) => typeof(DinosaurAgent).GetMethod(name, Private).Invoke(rex, null);
@@ -102,7 +105,8 @@ namespace JurassicWorld.Editor
             cooldownEnds = Time.time + rex.InteractionCooldownRemaining;
             detectionBegan = Mathf.Max(Time.time, cooldownEnds);
             sawIntro = sawWalk = sawEnding = sawTurn = sawReturn = false;
-            peerWaitBegan = -1f;
+            peerWaitBegan = -1f; followBegan = -1f;
+            nearSetup = false; playerOffset = direction;
             // The natural detection gate must reject both out-of-range and hidden players.
             camera.transform.position += direction * .2f;
             Require(!(bool)Call("CanSeePlayer"), "Detected a player beyond 32m.");
@@ -125,7 +129,12 @@ namespace JurassicWorld.Editor
             {
                 if (frame == Time.frameCount) return;
                 frame = Time.frameCount;
-                Require(Time.time - began < 180f, "Main sequence timed out: " + rex.FrontInteractionStage + "/" + rex.CurrentAnimationSourceName);
+                Require(Time.time - began < 180f, "Main sequence timed out: " + rex.FrontInteractionStage + "/" + rex.CurrentAnimationSourceName
+                    + "; timing=" + Get("frontTimingFollow") + ", follow=" + Get("frontFollowElapsed") + "/" + Get("frontFollowDuration")
+                    + ", exit=" + Get("frontExitPending") + ", waiting=" + Get("frontWaiting") + ", waitReason=" + Get("frontWaitReason")
+                    + ", reason=" + rex.FrontEndReason + ", block=" + Get("frontBlockReason") + ", blockedAt=" + Get("frontFollowBlockedAt")
+                    + ", returnBlockedAt=" + Get("frontReturnBlockedAt") + ", returnIndex=" + Get("frontReturnIndex")
+                    + ", returned=" + Get("frontReturnWalked") + ", delta=" + Time.deltaTime + ", visible=" + rex.PlayerVisibilityStatus);
                 if (stage == 0)
                 {
                     // Keep the fixture still while exercising the real hold/cooldown/visibility gate.
@@ -135,6 +144,11 @@ namespace JurassicWorld.Editor
                     Require(!rex.IsFrontTestControlled && rex.FrontTestInteractionCount == 0, "Main used a test trigger.");
                     Require(rex.IsSideTestSequence == (index < 2), "Live bearing selected the wrong sequence or retained stale side state.");
                     if (index < 2) Require((bool)Get("sideFromLeft") == (index == 0), "Wrong side selected.");
+                    // Detection ran at the 32m boundary; keep the same bearing but inside it so a
+                    // slight intro root shift cannot break a marginal sightline before Follow.
+                    camera.transform.position = rex.transform.position + direction * 24f + Vector3.up * 1.7f;
+                    Physics.SyncTransforms();
+                    Require((bool)Call("CanSeePlayer"), "Fixture lost sight when moving inside the detection range.");
                     rex.enabled = true; stage = 1;
                 }
                 string action = rex.CurrentAnimationSourceName;
@@ -159,12 +173,25 @@ namespace JurassicWorld.Editor
                     }
                 }
                 else peerWaitBegan = -1f;
-                if (rex.FrontInteractionStage == "Follow" || rex.FrontInteractionStage == "SideStartRun")
-                    camera.transform.position = rex.transform.position + direction * 24f + Vector3.up * 1.7f;
+                if (action == "walk head low" && followBegan < 0f) followBegan = Time.time;
+                // After a short chase, stop leading the rex deep into the forest and let the
+                // natural Near sequence end the encounter at a spot it has just walked.
+                if (!nearSetup && followBegan > 0f && rex.FrontInteractionStage == "Follow" && Time.time - followBegan >= 4f)
+                {
+                    playerOffset = camera.transform.position - rex.transform.position; playerOffset.y = 0f;
+                    playerOffset = playerOffset.sqrMagnitude < .01f ? direction : playerOffset.normalized;
+                    camera.transform.position = rex.transform.position + playerOffset * 9f + Vector3.up * 1.7f;
+                    Require((bool)Call("CanSeePlayer"), "Fixture lost sight while closing to Near range.");
+                    nearSetup = true;
+                }
+                if (stage > 0 && (rex.FrontInteractionStage == "Follow" || rex.FrontInteractionStage == "SideStartRun"))
+                    camera.transform.position = rex.transform.position + (nearSetup ? playerOffset * 9f : (Vector3)Call("GetVisualForward") * 24f) + Vector3.up * 1.7f;
                 if (rex.FrontInteractionStage == "Ending" || rex.FrontInteractionStage == "TurnBack")
                     camera.transform.position = new Vector3(200f, 2f, 200f);
                 if (!sawReturn || rex.IsFrontInteractionActive) return;
-                Require(sawIntro && sawWalk && sawEnding && sawTurn, "Main skipped part of the tested sequence.");
+                Require(sawIntro && sawWalk && sawEnding && sawTurn, "Main skipped part of the tested sequence: stage="
+                    + rex.FrontInteractionStage + ", reason=" + rex.FrontEndReason + ", visibility=" + rex.PlayerVisibilityStatus
+                    + ", intro=" + sawIntro + ", walk=" + sawWalk + ", ending=" + sawEnding + ", turn=" + sawTurn);
                 Require(rex.InteractionCooldownRemaining > 9.9f && rex.IsFreeRoaming, "Main did not return to free roaming with cooldown.");
                 Report.AppendLine("PASS Main natural " + Angles[index] + "deg: detection/occlusion/hold, full sequence, return and cooldown; no test controller.");
                 if (++index == Angles.Length) Finish(null); else Prepare();

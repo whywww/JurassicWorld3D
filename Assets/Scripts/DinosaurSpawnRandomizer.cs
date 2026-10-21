@@ -68,8 +68,13 @@ namespace JurassicWorld
                 RandomizeAll();
         }
 
+        public static int LastSpawnSeed { get; private set; }
+
         private static void RandomizeAll()
         {
+            // A previous Play session may have populated the registry with the same Terrain.
+            // Scene trees and their baked sections must belong to this session as well.
+            TerrainTreeObstacleRegistry.Invalidate();
             DinosaurAgent[] agents = UnityEngine.Object.FindObjectsOfType<DinosaurAgent>();
             if (agents.Length == 0)
                 return;
@@ -89,7 +94,10 @@ namespace JurassicWorld
                 ? new Vector2(camera.transform.position.x, camera.transform.position.z)
                 : Vector2.zero;
 
-            var random = new System.Random(); // 无参构造：时间种子，每次 Play 面貌不同
+            var settings = UnityEngine.Object.FindObjectOfType<DinosaurInteractionSettings>();
+            LastSpawnSeed = settings != null && settings.spawnSeed != 0 ? settings.spawnSeed : System.Environment.TickCount;
+            Debug.Log($"[SpawnRandomizer] seed={LastSpawnSeed}");
+            var random = new System.Random(LastSpawnSeed);
             var routeOrder = new int[MovementCorridor.RouteCount];
             for (int r = 0; r < routeOrder.Length; r++) routeOrder[r] = r;
             for (int r = routeOrder.Length - 1; r > 0; r--)
@@ -122,7 +130,14 @@ namespace JurassicWorld
                 if (agent.IsFreeRoaming)
                 {
                     if (!agent.TryFreeSpawn(hasCamera, cameraXZ, placedPositions, placedRadii, random, out Vector2 freePosition))
+                    {
+                        // Unity logs initializer exceptions and keeps playing. Do not leave an
+                        // unvalidated saved pose visible and moving after a failed spawn.
+                        for (int pending = i; pending < agents.Length; pending++)
+                            if (agents[pending] != null) agents[pending].gameObject.SetActive(false);
+                        HudController.ShowError($"{agent.DisplayName} 无安全出生点；seed={LastSpawnSeed}。请检查树林净空。");
                         throw new System.InvalidOperationException($"[SpawnRandomizer] {agent.DisplayName} 没有安全的自由漫游出生点。");
+                    }
                     placedPositions.Add(freePosition);
                     placedRadii.Add(agent.CollisionRadius);
                     placedRoutes.Add(-1);

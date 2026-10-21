@@ -40,6 +40,31 @@ namespace JurassicWorld.Editor
         [MenuItem("Jurassic World/Tests/Emotiv Input Acceptance", true)]
         private static bool CanRun() => !EditorApplication.isPlayingOrWillChangePlaymode;
 
+        // Batch entry point independent of whether hardware input is enabled in Main.
+        public static void RunPlayerMovementRegression()
+        {
+            checks = 0;
+            try
+            {
+                VerifyCommands();
+                VerifyKeyboard();
+                EditorSceneManager.OpenScene("Assets/Scenes/Main.unity");
+                Require(Camera.main != null && Camera.main.GetComponent<SmoothExplorerCamera>() != null,
+                    "Player camera missing");
+                Require(Terrain.activeTerrain != null, "Terrain missing");
+                VerifyPlayerMovement(Camera.main, Terrain.activeTerrain);
+                VerifyStreamDelivery();
+                Debug.Log("[PlayerMovementRegression] PASS: " + checks + " checks. Hardware/authorization not tested.");
+                if (Application.isBatchMode) EditorApplication.Exit(0);
+            }
+            catch (Exception error)
+            {
+                Debug.LogException(error);
+                if (Application.isBatchMode) EditorApplication.Exit(1);
+                else throw;
+            }
+        }
+
         // Can also run in a minimal temporary Unity project while the user's Editor remains open.
         public static void RunStreamRegression()
         {
@@ -262,47 +287,56 @@ namespace JurassicWorld.Editor
             Require(!emotiv.IsAuthorizedOK && !emotiv.IsSessionCreated && !emotiv.IsProfileLoaded, "Stop clears readiness");
         }
 
-        private static void VerifyCollision(Camera camera, Terrain terrain)
+        private static void VerifyPlayerMovement(Camera camera, Terrain terrain)
         {
-            TerrainTreeObstacleRegistry.EnsureInitialized();
-            Require(TerrainTreeObstacleRegistry.ObstacleCount > 0, "Existing obstacles missing");
-            // Use the controller's actual 4 m/s frame step, rather than a map-wide teleport.
-            const float frameStep = 4f / 60f;
-            Rect bounds = WorldBounds.PlayerExplorationXZ;
-            bool checkedBoundary = false;
-            foreach (Vector2 edge in new[] { new Vector2(bounds.xMin, 0), new Vector2(bounds.xMax, 0),
-                new Vector2(0, bounds.yMin), new Vector2(0, bounds.yMax) })
+            var explorer = camera.GetComponent<SmoothExplorerCamera>();
+            Vector3 originalPosition = camera.transform.position;
+            Set(explorer, "groundTerrain", terrain);
+            float eyeHeight = (float)typeof(SmoothExplorerCamera).GetField("eyeHeight",
+                BindingFlags.NonPublic | BindingFlags.Instance).GetValue(explorer);
+            try
             {
-                Vector2 start = Vector2.MoveTowards(edge, bounds.center, 0.01f);
-                if (TerrainTreeObstacleRegistry.IsBlocked(start, 0.45f)) continue;
-                Vector2 desired = WorldBounds.ClampToPlayerExploration(start + (edge - bounds.center).normalized * frameStep);
-                Vector2 result = TerrainTreeObstacleRegistry.SlideMove(start, desired, 0.45f, 1f / 60f);
-                Require(WorldBounds.ContainsPlayer(result), "Movement must stay inside exploration bounds");
-                Require(!TerrainTreeObstacleRegistry.IsBlocked(result, 0.45f), "Boundary movement must not end inside a tree");
-                checkedBoundary = true;
+                TerrainTreeObstacleRegistry.EnsureInitialized();
+                Require(TerrainTreeObstacleRegistry.ObstacleCount > 0, "Dinosaur obstacles missing");
+                Rect bounds = WorldBounds.PlayerExplorationXZ;
+                foreach (Vector2 desired in new[] {
+                    new Vector2(bounds.xMin - 1, 0), new Vector2(bounds.xMax + 1, 0),
+                    new Vector2(0, bounds.yMin - 1), new Vector2(0, bounds.yMax + 1) })
+                {
+                    Invoke(explorer, "MoveTo", desired);
+                    Vector2 expected = WorldBounds.ClampToPlayerExploration(desired);
+                    Equal(new Vector2(camera.transform.position.x, camera.transform.position.z), expected,
+                        "Player remains inside exploration bounds");
+                    float ground = terrain.SampleHeight(camera.transform.position) + terrain.transform.position.y;
+                    Require(Mathf.Abs(camera.transform.position.y - ground - eyeHeight) < 0.001f,
+                        "Player retains terrain-relative eye height");
+                }
+
+                int crossedTrees = 0;
+                Vector3 origin = terrain.transform.position;
+                Vector3 size = terrain.terrainData.size;
+                foreach (var tree in terrain.terrainData.treeInstances)
+                {
+                    Vector3 point = origin + Vector3.Scale(tree.position, size);
+                    Vector2 center = new Vector2(point.x, point.z);
+                    if (!WorldBounds.ContainsPlayer(center)
+                        || !TerrainTreeObstacleRegistry.IsBlocked(center, 0.45f)) continue;
+                    // Traverse in both directions with normal frame-sized steps, including through the tree center.
+                    foreach (float direction in new[] { 1f, -1f })
+                        for (int frame = -30; frame <= 30; frame++)
+                        {
+                            Vector2 desired = center + Vector2.right * (direction * frame * 4f / 60f);
+                            Invoke(explorer, "MoveTo", desired);
+                            Equal(new Vector2(camera.transform.position.x, camera.transform.position.z),
+                                WorldBounds.ClampToPlayerExploration(desired), "Player passes through trees without displacement");
+                        }
+                    Require(TerrainTreeObstacleRegistry.IsBlocked(center, 0.45f),
+                        "Player movement must preserve shared tree obstacles for dinosaurs");
+                    crossedTrees++;
+                }
+                Require(crossedTrees > 0, "No explorable tree tested");
             }
-            Require(checkedBoundary, "No suitable boundary for movement check");
-            bool checkedTree = false;
-            Vector3 origin = terrain.transform.position;
-            Vector3 size = terrain.terrainData.size;
-            foreach (var tree in terrain.terrainData.treeInstances)
-            {
-                Vector3 point = origin + Vector3.Scale(tree.position, size);
-                Vector2 center = new Vector2(point.x, point.z);
-                Vector2 approach = center + Vector2.right * 3f;
-                if (!WorldBounds.ContainsPlayer(center) || !WorldBounds.ContainsPlayer(approach)
-                    || !TerrainTreeObstacleRegistry.IsBlocked(center, 0.45f)
-                    || TerrainTreeObstacleRegistry.IsBlocked(approach, 0.45f)) continue;
-                Vector2 stopped = approach;
-                for (int frame = 0; frame < 120; frame++)
-                    stopped = TerrainTreeObstacleRegistry.SlideMove(stopped,
-                        Vector2.MoveTowards(stopped, center, frameStep), 0.45f, 1f / 60f);
-                Require(!TerrainTreeObstacleRegistry.IsBlocked(stopped, 0.45f), "Player-radius sweep must stop before trunk");
-                Require((stopped - center).sqrMagnitude > 0.01f, "Sweep must not reach tree center");
-                checkedTree = true;
-                break;
-            }
-            Require(checkedTree, "No suitable existing tree for collision check");
+            finally { camera.transform.position = originalPosition; }
         }
 
         private static void VerifyScene()
@@ -325,7 +359,7 @@ namespace JurassicWorld.Editor
                 Require(settings.FindProperty(field) == null, "Config must not be serialized in scene: " + field);
             Equal(input.ReadMovement(), Vector2.zero, "Unconnected component yields zero");
             Require(Terrain.activeTerrain != null, "Existing terrain missing");
-            VerifyCollision(camera, Terrain.activeTerrain);
+            VerifyPlayerMovement(camera, Terrain.activeTerrain);
             Require(WorldBounds.ContainsPlayer(new Vector2(camera.transform.position.x, camera.transform.position.z)), "Player starts outside bounds");
 
             // Same action and power must still refresh arrival time; exercise the actual event callback.

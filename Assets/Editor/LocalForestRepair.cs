@@ -39,6 +39,7 @@ namespace JurassicWorld.Editor
             Terrain terrain = Terrain.activeTerrain;
             Directory.CreateDirectory(Output);
             const string checkpoint = "Tools/VegetationDiversity/Checkpoints/Main_BeforeLocalForestRepair.unity";
+            Directory.CreateDirectory("Tools/VegetationDiversity/Checkpoints");
             if (!File.Exists(checkpoint)) File.Copy(CentralForestDensification.ScenePath, checkpoint);
             if (Baseline == null && !AssetDatabase.CopyAsset(AssetDatabase.GetAssetPath(terrain.terrainData), BaselinePath))
                 throw new InvalidOperationException("Could not save terrain checkpoint.");

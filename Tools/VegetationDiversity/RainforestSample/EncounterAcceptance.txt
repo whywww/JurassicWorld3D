@@ -1,0 +1,10 @@
+Captured coordinates are occupied by the restored forest; replaying the same encounter distance/orientations in a validated clearing.
+Turn probe: safe=True staticStep=False navRay=False.
+Main captured pose: rex=(-14.0000, 0.0000, 5.0000) raptor=(-5.7733, 0.0000, -2.0356) distance=10.825; nav=True offset=0.0092; static=; status=Waiting for safe retreat / turning.
+Candidate length 22m: nav samples=7, complete paths=7, monotonic=7.
+Candidate length 8m: nav samples=7, complete paths=7, monotonic=7.
+Candidate length 4m: nav samples=7, complete paths=7, monotonic=7.
+Candidate length 2m: nav samples=7, complete paths=7, monotonic=7.
+PASS Main captured encounter: released in 3.28s, travelled=9.20m, distance=20.02m.
+Captured coordinates are occupied by the restored forest; replaying the same encounter distance/orientations in a validated clearing.
+PASS coupled Main return: resumed actual roaming in 5.43s; rex moved=1.17m; peerWait=True; raptor travelled=14.80m; rexStage=Inactive.

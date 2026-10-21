@@ -8,5 +8,4 @@
 
 被替换地形树的完整实例字段及原索引保存在 Northwest Autumn Region / ForestRegionBackup；原场景树保存在不激活的 Original Scene Trees 中，并记录原父对象和局部变换。Remove 恢复这些记录。地形高度、地表图层、溪流、原型数组和未涉及树实例不改动。
 
-修改前检查点：Tools/VegetationDiversity/Checkpoints/Main_BeforeCoreRouteRevision.unity 及 MainCreekTerrain_BeforeCoreRouteRevision.asset。阶段仍为1，无截图。
 

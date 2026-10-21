@@ -1134,8 +1134,7 @@ namespace JurassicWorld.Editor
             int stumps = SumPrefabCounts(post, "deadwood.byPrefab.", name => name.IndexOf("Stump", StringComparison.OrdinalIgnoreCase) >= 0);
             Gate("B6-deadwood-counts", logs >= 6 && logs <= 8 && stumps >= 3 && stumps <= 5,
                 $"deadwood log={logs}（期望 6..8）stump={stumps}（期望 3..5），总实例={Get(post, "deadwood.childCount")}");
-            // 期望值 44 → 39：UnderstorySeeder 的 hero 灌木 cluster 化改造（9/23）把数量定格在 39，
-            // 该值已由 VALIDATION.md「Understory Pass 实体…岩石 151 / hero 灌木 39 / deadwood 13」记为当前契约。
+            // 当前契约：岩石 151 / hero 灌木 39 / deadwood 13（UnderstorySeeder 9/23 cluster 化后定格）。
             Gate("B6b-vegetation-unchanged", I(post, "vegetation.childCount") == I(pre, "vegetation.childCount") && I(post, "vegetation.childCount") == 39,
                 $"hero 灌木 pre={Get(pre, "vegetation.childCount")} → post={Get(post, "vegetation.childCount")}（pre==post 且 post==39）");
             Gate("B6c-ground-pass-rocks-retired", I(post, "groundPassRocks.childCount") == -1,

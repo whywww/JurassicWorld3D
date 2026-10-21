@@ -198,7 +198,7 @@ namespace JurassicWorld.Editor
             float total = 0f;
             for (int i = 1; i < frames.Length; i++)
             {
-                // Rotate during a stepping phase, never through a double-support pause.
+                // Derive turn progress from stepping phases, then soften contact transitions.
                 if (frames[i].leftContact == frames[i].rightContact) continue;
                 Vector3 swing = frames[i].leftContact ? frames[i].rightSole - frames[i - 1].rightSole : frames[i].leftSole - frames[i - 1].leftSole;
                 weights[i] = new Vector2(swing.x, swing.z).magnitude;
@@ -207,32 +207,22 @@ namespace JurassicWorld.Editor
             var smooth = new float[weights.Length]; total = 0f;
             for (int i = 1; i < weights.Length; i++)
             {
-                if (frames[i].leftContact == frames[i].rightContact) continue;
-                for (int j = Mathf.Max(1, i - 2); j <= Mathf.Min(weights.Length - 1, i + 2); j++) smooth[i] += weights[j] / 5f;
+                // Spread a support transition over 0.2s instead of concentrating the
+                // turn in one isolated contact sample (up to 28 degrees at 60Hz).
+                for (int j = Mathf.Max(1, i - 6); j <= Mathf.Min(weights.Length - 1, i + 6); j++) smooth[i] += weights[j] / 13f;
                 total += smooth[i];
             }
             weights = smooth;
             if (total < .01f && Mathf.Abs(motion.turnDegrees) > 1f) throw new InvalidOperationException("Turn has no identifiable stepping support phase: " + motion.sourceName);
             total = Mathf.Max(total, .01f);
-            Vector2 root = Vector2.zero, leftAnchor = XZ(frames[0].leftSole), rightAnchor = XZ(frames[0].rightSole);
+            Vector2 root = Vector2.zero;
             float yaw = 0f, peakRate = 0f, maximumOffset = 0f;
             for (int i = 1; i < frames.Length; i++)
             {
                 float previousDesired = frames[i - 1].yaw + (Mathf.Abs(motion.turnDegrees) > 1f ? frames[i - 1].authoredYaw : 0f);
                 float nextYaw = previousDesired + motion.turnDegrees * weights[i] / total
                     - (Mathf.Abs(motion.turnDegrees) > 1f ? frames[i].authoredYaw : 0f);
-                if (frames[i].leftContact && !frames[i - 1].leftContact) leftAnchor = root + Rotate(XZ(frames[i].leftSole), yaw);
-                if (frames[i].rightContact && !frames[i - 1].rightContact) rightAnchor = root + Rotate(XZ(frames[i].rightSole), yaw);
-                if (motion.role == InteractionMotionRole.Turn180Look || (int)motion.role >= (int)InteractionMotionRole.BiteCloseLeft)
-                {
-                    // New performances integrate support travel continuously when contact changes.
-                    leftAnchor = root + Rotate(XZ(frames[i - 1].leftSole), yaw);
-                    rightAnchor = root + Rotate(XZ(frames[i - 1].rightSole), yaw);
-                }
-                Vector2 correction = Vector2.zero; int support = 0;
-                if (frames[i].leftContact) { correction += leftAnchor - Rotate(XZ(frames[i].leftSole), nextYaw); support++; }
-                if (frames[i].rightContact) { correction += rightAnchor - Rotate(XZ(frames[i].rightSole), nextYaw); support++; }
-                if (support > 0) root = correction / support;
+                root += SupportTravel(frames[i - 1], frames[i], yaw, nextYaw);
                 frames[i].rootOffset = root; frames[i].yaw = nextYaw;
                 peakRate = Mathf.Max(peakRate, Mathf.Abs(nextYaw - yaw) / (frames[i].time - frames[i - 1].time));
                 maximumOffset = Mathf.Max(maximumOffset, root.magnitude);
@@ -242,6 +232,47 @@ namespace JurassicWorld.Editor
                 ? 1f : Mathf.Clamp(90f / Mathf.Max(90f, peakRate), .2f, 1f);
             motion.blendDuration = .12f;
             Debug.Log($"TURN_CALIBRATION {motion.sourceName}: frames={frames.Length}, rootYaw={yaw:F2}, authoredYaw={frames[frames.Length - 1].authoredYaw:F2}, maxRootOffset={maximumOffset:F3}, playback={motion.turnPlaybackSpeed:F3}.");
+        }
+
+        // Integrate adjacent sole positions. Reusing a stale support anchor when a foot
+        // lands again creates a discontinuity unrelated to the authored animation.
+        private static Vector2 SupportTravel(DinosaurInteractionProfile.FootFrame previous,
+            DinosaurInteractionProfile.FootFrame next, float yaw, float nextYaw)
+        {
+            Vector2 delta = Vector2.zero; int count = 0;
+            if (next.leftContact) { delta += Rotate(XZ(previous.leftSole), yaw) - Rotate(XZ(next.leftSole), nextYaw); count++; }
+            if (next.rightContact) { delta += Rotate(XZ(previous.rightSole), yaw) - Rotate(XZ(next.rightSole), nextYaw); count++; }
+            return count == 0 ? Vector2.zero : delta / count;
+        }
+
+        public static void RepairLegacyRootContinuity()
+        {
+            if (EditorApplication.isPlayingOrWillChangePlaymode) throw new InvalidOperationException("Stop Play before repairing root samples.");
+            var profile = AssetDatabase.LoadAssetAtPath<DinosaurInteractionProfile>("Assets/Navigation/TRexCuriosity.asset");
+            var report = new StringBuilder("# Legacy root continuity\n\nRebuild rootOffset and smooth the legacy 90-degree root heading across contact transitions. Clip assets, net heading, contacts and playback multipliers are preserved.\n\n");
+            foreach (var motion in profile.motions)
+            {
+                if (motion.role != InteractionMotionRole.TurnLeft && motion.role != InteractionMotionRole.TurnRight
+                    && motion.role != InteractionMotionRole.CaveBite && motion.role != InteractionMotionRole.CaveBiteOut) continue;
+                var frames = motion.footFrames; Vector2 root = frames[0].rootOffset;
+                float before = 0f, after = 0f;
+                for (int i = 1; i < frames.Length; i++) before = Mathf.Max(before, Vector2.Distance(frames[i-1].rootOffset, frames[i].rootOffset));
+                if (motion.role == InteractionMotionRole.TurnLeft || motion.role == InteractionMotionRole.TurnRight)
+                {
+                    float playback = motion.turnPlaybackSpeed, blend = motion.blendDuration;
+                    ReconstructTurn(motion);
+                    motion.turnPlaybackSpeed = playback; motion.blendDuration = blend;
+                }
+                for (int i = 1; i < frames.Length; i++)
+                {
+                    Vector2 delta = SupportTravel(frames[i-1], frames[i], frames[i-1].yaw, frames[i].yaw);
+                    root += delta; frames[i].rootOffset = root; after = Mathf.Max(after, delta.magnitude);
+                }
+                report.AppendLine($"- {motion.sourceName}: max adjacent root step {before:F4} → {after:F4}m; playback {motion.turnPlaybackSpeed:F4} unchanged.");
+            }
+            EditorUtility.SetDirty(profile); AssetDatabase.SaveAssets();
+            File.WriteAllText(RainforestSample.Output + "/RootContinuity.md", report.ToString());
+            Debug.Log("ROOT_CONTINUITY_REPAIRED");
         }
 
         public static void Audit()

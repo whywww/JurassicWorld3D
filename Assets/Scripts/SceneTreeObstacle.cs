@@ -7,8 +7,9 @@ namespace JurassicWorld
     {
         [SerializeField, Min(0.05f)] private float radius = 0.7f;
         public float Radius => radius;
-        // World-height/offset sections baked from the central woody stem, excluding lateral branches.
+        // World-height/offset sections; optionally include hard branches for local rainforest trees.
         public TreeTrunkSection[] trunkSections = System.Array.Empty<TreeTrunkSection>();
+        public bool includeHardBranches;
 
 #if UNITY_EDITOR
         public void SetRadius(float value) => radius = Mathf.Max(0.05f, value);

@@ -33,9 +33,6 @@ namespace JurassicWorld
         private void ClearSideRoarHandoff()
         {
             RestoreSideHeadPose();
-            if (sideRoarHandoffActive && frontEnvelope != null)
-                frontEnvelopeBlendUntil = Time.time + (IsSteppingTurn
-                    ? Mathf.Max(.15f, (stepTurnEnd - stepTurnTime) / Mathf.Max(.01f, stepTurnMotion.turnPlaybackSpeed)) : .15f);
             sideRoarHandoffActive = sideRoarHandoffFading = false;
             sideRoarHandoffTime = sideRoarHeadWeight = sideWalkEntry = 0f;
             frontFeet?.EndSideHandoff();

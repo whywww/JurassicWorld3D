@@ -25,7 +25,9 @@ namespace JurassicWorld
         {
             public Vector2 position;
             public float radius;
+            public float sectionReach;
             public TreeTrunkSection[] sections;
+            public string name;
         }
 
         /// <summary>空间网格边长（米）。4m 兼顾「一格内树数量少」与「邻域遍历次数少」。</summary>
@@ -68,6 +70,7 @@ namespace JurassicWorld
         private static int cachedTreeInstanceCount;     // 缓存的 terrainData.treeInstanceCount（任一变化即重建）
         private static int obstacleCount;             // 有效障碍圆数量
         private static float maxTreeRadius;           // 最大树半径，用于按查询半径推导邻域跨度
+        private static float maxSectionReach;
         private static bool initialized;              // 是否已完成首次构建
         private static bool warnedMissingTerrain;     // 「无地形」警告只输出一次
         private static bool warnedMissingTerrainData; // 「无 TerrainData」警告只输出一次
@@ -99,13 +102,15 @@ namespace JurassicWorld
             if (initialized && cachedTerrainInstanceId == activeInstanceId && cachedTreeInstanceCount == activeTreeCount)
                 return;
 
+            GeometryRevision++;
             Rebuild(activeTerrain, activeInstanceId, activeTreeCount);
         }
 
         /// <summary>强制下次查询重建注册表（例如运行期动态增删树后调用）。</summary>
+        public static int GeometryRevision { get; private set; }
         public static void Invalidate()
         {
-            initialized = false;
+            initialized = false; GeometryRevision++;
         }
 
         /// <summary>
@@ -123,19 +128,21 @@ namespace JurassicWorld
             return sections.ToArray();
         }
 
+        public static string LastCoreObstacle { get; private set; }
         public static bool IsCoreBlocked(Vector2 xz, Vector2 forward, DinosaurCoreBody body)
         {
+            LastCoreObstacle = null;
             EnsureInitialized();
             float broad = body.BroadRadius;
-            int span = NeighborSpan(broad), cx = CellIndex(xz.x), cz = CellIndex(xz.y);
+            int span = Mathf.Max(1, Mathf.CeilToInt((broad + maxSectionReach) / CellSize)), cx = CellIndex(xz.x), cz = CellIndex(xz.y);
             for (int x = -span; x <= span; x++) for (int z = -span; z <= span; z++)
             {
                 if (!cells.TryGetValue(CellKey(cx + x, cz + z), out var bucket)) continue;
                 foreach (var obstacle in bucket)
                 {
-                    if ((obstacle.position - xz).sqrMagnitude >= (broad + obstacle.radius) * (broad + obstacle.radius)) continue;
+                    if ((obstacle.position - xz).sqrMagnitude >= (broad + obstacle.sectionReach) * (broad + obstacle.sectionReach)) continue;
                     foreach (var section in obstacle.sections)
-                        if (body.Intersects(xz, forward, section)) return true;
+                        if (body.Intersects(xz, forward, section)) { LastCoreObstacle = obstacle.name; return true; }
                 }
             }
             return false;
@@ -168,7 +175,7 @@ namespace JurassicWorld
         {
             EnsureInitialized();
             Vector2 start = new Vector2(from.x, from.z), delta = new Vector2(to.x - from.x, to.z - from.z);
-            int padding = NeighborSpan(0f);
+            int padding = Mathf.Max(1, Mathf.CeilToInt(maxSectionReach / CellSize));
             int minX = CellIndex(Mathf.Min(from.x, to.x)) - padding, maxX = CellIndex(Mathf.Max(from.x, to.x)) + padding;
             int minZ = CellIndex(Mathf.Min(from.z, to.z)) - padding, maxZ = CellIndex(Mathf.Max(from.z, to.z)) + padding;
             for (int x = minX; x <= maxX; x++) for (int z = minZ; z <= maxZ; z++)
@@ -551,6 +558,7 @@ namespace JurassicWorld
             cells.Clear();
             obstacleCount = 0;
             maxTreeRadius = 0f;
+            maxSectionReach = 0f;
 
             if (terrain == null)
             {
@@ -613,7 +621,7 @@ namespace JurassicWorld
                         band.radius *= instance.widthScale; sections[j] = band;
                     }
                 }
-                Insert(worldX, worldZ, radius, sections);
+                Insert(worldX, worldZ, radius, sections, $"Terrain tree {i} (prototype {instance.prototypeIndex})");
             }
 
             // Authored scene trees use the same swept-circle movement queries as Terrain trees.
@@ -624,12 +632,12 @@ namespace JurassicWorld
                 Vector3 position = marker.transform.position;
                 var sections = new TreeTrunkSection[marker.trunkSections.Length];
                 for (int j = 0; j < sections.Length; j++) { sections[j] = marker.trunkSections[j]; sections[j].center += new Vector2(position.x, position.z); }
-                Insert(position.x, position.z, marker.Radius, sections);
+                Insert(position.x, position.z, marker.Radius, sections, marker.name);
             }
         }
 
         /// <summary>把一个障碍圆写入其所属网格桶。</summary>
-        private static void Insert(float worldX, float worldZ, float radius, TreeTrunkSection[] sections = null)
+        private static void Insert(float worldX, float worldZ, float radius, TreeTrunkSection[] sections = null, string name = null)
         {
             long key = CellKey(CellIndex(worldX), CellIndex(worldZ));
             List<TreeObstacle> bucket;
@@ -641,8 +649,13 @@ namespace JurassicWorld
 
             TreeObstacle obstacle;
             obstacle.position = new Vector2(worldX, worldZ);
+            obstacle.name = name;
             obstacle.radius = radius;
             obstacle.sections = sections != null && sections.Length > 0 ? sections : new[] { new TreeTrunkSection { center = new Vector2(worldX, worldZ), radius = radius, bottom = -100f, top = 100f } };
+            obstacle.sectionReach = radius;
+            foreach (var section in obstacle.sections)
+                obstacle.sectionReach = Mathf.Max(obstacle.sectionReach, Vector2.Distance(obstacle.position, section.center) + section.radius);
+            maxSectionReach = Mathf.Max(maxSectionReach, obstacle.sectionReach);
             bucket.Add(obstacle);
 
             obstacleCount++;

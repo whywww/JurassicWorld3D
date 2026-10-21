@@ -88,7 +88,7 @@ namespace JurassicWorld.Editor
                             motion.footFrames[i].rootOffset = new Vector2(0f, distance);
                         }
                     }
-                    motion.bodyBands = RouteObstacleClearance.BakeMotionBands(rex, clip);
+                    motion.bodyBands = TRexBodyEnvelopeBake.Bake(rex, motion);
                     string path = folder + "/" + clip.name + ".anim";
                     var existingClip = AssetDatabase.LoadAssetAtPath<AnimationClip>(path);
                     if (existingClip == null) { AssetDatabase.CreateAsset(clip, path); existingClip = clip; }
@@ -178,7 +178,7 @@ namespace JurassicWorld.Editor
                 MeasureMotion(rex, animation, source, motion, report);
                 motion.turnDegrees = ReturnTurnDegrees;
                 TRexTurnCalibration.Sample(rex, animation, motion);
-                motion.bodyBands = RouteObstacleClearance.BakeMotionBands(rex, clip);
+                motion.bodyBands = TRexBodyEnvelopeBake.Bake(rex, motion);
                 motion.turnPlaybackSpeed = 1f;
                 var first = motion.footFrames[0]; var last = motion.footFrames[motion.footFrames.Length - 1];
                 float heading = last.yaw + last.authoredYaw;
@@ -259,7 +259,7 @@ namespace JurassicWorld.Editor
                 var motion = new DinosaurInteractionProfile.Motion { role = role, sourceName = Names[index], clip = clip };
                 MeasureMotion(rex, animation, source, motion, report);
                 TRexTurnCalibration.Sample(rex, animation, motion);
-                motion.bodyBands = RouteObstacleClearance.BakeMotionBands(rex, clip);
+                motion.bodyBands = TRexBodyEnvelopeBake.Bake(rex, motion);
                 motions.RemoveAll(m => m.role == role); motions.Add(motion);
             }
             profile.motions = motions.ToArray(); EditorUtility.SetDirty(profile); AssetDatabase.SaveAssets();
@@ -345,21 +345,28 @@ namespace JurassicWorld.Editor
             Debug.Log($"TREX_LARGE_OBSTACLES_REBUILT: {settings.solidObstacles.Length} large rocks; trunks only; soft plants and small props excluded.");
         }
 
-        private static void RebuildObstaclesAndNavigation(DinosaurInteractionSettings settings, DinosaurCoreBody body)
+        internal static void RebuildObstaclesAndNavigation(DinosaurInteractionSettings settings, DinosaurCoreBody body)
         {
             TerrainTreeObstacleRegistry.Invalidate();
             settings.solidObstacles = SolidProps().Select(BoundsOf).Where(b => b.size.sqrMagnitude > .001f).ToArray();
+            // The navigation graph uses the narrowest animal's lateral clearance. Length and
+            // orientation belong to the existing per-species swept-body checks, not a 10m disc.
+            settings.navigationRadius = Object.FindObjectsOfType<DinosaurAgent>()
+                .Select(a => new SerializedObject(a).FindProperty("interactionBody").objectReferenceValue as DinosaurCoreBody)
+                .Where(b => b != null && b.bands.Length > 0)
+                .Select(b => Mathf.Max(.35f, b.bands.Max(band => Mathf.Abs(band.bounds.center.x) + band.bounds.extents.x) + .15f))
+                .DefaultIfEmpty(1f).Min();
             BuildNavigation(settings, body);
             EditorUtility.SetDirty(settings);
         }
 
-        internal static void BakeCurrentScene(bool adjustForest = true)
+        internal static void BakeCurrentScene(bool adjustForest = false)
         {
             if (!AssetDatabase.IsValidFolder(Folder)) AssetDatabase.CreateFolder("Assets", "Navigation");
             var rex = Object.FindObjectsOfType<DinosaurAgent>().Single(a => a.name == "Tyrannosaurus Rex");
             var profile = Calibrate(rex);
             var body = RouteObstacleClearance.BakeInteractionBody(rex, profile.motions.Where(m => (int)m.role <= (int)InteractionMotionRole.Walk).Select(m => m.clip).ToArray());
-            foreach (var motion in profile.motions) motion.bodyBands = RouteObstacleClearance.BakeMotionBands(rex, motion.clip);
+            foreach (var motion in profile.motions) motion.bodyBands = TRexBodyEnvelopeBake.Bake(rex, motion);
             EditorUtility.SetDirty(profile);
             var serialized = new SerializedObject(rex);
             serialized.FindProperty("playerInteractionEnabled").boolValue = true;
@@ -375,9 +382,9 @@ namespace JurassicWorld.Editor
             // Their larger animated envelope is still enforced by full-body trajectory checks.
             if (settings.navigationRadius <= 0f) settings.navigationRadius = body.BroadRadius + .35f;
             if (adjustForest) PrepareForest(settings.navigationRadius);
+            DinosaurSafetySetup.ConfigureCurrentScene();
             RebuildObstaclesAndNavigation(settings, body);
             EditorUtility.SetDirty(rex);
-            DinosaurSafetySetup.ConfigureCurrentScene();
         }
 
         private static DinosaurInteractionProfile Calibrate(DinosaurAgent rex)
@@ -669,7 +676,11 @@ namespace JurassicWorld.Editor
         {
             var sources = new List<NavMeshBuildSource>();
             Rect area = WorldBounds.DinosaurActivityXZ;
-            float bodyHeight = Mathf.Max(.5f, body.bands.Max(b => b.bounds.max.y));
+            float bodyHeight = Object.FindObjectsOfType<DinosaurAgent>()
+                .Select(a => new SerializedObject(a).FindProperty("interactionBody").objectReferenceValue as DinosaurCoreBody)
+                .Where(b => b != null && b.bands.Length > 0)
+                .Select(b => Mathf.Max(.5f, b.bands.Max(band => band.bounds.max.y)))
+                .DefaultIfEmpty(Mathf.Max(.5f, body.bands.Max(b => b.bounds.max.y))).Min();
             sources.Add(new NavMeshBuildSource { shape = NavMeshBuildSourceShape.Box,
                 transform = Matrix4x4.TRS(new Vector3(area.center.x, -.1f, area.center.y), Quaternion.identity, Vector3.one),
                 size = new Vector3(area.width, .2f, area.height), area = 0 });
@@ -700,17 +711,12 @@ namespace JurassicWorld.Editor
             {
                 var filter = new NavMeshQueryFilter { agentTypeID = settings.navigationAgentTypeId, areaMask = 1 };
                 var path = new NavMeshPath();
-                foreach (Vector2 clearing in Clearings)
-                {
-                    if (!NavMesh.SamplePosition(new Vector3(clearing.x, 0f, clearing.y), out _, 1f, filter))
-                        throw new InvalidOperationException("Clearing is not navigable: " + clearing);
-                    if (!NavMesh.CalculatePath(new Vector3(Clearings[0].x, 0f, Clearings[0].y), new Vector3(clearing.x, 0f, clearing.y), filter, path)
-                        || path.status != NavMeshPathStatus.PathComplete) throw new InvalidOperationException("Interaction clearing is disconnected: " + clearing);
-                }
+                if (!NavMesh.SamplePosition(new Vector3(Clearings[0].x, 0f, Clearings[0].y), out var connection, 16f, filter))
+                    throw new InvalidOperationException("No central navigation connection.");
                 for (int route = 0; route < MovementCorridor.RouteCount; route++)
                 {
                     Vector2 p = MovementCorridor.PointAt(route, 0f);
-                    if (!NavMesh.CalculatePath(new Vector3(p.x, 0f, p.y), new Vector3(Clearings[0].x, 0f, Clearings[0].y), filter, path)
+                    if (!NavMesh.CalculatePath(new Vector3(p.x, 0f, p.y), connection.position, filter, path)
                         || path.status != NavMeshPathStatus.PathComplete) throw new InvalidOperationException("Route does not connect to interaction spaces: " + route);
                     for (float arc = 0f; arc < MovementCorridor.Length(route); arc += 5f)
                     {

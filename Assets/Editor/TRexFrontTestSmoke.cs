@@ -178,6 +178,8 @@ namespace JurassicWorld.Editor
                 Require((bool)canSee.Invoke(rex, null) == expected, $"Detection boundary mismatch at {angle}deg / {distance}m.");
             }
             test.playerCamera.transform.position = rex.transform.position + forward * 28f + Vector3.up * 1.7f;
+            var settings = UnityEngine.Object.FindObjectOfType<DinosaurInteractionSettings>();
+            var originalObstacles = settings.solidObstacles;
             var obstacle = GameObject.CreatePrimitive(PrimitiveType.Cube);
             try
             {
@@ -185,9 +187,15 @@ namespace JurassicWorld.Editor
                     test.playerCamera.transform.position, .5f);
                 obstacle.transform.localScale = Vector3.one * 2f;
                 Physics.SyncTransforms();
+                // Sight uses the baked solid bounds rather than every decorative collider.
+                settings.solidObstacles = originalObstacles.Concat(new[] { obstacle.GetComponent<Renderer>().bounds }).ToArray();
                 Require(!(bool)canSee.Invoke(rex, null), "An occluded player passed detection.");
             }
-            finally { UnityEngine.Object.DestroyImmediate(obstacle); Physics.SyncTransforms(); }
+            finally
+            {
+                settings.solidObstacles = originalObstacles;
+                UnityEngine.Object.DestroyImmediate(obstacle); Physics.SyncTransforms();
+            }
             test.playerCamera.transform.position = initialPlayer;
         }
         private static void VerifyApproachLayouts()

@@ -209,7 +209,6 @@ namespace JurassicWorld.Editor
             text.AppendLine($"\n秋叶树：修正前落在新主体区内 {backup.autumnBaseline}，保留一半 {backup.autumnRetained}；主体区 {autumnInside}；18m渐变及额外14m零星过渡 {autumnTransition}；远离过渡区 {autumnFar}。");
             text.AppendLine($"\n外围及原有树转换：地形实例 {backup.removedTrees.Length}，场景树 {backup.originalSceneTrees.Length}；转换前后当地棵数相同。");
             text.AppendLine("\n被替换地形树的完整实例字段及原索引保存在 Northwest Autumn Region / ForestRegionBackup；原场景树保存在不激活的 Original Scene Trees 中，并记录原父对象和局部变换。Remove 恢复这些记录。地形高度、地表图层、溪流、原型数组和未涉及树实例不改动。");
-            text.AppendLine("\n修改前检查点：Tools/VegetationDiversity/Checkpoints/Main_BeforeCoreRouteRevision.unity 及 MainCreekTerrain_BeforeCoreRouteRevision.asset。阶段仍为1，无截图。\n");
             Directory.CreateDirectory(CentralForestDensification.Output);
             File.WriteAllText(CentralForestDensification.Output + "/NorthwestRegion.md", text.ToString());
             Debug.Log($"NORTHWEST_REGION_VALIDATION_OK: area={fraction:P2}, autumnInside={autumnInside}, transition={autumnTransition}, far={autumnFar}; replacement counts and restore data present.");

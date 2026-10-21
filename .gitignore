@@ -77,3 +77,8 @@ crashlytics-build.properties
 
 # Local EMOTIV credentials (also beside a Windows Player executable)
 emotiv.local.json
+
+# Generated forest checkpoints and repair captures
+/Tools/VegetationDiversity/Checkpoints/
+/Tools/VegetationDiversity/LocalForestRepair/
+*.zip.meta

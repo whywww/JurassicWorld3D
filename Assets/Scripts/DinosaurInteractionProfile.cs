@@ -25,6 +25,8 @@ namespace JurassicWorld
             public float turnPlaybackSpeed = 1f;
             public DinosaurCoreBody.Band[] bodyBands = Array.Empty<DinosaurCoreBody.Band>();
             public PlayerPose[] playerPoses = Array.Empty<PlayerPose>();
+            // Body/neck/head only, sampled independently of foot/root calibration.
+            public PlayerPose[] obstaclePoses = Array.Empty<PlayerPose>();
             [NonSerialized] private string stateName;
             public string StateName => stateName ?? (stateName = "Curiosity_" + role);
         }
