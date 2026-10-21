@@ -22,7 +22,7 @@ namespace JurassicWorld
         private bool frontPeerClearing, frontPeerYielding;
         private Vector3 frontPeerGoal;
         private float frontPeerRetryAt, frontPeerClearBegan, frontPeerBlockedTime;
-        private bool IsFrontFollowing => frontStage == FrontStage.Follow || IsSideLocomotion;
+        private bool IsFrontFollowing => frontStage == FrontStage.Follow;
 
         private void NoteFrontFollowBlock()
         {
@@ -205,7 +205,7 @@ namespace JurassicWorld
             // A lower-priority dinosaur actively yields instead of holding the interaction.
             if (frontBlockReason == "Peer" && frontBlockingPeer != null && !HasRightOfWay(frontBlockingPeer))
             { BeginFrontPeerClearance(frontBlockingPeer, true); return; }
-            if ((frontStage == FrontStage.Follow || IsSideLocomotion) && frontFollowMotion != null)
+            if (frontStage == FrontStage.Follow && frontFollowMotion != null)
                 frontSavedWalkTime = legacyAnimation[frontFollowMotion.StateName].time;
             frontSavedReturnTime = moveState != null ? moveState.time : 0f;
             frontWaiting = true; frontRetryAt = Time.time + Mathf.Max(.05f, interactionSettings.spaceSearchInterval);
@@ -253,7 +253,7 @@ namespace JurassicWorld
             if (frontPeerClearing || blocker == null) return;
             frontWaiting = false; frontWaitPlaying = false; frontWaitHoldingPose = false;
             frontWaitReason = frontBlockReason = null; frontPeerBlockedTime = 0f;
-            if ((frontStage == FrontStage.Follow || IsSideLocomotion) && frontFollowMotion != null)
+            if (frontStage == FrontStage.Follow && frontFollowMotion != null)
                 frontSavedWalkTime = legacyAnimation[frontFollowMotion.StateName].time;
             frontSavedReturnTime = moveState != null ? moveState.time : 0f;
             if (IsSteppingTurn)
@@ -309,7 +309,7 @@ namespace JurassicWorld
         }
         private void FinishFrontPeerClearance()
         {
-            bool stageFollow = frontStage == FrontStage.Follow || IsSideLocomotion;
+            bool stageFollow = frontStage == FrontStage.Follow;
             bool stageReturn = frontStage == FrontStage.ReturnWalk;
             CancelFrontPeerClearance();
             if (moveState != null) moveState.speed = 0f;
@@ -389,12 +389,6 @@ namespace JurassicWorld
                 TurnPose(frame, out var next, out var heading);
                 return FrontWalkAnimatedStep(stepTurnMotion, stepTurnTime, nextTime, p, next, q, heading);
             }
-            if (sideTestSequence && IsSideLocomotion)
-            {
-                if (!hasCuriosityPath || frontWaitReplans++ < 2)
-                    if (!PlanFrontFollow()) return false;
-                return (!hasCuriosityPath || FrontPathNextSafe()) && FrontStepSafe(p, p, q, q, interactionBody);
-            }
             if (frontStage == FrontStage.Follow)
             {
                 if (frontWaitReplans < 2) { frontWaitReplans++; if (!PlanFrontFollow()) return false; }
@@ -428,7 +422,7 @@ namespace JurassicWorld
             if (PathFinished()) return true;
             Vector3 direction = curiosityCorners[curiosityCorner] - transform.position; direction.y = 0f;
             float angle = Vector3.SignedAngle(GetVisualForward(), direction, Vector3.up);
-            if (Mathf.Abs(angle) >= FrontSteppingTurnAngle && !IsSideLocomotion)
+            if (Mathf.Abs(angle) >= FrontSteppingTurnAngle)
                 return TryBeginSteppingTurn(angle, frontStage == FrontStage.ReturnWalk ? TurnUse.FrontReturn : TurnUse.FrontFollow);
             Quaternion rotation = direction.sqrMagnitude < .001f ? transform.rotation
                 : Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(direction) * Quaternion.Euler(0f, -VisualYaw, 0f), 1f);
@@ -488,9 +482,8 @@ namespace JurassicWorld
                         UseFrontEnvelope(frontAction); legacyAnimation.CrossFade(frontAction.StateName, .2f);
                         legacyAnimation[frontAction.StateName].time = frontActionTime; activeClip = frontAction.StateName;
                     }
-                    else if (frontStage == FrontStage.Follow || IsSideLocomotion)
+                    else if (frontStage == FrontStage.Follow)
                     {
-                        if (ResumeSideWalkBlend()) return true;
                         UseFrontEnvelope(frontFollowMotion);
                         var state = legacyAnimation[frontFollowMotion.StateName];
                         legacyAnimation.CrossFade(frontFollowMotion.StateName, .15f);

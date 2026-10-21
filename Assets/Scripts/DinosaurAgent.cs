@@ -12,7 +12,7 @@ namespace JurassicWorld
             Approaching
         }
 
-        public enum PlayerInteractionPhase { Inactive, Observing, Turning, Starting, Following, Stopping, Looking, Returning, FrontSequence }
+        public enum PlayerInteractionPhase { Inactive, Turning, Returning, FrontSequence }
 
         [Header("T-Rex player interaction")]
         [SerializeField] private bool playerInteractionEnabled;
@@ -384,6 +384,7 @@ namespace JurassicWorld
 
             if (UpdateRouteStepping()) return;
             if (IsSteppingTurn && stepTurnUse == TurnUse.Wander) { TickSteppingTurn(); return; }
+            if (freeRecoveryActive && InteractionPhase == PlayerInteractionPhase.Inactive && UpdateFreeRoaming()) return;
             if (UpdatePlayerInteraction()) return;
             if (UpdateFreeRoaming()) return;
 

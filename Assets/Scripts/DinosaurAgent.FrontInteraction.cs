@@ -5,7 +5,7 @@ namespace JurassicWorld
 {
     public sealed partial class DinosaurAgent
     {
-        private enum FrontStage { Intro, Follow, Near, Ending, TurnBack, ReturnWalk, SideStartRun }
+        private enum FrontStage { Intro, Follow, Near, Ending, TurnBack, ReturnWalk }
         private static readonly InteractionMotionRole[] FrontIntro = { InteractionMotionRole.Investigate,
             InteractionMotionRole.InvestigateOut, InteractionMotionRole.BigRoarStep };
         [Header("Front interaction")]
@@ -13,7 +13,7 @@ namespace JurassicWorld
         [SerializeField, Min(0f)] private float frontNearDistance = 10f;
         [SerializeField, Min(0f)] private float frontResumeDistance = 15f;
         [SerializeField, Min(1f)] private float frontFollowDuration = 30f;
-        [SerializeField, Min(0f)] private float frontReturnWalkTime = 10f;
+        [SerializeField, Min(0f)] private float frontReturnWalkTime = 3f;
         private bool frontActive, frontStopPending;
         private FrontStage frontStage;
         private int frontActionIndex, frontReturnIndex;
@@ -49,7 +49,7 @@ namespace JurassicWorld
             ? frontPeerYielding ? " (YieldingToPeer)" : " (PassingPeer)"
             : frontWaiting ? frontWaitReason == "Peer" ? " (WaitingForPeerClearance)" : " (WaitingForClearance)" : "");
         public float FrontActionPlaybackTime => frontWaiting && frontWaitPlaying ? frontWaitTime : frontAction != null ? frontActionTime
-            : (frontStage == FrontStage.Follow || IsSideLocomotion) && frontFollowMotion != null && legacyAnimation != null
+            : frontStage == FrontStage.Follow && frontFollowMotion != null && legacyAnimation != null
                 ? legacyAnimation[frontFollowMotion.StateName].time : frontStage == FrontStage.ReturnWalk && moveState != null ? moveState.time : 0f;
         public bool FrontActionWaitingForSpace => frontActive && (frontWaiting || frontPeerClearing || frontBlocked > 0f);
         private bool frontTestControlled, frontTestWaiting;
@@ -101,7 +101,6 @@ namespace JurassicWorld
             sideTestSequence = fromSide;
             sideFromLeft = fromSide && fromLeft;
             ClearSideRoarHandoff();
-            ClearSideWalkBlend();
             frontFeet?.EndReturnHandoff();
             ClearInteractionNavigation();
             frontOriginalBody = interactionBody;
@@ -216,7 +215,6 @@ namespace JurassicWorld
             bool handoff = sideTestSequence && !resume && frontStage == FrontStage.Intro;
             ClearSideRoarHandoff();
             if (handoff) BeginSideRoarHandoff();
-            ClearSideWalkBlend();
             frontStage = FrontStage.Follow;
             frontFollowBlockedAt = -1f;
             frontAction = null; frontFollowMotion = null;
@@ -242,7 +240,7 @@ namespace JurassicWorld
         // reversed path inside the actual corridor without storing every frame.
         private void RecordFrontTrail(bool force = false)
         {
-            if (!force && frontStage != FrontStage.Follow && !IsSideLocomotion) return;
+            if (!force && frontStage != FrontStage.Follow) return;
             Vector3 position = transform.position;
             if (frontTrail.Count == 0) { frontTrail.Add(position); return; }
             Vector3 last = frontTrail[frontTrail.Count - 1];
@@ -265,7 +263,7 @@ namespace JurassicWorld
             Vector3 direction = curiosityCorners[curiosityCorner] - transform.position; direction.y = 0f;
             if (direction.sqrMagnitude < .00000001f) return false;
             float angle = Vector3.SignedAngle(GetVisualForward(), direction, Vector3.up);
-            if (Mathf.Abs(angle) >= FrontSteppingTurnAngle && !IsSideLocomotion
+            if (Mathf.Abs(angle) >= FrontSteppingTurnAngle
                 && !(SideHandoffMoving && sideRoarHandoffTime < sideRoarHandoffDuration))
             {
                 if (TryBeginSteppingTurn(angle, returning ? TurnUse.FrontReturn : TurnUse.FrontFollow)) return false;
@@ -310,7 +308,6 @@ namespace JurassicWorld
             if (frontStage == FrontStage.Follow)
                 Debug.Log($"[T-Rex front] Follow -> Ending: walked={frontFollowElapsed:F3}s, lostSight={invisibleTime:F3}s, reason={frontEndReason ?? frontBlockReason}, path={hasCuriosityPath}", this);
             ClearSideRoarHandoff();
-            ClearSideWalkBlend();
             CancelFrontWait();
             CancelFrontPeerClearance();
             frontTimingFollow = false;
@@ -325,7 +322,6 @@ namespace JurassicWorld
         {
             if (!FrontPlayerNear) { frontNearPending = false; return; }
             ClearSideRoarHandoff();
-            ClearSideWalkBlend();
             CancelFrontWait();
             CancelFrontPeerClearance();
             ChooseFrontBite();
@@ -336,7 +332,7 @@ namespace JurassicWorld
         }
         private void BeginFrontReturn()
         {
-            ClearSideRoarHandoff(); ClearSideWalkBlend();
+            ClearSideRoarHandoff();
             CancelFrontWait(); CancelFrontPeerClearance();
             frontStopPending = false;
             frontTimingFollow = false;
@@ -354,6 +350,25 @@ namespace JurassicWorld
             frontReturnIndex = frontTrail.Count - 1;
             while (frontReturnIndex >= 0 && FlatDistance(transform.position, frontTrail[frontReturnIndex]) < 1.2f) frontReturnIndex--;
             BeginFrontReturnWalkBlend();
+        }
+        private void AdvanceFrontReturnTarget()
+        {
+            while (frontReturnIndex >= 0 && FlatDistance(transform.position, frontTrail[frontReturnIndex]) <= 1.2f)
+                frontReturnIndex--;
+            if (frontReturnIndex <= 0) return;
+            // Dense trail samples are smaller than a walking turn's radius. Aim along
+            // the same straight section instead of orbiting a nearby sample after a turn.
+            Vector3 start = frontTrail[frontReturnIndex];
+            Vector3 tangent = start - frontTrail[frontReturnIndex - 1]; tangent.y = 0f;
+            float lookAhead = Mathf.Max(3f, WalkSpeed * 2f);
+            while (frontReturnIndex > 0 && FlatDistance(transform.position, frontTrail[frontReturnIndex]) < lookAhead)
+            {
+                Vector3 next = frontTrail[frontReturnIndex - 1];
+                Vector3 segment = frontTrail[frontReturnIndex] - next; segment.y = 0f;
+                Vector3 span = start - next; span.y = 0f;
+                if (Vector3.Angle(tangent, segment) > 15f || Vector3.Angle(tangent, span) > 15f) break;
+                frontReturnIndex--;
+            }
         }
         private void BeginFrontReturnWalkBlend()
             => BeginMatchedWalkBlend(interactionProfile.Find(InteractionMotionRole.Turn180Look), -1f, false);
@@ -427,7 +442,6 @@ namespace JurassicWorld
         private void FinishFrontInteraction()
         {
             ClearSideRoarHandoff();
-            ClearSideWalkBlend();
             CancelFrontWait();
             CancelFrontPeerClearance();
             frontActive = frontStopPending = false; frontAction = frontFollowMotion = null;
@@ -439,16 +453,16 @@ namespace JurassicWorld
             // through the following walk; it clears itself at the second landing.
             if (legacyAnimation[WaitClip] != null) legacyAnimation[WaitClip].enabled = false;
             interactionBody = frontOriginalBody;
-            frontTrail.Clear(); ClearInteractionNavigation();
-            InteractionPhase = PlayerInteractionPhase.Inactive;
-            cooldownUntil = Time.time + interactionCooldown;
-            isReturning = false; freeReplanFailures = 0;
-            if (IsFreeRoaming) { if (!PickFreeGoal()) FreeIdle(2f); }
+            frontTrail.Clear();
+            if (IsFreeRoaming) FinishFreeInteraction();
             else
             {
                 // Route comparison mode must reconnect continuously instead of snapping to its centreline.
+                ClearInteractionNavigation();
                 InteractionPhase = PlayerInteractionPhase.Returning;
-                isReturning = true; hasCuriosityPath = false; nextReplan = 0f;
+                cooldownUntil = Time.time + interactionCooldown;
+                freeReplanFailures = 0;
+                hasCuriosityPath = false; nextReplan = 0f;
             }
         }
         private void UpdateFrontVisibility(float deltaTime)
@@ -458,7 +472,7 @@ namespace JurassicWorld
             if (failure == null) { lastSeenPlayer = viewCamera.transform.position; invisibleTime = 0f; }
             // Opening and closing performances finish at their authored pose; only following,
             // near and side travel lose the interaction when the player leaves the sight cone.
-            if (frontStage != FrontStage.Follow && frontStage != FrontStage.Near && !IsSideChasing)
+            if (frontStage != FrontStage.Follow && frontStage != FrontStage.Near)
             { invisibleTime = 0f; return; }
             if (failure != null) invisibleTime += deltaTime;
             if (failure != null && invisibleTime >= lostSightGrace && !frontExitPending)
@@ -482,25 +496,23 @@ namespace JurassicWorld
             // before selecting a checked ending, rather than waiting forever after sight loss.
             if (frontExitPending && (frontWaiting || frontPeerClearing)
                 && (frontStage == FrontStage.Intro || frontStage == FrontStage.Follow || frontStage == FrontStage.Near
-                    || frontStage == FrontStage.Ending || IsSideChasing))
+                    || frontStage == FrontStage.Ending))
             { CancelFrontWait(); CancelFrontPeerClearance(); BeginFrontEnding(); return true; }
             if (frontPeerClearing) return TickFrontPeerClearance();
             if (frontWaiting) return TickFrontSpaceWait();
             if (EndBlockedFrontFollow()) return true;
             AdvanceSideRoarHandoff();
             RefreshFrontPoseEnvelope();
-            if (frontStage == FrontStage.Follow || sideTestSequence && IsSideChasing)
+            if (frontStage == FrontStage.Follow)
             {
                 if (FrontPlayerNear) frontNearPending = true;
             }
             if (IsSteppingTurn)
             {
-                if (frontExitPending || frontNearPending) stopAfterStepTurn = true;
                 TickSteppingTurn();
                 if (interactionMoved && IsFrontFollowing) frontFollowBlockedAt = -1f;
                 return true;
             }
-            if (sideTestSequence && IsSideLocomotion) return TickSideLocomotion();
             if (frontStage == FrontStage.Intro || frontStage == FrontStage.Near || frontStage == FrontStage.Ending || frontStage == FrontStage.TurnBack)
             {
                 var sequence = frontStage == FrontStage.Intro ? ActiveIntroSequence
@@ -618,7 +630,7 @@ namespace JurassicWorld
             { frontReturnIndex--; hasCuriosityPath = false; }
             if (!hasCuriosityPath || PathFinished())
             {
-                while (frontReturnIndex >= 0 && FlatDistance(transform.position, frontTrail[frontReturnIndex]) < 1.2f) frontReturnIndex--;
+                AdvanceFrontReturnTarget();
                 if (frontReturnIndex < 0)
                 {
                     if (frontReturnHasHistory) { FinishFrontInteraction(); return true; }

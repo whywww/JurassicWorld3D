@@ -23,6 +23,7 @@ namespace JurassicWorld.Editor
         private static float previousSampleTime;
         private static double deadline;
         private static int scenario = -1;
+        private static int turnOutsideCorridorFrames;
         private static readonly int[,] RoutePairs = { { 0, 4, 2 }, { 1, 2, 5 }, { 3, 5, 0 } };
 
         static DinosaurRouteAcceptance()
@@ -211,6 +212,7 @@ namespace JurassicWorld.Editor
                 return;
             }
             previous = new Vector3[agents.Length];
+            turnOutsideCorridorFrames = 0;
             previousAnimationTravel = new float[agents.Length];
             foreach (var agent in agents)
             {
@@ -308,7 +310,9 @@ namespace JurassicWorld.Editor
                 {
                     Vector3 position = agents[i].transform.position;
                     var core = agents[i].GetComponent<DinosaurCoreBody>();
-                    if (core != null)
+                    // Route turns may cross static geometry; the post-turn walk may
+                    // only leave its captured overlaps. Ordinary route walking stays strict.
+                    if (core != null && !agents[i].IsRouteTurnPerformance && !agents[i].IsRouteStaticRecovery)
                     {
                         Vector3 forward = agents[i].transform.rotation * Quaternion.Euler(0f, agents[i].VisualYaw, 0f) * Vector3.forward;
                         Require(!TerrainTreeObstacleRegistry.IsCoreBlocked(new Vector2(position.x,position.z),new Vector2(forward.x,forward.z).normalized,core), "Core body intersects a trunk during movement: " + agents[i].DisplayName);
@@ -330,9 +334,13 @@ namespace JurassicWorld.Editor
                     bool rejoining = (bool)typeof(DinosaurAgent).GetField("routeRejoining", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(agents[i]);
                     // Authored foot-pivot turns have a lateral step, then reconnect to the
                     // centreline. Keep exact line checks outside that explicitly bounded phase.
-                    float routeLimit = agents[i].IsSteppingTurn || rejoining || wasRejoining[i] ? 2.01f : .02f;
+                    float routeLimit = rejoining
+                        ? Mathf.Max(2.01f, MovementCorridor.MinDistanceToRoute(new Vector2(previous[i].x, previous[i].z), agents[i].RouteIndex) + .01f)
+                        : wasRejoining[i] ? 2.01f : .02f;
                     float lateral = MovementCorridor.MinDistanceToRoute(new Vector2(position.x, position.z), agents[i].RouteIndex);
-                    Require(lateral < routeLimit, $"Agent left route: {agents[i].DisplayName}, lateral={lateral:F3}, limit={routeLimit:F3}, turn={agents[i].IsSteppingTurn}, rejoining={rejoining}.");
+                    if (agents[i].IsRouteTurnPerformance && lateral > 2f) turnOutsideCorridorFrames++;
+                    if (!agents[i].IsRouteTurnPerformance && authored <= 0f)
+                        Require(lateral < routeLimit, $"Agent left route: {agents[i].DisplayName}, lateral={lateral:F3}, limit={routeLimit:F3}, turn={agents[i].IsSteppingTurn}, rejoining={rejoining}.");
                     wasRejoining[i] = rejoining;
                     previous[i] = position;
                 }
@@ -348,7 +356,8 @@ namespace JurassicWorld.Editor
                     Require(travelled[i] > MovementCorridor.Length(agents[i].RouteIndex) * 2f, "Agent did not complete route.");
                 }
                 if (scenario < RoutePairs.GetLength(0) - 1) { BeginScenario(scenario + 1); return; }
-                Debug.Log("DINOSAUR_ROUTE_MOVEMENT_OK: requested route pairs completed; full routes, continuous movement, peer clearance, no stuck agents.");
+                Require(turnOutsideCorridorFrames > 0, "Route regression did not exercise an unrestricted turn beyond the old two-metre corridor.");
+                Debug.Log($"DINOSAUR_ROUTE_MOVEMENT_OK: requested route pairs completed; full routes, continuous movement, peer clearance, no stuck agents. Unrestricted turn frames outside old corridor={turnOutsideCorridorFrames}.");
                 Finish(null);
             }
             catch (Exception error) { Finish(error); }

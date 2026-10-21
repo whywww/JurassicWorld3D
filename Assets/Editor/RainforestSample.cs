@@ -34,6 +34,8 @@ namespace JurassicWorld.Editor
             string checkpoint = Output + "/Main_BeforeSample.unity";
             if (!File.Exists(checkpoint)) File.Copy(CentralForestDensification.ScenePath, checkpoint);
             FoliageInteractionPreparation.RestoreCurrent();
+            RainforestTreeSizing.CaptureExisting();
+            RainforestTreeSizing.CaptureViews("size-before");
             RemoveOwned();
             var before = new Snapshot();
             Apply(); before.Check(); string first = Signature();
@@ -47,6 +49,8 @@ namespace JurassicWorld.Editor
             if (first != Signature()) throw new InvalidOperationException("Bake hook changed the sample layout.");
             before.Check();
             FoliageInteractionPreparation.SeedConfigured();
+            RainforestTreeSizing.WriteReport();
+            RainforestTreeSizing.CaptureViews("size-after");
             Save();
             Debug.Log("RAINFOREST_SAMPLE_BUILD_OK: deterministic build, undo and Bake hook; existing terrain and poses preserved.");
         }
@@ -152,6 +156,16 @@ namespace JurassicWorld.Editor
                     foreach (var p in path.corners) if (corridor.Count == 0 || Vector3.Distance(corridor[corridor.Count - 1], p) > .1f) corridor.Add(p);
                 }
                 layout.corridor = corridor.ToArray();
+                if (RainforestTreeSizing.RestoreLayout(layout))
+                {
+                    foreach (var body in reserved.Select(p => p.body).Distinct()) Object.DestroyImmediate(body.gameObject);
+                    reserved.Clear(); centers = layout.clearingPositions.ToList(); headings = layout.clearingRotations.ToList();
+                    corridor = layout.corridor.ToList();
+                    for (int i = 0; i < centers.Count; i++)
+                        reserved.AddRange(PerformancePoses(profile, centers[i], headings[i], rex.VisualYaw, root.transform));
+                    if (reserved.Any(p => settings.PoseBlocked(p.position, p.forward, p.body)))
+                        throw new InvalidOperationException("Existing sample clearing no longer fits its performance.");
+                }
                 var walk = profile.Find(InteractionMotionRole.Walk);
                 var walkBody = new GameObject("Reserved walking body").AddComponent<DinosaurCoreBody>(); walkBody.transform.SetParent(root.transform, false);
                 walkBody.bands = walk.bodyBands;
@@ -190,6 +204,10 @@ namespace JurassicWorld.Editor
                     sitesToPlant.Add(p);
                 }
                 layout.clearingArea = clearingCells; layout.corridorArea = corridorCells; layout.plantableArea = sitesToPlant.Count;
+                // This is a size correction, not a new land-use design. Retain the
+                // previously saved clearing/corridor footprint and planting budget.
+                if (RainforestTreeSizing.RestoreLayout(layout))
+                { clearingCells = Mathf.RoundToInt(layout.clearingArea); corridorCells = Mathf.RoundToInt(layout.corridorArea); }
                 int retainedPlantable = stems.Count(s => Area.Contains(s.position) && siteSafe(s.position)
                     && !BlockedBy(reserved, s.position, .85f) && !BlockedBy(walking, s.position, .85f)
                     && !BlockedBy(spawnReservations, s.position, .85f) && trunkSafe(s.position, .85f));
@@ -200,18 +218,21 @@ namespace JurassicWorld.Editor
                     p + new Vector2(-.25f, .25f), p + new Vector2(.25f, .25f) }).OrderBy(_ => random.Next()).ToList();
                 var trees = new GameObject("Trees"); trees.transform.SetParent(root.transform, false);
                 int added = 0, woodRejected = 0, reservationRejected = 0;
-                foreach (Vector2 site in candidates)
+                var preferred = RainforestTreeSizing.Load();
+                foreach (Vector2 site in preferred.Select(t => t.position).Concat(candidates))
                 {
                     if (added + retainedPlantable >= target) break;
-                    Vector2 p = site + new Vector2((float)random.NextDouble() - .5f, (float)random.NextDouble() - .5f) * .5f;
+                    var retained = preferred.FirstOrDefault(t => t.position == site);
+                    Vector2 p = retained != null ? site : site + new Vector2((float)random.NextDouble() - .5f, (float)random.NextDouble() - .5f) * .5f;
                     if (!Area.Contains(p) || !siteSafe(p) || BlockedBy(reserved, p, .85f) || BlockedBy(walking, p, .85f) || BlockedBy(spawnReservations, p, .85f)
                         || !trunkSafe(p, .85f) || stems.Any(s => Vector2.Distance(s.position, p) < s.radius + 1.6f)) continue;
-                    string treePath = random.Next(3) == 0 ? "Assets/VegetationDiversity/Prefabs/Pachira_B.prefab"
+                    string treePath = retained != null ? retained.path : random.Next(3) == 0 ? "Assets/VegetationDiversity/Prefabs/Pachira_B.prefab"
                         : "Assets/NatureStarterKit2/Nature/tree0" + (1 + random.Next(4)) + ".prefab";
                     var tree = CentralForestDensification.Instantiate(treePath, trees.transform);
                     tree.name = "RainforestTree_" + added;
-                    tree.transform.rotation = Quaternion.Euler(0f, (float)random.NextDouble() * 360f, 0f);
-                    tree.transform.localScale *= Mathf.Lerp(15f, 21f, (float)random.NextDouble()) / CentralForestDensification.BoundsOf(tree).size.y;
+                    tree.transform.rotation = Quaternion.Euler(0f, retained != null ? retained.yaw : (float)random.NextDouble() * 360f, 0f);
+                    float variation = retained != null ? retained.variation : Mathf.Lerp(.82f, 1.14f, (float)random.NextDouble());
+                    tree.transform.localScale *= RainforestTreeSizing.BaseHeight(treePath) * variation / CentralForestDensification.BoundsOf(tree).size.y;
                     CentralForestDensification.Ground(tree, terrain, p);
                     foreach (var collider in tree.GetComponentsInChildren<Collider>()) Object.DestroyImmediate(collider);
                     var marker = tree.GetComponent<SceneTreeObstacle>() ?? tree.AddComponent<SceneTreeObstacle>();
@@ -259,13 +280,15 @@ namespace JurassicWorld.Editor
                 {
                     var motion = profile.Find(role); if (motion == null) throw new InvalidOperationException("Missing performance: " + role);
                     var body = new GameObject("Reservation " + role).AddComponent<DinosaurCoreBody>(); body.transform.SetParent(parent, false);
-                    var bands = motion.bodyBands.ToDictionary(b => b.layer, b => b.bounds);
-                    foreach (var band in outgoing.bodyBands)
-                    {
-                        if (bands.TryGetValue(band.layer, out var bounds)) { bounds.Encapsulate(band.bounds); bands[band.layer] = bounds; }
-                        else bands[band.layer] = band.bounds;
-                    }
-                    body.bands = bands.Select(b => new DinosaurCoreBody.Band { layer = b.Key, bounds = b.Value }).ToArray();
+                    // Current profiles have several body parts per height layer.
+                    // Cover each part's blend between clips without merging unrelated parts.
+                    body.bands = motion.bodyBands.Concat(outgoing.bodyBands)
+                        .GroupBy(b => new { b.layer, b.part }).Select(group =>
+                        {
+                            var band = group.First();
+                            foreach (var other in group.Skip(1)) band.bounds.Encapsulate(other.bounds);
+                            return band;
+                        }).ToArray();
                     float duration = role == InteractionMotionRole.LookForwardTwo ? Mathf.Min(2f, motion.clip.length) : motion.clip.length;
                     DinosaurInteractionProfile.FootFrame end = motion.footFrames[0];
                     foreach (var frame in motion.footFrames.Where((f, i) => (i % 6 == 0 || i == motion.footFrames.Length - 1) && f.time <= duration + .001f))

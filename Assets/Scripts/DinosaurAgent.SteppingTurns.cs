@@ -5,19 +5,21 @@ namespace JurassicWorld
 {
     public sealed partial class DinosaurAgent
     {
-        private enum TurnUse { Follow, Return, Route, Wander, FrontFollow, FrontReturn }
+        private enum TurnUse { Return, Route, Wander, FrontFollow, FrontReturn }
         private TurnUse stepTurnUse;
         private DinosaurInteractionProfile.Motion stepTurnMotion;
         private Vector3 stepTurnOrigin;
         private Quaternion stepTurnRotation;
         private float stepTurnTime, stepTurnEnd, stepTurnBlocked;
         private AnimationState stepTurnState, stepTurnOutgoing;
-        private PlayerInteractionPhase stepTurnResume;
-        private bool routeRejoining, stopAfterStepTurn;
+        private bool routeRejoining;
+        private bool routeJoinRecovering;
         private float routeJoinArc;
         private Vector3 routeJoinPoint;
         public bool IsSteppingTurn => stepTurnMotion != null;
         public bool IsRouteTurnOrJoin => IsSteppingTurn && stepTurnUse == TurnUse.Route || routeRejoining;
+        public bool IsRouteTurnPerformance => IsSteppingTurn && stepTurnUse == TurnUse.Route;
+        public bool IsRouteStaticRecovery => routeRejoining && routeJoinRecovering;
         public bool HasFootPhaseData => interactionProfile != null && interactionProfile.Find(InteractionMotionRole.Walk)?.footFrames.Length > 1;
         public float StepTurnClipTime => stepTurnTime;
         // Cumulative sampled path length, independent of the applied transform/foot IK.
@@ -89,8 +91,12 @@ namespace JurassicWorld
             Vector3 f0 = fromRotation * Quaternion.Euler(0f, VisualYaw, 0f) * Vector3.forward;
             Vector3 f1 = toRotation * Quaternion.Euler(0f, VisualYaw, 0f) * Vector3.forward;
             Vector2 a = new Vector2(from.x, from.z), b = new Vector2(to.x, to.z);
-            if (constrainRoute && MovementCorridor.MinDistanceToRoute(b, routeIndex) > 2f)
-            { LastMovementBlock = "Route corridor"; return false; }
+            if (constrainRoute)
+            {
+                float routeLimit = routeRejoining ? Mathf.Max(2f, MovementCorridor.MinDistanceToRoute(a, routeIndex) + .001f) : 2f;
+                if (MovementCorridor.MinDistanceToRoute(b, routeIndex) > routeLimit)
+                { LastMovementBlock = "Route corridor"; return false; }
+            }
             if (interactionSettings.StepBlocked(a, b, new Vector2(f0.x, f0.z), new Vector2(f1.x, f1.z), interactionBody))
             { LastMovementBlock = "Body sweep"; return false; }
             if (!SafetySegmentAllowed(a, b, IsAvoidingTyrannosaurus)) { LastMovementBlock = "Safety distance"; return false; }
@@ -121,11 +127,9 @@ namespace JurassicWorld
             bool frontTurn = frontActive && (use == TurnUse.FrontFollow || use == TurnUse.FrontReturn);
             if (IsSteppingTurn || !HasFootPhaseData || Mathf.Abs(angle) < 25f) return false;
             if (!SelectSteppingTurn(angle, frontTurn, out var motion, out float end)) return false;
-            // No whole-turn preflight: every accepted step is checked against the walking gate.
+            // Route and wander turns are performances; the connecting walk has its own gates.
             stepTurnOrigin = transform.position; stepTurnRotation = transform.rotation;
             stepTurnMotion = motion; stepTurnUse = use; stepTurnTime = stepTurnBlocked = 0f; stepTurnEnd = end;
-            stepTurnResume = InteractionPhase;
-            stopAfterStepTurn = false;
             stepTurnOutgoing = string.IsNullOrEmpty(activeClip) ? null : legacyAnimation[activeClip];
             float outgoingTime = stepTurnOutgoing != null ? stepTurnOutgoing.time : 0f;
             legacyAnimation.Stop();
@@ -140,33 +144,13 @@ namespace JurassicWorld
             return true;
         }
 
-        private bool FreeTurnFitsAt(Vector3 origin, Quaternion rotation, float angle)
-        {
-            var motion = interactionProfile.Find(angle < 0f ? InteractionMotionRole.TurnLeft : InteractionMotionRole.TurnRight);
-            if (motion == null || motion.footFrames.Length < 2) return false;
-            Vector3 savedOrigin = stepTurnOrigin;
-            Quaternion savedRotation = stepTurnRotation;
-            stepTurnOrigin = origin; stepTurnRotation = rotation;
-            try
-            {
-                Vector3 previous = origin; Quaternion previousRotation = rotation;
-                foreach (var frame in motion.footFrames)
-                {
-                    TurnPose(frame, out var position, out var heading);
-                    if (!StepPoseSafe(previous, position, previousRotation, heading, false)) return false;
-                    previous = position; previousRotation = heading;
-                }
-                return true;
-            }
-            finally { stepTurnOrigin = savedOrigin; stepTurnRotation = savedRotation; }
-        }
-
         private bool TickSteppingTurn()
         {
             float nextTime = Mathf.Min(stepTurnEnd, stepTurnTime + Time.deltaTime * stepTurnMotion.turnPlaybackSpeed);
             var frame = SampleFootFrame(stepTurnMotion, nextTime);
             TurnPose(frame, out var position, out var rotation);
-            if (!(frontActive ? FrontWalkAnimatedStep(stepTurnMotion, stepTurnTime, nextTime, transform.position, position, transform.rotation, rotation)
+            if (!(stepTurnUse == TurnUse.Wander || stepTurnUse == TurnUse.Route ? FrontAnimatedStep(stepTurnMotion, stepTurnTime, nextTime, transform.position, position, transform.rotation, rotation)
+                : frontActive ? FrontWalkAnimatedStep(stepTurnMotion, stepTurnTime, nextTime, transform.position, position, transform.rotation, rotation)
                 : StepPoseSafe(transform.position, position, transform.rotation, rotation, stepTurnUse == TurnUse.Route)))
             {
                 stepTurnBlocked += Time.deltaTime;
@@ -176,7 +160,7 @@ namespace JurassicWorld
                     BeginFrontSpaceWait();
                     return false;
                 }
-                if (stepTurnBlocked >= blockedReplanDelay && (stopAfterStepTurn || stepTurnUse == TurnUse.Wander))
+                if (stepTurnBlocked >= blockedReplanDelay && stepTurnUse == TurnUse.Wander)
                 {
                     RecoverInterruptedTurn();
                 }
@@ -213,12 +197,18 @@ namespace JurassicWorld
                     else if (frontNearPending) BeginFrontNear();
                     else PlayFrontFollow();
                 }
-                else PlayMovementClip(WalkSpeed);
+                else
+                {
+                    // The authored turn translates the root. Its old first NavMesh
+                    // corner may now be behind us; reconnect from the accepted pose.
+                    hasCuriosityPath = false;
+                    PlayMovementClip(WalkSpeed);
+                }
             }
             else if (completed == TurnUse.Wander)
             {
                 BeginMatchedWalkBlend(completedMotion, stepTurnTime, true);
-                if (!PlanCuriosityPath(freeGoal, true)) FreeIdle(2f);
+                FinishWanderTurn();
             }
             else if (completed == TurnUse.Route)
             {
@@ -228,13 +218,17 @@ namespace JurassicWorld
                 Vector2 p = MovementCorridor.PointAt(routeIndex, routeJoinArc);
                 routeJoinPoint = new Vector3(p.x, MovementHeight, p.y);
                 routeRejoining = true;
+                routeJoinRecovering = !FreeRecoveryRestPose(transform.position, transform.rotation);
+                if (routeJoinRecovering)
+                {
+                    interactionSettings.CollectStaticOverlaps(xz, CoreForward, interactionBody, freeRecoveryAllowed);
+                    freeRecoveryGeometry = TerrainTreeObstacleRegistry.GeometryRevision;
+                    freeRecoverySolids = (Bounds[])interactionSettings.solidObstacles.Clone();
+                }
                 PlayClip(moveClip);
             }
             else if (completed == TurnUse.Return)
             { InteractionPhase = PlayerInteractionPhase.Returning; hasCuriosityPath = false; nextReplan = 0f; }
-            else if (stopAfterStepTurn) BeginCuriosityStop();
-            else if (stepTurnResume == PlayerInteractionPhase.Observing) BeginCuriosityRun();
-            else { InteractionPhase = PlayerInteractionPhase.Following; curiosityMotion = null; }
             return true;
         }
 
@@ -256,7 +250,6 @@ namespace JurassicWorld
             stepTurnMotion = null;
             stepTurnState = stepTurnOutgoing = null;
             stepTurnTime = stepTurnEnd = stepTurnBlocked = 0f;
-            stopAfterStepTurn = false;
         }
 
         private void RecoverInterruptedTurn()
@@ -265,25 +258,32 @@ namespace JurassicWorld
             TurnUse interrupted = stepTurnUse;
             GetComponent<DinosaurFootLock>()?.HoldSupportDuringRecovery(.35f);
             ClearSteppingTurn();
-            currentInteractionSpeed = actualInteractionSpeed = 0f;
-            if (interrupted == TurnUse.Wander || InteractionPhase == PlayerInteractionPhase.Inactive) FreeIdle(2f);
+            actualInteractionSpeed = 0f;
+            if (interrupted == TurnUse.Wander)
+            {
+                // A peer can interrupt a performance after it has crossed static geometry.
+                // Preserve an escape state for that partial pose as well as completed turns.
+                FinishWanderTurn();
+                FreeIdle(2f);
+            }
+            else if (InteractionPhase == PlayerInteractionPhase.Inactive) FreeIdle(2f);
             else if (interrupted == TurnUse.FrontFollow || interrupted == TurnUse.FrontReturn)
             {
                 if (frontNearPending && !frontExitPending) BeginFrontNear();
                 else BeginFrontEnding();
             }
-            else BeginCuriosityStop();
+            else { InteractionPhase = PlayerInteractionPhase.Returning; hasCuriosityPath = false; nextReplan = 0f; }
         }
 
         private void ClearInteractionNavigation()
         {
             ClearSteppingTurn();
             routeRejoining = false;
+            routeJoinRecovering = false;
             hasCuriosityPath = false;
             curiosityCorners = System.Array.Empty<Vector3>();
-            curiosityCorner = failedReplans = 0;
+            curiosityCorner = 0;
             curiosityBlockedTime = visibleTime = invisibleTime = 0f;
-            curiosityMotion = null;
         }
 
         public bool ApplyFootRootCorrection(Vector3 correction)
@@ -317,39 +317,21 @@ namespace JurassicWorld
             }
             correction = Vector3.ClampMagnitude(correction, ForestFootCorrectionBudget);
             Vector3 target = transform.position + correction;
-            if (!StepPoseSafe(transform.position, target, transform.rotation, transform.rotation, stepTurnUse == TurnUse.Route)) return false;
-            if (stepTurnUse == TurnUse.Route && !CorrectedRouteTurnFits(correction, target)) return false;
+            if (stepTurnUse == TurnUse.Wander || stepTurnUse == TurnUse.Route)
+            {
+                if (!FrontAnimationPoseSafe(transform.position, target, transform.rotation, transform.rotation, interactionBody)) return false;
+            }
+            else if (!StepPoseSafe(transform.position, target, transform.rotation, transform.rotation, stepTurnUse == TurnUse.Route)) return false;
             transform.position = target;
             stepTurnOrigin += correction; // Preserve the correction on subsequent sampled steps.
             return true;
-        }
-
-        private bool CorrectedRouteTurnFits(Vector3 correction, Vector3 position)
-        {
-            // Foot IK shifts the origin of every remaining sample. A correction safe
-            // at this instant can otherwise strand the turn outside its preflighted corridor.
-            Vector3 origin = stepTurnOrigin; Quaternion rotation = transform.rotation;
-            stepTurnOrigin += correction;
-            try
-            {
-                foreach (var frame in stepTurnMotion.footFrames)
-                {
-                    if (frame.time <= stepTurnTime) continue;
-                    if (frame.time > stepTurnEnd) break;
-                    TurnPose(frame, out var next, out var heading);
-                    if (!StepPoseSafe(position, next, rotation, heading, true)) return false;
-                    position = next; rotation = heading;
-                }
-                TurnPose(SampleFootFrame(stepTurnMotion, stepTurnEnd), out var end, out var endRotation);
-                return StepPoseSafe(position, end, rotation, endRotation, true);
-            }
-            finally { stepTurnOrigin = origin; }
         }
 
         private bool UpdateRouteStepping()
         {
             if (IsSteppingTurn && stepTurnUse == TurnUse.Route) { TickSteppingTurn(); return true; }
             if (!routeRejoining) return false;
+            if (routeJoinRecovering && FreeRecoveryRestPose(transform.position, transform.rotation)) routeJoinRecovering = false;
             Vector3 direction = routeJoinPoint - transform.position; direction.y = 0f;
             if (direction.magnitude <= .03f)
             {
@@ -366,7 +348,12 @@ namespace JurassicWorld
                 Quaternion.LookRotation(direction) * Quaternion.Euler(0f, -VisualYaw, 0f), 40f * Time.deltaTime);
             Vector3 heading = rotation * Quaternion.Euler(0f, VisualYaw, 0f) * Vector3.forward;
             Vector3 position = transform.position + heading * Mathf.Min(WalkSpeed * Time.deltaTime, direction.magnitude);
-            if (StepPoseSafe(transform.position, position, transform.rotation, rotation, true))
+            bool canWalk = routeJoinRecovering
+                ? MovementCorridor.MinDistanceToRoute(new Vector2(position.x, position.z), routeIndex)
+                    <= Mathf.Max(2f, MovementCorridor.MinDistanceToRoute(new Vector2(transform.position.x, transform.position.z), routeIndex)) + .001f
+                    && FreeRecoveryStep(transform.position, position, transform.rotation, rotation, true)
+                : StepPoseSafe(transform.position, position, transform.rotation, rotation, true);
+            if (canWalk)
             { transform.SetPositionAndRotation(position, rotation); PlayMovementClip(WalkSpeed); }
             else PlayClip(idleClip);
             return true;

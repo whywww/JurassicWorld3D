@@ -60,7 +60,7 @@ namespace JurassicWorld.Editor
         private static bool WalkingStage()
         {
             string stage = rex.FrontInteractionStage;
-            return stage.StartsWith("Follow") || stage.StartsWith("ReturnWalk") || stage.StartsWith("SideStartRun");
+            return stage.StartsWith("Follow") || stage.StartsWith("ReturnWalk");
         }
         static RainforestSampleAcceptance()
         {

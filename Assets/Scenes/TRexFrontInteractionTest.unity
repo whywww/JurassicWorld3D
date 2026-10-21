@@ -831,7 +831,7 @@ MonoBehaviour:
   frontNearDistance: 10
   frontResumeDistance: 15
   frontFollowDuration: 30
-  frontReturnWalkTime: 10
+  frontReturnWalkTime: 3
 --- !u!4 &379201638
 Transform:
   m_ObjectHideFlags: 0

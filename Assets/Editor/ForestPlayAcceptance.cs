@@ -41,6 +41,12 @@ namespace JurassicWorld.Editor
         private static Bounds[] vegetationBounds;
         private static Vector3 captureOffset;
         private static Camera playerCamera;
+        private static int meshSamples, meshOverlapSamples, meshOverlapVertices;
+        private static readonly Dictionary<DinosaurAgent, Vector2> RecoveryDistances = new Dictionary<DinosaurAgent, Vector2>();
+        private static object Query(DinosaurAgent agent, string method, params object[] args)
+            => typeof(DinosaurAgent).GetMethod(method, Flags).Invoke(agent, args);
+        private static string CollisionStage(DinosaurAgent agent)
+            => (string)typeof(DinosaurAgent).GetProperty("ForestCollisionStage", Flags).GetValue(agent);
         private static object Get(DinosaurAgent agent, string field) => typeof(DinosaurAgent).GetField(field, Flags).GetValue(agent);
         private static void Require(bool condition, string message) { if (!condition) throw new InvalidOperationException(message); }
         private static void Spawn() => typeof(DinosaurSpawnRandomizer).GetMethod("RandomizeAll", BindingFlags.Static | BindingFlags.NonPublic).Invoke(null, null);
@@ -58,6 +64,10 @@ namespace JurassicWorld.Editor
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode || EditorSceneManager.GetActiveScene().isDirty)
                 throw new InvalidOperationException("Save the scene and stop Play before acceptance.");
+            string prior = RainforestSample.Output + "/NormalPlay.md";
+            string history = RainforestSample.Output + "/NormalPlay.BeforeCollisionPolicy.md";
+            if (File.Exists(prior) && !File.Exists(history))
+                File.WriteAllText(history, "> Historical result using the previous all-vertices/static-penetration assertions; not the current collision policy.\n\n" + File.ReadAllText(prior));
             EditorSceneManager.OpenScene("Assets/Scenes/Main.unity");
             foreach (var agent in Object.FindObjectsOfType<DinosaurAgent>())
             {
@@ -82,7 +92,10 @@ namespace JurassicWorld.Editor
             {
                 Bind();
                 originalVSync = QualitySettings.vSyncCount; originalFrameRate = Application.targetFrameRate;
-                Report.Clear(); Report.AppendLine("# Normal Play regression\n");
+                Report.Clear(); Report.AppendLine("# Normal Play regression — runtime collision policy\n");
+                meshSamples = meshOverlapSamples = meshOverlapVertices = 0;
+                RecoveryDistances.Clear();
+                Report.AppendLine("Births and ordinary travel use the runtime collision envelope. Special performances may overlap static scenery; peer body checks remain active. Recovery permits only unretired original overlaps and inward boundary/navigation movement. Rendered-mesh overlaps are visual diagnostics, not collision failures. Historical strict-mesh results: NormalPlay.BeforeCollisionPolicy.md.\n");
                 Report.AppendLine("All agents, navigation, skeletal animation, foot locking and foliage interaction remain active. First minute is rendered continuously and recorded; remaining movement frames run with AlwaysAnimate and camera renders at 30-second checkpoints. GPU/CPU rendering cost is measured separately in Performance.md.\n");
                 // Exercise the actual startup sampler; no reserved clearing placements.
                 for (int seed = 731716; seed < 731748; seed++)
@@ -91,9 +104,15 @@ namespace JurassicWorld.Editor
                         agent.transform.SetPositionAndRotation(SessionState.GetVector3(Key + agent.name + ".position", Vector3.zero),
                             Quaternion.Euler(SessionState.GetVector3(Key + agent.name + ".rotation", Vector3.zero)));
                     settings.spawnSeed = seed; Spawn();
-                    foreach (var agent in agents) { CheckPose(agent); CheckRenderedBody(agent); }
+                    foreach (var agent in agents)
+                    {
+                        agent.GetComponentInChildren<Animation>().Sample();
+                        CheckPose(agent, true);
+                        CheckSpawnExit(agent);
+                        CheckRenderedBody(agent, $"spawn seed {seed}");
+                    }
                 }
-                Report.AppendLine("32 fixed seeds: full-body spawn and six-metre exit checks passed for both active species.");
+                Report.AppendLine("32 fixed seeds: runtime body-envelope, navigation, camera/peer spacing and six-metre exit contracts passed for both active species; visible mesh results are reported separately.");
                 rate = 0; deadline = EditorApplication.timeSinceStartup + 1800;
                 StartCase();
                 EditorApplication.update += Tick;
@@ -120,6 +139,7 @@ namespace JurassicWorld.Editor
             try
             {
             Bind();
+            RecoveryDistances.Clear();
             settings.spawnSeed = 731716; Spawn();
             Time.captureDeltaTime = 1f / Rates[rate];
             QualitySettings.vSyncCount = 0; Application.targetFrameRate = -1;
@@ -170,43 +190,89 @@ namespace JurassicWorld.Editor
             catch (Exception error) { Finish(error); }
         }
 
-        private static void CheckPose(DinosaurAgent agent)
+        private static void CheckPose(DinosaurAgent agent, bool spawning = false)
         {
-            var body = (DinosaurCoreBody)Get(agent, "interactionBody");
-            Vector3 visual = agent.transform.rotation * Quaternion.Euler(0f, agent.VisualYaw, 0f) * Vector3.forward;
-            string reason = settings.PoseBlockReason(new Vector2(agent.transform.position.x, agent.transform.position.z),
-                new Vector2(visual.x, visual.z), body);
-            Require(reason == null, $"Hard penetration: {agent.DisplayName}, {reason}, {Diagnostic(agent)}");
+            Vector2 prior = RecoveryDistances.TryGetValue(agent, out var distances) ? distances
+                : new Vector2(float.PositiveInfinity, float.PositiveInfinity);
+            string reason = (string)Query(agent, "ForestCollisionFailure", spawning, prior.x, prior.y);
+            Require(reason == null, $"Runtime collision contract: {reason}, {Diagnostic(agent)}");
+            if (!spawning && CollisionStage(agent) == "Recovery")
+                RecoveryDistances[agent] = new Vector2((float)Query(agent, "FreeRecoveryBoundary", agent.transform.position, agent.transform.rotation),
+                    (float)Query(agent, "FreeRecoveryNavDistance", agent.transform.position));
+            else RecoveryDistances.Remove(agent);
+        }
+
+        private static void CheckSpawnExit(DinosaurAgent agent)
+        {
+            Vector3 forward = agent.transform.rotation * Quaternion.Euler(0f, agent.VisualYaw, 0f) * Vector3.forward;
+            object[] args = { agent.transform.position, forward, Vector3.zero };
+            Require((bool)typeof(DinosaurAgent).GetMethod("SpawnExitFits", Flags).Invoke(agent, args), "Unsafe six-metre spawn exit: " + Diagnostic(agent));
+            Vector3 exit = (Vector3)args[2];
+            Camera camera = Camera.main;
+            Require(camera == null || Vector2.Distance(new Vector2(agent.transform.position.x, agent.transform.position.z),
+                new Vector2(camera.transform.position.x, camera.transform.position.z)) >= 25f, "Spawn too close to camera: " + Diagnostic(agent));
+            foreach (var peer in agents)
+            {
+                if (peer == agent) continue;
+                Vector2 a = new Vector2(agent.transform.position.x, agent.transform.position.z), b = new Vector2(exit.x, exit.z);
+                Vector2 p = new Vector2(peer.transform.position.x, peer.transform.position.z), d = b - a;
+                float t = Mathf.Clamp01(Vector2.Dot(p - a, d) / d.sqrMagnitude);
+                float spacing = agent.CollisionRadius + peer.CollisionRadius + 6f;
+                Require(Vector2.Distance(a, p) >= spacing, "Spawn peer spacing: " + Diagnostic(agent));
+                // Startup places larger animals first; later, smaller animals are not
+                // retroactively added to the earlier animal's six-metre reservation.
+                if (peer.CollisionRadius > agent.CollisionRadius)
+                    Require(Vector2.Distance(a + d * t, p) >= spacing, "Spawn exit peer spacing: " + Diagnostic(agent));
+            }
         }
 
         private static string Diagnostic(DinosaurAgent agent) =>
-            $"{agent.DisplayName}, seed={DinosaurSpawnRandomizer.LastSpawnSeed}, elapsed={Time.time-began:F2}, fps={Rates[Mathf.Min(rate, Rates.Length - 1)]}, position={agent.transform.position}, yaw={agent.transform.eulerAngles.y:F2}, state={agent.CurrentState}, timer={Get(agent, "stateTimer")}, enabled={agent.enabled}, interaction={agent.InteractionPhase}, front={Get(agent, "frontActive")}/{Get(agent, "frontTestWaiting")}, turn={agent.IsSteppingTurn}, turnTime={agent.StepTurnClipTime:F6}, path={Get(agent, "hasCuriosityPath")}, goal={Get(agent, "freeGoal")}, blocked={Get(agent, "curiosityBlockedTime")}, reason={agent.RoamingBlockReason}, avoidance={agent.AvoidanceStatus}";
+            $"{agent.DisplayName}, collisionStage={CollisionStage(agent)}, seed={DinosaurSpawnRandomizer.LastSpawnSeed}, elapsed={Time.time-began:F2}, fps={Rates[Mathf.Min(rate, Rates.Length - 1)]}, position={agent.transform.position}, yaw={agent.transform.eulerAngles.y:F2}, state={agent.CurrentState}, timer={Get(agent, "stateTimer")}, enabled={agent.enabled}, interaction={agent.InteractionPhase}, front={Get(agent, "frontActive")}/{Get(agent, "frontTestWaiting")}, turn={agent.IsSteppingTurn}, turnTime={agent.StepTurnClipTime:F6}, path={Get(agent, "hasCuriosityPath")}, goal={Get(agent, "freeGoal")}, blocked={Get(agent, "curiosityBlockedTime")}, reason={agent.RoamingBlockReason}, avoidance={agent.AvoidanceStatus}";
 
-        private static void CheckRenderedBody(DinosaurAgent agent)
+        // One diagnostic per animal/sample. A vertex overlapping multiple trunk sections is counted once.
+        private static int CheckRenderedBody(DinosaurAgent agent, string sample)
         {
             var sections = TerrainTreeObstacleRegistry.GetTrunkSections();
+            int count = 0;
+            Vector3 firstVertex = default;
+            TreeTrunkSection firstWood = default;
             foreach (var skin in agent.GetComponentsInChildren<SkinnedMeshRenderer>())
             {
-                Bounds bounds = skin.bounds;
-                var nearby = sections.Where(s => s.top > bounds.min.y && s.bottom < bounds.max.y
-                    && s.center.x + s.radius > bounds.min.x && s.center.x - s.radius < bounds.max.x
-                    && s.center.y + s.radius > bounds.min.z && s.center.y - s.radius < bounds.max.z).ToArray();
-                if (nearby.Length == 0) continue;
                 var mesh = new Mesh();
                 try
                 {
                     skin.BakeMesh(mesh);
-                    foreach (var vertex in mesh.vertices)
+                    // Use baked geometry for the broad phase too: renderer bounds can be stale after re-spawning.
+                    Vector3[] vertices = mesh.vertices;
+                    if (vertices.Length == 0) continue;
+                    Bounds bounds = new Bounds(skin.transform.TransformPoint(vertices[0]), Vector3.zero);
+                    foreach (var vertex in vertices) bounds.Encapsulate(skin.transform.TransformPoint(vertex));
+                    var nearby = sections.Where(section => section.top > bounds.min.y && section.bottom < bounds.max.y
+                        && section.center.x + section.radius > bounds.min.x && section.center.x - section.radius < bounds.max.x
+                        && section.center.y + section.radius > bounds.min.z && section.center.y - section.radius < bounds.max.z).ToArray();
+                    foreach (var vertex in vertices)
                     {
-                        Vector3 p = skin.transform.TransformPoint(vertex);
+                        Vector3 point = skin.transform.TransformPoint(vertex);
                         foreach (var section in nearby)
-                            Require(p.y <= section.bottom || p.y >= section.top
-                                || Vector2.Distance(new Vector2(p.x, p.z), section.center) >= section.radius - .025f,
-                                $"Rendered mesh inside hard wood at {p}, wood={section.center}, radius={section.radius}: " + Diagnostic(agent));
+                        {
+                            if (point.y <= section.bottom || point.y >= section.top
+                                || Vector2.Distance(new Vector2(point.x, point.z), section.center) >= section.radius - .025f) continue;
+                            if (count == 0) { firstVertex = point; firstWood = section; }
+                            count++; break;
+                        }
                     }
                 }
                 finally { Object.DestroyImmediate(mesh); }
             }
+            meshSamples++;
+            if (count > 0)
+            {
+                meshOverlapSamples++; meshOverlapVertices += count;
+                string detail = $"VISUAL_ONLY {sample}: dinosaur={agent.DisplayName}, seed={DinosaurSpawnRandomizer.LastSpawnSeed}, stage={CollisionStage(agent)}, overlappingVertices={count}, firstVertex={firstVertex:F3}, wood={firstWood.center:F3}, radius={firstWood.radius:F4}";
+                Report.AppendLine("- " + detail);
+                Debug.Log(detail);
+            }
+            return count;
         }
 
         private static void Record()
@@ -265,14 +331,14 @@ namespace JurassicWorld.Editor
                         + string.Join("; ", agents.Select((a, i) => $"{a.DisplayName}={travelled[i]:F2}m"));
                     Debug.Log("FOREST_PLAY_PROGRESS " + progress);
                     if (playerCamera != null && !playerCamera.enabled) playerCamera.Render();
-                    foreach (var agent in agents) CheckRenderedBody(agent);
+                    foreach (var agent in agents) CheckRenderedBody(agent, $"checkpoint {Rates[rate]} FPS / {Time.time - began:F1}s");
                     File.WriteAllText(RainforestSample.Output + "/NormalPlay.md", Report + "\n" + progress);
                 }
                 if (Time.time - began < duration) return;
                 for (int i = 0; i < agents.Length; i++)
                 {
                     Require(travelled[i] > 5f, "No initial movement: " + Diagnostic(agents[i]));
-                    Report.AppendLine($"- {Rates[rate]} FPS / {duration:F0}s / {agents[i].DisplayName}: {travelled[i]:F2}m; no hard penetration, jumps or prolonged static stall.");
+                    Report.AppendLine($"- {Rates[rate]} FPS / {duration:F0}s / {agents[i].DisplayName}: {travelled[i]:F2}m; runtime collision contract passed; no root jumps or prolonged static stall. Static overlaps permitted only by the active policy.");
                 }
                 Debug.Log($"FOREST_PLAY_CASE_PASS fps={Rates[rate]}");
                 Report.AppendLine($"Maximum planted-foot error at {Rates[rate]} FPS: {maximumFootError:F4}m (limit 0.25m).\n");
@@ -289,7 +355,8 @@ namespace JurassicWorld.Editor
             CloseVideo();
             SceneManager.sceneLoaded -= Loaded; EditorApplication.delayCall -= InitializeCase;
             Directory.CreateDirectory(RainforestSample.Output);
-            Report.AppendLine(error == null ? "\nPASS" : "\nFAIL\n\n" + error);
+            Report.AppendLine($"\nVisible-mesh diagnostics: {meshSamples} animal samples; {meshOverlapSamples} samples contained overlaps; {meshOverlapVertices} overlapping vertices total (vertices may recur across samples). These counts do not determine collision-contract success.");
+            Report.AppendLine(error == null ? "\nRuntime collision contract: PASS" : "\nRuntime collision contract: FAIL\n\n" + error);
             File.WriteAllText(RainforestSample.Output + "/NormalPlay.md", Report.ToString());
             if (error == null) Debug.Log("FOREST_NORMAL_PLAY_PASS"); else Debug.LogException(error);
             if (Application.isBatchMode) EditorApplication.Exit(error == null ? 0 : 1);

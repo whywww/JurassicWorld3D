@@ -30,11 +30,7 @@ namespace JurassicWorld.Editor
         private static Vector3 cogFacing, headFacing;
         private static readonly StringBuilder headingSamples = new StringBuilder();
         private static bool baseline;
-        private static float startRunBegan, startRunDistance, startRunRate;
-        private static Vector3 startRunPrevious;
-        private static bool startRunMeasured;
-        private static bool blendBaseline, sawBlend, finishedBlend;
-        private static float previousBlendWalkTime, waitingBlendTime, waitingWalkTime;
+        private static bool blendBaseline;
         private static readonly StringBuilder blendSamples = new StringBuilder();
         private static Camera blendObserver;
         private static float blendShotBegan;
@@ -129,21 +125,11 @@ namespace JurassicWorld.Editor
                 test.playerCamera.GetComponent<SmoothExplorerCamera>().enabled = false;
                 settings = UnityEngine.Object.FindObjectOfType<DinosaurInteractionSettings>();
                 originalObstacles = settings.solidObstacles;
-                startRunRate = index == 14 || index == 15 ? 1f : .8f;
                 var serializedRex = new SerializedObject(rex);
-                Require(Mathf.Abs(serializedRex.FindProperty("sideStartRunPlaybackSpeed").floatValue - .8f) < .001f,
-                    "Side start default is not 0.8x.");
-                serializedRex.FindProperty("sideStartRunPlaybackSpeed").floatValue = startRunRate;
-                Require(Mathf.Abs(serializedRex.FindProperty("sideWalkBlendDuration").floatValue - .3f) < .001f,
-                    "Side walk blend default is not 0.3s.");
-                if (blendBaseline) serializedRex.FindProperty("sideWalkBlendDuration").floatValue = 0f;
                 Require(Mathf.Abs(serializedRex.FindProperty("sideRoarHandoffDuration").floatValue - .4f) < .001f,
                     "Side roar handoff default is not 0.4s.");
                 if (blendBaseline) serializedRex.FindProperty("sideRoarHandoffDuration").floatValue = 0f;
                 serializedRex.ApplyModifiedPropertiesWithoutUndo();
-                startRunBegan = -1f; startRunDistance = 0f; startRunMeasured = false;
-                sawBlend = finishedBlend = false; previousBlendWalkTime = 0f;
-                waitingBlendTime = waitingWalkTime = -1f;
                 blendShotBegan = -1f; blendShot = 0; blendObserver = null;
                 blendSamples.Clear(); blendSamples.AppendLine("time,stage,source_time,walk_time,walk_weight,speed,left_contact,right_contact,left_error,right_error,head_yaw,root_yaw,handoff_age,left_x,left_z,right_x,right_z");
                 handoffError = null; handoffObserved = lastLeftPlant = lastRightPlant = false;
@@ -173,55 +159,8 @@ namespace JurassicWorld.Editor
                 Require(maximumStep < .5f, "Root jump in side test: " + maximumStep);
                 previous = rex.transform.position;
                 string stage = rex.FrontInteractionStage, action = rex.CurrentAnimationSourceName;
-                bool blending = AgentField("sideWalkMotion") != null;
-                if (blending)
-                {
-                    sawBlend = true;
-                    float walkTime = (float)AgentField("sideWalkTime"), blendTime = (float)AgentField("sideWalkBlendTime");
-                    if ((bool)AgentField("frontWaiting"))
-                    {
-                        if (waitingBlendTime >= 0f) Require(Mathf.Abs(blendTime - waitingBlendTime) < .0001f
-                            && Mathf.Abs(walkTime - waitingWalkTime) < .0001f, "Waiting advanced the side walk blend.");
-                        waitingBlendTime = blendTime; waitingWalkTime = walkTime;
-                    }
-                    else waitingBlendTime = waitingWalkTime = -1f;
-                    previousBlendWalkTime = walkTime;
-                }
-                else if (sawBlend && !finishedBlend && stage == "Follow")
-                {
-                    var walk = rex.GetComponentInChildren<Animation>()["Curiosity_FollowWalk"];
-                    Require(Mathf.Repeat(walk.time - previousBlendWalkTime, walk.length) < .1f,
-                        "Blend completion reset the walking phase.");
-                    Require(walk.weight > .99f, "Blend did not complete at full walking weight.");
-                    finishedBlend = true;
-                }
-                if (index >= 14 && index < 18 && !startRunMeasured)
-                {
-                    if (stage == "SideStartRun" || stage == "Follow" && startRunBegan >= 0f)
-                    {
-                        if (startRunBegan < 0f) { startRunBegan = Time.time; startRunPrevious = rex.transform.position; }
-                        startRunDistance += Vector3.Distance(startRunPrevious, rex.transform.position);
-                        startRunPrevious = rex.transform.position;
-                    }
-                    if (stage == "Follow" && startRunBegan >= 0f)
-                    {
-                        startRunMeasured = true;
-                        var profile = (DinosaurInteractionProfile)new SerializedObject(rex).FindProperty("interactionProfile").objectReferenceValue;
-                        var role = test.ActiveSide == TRexFrontTestController.ApproachSide.Left
-                            ? InteractionMotionRole.SideStartRunLeft : InteractionMotionRole.SideStartRunRight;
-                        float duration = Time.time - startRunBegan;
-                        Require(Mathf.Abs(duration - profile.Find(role).clip.length / startRunRate) < .04f,
-                            "Side start duration does not match the selected rate: " + duration);
-                        string key = Key + (test.ActiveSide == TRexFrontTestController.ApproachSide.Left ? ".LeftDistance" : ".RightDistance");
-                        if (index < 16) SessionState.SetFloat(key, startRunDistance);
-                        else Require(Mathf.Abs(startRunDistance - SessionState.GetFloat(key, -100f))
-                            < Mathf.Max(.1f, SessionState.GetFloat(key, 0f) * .1f),
-                            "Startup blend changed travel by more than ten percent: " + startRunDistance);
-                        File.AppendAllText("Logs/trex-side-test-result.txt", $"PASS start rate {startRunRate:F1}x: {test.ActiveSide}, duration={duration:F3}s, travel={startRunDistance:F3}m\n");
-                    }
-                }
                 Vector3 direction = test.approachLayout.forward;
-                if (stage == "Intro" || stage == "SideStartRun" || stage == "Follow" && loopStarted < 0f)
+                if (stage == "Intro" || stage == "Follow" && loopStarted < 0f)
                 {
                     Vector3 target = test.playerCamera.transform.position - rex.transform.position;
                     float Yaw(Vector3 forward) => Mathf.Atan2(forward.x, forward.z) * Mathf.Rad2Deg;
@@ -233,7 +172,7 @@ namespace JurassicWorld.Editor
                     if (index == 2 || index == 11)
                     {
                         string shot = action + "-" + Mathf.FloorToInt(rex.FrontActionPlaybackTime * 4f);
-                        if ((stage == "SideStartRun" || stage == "Follow" || action.StartsWith("roar", StringComparison.Ordinal) && rex.FrontActionPlaybackTime > 4f)
+                        if ((stage == "Follow" || action.StartsWith("roar", StringComparison.Ordinal) && rex.FrontActionPlaybackTime > 4f)
                             && captures.Add(shot)) Capture((baseline ? "before-" : "after-") + "case-" + index + "-" + shot);
                     }
                 }
@@ -245,17 +184,17 @@ namespace JurassicWorld.Editor
                 else
                 {
                     Require(rex.FrontBlockingReason != "Player", "Player proximity blocked an interaction stage.");
-                    Require(stage != "SideStartRun" && !action.StartsWith("idle attack to run", StringComparison.Ordinal),
+                    Require(!action.StartsWith("idle attack to run", StringComparison.Ordinal),
                         "Side interaction still used its skipped startup.");
                     Require(action != "run head loop" && action != "run to stop" && action != "run head low" && action != "idle investigate" && action != "idle investigae out" && action != "Big roar step",
                         "Side test played a front action: " + action);
-                    if (stage == "Intro" || stage == "SideStartRun" || stage == "Follow"
+                    if (stage == "Intro" || stage == "Follow"
                         || stage == "Near" || stage == "Ending" || stage == "TurnBack" || stage == "ReturnWalk")
                     {
                         if (action != lastAction && action != "look forward") { actions.Add(action); lastAction = action; }
                     }
                     if (stage == "Follow" && loopStarted < 0f) loopStarted = Time.time;
-                    if (stage == "SideStartRun" || stage == "Follow")
+                    if (stage == "Follow")
                     {
                         float distance = 24f;
                         if ((index < 6 || index >= 11) && loopStarted >= 0f && Time.time - loopStarted > 3f) distance = index >= 12 ? 0f : 9.5f;
@@ -305,10 +244,6 @@ namespace JurassicWorld.Editor
 
         private static void CompleteCase()
         {
-            if (index >= 14 && index < 18) Require(startRunMeasured, "Start rate scenario skipped its full start animation.");
-            if (index == 18 || index == 19)
-                Require(sawBlend && !finishedBlend && AgentField("sideWalkMotion") == null && !(bool)AgentField("frontWaiting"),
-                    "Blend interruption did not finish the interaction.");
             string side = test.ActiveSide == TRexFrontTestController.ApproachSide.Left ? "left" : "right";
             string[] expected = { "look " + side, "roar " + side, "walk head low",
                 "ROAR", "look forward 2", "bite close", "look forward 2", "turn 180 right", "walk slow loop" };

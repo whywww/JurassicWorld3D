@@ -11,24 +11,20 @@ namespace JurassicWorld
         [SerializeField, Min(0f)] private float detectionDistance = 24f;
         [SerializeField, Range(0f, 180f)] private float detectionAngle = 100f;
         [SerializeField, Min(0f)] private float detectionHold = .3f;
-        [SerializeField, Min(1f)] private float followDistance = 10f;
-        [SerializeField, Min(1f)] private float interactionDuration = 15f;
         [SerializeField, Min(.1f)] private float lostSightGrace = 3f;
         [SerializeField, Min(0f)] private float interactionCooldown = 10f;
         [SerializeField, Min(.1f)] private float replanInterval = .5f;
         [SerializeField, Min(.1f)] private float playerReplanDistance = 2f;
         [SerializeField, Min(.1f)] private float blockedReplanDelay = 2f;
         private DinosaurInteractionSettings interactionSettings;
-        private DinosaurInteractionProfile.Motion curiosityMotion;
         private NavMeshPath curiosityPath;
         private Vector3[] curiosityCorners = System.Array.Empty<Vector3>();
-        private int curiosityCorner, failedReplans;
+        private int curiosityCorner;
         private Vector3 lastSeenPlayer, plannedPlayer;
-        private float visibleTime, invisibleTime, cooldownUntil, interactionStarted, phaseStarted, nextReplan;
-        private float curiosityBlockedTime, currentInteractionSpeed, stopInitialSpeed, returnArc;
+        private float visibleTime, invisibleTime, cooldownUntil, nextReplan;
+        private float curiosityBlockedTime, returnArc;
         private float actualInteractionSpeed;
-        private bool curiosityBound, hasCuriosityPath, isReturning;
-        private Quaternion turnStartRotation, turnEndRotation;
+        private bool curiosityBound, hasCuriosityPath;
         public bool IsOffRouteInteraction => InteractionPhase != PlayerInteractionPhase.Inactive;
 
         private void BindCuriosityAnimations()
@@ -73,37 +69,6 @@ namespace JurassicWorld
                 ? "RockOcclusion" : null;
         }
 
-        private void PlayCuriosity(InteractionMotionRole role, bool loop = false)
-        {
-            curiosityMotion = interactionProfile.Find(role);
-            phaseStarted = Time.time;
-            if (curiosityMotion == null) { PlayClip(idleClip); return; }
-            string name = curiosityMotion.StateName;
-            var state = legacyAnimation[name];
-            state.wrapMode = loop ? WrapMode.Loop : WrapMode.ClampForever;
-            float referenceSpeed = curiosityMotion.groundSpeed;
-            if (role == InteractionMotionRole.StartRun)
-                foreach (var key in curiosityMotion.speed.keys) referenceSpeed = Mathf.Max(referenceSpeed, key.value);
-            state.speed = role == InteractionMotionRole.StartRun || role == InteractionMotionRole.StopRun
-                ? Mathf.Clamp((role == InteractionMotionRole.StopRun ? stopInitialSpeed : ApproachSpeed) / Mathf.Max(.01f, referenceSpeed),
-                    role == InteractionMotionRole.StopRun ? .5f : .1f, 1.5f) : 1f;
-            state.time = 0f;
-            legacyAnimation.CrossFade(name, .35f);
-            activeClip = name;
-        }
-
-        private float MotionTime => curiosityMotion != null && legacyAnimation[curiosityMotion.StateName] != null
-            ? legacyAnimation[curiosityMotion.StateName].time : Mathf.Max(0f, Time.time - phaseStarted);
-        private float MotionPlaybackSpeed => curiosityMotion != null ? legacyAnimation[curiosityMotion.StateName].speed : 1f;
-        private bool MotionFinished => curiosityMotion == null ? MotionTime >= 1f : MotionTime >= curiosityMotion.clip.length;
-        private InteractionMotionRole LookRole()
-        {
-            Vector3 direction = lastSeenPlayer - transform.position;
-            direction.y = 0f;
-            float angle = Vector3.SignedAngle(GetVisualForward(), direction, Vector3.up);
-            return angle < -20f ? InteractionMotionRole.LookLeft : angle > 20f ? InteractionMotionRole.LookRight : InteractionMotionRole.LookForward;
-        }
-
         private void StartInteraction()
         {
             frontFeet?.EndReturnHandoff();
@@ -111,17 +76,9 @@ namespace JurassicWorld
             float angle = Vector3.SignedAngle(GetVisualForward(), playerDirection, Vector3.up);
             if (Mathf.Abs(angle) <= 20f && FrontActionsAvailable()) { BeginFrontInteraction(); return; }
             if (Mathf.Abs(angle) <= 50f + .0001f && SideActionsAvailable()) { BeginInteractionSequence(true, angle < 0f); return; }
-            CurrentState = DinosaurState.RandomWalk;
-            InteractionPhase = PlayerInteractionPhase.Observing;
-            lastSeenPlayer = viewCamera.transform.position;
-            interactionStarted = Time.time;
-            visibleTime = invisibleTime = curiosityBlockedTime = currentInteractionSpeed = 0f;
-            actualInteractionSpeed = 0f;
-            failedReplans = 0;
-            isReturning = false;
-            hasCuriosityPath = waitingAtCrossing = false;
-            MovementCorridorCrossings.Release(this);
-            PlayCuriosity(LookRole());
+            Debug.LogWarning("[T-Rex curiosity] Interaction profile lacks front/side actions; ignoring player.", this);
+            visibleTime = 0f;
+            cooldownUntil = Time.time + interactionCooldown;
         }
 
         private NavMeshQueryFilter NavigationFilter => new NavMeshQueryFilter
@@ -149,17 +106,6 @@ namespace JurassicWorld
             curiosityCorner = 0;
             hasCuriosityPath = curiosityCorners.Length != 0;
             return hasCuriosityPath;
-        }
-
-        private bool PlanFollow()
-        {
-            plannedPlayer = lastSeenPlayer;
-            nextReplan = Time.time + Mathf.Max(.5f, replanInterval);
-            Vector3 away = transform.position - lastSeenPlayer;
-            away.y = 0f;
-            if (away.sqrMagnitude < .01f) away = -GetVisualForward();
-            Vector3 target = lastSeenPlayer + away.normalized * followDistance;
-            return PlanCuriosityPath(target, false);
         }
 
         private bool PlanReturn()
@@ -207,26 +153,7 @@ namespace JurassicWorld
             return hasCuriosityPath && curiosityCorner >= curiosityCorners.Length;
         }
 
-        private void StartTurningOrRunning()
-        {
-            if (!PlanFollow()) { BeginCuriosityStop(); return; }
-            PathFinished();
-            if (curiosityCorner >= curiosityCorners.Length) { BeginCuriosityStop(); return; }
-            Vector3 direction = curiosityCorners[curiosityCorner] - transform.position;
-            direction.y = 0f;
-            float angle = Vector3.SignedAngle(GetVisualForward(), direction, Vector3.up);
-            if (Mathf.Abs(angle) >= 40f && TryBeginSteppingTurn(angle, TurnUse.Follow)) return;
-            BeginCuriosityRun();
-        }
-
-        private void BeginCuriosityRun()
-        {
-            InteractionPhase = PlayerInteractionPhase.Starting;
-            currentInteractionSpeed = 0f;
-            PlayCuriosity(InteractionMotionRole.StartRun);
-        }
-
-        private bool MoveCuriosity(float speed, bool keepPlayerDistance)
+        private bool MoveCuriosity(float speed)
         {
             actualInteractionSpeed = 0f;
             if (!hasCuriosityPath || PathFinished()) return false;
@@ -237,9 +164,9 @@ namespace JurassicWorld
             if (Mathf.Abs(turnAngle) >= 40f && !FinishingReturnFootsteps)
             {
                 bool wander = IsFreeRoaming && InteractionPhase == PlayerInteractionPhase.Inactive;
-                if (!TryBeginSteppingTurn(turnAngle, wander ? TurnUse.Wander : isReturning ? TurnUse.Return : TurnUse.Follow))
+                if (!TryBeginSteppingTurn(turnAngle, wander ? TurnUse.Wander : TurnUse.Return))
                 {
-                    if (!wander || !FindFreeTurnSpace(turnAngle)) curiosityBlockedTime += Time.deltaTime;
+                    curiosityBlockedTime += Time.deltaTime;
                 }
                 return false;
             }
@@ -250,13 +177,6 @@ namespace JurassicWorld
             float step = Mathf.Min(Mathf.Max(0f, speed) * Time.deltaTime, direction.magnitude);
 
             Vector2 to = from + new Vector2(heading.x, heading.z) * step;
-            if (keepPlayerDistance && viewCamera != null)
-            {
-                Vector2 player = new Vector2(viewCamera.transform.position.x, viewCamera.transform.position.z);
-                // Allow retreat if the player approaches us; never move closer inside the safety distance.
-                if (Vector2.Distance(to, player) < followDistance && Vector2.Distance(to, player) < Vector2.Distance(from, player))
-                    to = from;
-            }
             bool blocked = interactionSettings.StepBlocked(from, to, CoreForward, new Vector2(heading.x, heading.z), interactionBody)
                 || !SafetySegmentAllowed(from, to, IsAvoidingTyrannosaurus)
                 || FindBlockingStep(from, to) != null;
@@ -270,50 +190,7 @@ namespace JurassicWorld
             if (moved) actualInteractionSpeed = Vector2.Distance(from, to) / Mathf.Max(.00001f, Time.deltaTime);
             interactionMoved |= moved;
             if (moved || Quaternion.Angle(rotation, desired) > 1f) curiosityBlockedTime = 0f;
-            if (moved) failedReplans = 0;
             return moved;
-        }
-
-        private void UpdateRunAnimation(bool moved, float speed)
-        {
-            var run = interactionProfile.Find(InteractionMotionRole.Run);
-            if (!moved) { PlayClip(idleClip); return; }
-            if (run == null) { PlayMovementClip(speed); return; }
-            PlayClip(run.StateName, speed / Mathf.Max(.01f, run.groundSpeed));
-        }
-
-        private void BeginCuriosityStop()
-        {
-            if (IsSteppingTurn) { stopAfterStepTurn = true; return; }
-            if (InteractionPhase == PlayerInteractionPhase.Stopping || InteractionPhase == PlayerInteractionPhase.Looking) return;
-            InteractionPhase = PlayerInteractionPhase.Stopping;
-            hasCuriosityPath = false;
-            stopInitialSpeed = actualInteractionSpeed;
-            if (stopInitialSpeed > .05f) PlayCuriosity(InteractionMotionRole.StopRun);
-            else { curiosityMotion = null; phaseStarted = Time.time; PlayClip(idleClip); }
-        }
-
-        private void MoveCuriosityStop(float speed)
-        {
-            actualInteractionSpeed = 0f;
-            if (speed <= .001f) return;
-            Vector3 position = transform.position + GetVisualForward() * (speed * Time.deltaTime);
-            // Stopping never consults old path corners or starts another turn.
-            Vector3 player = viewCamera != null ? viewCamera.transform.position : position + GetVisualForward() * followDistance;
-            bool approachingPlayer = FlatDistance(position, player) < followDistance
-                && FlatDistance(position, player) < FlatDistance(transform.position, player);
-            if (approachingPlayer || !StepPoseSafe(transform.position, position, transform.rotation, transform.rotation, false))
-            {
-                stopInitialSpeed = currentInteractionSpeed = 0f;
-                curiosityMotion = null;
-                phaseStarted = Time.time;
-                GetComponent<DinosaurFootLock>()?.HoldSupportDuringRecovery(.35f);
-                PlayClip(idleClip);
-                return;
-            }
-            transform.position = position;
-            actualInteractionSpeed = speed;
-            interactionMoved = true;
         }
 
         private void CompleteReturn()
@@ -322,7 +199,6 @@ namespace JurassicWorld
             routeArc = returnArc;
             InteractionPhase = PlayerInteractionPhase.Inactive;
             cooldownUntil = Time.time + interactionCooldown;
-            isReturning = false;
             BeginIdle();
         }
 
@@ -349,73 +225,10 @@ namespace JurassicWorld
                 else StartInteraction();
             }
             if (frontActive) return TickFrontInteraction();
-            bool following = !isReturning && InteractionPhase != PlayerInteractionPhase.Returning && InteractionPhase != PlayerInteractionPhase.Looking
-                && InteractionPhase != PlayerInteractionPhase.Stopping;
-            if (following)
-            {
-                if (CanSeePlayer()) { lastSeenPlayer = viewCamera.transform.position; invisibleTime = 0f; }
-                else invisibleTime += Time.deltaTime;
-                if (invisibleTime >= lostSightGrace || Time.time - interactionStarted >= interactionDuration)
-                {
-                    BeginCuriosityStop();
-                }
-            }
             switch (InteractionPhase)
             {
-                case PlayerInteractionPhase.Observing:
-                    if (MotionFinished) StartTurningOrRunning();
-                    break;
                 case PlayerInteractionPhase.Turning:
                     TickSteppingTurn();
-                    break;
-                case PlayerInteractionPhase.Starting:
-                    currentInteractionSpeed = curiosityMotion == null ? Mathf.MoveTowards(currentInteractionSpeed, ApproachSpeed, ApproachSpeed * Time.deltaTime)
-                        : Mathf.Max(0f, Mathf.Min(ApproachSpeed, curiosityMotion.speed.Evaluate(MotionTime) * MotionPlaybackSpeed));
-                    bool startingMove = MoveCuriosity(currentInteractionSpeed, true);
-                    if (IsSteppingTurn) break;
-                    if (curiosityMotion == null) UpdateRunAnimation(startingMove, currentInteractionSpeed);
-                    if (!startingMove && curiosityBlockedTime > .1f) { BeginCuriosityStop(); break; }
-                    if (MotionFinished) { InteractionPhase = PlayerInteractionPhase.Following; curiosityMotion = null; }
-                    break;
-                case PlayerInteractionPhase.Following:
-                    if (Time.time >= nextReplan && (FlatDistance(lastSeenPlayer, plannedPlayer) > playerReplanDistance || !hasCuriosityPath))
-                    {
-                        if (!PlanFollow() && ++failedReplans >= 2) { BeginCuriosityStop(); break; }
-                    }
-                    currentInteractionSpeed = Mathf.MoveTowards(currentInteractionSpeed, ApproachSpeed, ApproachSpeed * Time.deltaTime);
-                    bool moved = MoveCuriosity(currentInteractionSpeed, true);
-                    if (IsSteppingTurn) break;
-                    UpdateRunAnimation(moved, currentInteractionSpeed);
-                    if (curiosityBlockedTime >= blockedReplanDelay && Time.time >= nextReplan)
-                    {
-                        failedReplans++;
-                        curiosityBlockedTime = 0f;
-                        if (failedReplans >= 2 || !PlanFollow()) BeginCuriosityStop();
-                    }
-                    break;
-                case PlayerInteractionPhase.Stopping:
-                    float stopLength = curiosityMotion == null ? .35f : curiosityMotion.clip.length;
-                    float measured = curiosityMotion == null || curiosityMotion.groundSpeed < .01f ? 1f - Mathf.Clamp01(MotionTime / stopLength)
-                        : Mathf.Clamp01(curiosityMotion.speed.Evaluate(MotionTime) / curiosityMotion.groundSpeed);
-                    currentInteractionSpeed = stopInitialSpeed * measured;
-                    MoveCuriosityStop(currentInteractionSpeed);
-                    if (MotionFinished || MotionTime >= stopLength)
-                    {
-                        currentInteractionSpeed = 0f;
-                        InteractionPhase = PlayerInteractionPhase.Looking;
-                        PlayCuriosity(LookRole());
-                    }
-                    break;
-                case PlayerInteractionPhase.Looking:
-                    if (MotionFinished)
-                    {
-                        if (IsFreeRoaming) { FinishFreeInteraction(); break; }
-                        InteractionPhase = PlayerInteractionPhase.Returning;
-                        isReturning = true;
-                        hasCuriosityPath = false;
-                        curiosityBlockedTime = 0f;
-                        nextReplan = 0f;
-                    }
                     break;
                 case PlayerInteractionPhase.Returning:
                     if (!hasCuriosityPath && Time.time >= nextReplan) PlanReturn();
@@ -438,7 +251,7 @@ namespace JurassicWorld
                         }
                         break;
                     }
-                    bool returningMove = MoveCuriosity(WalkSpeed, false);
+                    bool returningMove = MoveCuriosity(WalkSpeed);
                     if (IsSteppingTurn) break;
                     if (returningMove) PlayMovementClip(WalkSpeed); else PlayClip(idleClip);
                     if (curiosityBlockedTime >= blockedReplanDelay)

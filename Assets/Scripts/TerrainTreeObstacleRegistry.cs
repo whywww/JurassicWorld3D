@@ -23,6 +23,7 @@ namespace JurassicWorld
         /// <summary>单棵树的碰撞圆：仅 XZ 平面位置（米，世界坐标）+ 半径（米）。</summary>
         private struct TreeObstacle
         {
+            public int id;
             public Vector2 position;
             public float radius;
             public float sectionReach;
@@ -147,6 +148,25 @@ namespace JurassicWorld
             }
             return false;
         }
+        // Stable for a geometry revision; recovery tracks whole trees, not individual trunk bands.
+        internal static void CollectCoreOverlaps(Vector2 xz, Vector2 forward, DinosaurCoreBody body, HashSet<int> overlaps)
+        {
+            EnsureInitialized();
+            float broad = body.BroadRadius;
+            int span = Mathf.Max(1, Mathf.CeilToInt((broad + maxSectionReach) / CellSize));
+            int cx = CellIndex(xz.x), cz = CellIndex(xz.y);
+            for (int x = -span; x <= span; x++) for (int z = -span; z <= span; z++)
+            {
+                if (!cells.TryGetValue(CellKey(cx + x, cz + z), out var bucket)) continue;
+                foreach (var obstacle in bucket)
+                {
+                    if ((obstacle.position - xz).sqrMagnitude >= (broad + obstacle.sectionReach) * (broad + obstacle.sectionReach)) continue;
+                    foreach (var section in obstacle.sections)
+                        if (body.Intersects(xz, forward, section)) { overlaps.Add(obstacle.id); break; }
+                }
+            }
+        }
+
         public static bool IsCoreStepBlocked(Vector2 from, Vector2 to, Vector2 fromForward, Vector2 toForward, DinosaurCoreBody body)
         {
             float angle = Vector2.SignedAngle(fromForward, toForward);
@@ -648,6 +668,7 @@ namespace JurassicWorld
             }
 
             TreeObstacle obstacle;
+            obstacle.id = obstacleCount;
             obstacle.position = new Vector2(worldX, worldZ);
             obstacle.name = name;
             obstacle.radius = radius;

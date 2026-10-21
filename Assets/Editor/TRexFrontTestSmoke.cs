@@ -98,7 +98,7 @@ namespace JurassicWorld.Editor
                     sawRun |= action == "walk head low";
                     sawEnding |= action == "look forward 2";
                     sawTurn |= action == "turn 180 right"; sawReturn |= rex.FrontInteractionStage == "ReturnWalk";
-                    if (rex.FrontInteractionStage == "Follow" || rex.FrontInteractionStage == "SideStartRun")
+                    if (rex.FrontInteractionStage == "Follow")
                         test.playerCamera.transform.position = rex.transform.position + sequenceDirection * 24f + Vector3.up * 1.7f;
                     if (rex.FrontInteractionStage == "Ending" || rex.FrontInteractionStage == "TurnBack") test.playerCamera.transform.position = new Vector3(200f, 2f, 200f);
                     if (sawReturn && rex.FrontInteractionStage == "Inactive")

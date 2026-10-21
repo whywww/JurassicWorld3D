@@ -9,7 +9,7 @@ using UnityEngine;
 namespace JurassicWorld.Editor
 {
     [InitializeOnLoad]
-    public static class TRexFreeRoamSmoke
+    public static partial class TRexFreeRoamSmoke
     {
         private const string Key = "JurassicWorld.FreeRoamSmoke";
         private const BindingFlags Private = BindingFlags.Instance | BindingFlags.NonPublic;
@@ -78,6 +78,7 @@ namespace JurassicWorld.Editor
                 {
                     rex.enabled = raptor.enabled = false;
                     raptor.transform.position = new Vector3(200f, 0f, 200f);
+                    VerifyFreeRecoveryContracts();
                     turnCase = 0; BeginTurnCase();
                 }
                 EditorApplication.update += Tick;
@@ -86,17 +87,19 @@ namespace JurassicWorld.Editor
         }
         private static void BeginTurnCase()
         {
+            ConfigureTurnObstacles();
             bool found = false;
-            foreach (var point in new[] { new Vector3(-22f, 0f, 8f), new Vector3(23f, 0f, 18f), new Vector3(0f, 0f, 49f) })
+            foreach (var point in new[] { turnCase / 2 == 3 ? new Vector3(300f, 0f, 300f) : new Vector3(-22f, 0f, 8f) })
             {
                 rex.transform.SetPositionAndRotation(point, Quaternion.Euler(0f, -rex.VisualYaw, 0f));
                 rex.GetComponent<DinosaurFootLock>().ResetSupportAnchors();
                 Set("freeGoal", point + Vector3.forward * 15f);
                 var use = Enum.Parse(typeof(DinosaurAgent).GetNestedType("TurnUse", BindingFlags.NonPublic), "Wander");
-                found = (bool)typeof(DinosaurAgent).GetMethod("TryBeginSteppingTurn", Private).Invoke(rex, new[] { (object)(turnCase == 0 ? -90f : 90f), use });
+                found = (bool)typeof(DinosaurAgent).GetMethod("TryBeginSteppingTurn", Private).Invoke(rex, new[] { (object)(turnCase % 2 == 0 ? -90f : 90f), use });
                 if (found) break;
             }
             Require(found, "No safe full " + (turnCase == 0 ? "left" : "right") + " turn fixture.");
+            Require(rex.ApplyFootRootCorrection(Vector3.right * .001f), "Static space blocked wander foot correction.");
             turnStarted = Time.time;
             turnHeading = rex.transform.eulerAngles.y;
         }
@@ -108,14 +111,16 @@ namespace JurassicWorld.Editor
                 frame = Time.frameCount;
                 if (turnsOnly)
                 {
+                    Vector3 before = rex.transform.position;
                     typeof(DinosaurAgent).GetMethod("TickSteppingTurn", Private).Invoke(rex, null);
+                    Require(Vector3.Distance(before, rex.transform.position) < 1f, "Wander turn teleported.");
                     Require(Time.time - turnStarted < 15f, "Stepping turn did not finish.");
                     if (!rex.IsSteppingTurn)
                     {
                         float yaw = Mathf.DeltaAngle(turnHeading, rex.transform.eulerAngles.y);
-                        Require(Mathf.Abs(yaw - (turnCase == 0 ? -90f : 90f)) < 1f, "Turn did not reach authored 90 degree heading.");
+                        Require(Mathf.Abs(yaw - (turnCase % 2 == 0 ? -90f : 90f)) < 1f, "Turn did not reach authored 90 degree heading.");
                         turns++;
-                        if (++turnCase == 2) { Finish(null); return; }
+                        if (++turnCase == 8) { Finish(null); return; }
                         BeginTurnCase();
                     }
                     return;
@@ -129,7 +134,7 @@ namespace JurassicWorld.Editor
                 if (Vector3.Distance(goal, currentGoal) > 1f) { goal = currentGoal; goals++; }
                 if (rex.IsSteppingTurn && !wasTurning) turns++;
                 wasTurning = rex.IsSteppingTurn;
-                if (stage != 3)
+                if (stage != 3 && !rex.IsSteppingTurn && !(bool)Get("freeRecoveryActive"))
                 {
                     Vector3 forward = rex.transform.rotation * Quaternion.Euler(0f, rex.VisualYaw, 0f) * Vector3.forward;
                     Require(!settings.PoseBlocked(new Vector2(position.x, position.z), new Vector2(forward.x, forward.z), (DinosaurCoreBody)Get("interactionBody")),
@@ -144,7 +149,7 @@ namespace JurassicWorld.Editor
                         $"Free roaming did not make off-route progress. seed={DinosaurSpawnRandomizer.LastSpawnSeed}, position={position}, travelled={travelled:F3}, goals={goals}, turn={rex.IsSteppingTurn}, turnTime={rex.StepTurnClipTime:F5}, clip={Get("activeClip")}, blocked={Get("curiosityBlockedTime")}");
                     if (disabled) { Finish(null); return; }
                     if (rex.IsSteppingTurn) return;
-                    typeof(DinosaurAgent).GetMethod("BeginCuriosityStop", Private).Invoke(rex, null);
+                    typeof(DinosaurAgent).GetMethod("FinishFreeInteraction", Private).Invoke(rex, null);
                     Set("actualInteractionSpeed", 0f);
                     stage = 1;
                 }
@@ -176,8 +181,9 @@ namespace JurassicWorld.Editor
         private static void Finish(Exception error)
         {
             EditorApplication.update -= Tick; SessionState.SetBool(Key, false); Time.captureDeltaTime = 0f;
+            CleanupTurnObstacles();
             if (settings != null && originalObstacles != null) settings.solidObstacles = originalObstacles;
-            string result = error == null ? turnsOnly ? "PASS left/right 90 degree stepping turn preflight and completion. Short smoke; visual Play feedback required." : $"PASS free roaming {(disabled ? "interaction OFF" : "ON + local interaction exit + blocked stop")}: travelled={travelled:F2}m goals={goals} turns={turns} departure={maximumDeparture:F2}m; raptor uses free roaming. Short smoke; visual Play feedback required." : error.ToString();
+            string result = error == null ? turnsOnly ? "PASS 8 left/right turns through solids, trees, boundary and off-NavMesh; peer gate and recovery contracts. Short smoke; visual Play feedback required." : $"PASS free roaming {(disabled ? "interaction OFF" : "ON + local interaction exit + blocked stop")}: travelled={travelled:F2}m goals={goals} turns={turns} departure={maximumDeparture:F2}m; raptor uses free roaming. Short smoke; visual Play feedback required." : error.ToString();
             Directory.CreateDirectory("Logs"); File.WriteAllText(turnsOnly ? "Logs/trex-free-turn-result.txt" : disabled ? "Logs/trex-free-roam-off-result.txt" : "Logs/trex-free-roam-result.txt", result);
             if (error == null) Debug.Log(result); else Debug.LogException(error);
             if (Application.isBatchMode) EditorApplication.Exit(error == null ? 0 : 1); else EditorApplication.isPlaying = false;

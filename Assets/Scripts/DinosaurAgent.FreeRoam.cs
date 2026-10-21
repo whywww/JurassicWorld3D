@@ -23,7 +23,7 @@ namespace JurassicWorld
         public bool UsesRouteScheduling => !IsFreeRoaming && !IsOffRouteInteraction;
         private Vector3 freeGoal;
         private int freeReplanFailures;
-        private bool freeTurnRelocation, freeNavigationWarning, freeRetryGoal;
+        private bool freeNavigationWarning, freeRetryGoal;
         private float roamingWalkBlendUntil;
         public string RoamingBlockReason { get; private set; } = "";
         public string LastMovementBlock { get; private set; } = "";
@@ -104,7 +104,7 @@ namespace JurassicWorld
             => NavMesh.FindClosestEdge(point, out var edge, NavigationFilter) && edge.distance >= .05f;
 
         // Navigation is shared with smaller animals. A complete root path alone is
-        // insufficient: check the entire body's translations and corner rotations.
+        // insufficient: check body translation; wander turns use the performance gate.
         private bool RoamingPathFits(Vector3 origin, Quaternion rotation, Vector3[] corners)
         {
             Vector2 previous = new Vector2(origin.x, origin.z);
@@ -115,8 +115,9 @@ namespace JurassicWorld
                 Vector2 next = new Vector2(corner.x, corner.z), delta = next - previous;
                 if (delta.sqrMagnitude < .0064f) continue;
                 Vector2 direction = delta.normalized;
-                string reason = interactionSettings.StepBlockReason(previous, previous, heading, direction, interactionBody)
-                    ?? interactionSettings.StepBlockReason(previous, next, direction, direction, interactionBody);
+                string reason = species == DinosaurSpecies.Velociraptor
+                    ? interactionSettings.StepBlockReason(previous, previous, heading, direction, interactionBody) : null;
+                reason = reason ?? interactionSettings.StepBlockReason(previous, next, direction, direction, interactionBody);
                 if (reason != null) { RoamingBlockReason = reason + " / path clearance"; return false; }
                 heading = direction; previous = next;
             }
@@ -136,28 +137,7 @@ namespace JurassicWorld
             if (interactionSettings.StepBlocked(from, to, heading, heading, interactionBody)
                 || !SafetySegmentAllowed(from, to, false)) return false;
             exit = hit.position;
-            Quaternion rotation = Quaternion.LookRotation(forward) * Quaternion.Euler(0f, -VisualYaw, 0f);
-            return HasRoamingTurnExit(exit, rotation);
-        }
-
-        private bool HasRoamingTurnExit(Vector3 origin, Quaternion rotation)
-        {
-            if (species != DinosaurSpecies.Tyrannosaurus) return true;
-            // A point at the end of a narrow passage is not a usable walking goal.
-            // Reserve an actual two-step turn there, using the existing root tracks,
-            // rather than walking into a pocket and only then discovering no exit.
-            foreach (float angle in new[] { -90f, 90f })
-            {
-                if (!FreeTurnFitsAt(origin, rotation, angle)) continue;
-                var motion = interactionProfile.Find(angle < 0f ? InteractionMotionRole.TurnLeft : InteractionMotionRole.TurnRight);
-                var last = SampleFootFrame(motion, motion.clip.length);
-                Vector3 end = origin + rotation * Quaternion.Euler(0f, VisualYaw, 0f)
-                    * new Vector3(last.rootOffset.x, 0f, last.rootOffset.y);
-                end.y = MovementHeight;
-                Quaternion heading = Quaternion.Euler(0f, last.yaw, 0f) * rotation;
-                if (FreeTurnFitsAt(end, heading, angle)) return true;
-            }
-            return false;
+            return true;
         }
 
         private bool FreeNavigationReady()
@@ -216,10 +196,9 @@ namespace JurassicWorld
             roamingWalkBlendUntil = 0f;
             frontFeet?.EndReturnHandoff();
             hasCuriosityPath = false;
-            freeTurnRelocation = false;
             freeRetryGoal = false;
             curiosityBlockedTime = 0f;
-            currentInteractionSpeed = actualInteractionSpeed = 0f;
+            actualInteractionSpeed = 0f;
             BeginIdle();
             stateTimer = delay;
         }
@@ -241,14 +220,8 @@ namespace JurassicWorld
                 if (interactionSettings.PoseBlocked(new Vector2(hit.position.x, hit.position.z), new Vector2(arrival.x, arrival.z), interactionBody)
                     || FindBlockingPeer(new Vector2(hit.position.x, hit.position.z)) != null) continue;
                 if (!PlanCuriosityPath(hit.position, true)) continue;
-                Vector3 endHeading = curiosityCorners.Length > 1
-                    ? curiosityCorners[curiosityCorners.Length - 1] - curiosityCorners[curiosityCorners.Length - 2] : arrival;
-                endHeading.y = 0f;
-                if (endHeading.sqrMagnitude < .000001f || !HasRoamingTurnExit(hit.position,
-                    Quaternion.LookRotation(endHeading) * Quaternion.Euler(0f, -VisualYaw, 0f))) continue;
                 freeGoal = hit.position;
                 freeReplanFailures = 0;
-                freeTurnRelocation = false;
                 curiosityBlockedTime = 0f;
                 CurrentState = DinosaurState.RandomWalk;
                 MovementCorridorCrossings.Release(this);
@@ -256,26 +229,6 @@ namespace JurassicWorld
             }
             FreeIdle(2f);
             RoamingBlockReason = "Waiting for safe exit";
-            return false;
-        }
-
-        private bool FindFreeTurnSpace(float angle)
-        {
-            if (freeTurnRelocation) return false;
-            for (int attempt = 0; attempt < 8; attempt++)
-            {
-                Vector3 direction = Quaternion.Euler(0f, Range(-25f, 25f), 0f) * GetVisualForward();
-                Vector3 candidate = transform.position + direction * Range(2f, 6f);
-                if (!NavMesh.SamplePosition(candidate, out var hit, .5f, NavigationFilter)
-                    || NavMesh.Raycast(transform.position, hit.position, out _, NavigationFilter)) continue;
-                Quaternion rotation = Quaternion.LookRotation(direction) * Quaternion.Euler(0f, -VisualYaw, 0f);
-                if (!StepPoseSafe(transform.position, hit.position, transform.rotation, rotation, false)
-                    || !FreeTurnFitsAt(hit.position, rotation, angle)) continue;
-                if (!PlanCuriosityPath(hit.position, true)) continue;
-                freeTurnRelocation = true;
-                curiosityBlockedTime = 0f;
-                return true;
-            }
             return false;
         }
 
@@ -293,6 +246,7 @@ namespace JurassicWorld
                 if (moveState != null) moveState.speed = 0f;
                 return true;
             }
+            if (freeRecoveryActive) { UpdateFreeRecovery(); return true; }
             if (UpdateSafetyAvoidance()) return true;
             if (CurrentState == DinosaurState.Idle)
             {
@@ -312,15 +266,10 @@ namespace JurassicWorld
             if (!hasCuriosityPath) { FreeIdle(2f); return true; }
             if (PathFinished())
             {
-                if (freeTurnRelocation)
-                {
-                    freeTurnRelocation = false;
-                    if (!PlanCuriosityPath(freeGoal, true)) FreeIdle(2f);
-                }
-                else FreeIdle(Range(3f, 7f));
+                FreeIdle(Range(3f, 7f));
                 return true;
             }
-            bool moved = species == DinosaurSpecies.Velociraptor ? MoveRaptorFree() : MoveCuriosity(WalkSpeed, false);
+            bool moved = species == DinosaurSpecies.Velociraptor ? MoveRaptorFree() : MoveCuriosity(WalkSpeed);
             if (IsSteppingTurn) return true;
             if (moved) PlayMovementClip(WalkSpeed); else PlayClip(idleClip);
             if (curiosityBlockedTime >= 2f)
@@ -343,10 +292,8 @@ namespace JurassicWorld
             ClearInteractionNavigation();
             InteractionPhase = PlayerInteractionPhase.Inactive;
             cooldownUntil = Time.time + interactionCooldown;
-            isReturning = false;
-            curiosityMotion = null;
             freeReplanFailures = 0;
-            FreeIdle(Range(3f, 7f));
+            if (!PickFreeGoal()) FreeIdle(2f);
         }
     }
 }

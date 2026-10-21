@@ -45,6 +45,12 @@ namespace JurassicWorld.Editor
             EditorSceneManager.OpenScene("Assets/Scenes/Main.unity");
             SessionState.SetBool(Key, true); SessionState.SetBool(Key + ".Restore", true); EditorApplication.isPlaying = true;
         }
+        [MenuItem("Jurassic World/Acceptance/Verify Short Return Without Repeated Turns")]
+        public static void RunShortReturn()
+        {
+            Run();
+            SessionState.SetBool(Key + ".ShortReturn", true);
+        }
         private static object Call(string name, params object[] args) => typeof(DinosaurAgent).GetMethod(name, Flags).Invoke(rex, args);
         private static void Set(string name, object value) => typeof(DinosaurAgent).GetField(name, Flags).SetValue(rex, value);
         private static void Begin()
@@ -58,7 +64,8 @@ namespace JurassicWorld.Editor
                 string idle = (string)Field("idleClip"); animation.Play(idle); animation[idle].time = 0f; animation.Sample();
                 rex.GetComponentInChildren<DinosaurFootLock>()?.ResetSupportAnchors();
                 camera.transform.position = Vector3.forward * 24f + Vector3.up * 1.7f;
-                Set("frontFollowDuration", 30f); Set("frontReturnWalkTime", 8f);
+                Set("frontFollowDuration", 30f);
+                Set("frontReturnWalkTime", SessionState.GetBool(Key + ".ShortReturn", false) ? 3f : 8f);
                 Time.captureDeltaTime = 1f / 60f;
                 Call("BeginInteractionSequence", false, false); rex.enabled = true;
                 began = Time.time; followAt = endingAt = -1f; lastFrame = -1;
@@ -78,7 +85,7 @@ namespace JurassicWorld.Editor
                 {
                     string stage = rex.FrontInteractionStage;
                     if (!stage.StartsWith("Intro") && !stage.StartsWith("Follow") && !stage.StartsWith("Near")
-                        && !stage.StartsWith("SideStartRun") && !stage.StartsWith("Ending")
+                        && !stage.StartsWith("Ending")
                         && !stage.StartsWith("TurnBack") && !stage.StartsWith("ReturnWalk"))
                         throw new InvalidOperationException("Cost fixture left the interaction: " + stage + " / " + rex.FrontEndReason);
                     if (stage.StartsWith("Follow"))
@@ -100,6 +107,8 @@ namespace JurassicWorld.Editor
                         if (turn != null && turn != lastTurnMotion)
                         {
                             turnCount++;
+                            Require(!SessionState.GetBool(Key + ".ShortReturn", false),
+                                "Straight unobstructed 3s return started a stepping turn instead of walking the trail.");
                             lastTurnMotion = turn; lastTurnCheckAt = Time.time; lastTurnTime = turnTime;
                             var corners = (Vector3[])Field("curiosityCorners");
                             int cornerIndex = (int)Field("curiosityCorner");
@@ -130,7 +139,8 @@ namespace JurassicWorld.Editor
                     return;
                 }
                 Require(sawReturn && endingAt > 0f, "Interaction ended without a historical return.");
-                Require(maxReturnWalked >= 7.9f || sawHistoryStart, "Return did not walk its configured time or reach the trail start: " + maxReturnWalked.ToString("F3"));
+                float requiredWalkTime = SessionState.GetBool(Key + ".ShortReturn", false) ? 3f : 8f;
+                Require(maxReturnWalked >= requiredWalkTime - .1f || sawHistoryStart, "Return did not walk its configured time or reach the trail start: " + maxReturnWalked.ToString("F3"));
                 var allocations = FrameGc.OrderBy(v => v).ToArray();
                 string report = "# Historical trail and return cost\n\nPASS HISTORICAL_RETURN_COST\n\n" +
                     "Isolated Main actor/profile in empty flat navigation at a fixed 60 FPS. The recorded follow trail is the only return route; no exit is searched during follow or return. " +
@@ -165,6 +175,7 @@ namespace JurassicWorld.Editor
         private static void Require(bool condition, string message) { if (!condition) throw new InvalidOperationException(message); }
         private static void Finish(Exception error)
         {
+            SessionState.EraseBool(Key + ".ShortReturn");
             if (gcRecorder.Valid) gcRecorder.Dispose();
             EditorApplication.update -= Tick; SessionState.SetBool(Key, false); Time.captureDeltaTime = 0f;
             QualitySettings.vSyncCount = originalVsync; Application.targetFrameRate = originalRate;

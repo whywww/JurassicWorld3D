@@ -184,7 +184,7 @@ namespace JurassicWorld.Editor
                     Require((bool)Call("CanSeePlayer"), "Fixture lost sight while closing to Near range.");
                     nearSetup = true;
                 }
-                if (stage > 0 && (rex.FrontInteractionStage == "Follow" || rex.FrontInteractionStage == "SideStartRun"))
+                if (stage > 0 && rex.FrontInteractionStage == "Follow")
                     camera.transform.position = rex.transform.position + (nearSetup ? playerOffset * 9f : (Vector3)Call("GetVisualForward") * 24f) + Vector3.up * 1.7f;
                 if (rex.FrontInteractionStage == "Ending" || rex.FrontInteractionStage == "TurnBack")
                     camera.transform.position = new Vector3(200f, 2f, 200f);

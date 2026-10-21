@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -76,20 +77,43 @@ namespace JurassicWorld
                     Mathf.Abs(right.y) * b.extents.x + Mathf.Abs(forward.y) * b.extents.z);
                 if (center.x - extent.x < area.xMin || center.x + extent.x > area.xMax
                     || center.y - extent.y < area.yMin || center.y + extent.y > area.yMax) return "Boundary";
-                foreach (Bounds obstacle in solidObstacles)
+            }
+            foreach (Bounds obstacle in solidObstacles)
+                if (CoreIntersectsSolid(position, forward, body, obstacle))
                 {
-                    if (obstacle.max.y <= band.layer * .5f || obstacle.min.y >= (band.layer + 1) * .5f) continue;
-                    Vector2 delta = new Vector2(obstacle.center.x, obstacle.center.z) - center;
-                    if (Mathf.Abs(delta.x) >= extent.x + obstacle.extents.x || Mathf.Abs(delta.y) >= extent.y + obstacle.extents.z) continue;
-                    if (Mathf.Abs(Vector2.Dot(delta, right)) >= b.extents.x + Mathf.Abs(right.x) * obstacle.extents.x + Mathf.Abs(right.y) * obstacle.extents.z) continue;
-                    if (Mathf.Abs(Vector2.Dot(delta, forward)) >= b.extents.z + Mathf.Abs(forward.x) * obstacle.extents.x + Mathf.Abs(forward.y) * obstacle.extents.z) continue;
                     LastPoseObstacle = $"Solid at {obstacle.center:F2}";
                     return "Rock / solid obstacle";
                 }
-            }
             if (!TerrainTreeObstacleRegistry.IsCoreBlocked(position, forward, body)) return null;
             LastPoseObstacle = TerrainTreeObstacleRegistry.LastCoreObstacle;
             return "Tree";
+        }
+
+        internal void CollectStaticOverlaps(Vector2 position, Vector2 forward, DinosaurCoreBody body, HashSet<int> overlaps)
+        {
+            overlaps.Clear();
+            TerrainTreeObstacleRegistry.CollectCoreOverlaps(position, forward, body, overlaps);
+            for (int i = 0; i < solidObstacles.Length; i++)
+                if (CoreIntersectsSolid(position, forward, body, solidObstacles[i])) overlaps.Add(-i - 1);
+        }
+
+        private static bool CoreIntersectsSolid(Vector2 position, Vector2 forward, DinosaurCoreBody body, Bounds obstacle)
+        {
+            Vector2 right = new Vector2(forward.y, -forward.x);
+            foreach (var band in body.bands)
+            {
+                Bounds b = band.bounds;
+                if (obstacle.max.y <= band.layer * .5f || obstacle.min.y >= (band.layer + 1) * .5f) continue;
+                Vector2 center = position + right * b.center.x + forward * b.center.z;
+                Vector2 extent = new Vector2(Mathf.Abs(right.x) * b.extents.x + Mathf.Abs(forward.x) * b.extents.z,
+                    Mathf.Abs(right.y) * b.extents.x + Mathf.Abs(forward.y) * b.extents.z);
+                Vector2 delta = new Vector2(obstacle.center.x, obstacle.center.z) - center;
+                if (Mathf.Abs(delta.x) >= extent.x + obstacle.extents.x || Mathf.Abs(delta.y) >= extent.y + obstacle.extents.z) continue;
+                if (Mathf.Abs(Vector2.Dot(delta, right)) >= b.extents.x + Mathf.Abs(right.x) * obstacle.extents.x + Mathf.Abs(right.y) * obstacle.extents.z) continue;
+                if (Mathf.Abs(Vector2.Dot(delta, forward)) >= b.extents.z + Mathf.Abs(forward.x) * obstacle.extents.x + Mathf.Abs(forward.y) * obstacle.extents.z) continue;
+                return true;
+            }
+            return false;
         }
 
         public bool StepBlocked(Vector2 from, Vector2 to, Vector2 fromForward, Vector2 toForward, DinosaurCoreBody body)

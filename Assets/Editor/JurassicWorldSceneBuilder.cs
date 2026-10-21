@@ -1079,7 +1079,7 @@ namespace JurassicWorld.Editor
             helpRect.pivot = new Vector2(0f, 0f);
             helpRect.anchoredPosition = new Vector2(34f, 30f);
             helpRect.sizeDelta = new Vector2(820f, 100f);
-            help.text = "W/S：前进/后退    A/D：转向并前进    按住鼠标右键：自由观察\n空格键：召唤画面中的恐龙";
+            help.text = "W/S：前进/后退    A/D：转向并前进    按住鼠标右键：自由观察";
 
             Text status = MakeText(root.transform, "Status", TextAnchor.UpperRight, 24, font);
             RectTransform statusRect = status.rectTransform;
