@@ -82,3 +82,17 @@ emotiv.local.json
 /Tools/VegetationDiversity/Checkpoints/
 /Tools/VegetationDiversity/LocalForestRepair/
 *.zip.meta
+
+# Local acceptance reports and Python caches
+/Reports/
+__pycache__/
+*.pyc
+
+# Acceptance captures, recordings and scene checkpoints under Tools (local-only)
+/Tools/**/*.png
+/Tools/**/*.mp4
+/Tools/**/*.unity
+/Tools/**/*.bin
+/Tools/**/*.txt
+/Tools/**/Checkpoint/
+/Tools/VegetationDiversity/TreeHeights/
