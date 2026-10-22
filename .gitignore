@@ -87,3 +87,12 @@ emotiv.local.json
 /Reports/
 __pycache__/
 *.pyc
+
+# Acceptance captures, recordings and scene checkpoints under Tools (local-only)
+/Tools/**/*.png
+/Tools/**/*.mp4
+/Tools/**/*.unity
+/Tools/**/*.bin
+/Tools/**/*.txt
+/Tools/**/Checkpoint/
+/Tools/VegetationDiversity/TreeHeights/
