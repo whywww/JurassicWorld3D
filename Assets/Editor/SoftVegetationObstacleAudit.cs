@@ -115,7 +115,7 @@ namespace JurassicWorld.Editor
                 Vector2 originXZ=new Vector2(origin.x,origin.z), visualXZ=new Vector2(visual.x,visual.z);
                 string clearBefore=settings.PoseBlockReason(originXZ,visualXZ,body);
                 string turnBefore=TurnSignature(settings,agent,body,turn,origin,rotation,filter);
-                var fern=Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Vegetation/Ferns/Fern02_A.prefab"),origin,Quaternion.identity);
+                var fern=Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Environment/Vegetation/Fern02/Prepared/Prefabs/Fern02_A.prefab"),origin,Quaternion.identity);
                 fern.transform.SetParent(probeObject.transform,true);
                 fern.name="Audit soft fern";fern.AddComponent<BoxCollider>().size=new Vector3(10,10,10);
                 TerrainTreeObstacleRegistry.Invalidate();

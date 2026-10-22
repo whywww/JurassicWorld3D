@@ -14,7 +14,7 @@ namespace JurassicWorld.Editor
         internal const string RootName = "Phase 2 Biome Vegetation";
         private const string OldRootName = "Vegetation Diversity Prototype (X -15..15, Z 60..90)";
         private const string ScenePath = "Assets/Scenes/Main.unity";
-        private const string BananaPrefabPath = "Assets/VegetationDiversity/Prefabs/BananaTree.prefab";
+        private const string BananaPrefabPath = "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/BananaTree.prefab";
         private const string BananaGroveName = "Banana Grove Tropical";
         private const int ExpectedGroups = 30;
         private const int ExpectedBananaTrees = 12;
@@ -72,22 +72,22 @@ namespace JurassicWorld.Editor
 
         private static readonly TreeSpec[] AutumnTrees =
         {
-            new TreeSpec("Assets/VegetationDiversity/Prefabs/FabTree_1.prefab", 10f, 0.8f),
-            new TreeSpec("Assets/VegetationDiversity/Prefabs/FabTree_5.prefab", 14f, 0.9f),
-            new TreeSpec("Assets/VegetationDiversity/Prefabs/FabTree_10.prefab", 18f, 1.1f),
+            new TreeSpec("Assets/Environment/Vegetation/Trees/Prepared/Prefabs/FabTree_1.prefab", 10f, 0.8f),
+            new TreeSpec("Assets/Environment/Vegetation/Trees/Prepared/Prefabs/FabTree_5.prefab", 14f, 0.9f),
+            new TreeSpec("Assets/Environment/Vegetation/Trees/Prepared/Prefabs/FabTree_10.prefab", 18f, 1.1f),
         };
         private static readonly TreeSpec[] TransitionTrees =
         {
-            new TreeSpec("Assets/NatureStarterKit2/Nature/tree01.prefab", 10f, 0.85f),
-            new TreeSpec("Assets/NatureStarterKit2/Nature/tree02.prefab", 9f, 0.85f),
-            new TreeSpec("Assets/NatureStarterKit2/Nature/tree03.prefab", 8f, 0.8f),
+            new TreeSpec("Assets/ThirdParty/NatureStarterKit2/Nature/tree01.prefab", 10f, 0.85f),
+            new TreeSpec("Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab", 9f, 0.85f),
+            new TreeSpec("Assets/ThirdParty/NatureStarterKit2/Nature/tree03.prefab", 8f, 0.8f),
         };
         private static readonly TreeSpec[] TropicalTrees =
         {
             new TreeSpec(BananaPrefabPath, 3.2f, 0.38f),
             new TreeSpec(BananaPrefabPath, 3.6f, 0.40f),
-            new TreeSpec("Assets/VegetationDiversity/Prefabs/Pachira_B.prefab", 5f, 0.6f),
-            new TreeSpec("Assets/VegetationDiversity/Prefabs/IslandTree02.prefab", 10f, 1.1f),
+            new TreeSpec("Assets/Environment/Vegetation/Trees/Prepared/Prefabs/Pachira_B.prefab", 5f, 0.6f),
+            new TreeSpec("Assets/Environment/Vegetation/Trees/Prepared/Prefabs/IslandTree02.prefab", 10f, 1.1f),
         };
 
         [MenuItem("Jurassic World/Environment/Vegetation/Build Phase 2 Full Layout")]
@@ -358,7 +358,7 @@ namespace JurassicWorld.Editor
             if (sceneTrees.Any(tree => tree.name.StartsWith("CoconutPalm_", StringComparison.Ordinal)))
                 throw new InvalidOperationException("A generated coconut palm remains in the scene.");
             foreach (string fab in new[] { "FabTree_1", "FabTree_5", "FabTree_10" })
-                AssertThreeLods(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/VegetationDiversity/Prefabs/" + fab + ".prefab"), fab, false);
+                AssertThreeLods(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Environment/Vegetation/Trees/Prepared/Prefabs/" + fab + ".prefab"), fab, false);
             Debug.Log($"PHASE2_FULL_VALID groups={root.transform.childCount} trees={root.GetComponentsInChildren<SceneTreeObstacle>().Length} " +
                       $"routeSamples={routeSamples} obstacleCount={TerrainTreeObstacleRegistry.ObstacleCount}.");
         }

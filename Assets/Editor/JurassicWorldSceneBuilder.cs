@@ -23,9 +23,11 @@ namespace JurassicWorld.Editor
         private const int GroundRandomSeed = MovementCorridor.LayoutSeed;
         private const string MaterialFolder = "Assets/Materials";
         private const string SkyPanoramaPath = "Assets/Materials/NatureSkyPanorama.tga";
-        private const string TerrainFolder = "Assets/Terrain";
-        private const string TerrainDataPath = "Assets/Terrain/JurassicTerrainData.asset";
-        private const string TerrainLayerFolder = "Assets/Terrain/Layers";
+        private const string TerrainFolder = "Assets/Environment/Terrain/Prepared";
+        private const string TerrainDataPath = "Assets/Environment/Terrain/Prepared/JurassicTerrainData.asset";
+        private const string TerrainLayerFolder = "Assets/Environment/Terrain/Prepared/Layers";
+        private const string RockNaturalFolder = "Assets/Environment/RocksAndDeadwood/RockMossSet01/Prepared/Materials";
+        private const string RockNaturalPath = RockNaturalFolder + "/RockNatural.mat";
         private const float TerrainSize = 200f;
         private const float TerrainHeight = 10f;
         private const int HeightmapRes = 257;
@@ -44,8 +46,8 @@ namespace JurassicWorld.Editor
             FoliageInteractionPreparation.RestoreCurrent();
             ClearActiveScene();
             DeleteLegacyEnvironmentAssets();
-            // HQ 资产铸造（幂等）：确保 Assets/Vegetation/{Ferns,Rocks,Deadwood} 下的 project-owned
-            // material / prefab 就绪，使 UnderstorySeeder 的三个资产门控在本次 Bake 生效。
+            // HQ 资产铸造（幂等）：确保 Assets/Environment 下 Fern02 / RockMossSet01 / Deadwood 的
+            // project-owned material / prefab 就绪，使 UnderstorySeeder 的三个资产门控在本次 Bake 生效。
             // 必须早于 BuildTerrain（后者内部会跑 UnderstorySeeder.Seed）；资产已存在时为纯读操作。
             PolyHavenAssetIntegration.EnsureAssets();
             Font uiFont = LoadBuiltinFont();
@@ -1026,7 +1028,7 @@ namespace JurassicWorld.Editor
             }
 
             if (!usePrefabs)
-                Debug.LogWarning("[SceneBuilder] 未找到 HQ 岩石 prefab（Assets/Vegetation/Rocks），" +
+                Debug.LogWarning("[SceneBuilder] 未找到 HQ 岩石 prefab（Assets/Environment/RocksAndDeadwood/RockMossSet01/Prepared/Prefabs），" +
                                  "Environment Props 退回程序化 Sphere 占位。");
         }
 
@@ -1053,8 +1055,8 @@ namespace JurassicWorld.Editor
             if (groundTex == null)
                 return null;
 
-            EnsureFolder(MaterialFolder);
-            Material rockMat = LoadOrCreateStandardMaterial(MaterialFolder + "/RockNatural.mat");
+            EnsureFolder(RockNaturalFolder);
+            Material rockMat = LoadOrCreateStandardMaterial(RockNaturalPath);
             rockMat.mainTexture = groundTex;
             rockMat.mainTextureScale = new Vector2(2f, 2f);
             rockMat.SetFloat("_Glossiness", 0.02f);
@@ -1131,6 +1133,7 @@ namespace JurassicWorld.Editor
             PachycephalosaurusSceneIntegration.EnsureAssets();
             SauropeltaSceneIntegration.EnsureAssets();
             BaurusuchusSceneIntegration.EnsureAssets();
+            ProtoceratopsSceneIntegration.EnsureAssets();
             foreach (DinosaurTemplate template in CreateTemplates())
             {
                 if (!template.enabled)
@@ -1205,6 +1208,7 @@ namespace JurassicWorld.Editor
             SetField(loader, "footLockDistanceLimit", t.footLockDistanceLimit);
             EditorUtility.SetDirty(loader);
             if (t.objectName == "Pachycephalosaurus") PachycephalosaurusSceneIntegration.Configure(agent);
+            if (t.objectName == "Protoceratops") ProtoceratopsSceneIntegration.Configure(agent);
             if (t.objectName == "Sauropelta") SauropeltaSceneIntegration.Configure(agent);
             if (t.objectName == "Baurusuchus") BaurusuchusSceneIntegration.Configure(agent);
             if (DinosaurGaitCalibration.Species.Contains(t.objectName)) DinosaurGaitCalibration.Apply(agent);
@@ -2153,6 +2157,12 @@ namespace JurassicWorld.Editor
             return BuildDinosaur(CreateTemplates().Single(t => t.objectName == "Pachycephalosaurus"), camera, LoadBuiltinFont());
         }
 
+        internal static DinosaurAgent AddProtoceratopsToCurrentScene()
+        {
+            if (Camera.main == null) throw new InvalidOperationException("Main camera required to add Protoceratops.");
+            return BuildDinosaur(CreateTemplates().Single(t => t.objectName == "Protoceratops"), Camera.main, LoadBuiltinFont());
+        }
+
         internal static DinosaurAgent AddSauropeltaToCurrentScene()
         {
             if (Camera.main == null) throw new InvalidOperationException("Main camera required to add Sauropelta.");
@@ -2314,8 +2324,8 @@ namespace JurassicWorld.Editor
 
         private static void BuildInfoPanel(Transform hudParent, Font font)
         {
-            const float CardWidth = 520f;
-            const float CardHeight = 360f;
+            const float CardWidth = 500f;
+            const float CardHeight = 300f;
             const float MarginLeft = 36f;
             const float MarginTop = 36f;
             const int TitleFontSize = 32;
@@ -2489,7 +2499,7 @@ namespace JurassicWorld.Editor
                     walkSpeed = 1.5f,   // 仅作估算失败兜底：syncWalkSpeedToNative=true 时烘焙会把实测原生地速（≈2.3 m/s）写入 walkSpeed /
                                         // approachSpeed，运行期播放 =1.0× 原生步态、零滑移（playbackSpeed = walkSpeed ÷ 实测地速 ≡ 1.0）。
                                         // 此后想调步频只改本值 + 重烘焙即可（测速准确前提下始终零滑移，仅观感变化）。
-                    description = "霸王龙  Tyrannosaurus Rex\n\n生存年代：晚白垩世\n食性：肉食性\n体型：约 15 米\n\n强壮的顶级掠食者，拥有惊人的咬合力。",
+                    description = "生活年代：晚白垩世\n体型：大型，长约 12–15 米\n食性：肉食\n特点：咬合力极强，伏击大型猎物",
                     idleHint = "idle",
                     moveHint = "run",
                     alignBottom = true,
@@ -2540,7 +2550,7 @@ namespace JurassicWorld.Editor
                     yaw = 180f,
                     focusHeight = 2.4f,
                     walkSpeed = 1.6f,
-                    description = "胜王龙  Rajasaurus\n\n生存年代：晚白垩世\n食性：肉食性\n分布：印度\n\n头骨短而厚，是印度次大陆特有的阿贝力龙类。",
+                    description = "生活年代：晚白垩世\n体型：大型，长约 9 米\n食性：肉食\n特点：头骨短厚，鼻部生有角",
                     idleHint = "idle",
                     moveHint = "walk",
                     primaryAlbedo = "Assets/Dinosaurs/Rajasaurus/Source/textures/AlbedoMap.jpg",
@@ -2566,7 +2576,7 @@ namespace JurassicWorld.Editor
                     // 【纠错】旧值 6.2f（= 5.5 × 2.7/2.4 按体长比例外推）从未与动画匹配：未开启实测同步时
                     // playback 恒 1.0×，身体 6.2 m/s / 脚摆速实测 ≈1.63 m/s → 滑移率 ≈74%（「大幅滑步」根因）。
                     walkSpeed = 3.0f,
-                    description = "伶盗龙  Velociraptor\n\n生存年代：晚白垩世\n食性：肉食性\n体型：约 2.7 米\n\n敏捷的小型猎手，后足具有醒目的镰刀状趾爪。",
+                    description = "生活年代：晚白垩世\n体型：小型，长约 2 米\n食性：肉食\n特点：镰刀状趾爪，行动敏捷",
                     idleHint = "idle",
                     moveHint = "run",
                     primaryAlbedo = "Assets/Dinosaurs/Velociraptor/Source/Sketchfab/Raptor/Textures/Raptor_PatternA_Albedo.png",
@@ -2604,7 +2614,7 @@ namespace JurassicWorld.Editor
                     yaw = 0f,
                     focusHeight = 1.5f,
                     walkSpeed = 1.15f,
-                    description = "厚头龙  Pachycephalosaurus\n\n场景体长：约 4.5 米。",
+                    description = "生活年代：晚白垩世\n体型：中型，长约 4.5 米\n食性：植食为主\n特点：头顶骨穹厚实，用于冲撞",
                     idleHint = "Idle",
                     moveHint = "Walk",
                     footBoneNames = new[] { "Foot.L", "Foot.R" },
@@ -2618,6 +2628,27 @@ namespace JurassicWorld.Editor
 
                 new DinosaurTemplate
                 {
+                    objectName = "Protoceratops",
+                    displayName = "原角龙",
+                    assetPath = ProtoceratopsSceneIntegration.PrefabPath,
+                    preserveSourceMaterials = true,
+                    position = new Vector3(-18f, 0f, 20f),
+                    targetLength = 2f,
+                    focusHeight = .6f,
+                    walkSpeed = .5f,
+                    description = "生活年代：晚白垩世\n体型：小型，长约 2 米\n食性：植食\n特点：鹦鹉状喙，颈盾发达",
+                    idleHint = "WalkCycle",
+                    moveHint = "WalkCycle",
+                    freezePoseWhenStopped = true,
+                    enableFootLock = false,
+                    footBoneNames = new[] { "protoceratops_foot.L_13", "protoceratops_foot.R_24", "protoceratops_hand.L_44", "protoceratops_hand.R_57" },
+                    syncMoveAnimationSpeed = true,
+                    syncWalkSpeedToNative = true,
+                    collisionRadius = 1f,
+                },
+
+                new DinosaurTemplate
+                {
                     objectName = "Sauropelta",
                     displayName = "蜥结龙",
                     assetPath = SauropeltaSceneIntegration.PrefabPath,
@@ -2627,7 +2658,7 @@ namespace JurassicWorld.Editor
                     yaw = 0f,
                     focusHeight = 1.2f,
                     walkSpeed = .65f,
-                    description = "蜥结龙  Sauropelta\n\n场景体长：约 5 米。\n使用资源自带行走动画，停步时保持姿态。",
+                    description = "生活年代：早白垩世\n体型：中型，长约 5 米\n食性：植食\n特点：背部骨甲，肩部生有尖刺",
                     idleHint = "Walk",
                     moveHint = "Walk",
                     freezePoseWhenStopped = true,
@@ -2649,7 +2680,7 @@ namespace JurassicWorld.Editor
                     yaw = 0f,
                     focusHeight = 1f,
                     walkSpeed = 0.8f,
-                    description = "包鲁鳄  Baurusuchus\n\n生存年代：晚白垩世\n食性：肉食性\n场景体长：约 5 米。\n使用纯走路循环持续漫游，转弯保持前进；受阻时安全等待。",
+                    description = "生活年代：晚白垩世\n体型：中型，长约 4 米\n食性：肉食\n特点：陆生鳄类，四肢直立善跑",
                     idleHint = "idle",
                     moveHint = "run",
                     enableFootLock = true,
@@ -2672,7 +2703,7 @@ namespace JurassicWorld.Editor
                     yaw = 0f,
                     focusHeight = 2.5f,
                     walkSpeed = 1.15f,
-                    description = "剑龙  Stegosaurus\n\n植食性恐龙，拥有背部骨板和带刺的尾巴。\n场景体长：约 9 米。",
+                    description = "生活年代：晚侏罗世\n体型：大型，长约 9 米\n食性：植食\n特点：背板成排，尾端生有尖刺",
                     idleHint = "Idle",
                     moveHint = "Walk",
                     footBoneNames = new[] { "Foot.L", "Foot.R", "BackFoot.L", "BackFoot.R", "Toes.L", "Toes.R", "BackToes.L", "BackToes.R" },
@@ -2696,7 +2727,7 @@ namespace JurassicWorld.Editor
                     yaw = 180f,
                     focusHeight = 5.5f,
                     walkSpeed = 0.7f,
-                    description = "阿根廷龙  Argentinosaurus\n\n生存年代：晚白垩世\n食性：植食性\n体型：约 30–35 米\n\n已知最大的陆生动物之一，拥有极长的颈部和尾部。",
+                    description = "生活年代：晚白垩世\n体型：巨型，长 30–35 米\n食性：植食\n特点：长颈长尾，最大陆生动物之一",
                     idleHint = "idle",
                     moveHint = "walk",
                     primaryAlbedo = "Assets/Dinosaurs/Argentinosaurus/Source/textures/AlbedoMap.png",

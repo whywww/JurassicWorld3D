@@ -218,6 +218,7 @@ namespace JurassicWorld.Editor
 
         private static string[] CoreBones(DinosaurAgent agent)
         {
+            if (agent.name == "Protoceratops") return new[] { "protoceratops_pelvis.M_64", "protoceratops_spine02.M_63", "protoceratops_spine01.M_62", "protoceratops_chest.M_61" };
             if (agent.name == "Sauropelta") return new[] { "Bone", "Bone.001", "Bone.002", "Bone.003", "Bone.L", "Bone.R", "Bone.L.003", "Bone.R.003" };
             if (agent.name == "Baurusuchus") return new[] { "Bone", "Bone.001", "Bone.002", "Bone.003" };
             if (agent.name == "Pachycephalosaurus") return new[] { "Root", "Spine1", "Spine2", "Spine3", "Pelvis", "Hip.L", "Hip.R", "Shoulder.L", "Shoulder.R" };
@@ -650,6 +651,24 @@ namespace JurassicWorld.Editor
 
         // Stable per-sweep conflicts allow a resize to preserve pre-existing overlaps while
         // rejecting any new route/body contact. Include full bodies and all wood heights.
+        internal static Func<Transform, TreeTrunkSection[]> CreateWoodSectionProbe(Terrain terrain)
+        {
+            var clearance = new RouteObstacleClearance(terrain, false);
+            clearance.bodyBottom = -1f; clearance.bodyTop = 40f;
+            return tree =>
+            {
+                var marker = tree.GetComponent<SceneTreeObstacle>();
+                bool hard = marker.includeHardBranches; var prior = marker.trunkSections;
+                try
+                {
+                    marker.includeHardBranches = true;
+                    var item = new Obstacle { IsTree = true, Position = new Vector2(tree.position.x, tree.position.z) };
+                    return clearance.AddStemSections(item, tree, tree.localToWorldMatrix, marker.Radius);
+                }
+                finally { marker.includeHardBranches = hard; marker.trunkSections = prior; }
+            };
+        }
+
         internal static Func<Transform, HashSet<int>> CreateHeightConflictProbe(Terrain terrain)
         {
             var clearance = new RouteObstacleClearance(terrain, false);

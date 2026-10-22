@@ -10,7 +10,7 @@ foreach ($id in $assets.Keys) {
     $files = Invoke-RestMethod -TimeoutSec 30 -Uri "https://api.polyhaven.com/files/$id"
     $model = $files.fbx.'1k'.fbx
     if (-not $model) { throw "No 1K FBX for $id" }
-    $root = Join-Path (Get-Location) "Assets/ThirdParty/VegetationDiversity/PolyHaven/$($assets[$id])"
+    $root = Join-Path (Get-Location) "Assets/Environment/Vegetation/Trees/Source/PolyHaven/$($assets[$id])"
     New-Item -ItemType Directory -Force -Path $root | Out-Null
     $entries = [ordered]@{}
     $entries["${id}_1k.fbx"] = $model

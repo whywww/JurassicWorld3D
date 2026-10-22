@@ -16,6 +16,7 @@ namespace JurassicWorld.Editor
         private const string Folder = "Assets/Navigation";
         private const string ProfilePath = Folder + "/TRexCuriosity.asset";
         private const string DataPath = Folder + "/TRexInteractionNavMesh.asset";
+        private const string TerrainPath = "Assets/Environment/Terrain/Prepared/MainInteractionTerrain.asset";
         private const float ReturnTurnDegrees = 170f;
         public const string SideTestProfilePath = "Assets/Scenes/TRexFrontTestAssets/SideInteractionProfile.asset";
 
@@ -614,7 +615,7 @@ namespace JurassicWorld.Editor
         {
             Terrain terrain = Terrain.activeTerrain;
             if (terrain == null) throw new InvalidOperationException("Interaction requires Main terrain.");
-            string terrainPath = Folder + "/MainInteractionTerrain.asset";
+            string terrainPath = TerrainPath;
             if (AssetDatabase.GetAssetPath(terrain.terrainData) != terrainPath)
             {
                 var data = AssetDatabase.LoadAssetAtPath<TerrainData>(terrainPath);

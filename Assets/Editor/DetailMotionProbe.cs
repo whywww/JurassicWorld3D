@@ -192,7 +192,7 @@ namespace JurassicWorld.Editor
                 if (p == null || !p.usePrototypeMesh || p.prototype == null)
                     continue;
                 string path = AssetDatabase.GetAssetPath(p.prototype);
-                if (!string.IsNullOrEmpty(path) && path.StartsWith("Assets/Vegetation/Ferns"))
+                if (!string.IsNullOrEmpty(path) && path.StartsWith("Assets/Environment/Vegetation/Fern02"))
                     return i;
             }
             return -1;
@@ -208,7 +208,7 @@ namespace JurassicWorld.Editor
                 if (protos[i] == null || !protos[i].usePrototypeMesh || protos[i].prototype == null)
                     continue;
                 string path = AssetDatabase.GetAssetPath(protos[i].prototype);
-                if (!string.IsNullOrEmpty(path) && path.StartsWith("Assets/Vegetation/Ferns"))
+                if (!string.IsNullOrEmpty(path) && path.StartsWith("Assets/Environment/Vegetation/Fern02"))
                     count++;
             }
             return count;

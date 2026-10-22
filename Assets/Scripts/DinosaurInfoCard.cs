@@ -1,38 +1,31 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace JurassicWorld
 {
-    // 信息卡是 HUD Canvas 下的屏幕空间子面板（左上角锚定）。
-    // 翼龙入画时优先显示；地面恐龙在视野中心附近且距离较近时显示。
-    // 烘焙态通过 SceneBuilder SetField 写入 canvasGroup / titleText / bodyText 引用。
-    // 阈值参数在 Inspector 中可调（有代码默认值，不需要 SetField 注入）。
+    // Reuses the baked HUD card; visibility is measured from scene depth, not colliders.
     public sealed class DinosaurInfoCard : MonoBehaviour
     {
         [SerializeField] private CanvasGroup canvasGroup;
         [SerializeField] private Text titleText;
         [SerializeField] private Text bodyText;
 
-        // ---- 可调阈值（Inspector 可调，代码默认值即烘焙值）----
-        [SerializeField] private float enterDistance = 30f;
-        [SerializeField] private float exitDistance = 38f;
-        [SerializeField] private float enterCenterRadius = 0.20f;
-        [SerializeField] private float exitCenterRadius = 0.30f;
-
         private static DinosaurInfoCard instance;
-        private float fadeTarget;
         private const float FadeSpeed = 4f;
-
-        // ---- 运行期状态 ----
+        private float fadeTarget;
+        private DinosaurVisibility visibility;
+        private DinosaurVisibility.Target currentTarget, challenger;
+        private float challengerSince;
         private Camera cachedCamera;
-        private DinosaurAgent[] agentCache;
-        private PteradactalFlightController[] flyerCache;
-        private readonly Plane[] frustumPlanes = new Plane[6];
-        private DinosaurAgent currentTarget;
+        private readonly Plane[] planes = new Plane[6];
+        private readonly List<DinosaurVisibility.Observation> eligible = new List<DinosaurVisibility.Observation>();
 
         private void Awake()
         {
             instance = this;
+            visibility = GetComponent<DinosaurVisibility>();
+            if (visibility == null) visibility = gameObject.AddComponent<DinosaurVisibility>();
             if (canvasGroup != null)
             {
                 canvasGroup.alpha = 0f;
@@ -41,11 +34,17 @@ namespace JurassicWorld
             }
         }
 
-        private void Start()
+        private void OnDisable()
         {
-            cachedCamera = Camera.main;
-            agentCache = FindObjectsOfType<DinosaurAgent>();
-            flyerCache = FindObjectsOfType<PteradactalFlightController>();
+            currentTarget = challenger = null;
+            fadeTarget = 0f;
+            if (canvasGroup != null) canvasGroup.alpha = 0f;
+            if (visibility != null) visibility.enabled = false;
+        }
+
+        private void OnEnable()
+        {
+            if (visibility != null) visibility.enabled = true;
         }
 
         private void OnDestroy()
@@ -53,162 +52,110 @@ namespace JurassicWorld
             if (instance == this) instance = null;
         }
 
-        /// <summary>手动显示信息卡（保留为外部逃生通道）。</summary>
         public static void Show(string title, string body)
         {
             if (instance == null) return;
             instance.ApplyText(title, body);
-            instance.currentTarget = null; // 打断自动锁定
+            instance.currentTarget = instance.challenger = null;
             instance.fadeTarget = 1f;
         }
 
-        /// <summary>手动隐藏信息卡。</summary>
         public static void Hide()
         {
             if (instance == null) return;
-            instance.currentTarget = null;
+            instance.currentTarget = instance.challenger = null;
             instance.fadeTarget = 0f;
-        }
-
-        private void LateUpdate()
-        {
-            // 惰性获取相机（防御首帧 null）
-            if (cachedCamera == null)
-            {
-                cachedCamera = Camera.main;
-                if (cachedCamera == null)
-                {
-                    currentTarget = null;
-                    fadeTarget = 0f;
-                    return;
-                }
-            }
-            if (flyerCache == null || flyerCache.Length == 0)
-                flyerCache = FindObjectsOfType<PteradactalFlightController>();
-
-            GeometryUtility.CalculateFrustumPlanes(cachedCamera, frustumPlanes);
-            foreach (var flyer in flyerCache)
-            {
-                if (flyer == null || !flyer.isActiveAndEnabled ||
-                    !flyer.IsInView(cachedCamera, frustumPlanes)) continue;
-
-                currentTarget = null;
-                ApplyText(flyer.DisplayName, flyer.Description);
-                fadeTarget = 1f;
-                return;
-            }
-
-            // 惰性获取 Agent 列表
-            if (agentCache == null || agentCache.Length == 0)
-            {
-                agentCache = FindObjectsOfType<DinosaurAgent>();
-            }
-
-            EvaluateAutoDisplay();
         }
 
         private void Update()
         {
-            if (canvasGroup == null) return;
-            if (Mathf.Approximately(canvasGroup.alpha, fadeTarget)) return;
-            canvasGroup.alpha = Mathf.MoveTowards(canvasGroup.alpha, fadeTarget, Time.deltaTime * FadeSpeed);
+            if (canvasGroup != null)
+                canvasGroup.alpha = Mathf.MoveTowards(canvasGroup.alpha, fadeTarget, Time.deltaTime * FadeSpeed);
         }
 
-        // ---- 自动检测核心 ----
-
-        private void EvaluateAutoDisplay()
+        private void LateUpdate()
         {
-            DinosaurAgent best = null;
-            float bestCenterSqr = float.MaxValue;
-            float currentTargetCenterSqr = float.MaxValue;
-
-            float enterR2 = enterCenterRadius * enterCenterRadius;
-            float exitR2 = exitCenterRadius * exitCenterRadius;
-            float enterDist2 = enterDistance * enterDistance;
-            float exitDist2 = exitDistance * exitDistance;
-
-            Vector3 camPos = cachedCamera.transform.position;
-
-            for (int i = 0; i < agentCache.Length; i++)
+            var camera = Camera.main;
+            if (camera != cachedCamera)
             {
-                DinosaurAgent agent = agentCache[i];
-                if (agent == null) continue;
-
-                // 距离预筛（sqrMagnitude 避免 Sqrt 开销）
-                Vector3 agentPos = agent.transform.position;
-                float distSqr = (camPos - agentPos).sqrMagnitude;
-
-                // 迟滞：当前目标用宽松退出阈值，其他候选用严格进入阈值
-                float maxDist2 = (agent == currentTarget) ? exitDist2 : enterDist2;
-                if (distSqr > maxDist2) continue;
-
-                // 视口中心检测
-                Vector3 focusPoint = agentPos + Vector3.up * agent.ViewFocusHeight;
-                Vector3 vp = cachedCamera.WorldToViewportPoint(focusPoint);
-                if (vp.z <= 0f) continue; // 在相机后方
-
-                float dx = vp.x - 0.5f;
-                float dy = vp.y - 0.5f;
-                float centerSqr = dx * dx + dy * dy;
-
-                // 迟滞：当前目标用宽松退出半径
-                float maxR2 = (agent == currentTarget) ? exitR2 : enterR2;
-                if (centerSqr > maxR2) continue;
-
-                // 记录当前目标的分数（用于后续粘性比较）
-                if (agent == currentTarget)
-                    currentTargetCenterSqr = centerSqr;
-
-                if (centerSqr < bestCenterSqr)
-                {
-                    bestCenterSqr = centerSqr;
-                    best = agent;
-                }
+                currentTarget = challenger = null;
+                cachedCamera = camera;
             }
+            visibility.Tick(camera);
+            if (camera == null || !camera.isActiveAndEnabled || Time.unscaledTime - visibility.LastResultTime > .5f)
+            {
+                Select(null);
+                return;
+            }
+            EvaluateAutoDisplay(visibility.Observations, camera, Time.unscaledTime);
+        }
 
-            // 当前目标粘性：如果 currentTarget 仍有效且新候选未显著更优，保持当前
-            if (currentTarget != null && best != currentTarget && currentTargetCenterSqr <= exitR2)
-            {
-                // 新候选的 centerSqr 需小于当前目标的 70% 才值得切换
-                if (bestCenterSqr > currentTargetCenterSqr * 0.7f)
-                {
-                    best = currentTarget;
-                }
-            }
+        private static Vector2 CenterOffset(Vector2 center, float aspect) =>
+            new Vector2((center.x - .5f) * aspect, center.y - .5f);
 
-            // 切换逻辑
-            if (best != currentTarget)
+        private static bool IsCore(DinosaurVisibility.Observation item, float aspect) =>
+            !item.Target.IsFlying && CenterOffset(item.Center, aspect).sqrMagnitude <= .12f * .12f;
+
+        private static float Score(DinosaurVisibility.Observation item, float aspect)
+        {
+            float halfDiagonal = .5f * Mathf.Sqrt(aspect * aspect + 1f);
+            float center = 1f - Mathf.Clamp01(CenterOffset(item.Center, aspect).magnitude / halfDiagonal);
+            return .65f * center + .20f * Mathf.Clamp01(item.Area / .05f) + .15f / (1f + item.Distance / 20f);
+        }
+
+        private static bool SameTarget(DinosaurVisibility.Target a, DinosaurVisibility.Target b) =>
+            a != null && b != null && a.Owner != null && a.Owner == b.Owner;
+
+        private void EvaluateAutoDisplay(IReadOnlyList<DinosaurVisibility.Observation> observations, Camera camera, float now)
+        {
+            eligible.Clear();
+            GeometryUtility.CalculateFrustumPlanes(camera, planes);
+            bool hasCore = false;
+            foreach (var item in observations)
             {
-                currentTarget = best;
-                if (best != null)
-                    ApplyText(best.DisplayName, best.Description);
-                fadeTarget = best != null ? 1f : 0f;
+                if (item.VisiblePixels < 16 || item.VisibleRatio < .5f ||
+                    !item.Target.IsInView(camera, planes, out _)) continue;
+                eligible.Add(item);
+                hasCore |= IsCore(item, camera.aspect);
             }
-            else if (best == null)
+            DinosaurVisibility.Target best = null;
+            float bestScore = float.NegativeInfinity, currentScore = float.NegativeInfinity;
+            foreach (var item in eligible)
             {
-                fadeTarget = 0f;
+                if (hasCore && !IsCore(item, camera.aspect)) continue;
+                float score = Score(item, camera.aspect);
+                if (SameTarget(item.Target, currentTarget)) currentScore = score;
+                if (score > bestScore) { best = item.Target; bestScore = score; }
             }
-            else
+            if (best == null) { Select(null); return; }
+            // Invalid or core-excluded targets lose eligibility without the switch delay.
+            if (float.IsNegativeInfinity(currentScore)) { Select(best); return; }
+            if (SameTarget(best, currentTarget) || bestScore < currentScore * 1.15f)
             {
+                challenger = null;
                 fadeTarget = 1f;
+                return;
             }
+            if (!SameTarget(best, challenger))
+            {
+                challenger = best; challengerSince = now;
+                return;
+            }
+            if (now - challengerSince >= .2f) Select(best);
+        }
+
+        private void Select(DinosaurVisibility.Target target)
+        {
+            currentTarget = target;
+            challenger = null;
+            if (target != null) ApplyText(target.DisplayName, target.Description);
+            fadeTarget = target != null ? 1f : 0f;
         }
 
         private void ApplyText(string title, string body)
         {
-            string displayBody = FormatBody(body);
-            if (titleText != null && titleText.text != title)
-                titleText.text = title;
-            if (bodyText != null && bodyText.text != displayBody)
-                bodyText.text = displayBody;
-        }
-
-        /// <summary>跳过描述首行（格式为 "中文名  EnglishName\n\n正文..."）。</summary>
-        private static string FormatBody(string body)
-        {
-            if (string.IsNullOrEmpty(body)) return body;
-            int split = body.IndexOf("\n\n");
-            return split >= 0 ? body.Substring(split + 2) : body;
+            if (titleText != null && titleText.text != title) titleText.text = title;
+            if (bodyText != null && bodyText.text != body) bodyText.text = body;
         }
     }
 }

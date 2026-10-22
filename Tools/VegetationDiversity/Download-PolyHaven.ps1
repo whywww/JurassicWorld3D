@@ -1,6 +1,6 @@
 param(
     [string]$AssetId = 'island_tree_02',
-    [string]$Destination = 'Assets/ThirdParty/VegetationDiversity/PolyHaven/IslandTree02'
+    [string]$Destination = 'Assets/Environment/Vegetation/Trees/Source/PolyHaven/IslandTree02'
 )
 
 $ErrorActionPreference = 'Stop'

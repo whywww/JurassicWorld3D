@@ -20,3 +20,5 @@ run_crossing_regression.ps1 检查路线交叉逻辑，可用 -CorridorSource <�
 无法定位编辑器或编译工具时，脚本会报错并提示如何配置。
 
 针对个人缓存截图的 skyline 和 seam 分析脚本已删除。
+
+`Tools/VegetationDiversity/TreeHeights/` 等目录中的报告与 CSV 是环境资产整理前的历史记录，其中出现的资源路径可能仍指向旧目录，不作为当前路径依据。

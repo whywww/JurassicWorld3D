@@ -11,10 +11,10 @@ namespace JurassicWorld.Editor
     /// <summary>Prepares the five approved tree species used by the central forest.</summary>
     public static class PolyHavenFiveTreePreview
     {
-        private const string Source = "Assets/ThirdParty/VegetationDiversity/PolyHaven/";
-        private const string Prepared = "Assets/ThirdParty/VegetationDiversity/Prepared/";
-        private const string Prefabs = "Assets/VegetationDiversity/Prefabs/";
-        private const string Materials = "Assets/VegetationDiversity/Materials/";
+        private const string Source = "Assets/Environment/Vegetation/Trees/Source/PolyHaven/";
+        private const string Prepared = "Assets/Environment/Vegetation/Trees/Prepared/Models/";
+        private const string Prefabs = "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/";
+        private const string Materials = "Assets/Environment/Vegetation/Trees/Prepared/Materials/";
 
         private sealed class TreeSpec
         {

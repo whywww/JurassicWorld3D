@@ -20,7 +20,7 @@ for asset, name in assets:
     for mesh in list(bpy.data.meshes):
         if mesh.users == 0:
             bpy.data.meshes.remove(mesh)
-    source = os.path.join(project, 'Assets/ThirdParty/VegetationDiversity/PolyHaven', name, asset + '_1k.fbx')
+    source = os.path.join(project, 'Assets/Environment/Vegetation/Trees/Source/PolyHaven', name, asset + '_1k.fbx')
     bpy.ops.import_scene.fbx(filepath=source)
     meshes = [obj for obj in bpy.data.objects if obj.type == 'MESH' and obj.name != 'Cube']
     print('PREVIEW_SOURCE', asset, [(obj.name, len(obj.data.polygons)) for obj in meshes], flush=True)
@@ -81,7 +81,7 @@ for asset, name in assets:
     bpy.ops.object.select_all(action='DESELECT')
     for obj in objects:
         obj.select_set(True)
-    destination = os.path.join(project, 'Assets/ThirdParty/VegetationDiversity/Prepared', name + '_LODs.fbx')
+    destination = os.path.join(project, 'Assets/Environment/Vegetation/Trees/Prepared/Models', name + '_LODs.fbx')
     bpy.ops.export_scene.fbx(filepath=destination, use_selection=True, apply_unit_scale=True,
                              axis_forward='-Z', axis_up='Y', add_leaf_bones=False)
     reports.append({'asset': asset, 'name': name, 'source_triangles': source_triangles,

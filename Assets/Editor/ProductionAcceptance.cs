@@ -34,7 +34,7 @@ namespace JurassicWorld.Editor
     public static class ProductionAcceptance
     {
         private const string MainScenePath = "Assets/Scenes/Main.unity";
-        private const string TerrainDataPath = "Assets/Terrain/JurassicTerrainData.asset";
+        private const string TerrainDataPath = "Assets/Environment/Terrain/Prepared/JurassicTerrainData.asset";
         private const string OutputRelativeFolder = "Logs/acceptance";
 
         /// <summary>生产常量期望值（门控用）。</summary>
@@ -445,7 +445,7 @@ namespace JurassicWorld.Editor
 
             if (report.layerCount == 0 && UnderstoryAssetLocator.FindFernPrefabs().Length > 0)
                 warnings.Add(Warn("fern-layers-zero",
-                    "Assets/Vegetation/Ferns 有合格 prefab 但 TerrainData 中 fern 层数为 0：Bake 未生效或 fern 门控被跳过。"));
+                    "Assets/Environment/Vegetation/Fern02/Prepared/Prefabs 有合格 prefab 但 TerrainData 中 fern 层数为 0：Bake 未生效或 fern 门控被跳过。"));
             if (report.layerCount > 1 && report.distinctLayerSumCount != report.layerCount)
                 warnings.Add(Warn("fern-layer-sums-equal",
                     "存在 Σdensity 完全相同的 fern 层：疑似回退成「每层写一份完整目标密度」。"));
@@ -688,10 +688,9 @@ namespace JurassicWorld.Editor
         {
             string[] roots =
             {
-                "Assets/Vegetation",
-                "Assets/Materials/PolyHaven",
-                "Assets/Textures/PolyHaven",
-                "Assets/Meshes/PolyHaven",
+                "Assets/Environment/Vegetation",
+                "Assets/Environment/RocksAndDeadwood",
+                "Assets/Environment/Terrain/Prepared/GroundEcology",
             };
 
             var files = new List<AssetFile>();
@@ -765,7 +764,7 @@ namespace JurassicWorld.Editor
         private static FernMaterialProbe CollectFernMaterial(List<AcceptanceWarning> warnings)
         {
             var probe = new FernMaterialProbe();
-            const string materialPath = "Assets/Materials/PolyHaven/Fern02_Cutout.mat";
+            const string materialPath = PolyHavenAssetIntegration.FernMaterialPath;
             Material material = AssetDatabase.LoadAssetAtPath<Material>(materialPath);
             if (material == null)
             {

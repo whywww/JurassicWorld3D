@@ -29,7 +29,7 @@ namespace JurassicWorld.Editor
             internal bool Autumn;
             internal Species(string name, float height, float radius, bool autumn = false, bool starter = false)
             { Name = name; Height = height; Radius = radius; Autumn = autumn;
-                Path = starter ? "Assets/NatureStarterKit2/Nature/" + name + ".prefab" : "Assets/VegetationDiversity/Prefabs/" + name + ".prefab"; }
+                Path = starter ? "Assets/ThirdParty/NatureStarterKit2/Nature/" + name + ".prefab" : "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/" + name + ".prefab"; }
         }
         private static readonly Species[] SpeciesList =
         {
@@ -388,8 +388,8 @@ namespace JurassicWorld.Editor
                 if (c.Stems.Any(s => Vector2.Distance(s.Point, p) < s.Radius + .35f)) continue;
                 if (understory.transform.Cast<Transform>().Any(t => Vector2.Distance(XZ(t.position), p) < 1.2f)) continue;
                 bool fern = random.NextDouble() < .75;
-                GameObject item = Instantiate(fern ? "Assets/Vegetation/Ferns/Fern02_" + "ABCD"[random.Next(4)] + ".prefab" :
-                    "Assets/NatureStarterKit2/Nature/bush0" + random.Next(1, 7) + ".prefab", understory.transform);
+                GameObject item = Instantiate(fern ? "Assets/Environment/Vegetation/Fern02/Prepared/Prefabs/Fern02_" + "ABCD"[random.Next(4)] + ".prefab" :
+                    "Assets/ThirdParty/NatureStarterKit2/Nature/bush0" + random.Next(1, 7) + ".prefab", understory.transform);
                 item.name = "Local" + (fern ? "Fern_" : "Shrub_") + (++lowCount).ToString("000");
                 item.transform.localScale *= Range(random, .4f, .8f) / BoundsOf(item).size.y;
                 item.transform.rotation = Quaternion.Euler(0f, Range(random, 0f, 360f), 0f);
@@ -526,8 +526,8 @@ namespace JurassicWorld.Editor
                     if (!Core.Contains(p) || !SiteSafe(c, p, .3f)) continue;
                     if (points.Any(other => Vector2.Distance(other, p) < 1.1f)) continue;
                     bool fern = random.NextDouble() < .68;
-                    string path = fern ? "Assets/Vegetation/Ferns/Fern02_" + "ABCD"[random.Next(4)] + ".prefab" :
-                        "Assets/NatureStarterKit2/Nature/bush0" + random.Next(1, 7) + ".prefab";
+                    string path = fern ? "Assets/Environment/Vegetation/Fern02/Prepared/Prefabs/Fern02_" + "ABCD"[random.Next(4)] + ".prefab" :
+                        "Assets/ThirdParty/NatureStarterKit2/Nature/bush0" + random.Next(1, 7) + ".prefab";
                     GameObject item = Instantiate(path, group.transform); item.name = (fern ? "Fern" : "Shrub") + "_" + (++index);
                     item.transform.rotation = Quaternion.Euler(0f, Range(random, 0f, 360f), 0f);
                     item.transform.localScale *= Range(random, fern ? .65f : .7f, fern ? 1.35f : 1.6f) / BoundsOf(item).size.y;
@@ -541,7 +541,7 @@ namespace JurassicWorld.Editor
                 Vector2 p = XZ(trees[random.Next(trees.Length)].transform.position) + new Vector2(3f, 2f);
                 if (!Core.Contains(p) || !SiteSafe(c, p, 2.5f) || !c.SolidSafe(p, 3f)) continue;
                 if (c.Stems.Any(s => Vector2.Distance(s.Point, p) < s.Radius + 2.1f)) continue;
-                GameObject item = Instantiate("Assets/Vegetation/Deadwood/" + (i % 3 == 0 ? "DeadwoodLogTrunk02" : "DeadwoodStump01") + ".prefab", group.transform);
+                GameObject item = Instantiate("Assets/Environment/RocksAndDeadwood/Deadwood/Prepared/Prefabs/" + (i % 3 == 0 ? "DeadwoodLogTrunk02" : "DeadwoodStump01") + ".prefab", group.transform);
                 item.name = "Deadwood_" + i; item.transform.localScale *= .65f;
                 item.transform.rotation = Quaternion.Euler(0f, Range(random, 0f, 360f), 0f);
                 Ground(item, c.Terrain, p);
@@ -555,22 +555,22 @@ namespace JurassicWorld.Editor
             var group = new GameObject("Route Groundcover"); group.transform.SetParent(parent, false);
             var random = new System.Random(Seed + phase * 1919); var points = new List<Vector2>();
             // Reuse the existing grass texture with a small crossed tuft mesh, independent of Terrain details.
-            var tuft = AssetDatabase.LoadAssetAtPath<Mesh>("Assets/Terrain/GroundEcology/RouteGrassTuft.asset");
+            var tuft = AssetDatabase.LoadAssetAtPath<Mesh>("Assets/Environment/Terrain/Prepared/GroundEcology/Surface/RouteGrassTuft.asset");
             if (tuft == null)
             {
                 tuft = new Mesh { name = "Route grass tuft" };
                 tuft.vertices = new[] { new Vector3(-.18f,0,0),new Vector3(.18f,0,0),new Vector3(.1f,1,0),new Vector3(-.1f,1,0),new Vector3(0,0,-.18f),new Vector3(0,0,.18f),new Vector3(0,1,.1f),new Vector3(0,1,-.1f) };
                 tuft.uv = new[] { Vector2.zero,Vector2.right,Vector2.one,Vector2.up,Vector2.zero,Vector2.right,Vector2.one,Vector2.up };
                 tuft.triangles = new[] { 0,2,1,0,3,2,4,6,5,4,7,6 }; tuft.RecalculateNormals(); tuft.RecalculateBounds();
-                AssetDatabase.CreateAsset(tuft,"Assets/Terrain/GroundEcology/RouteGrassTuft.asset");
+                AssetDatabase.CreateAsset(tuft,"Assets/Environment/Terrain/Prepared/GroundEcology/Surface/RouteGrassTuft.asset");
             }
-            var mat = AssetDatabase.LoadAssetAtPath<Material>("Assets/Terrain/GroundEcology/RouteGrassTuft.mat");
+            var mat = AssetDatabase.LoadAssetAtPath<Material>("Assets/Environment/Terrain/Prepared/GroundEcology/Surface/RouteGrassTuft.mat");
             if (mat == null)
             {
                 mat = new Material(Shader.Find("Jurassic World/Foliage Cutout Double Sided"));
-                mat.mainTexture = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/NatureStarterKit2/Textures/grass01.tga");
+                mat.mainTexture = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/ThirdParty/NatureStarterKit2/Textures/grass01.tga");
                 mat.color = new Color(.65f,.8f,.5f); mat.SetFloat("_Cutoff",.35f);
-                AssetDatabase.CreateAsset(mat,"Assets/Terrain/GroundEcology/RouteGrassTuft.mat");
+                AssetDatabase.CreateAsset(mat,"Assets/Environment/Terrain/Prepared/GroundEcology/Surface/RouteGrassTuft.mat");
             }
             int count = 0;
             for (int route = 0; route < MovementCorridor.RouteCount; route++)
@@ -593,7 +593,7 @@ namespace JurassicWorld.Editor
                     else
                     {
                         bool fern = choice < .85f;
-                        item = Instantiate(fern ? "Assets/Vegetation/Ferns/Fern02_" + "ABCD"[random.Next(4)] + ".prefab" : "Assets/NatureStarterKit2/Nature/bush0" + random.Next(1,7) + ".prefab",group.transform);
+                        item = Instantiate(fern ? "Assets/Environment/Vegetation/Fern02/Prepared/Prefabs/Fern02_" + "ABCD"[random.Next(4)] + ".prefab" : "Assets/ThirdParty/NatureStarterKit2/Nature/bush0" + random.Next(1,7) + ".prefab",group.transform);
                         item.name = (fern ? "RouteFern_" : "RouteShrub_") + (++count);
                         item.transform.localScale *= Range(random,.4f,.8f)/BoundsOf(item).size.y;
                     }

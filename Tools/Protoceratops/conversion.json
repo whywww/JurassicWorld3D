@@ -1,0 +1,165 @@
+{
+  "actions": [
+    {
+      "name": "WalkCycle",
+      "frames": [
+        12.0,
+        60.0
+      ]
+    }
+  ],
+  "objects": [
+    {
+      "name": "Sketchfab_model",
+      "type": "EMPTY",
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "unnamed",
+      "type": "MESH",
+      "dimensions": [
+        6.90798807144165,
+        2.2346267700195312,
+        2.2275922298431396
+      ]
+    },
+    {
+      "name": "unnamed.001",
+      "type": "MESH",
+      "dimensions": [
+        6.939064025878906,
+        2.2652206420898438,
+        2.258779525756836
+      ]
+    },
+    {
+      "name": "GLTF_created_0",
+      "type": "ARMATURE",
+      "dimensions": [
+        25.990415573120117,
+        104.43698120117188,
+        46.318519592285156
+      ]
+    },
+    {
+      "name": "protoceratops_IKFoot.L_66",
+      "type": "EMPTY",
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "protoceratops_IKFoot.R_67",
+      "type": "EMPTY",
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "protoceratops_IKHand.L_68",
+      "type": "EMPTY",
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "protoceratops_IKHand.R_69",
+      "type": "EMPTY",
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "unnamed.002",
+      "type": "MESH",
+      "dimensions": [
+        24.824386596679688,
+        89.29132080078125,
+        30.812761306762695
+      ]
+    }
+  ],
+  "head_attached_eye_meshes": [
+    "unnamed",
+    "unnamed.001"
+  ],
+  "bones": [
+    "protoceratops_move.M_70",
+    "protoceratops_IKMove.M_65",
+    "protoceratops_tail_01.M_4",
+    "protoceratops_tail_02.M_3",
+    "protoceratops_tail_03.M_2",
+    "protoceratops_tail_04.M_1",
+    "protoceratops_pelvis.M_64",
+    "protoceratops_femur.L_15",
+    "protoceratops_shin.L_14",
+    "protoceratops_foot.L_13",
+    "protoceratops_finger01-1.L_6",
+    "protoceratops_finger01-2.L_5",
+    "protoceratops_finger02-1.L_8",
+    "protoceratops_finger02-2.L_7",
+    "protoceratops_finger03-1.L_10",
+    "protoceratops_finger03-2.L_9",
+    "protoceratops_finger04-1.L_12",
+    "protoceratops_finger04-2.L_11",
+    "protoceratops_femur.R_26",
+    "protoceratops_shin.R_25",
+    "protoceratops_foot.R_24",
+    "protoceratops_finger01-1.R_17",
+    "protoceratops_finger01-2.R_16",
+    "protoceratops_finger02-1.R_19",
+    "protoceratops_finger02-2.R_18",
+    "protoceratops_finger03-1.R_21",
+    "protoceratops_finger03-2.R_20",
+    "protoceratops_finger04-1.R_23",
+    "protoceratops_finger04-2.R_22",
+    "protoceratops_spine02.M_63",
+    "protoceratops_spine01.M_62",
+    "protoceratops_chest.M_61",
+    "protoceratops_neck_01.M_34",
+    "protoceratops_neck_02.M_33",
+    "protoceratops_head.M_32",
+    "protoceratops_jaw.M_30",
+    "protoceratops_tongue_01.M_29",
+    "protoceratops_tongue_02.M_28",
+    "protoceratops_tongue_03.M_27",
+    "protoceratops_shoulder.L_47",
+    "protoceratops_humerus.L_46",
+    "protoceratops_forearm.L_45",
+    "protoceratops_hand.L_44",
+    "protoceratops_finger05-1.L_36",
+    "protoceratops_finger05-2.L_35",
+    "protoceratops_finger07-1.L_38",
+    "protoceratops_finger07-2.L_37",
+    "protoceratops_finger06-1.L_40",
+    "protoceratops_finger06-2.L_39",
+    "protoceratops_finger08-1.L_42",
+    "protoceratops_finger08-2.L_41",
+    "protoceratops_finger09-1.L_43",
+    "protoceratops_shoulder.R_60",
+    "protoceratops_humerus.R_59",
+    "protoceratops_forearm.R_58",
+    "protoceratops_hand.R_57",
+    "protoceratops_finger05-1.R_49",
+    "protoceratops_finger05-2.R_48",
+    "protoceratops_finger07-1.R_51",
+    "protoceratops_finger07-2.R_50",
+    "protoceratops_finger06-1.R_53",
+    "protoceratops_finger06-2.R_52",
+    "protoceratops_finger08-1.R_55",
+    "protoceratops_finger08-2.R_54",
+    "protoceratops_finger09-1.R_56"
+  ]
+}

@@ -8,9 +8,10 @@ namespace JurassicWorld
     {
         public enum RoamingMode { [InspectorName("路线漫游")] Route, [InspectorName("自由漫游")] Free }
         public enum DinosaurSpecies { Other, Tyrannosaurus, Velociraptor, Pachycephalosaurus, Sauropelta, Baurusuchus,
-            Rajasaurus, Stegosaurus, Argentinosaurus }
+            Rajasaurus, Stegosaurus, Argentinosaurus, Protoceratops }
         private bool UsesSimpleFreeRoam => species == DinosaurSpecies.Velociraptor || species == DinosaurSpecies.Pachycephalosaurus
-            || species == DinosaurSpecies.Sauropelta || species == DinosaurSpecies.Baurusuchus;
+            || species == DinosaurSpecies.Sauropelta || species == DinosaurSpecies.Baurusuchus
+            || species == DinosaurSpecies.Protoceratops;
         [SerializeField] private DinosaurSpecies species;
         [SerializeField, Min(1f), InspectorName("霸王龙安全距离（米）")] private float safetyDistance = 15f;
         [SerializeField, Min(1f), InspectorName("避让解除距离（米）")] private float safetyReleaseDistance = 20f;
@@ -112,7 +113,7 @@ namespace JurassicWorld
         {
             if (!NavMesh.FindClosestEdge(point, out var edge, NavigationFilter) || edge.distance < .05f) return false;
             if (species != DinosaurSpecies.Pachycephalosaurus && species != DinosaurSpecies.Sauropelta
-                && species != DinosaurSpecies.Baurusuchus) return true;
+                && species != DinosaurSpecies.Baurusuchus && species != DinosaurSpecies.Protoceratops) return true;
             // The longer animal must be able to turn after resting, rather than
             // finish a valid forward path inside a pocket with no safe next heading.
             Vector2 position = new Vector2(point.x, point.z);
@@ -298,7 +299,7 @@ namespace JurassicWorld
             if (!hasCuriosityPath) { FreeIdle(2f); return true; }
             if (PathFinished())
             {
-                FreeIdle(species == DinosaurSpecies.Pachycephalosaurus ? Range(2f, 4f) : Range(3f, 7f));
+                FreeIdle(species == DinosaurSpecies.Pachycephalosaurus ? Range(1f, 2f) : Range(3f, 7f));
                 return true;
             }
             bool moved = UsesSimpleFreeRoam ? MoveRaptorFree() : MoveCuriosity(WalkSpeed);

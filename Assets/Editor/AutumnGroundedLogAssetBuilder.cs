@@ -10,14 +10,14 @@ namespace JurassicWorld.Editor
     /// <summary>Derives a flatter log for the autumn belt; the source Poly Haven prefab stays intact.</summary>
     internal static class AutumnGroundedLogAssetBuilder
     {
-        internal const string PrefabPath = "Assets/Terrain/DeadVegetation/AutumnGroundedLog.prefab";
-        private const string Folder = "Assets/Terrain/DeadVegetation";
-        private const string SourcePath = "Assets/Vegetation/Deadwood/DeadwoodLogTrunk02.prefab";
+        internal const string PrefabPath = "Assets/Environment/RocksAndDeadwood/AutumnGroundedLog/Prepared/Prefabs/AutumnGroundedLog.prefab";
+        private const string Folder = "Assets/Environment/RocksAndDeadwood/AutumnGroundedLog/Prepared/Models";
+        private const string SourcePath = "Assets/Environment/RocksAndDeadwood/Deadwood/Prepared/Prefabs/DeadwoodLogTrunk02.prefab";
 
         internal static void EnsureAssets()
         {
             if (AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath) != null) return;
-            if (!AssetDatabase.IsValidFolder(Folder)) AssetDatabase.CreateFolder("Assets/Terrain", "DeadVegetation");
+            if (!AssetDatabase.IsValidFolder(Folder)) JurassicWorldSceneBuilder.EnsureFolder(Folder);
             GameObject source = AssetDatabase.LoadAssetAtPath<GameObject>(SourcePath);
             if (source == null) throw new InvalidOperationException("Missing source deadwood log prefab.");
             Mesh main = source.transform.Find("LOD0").GetComponent<MeshFilter>().sharedMesh;

@@ -1,0 +1,2807 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &40555853058941767
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3149550133903577128}
+  m_Layer: 0
+  m_Name: protoceratops_finger05-2.R_48
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3149550133903577128
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 40555853058941767}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0.00000007493609, y: 0.9414687, z: -0.33710042, w: -0.00000011460505}
+  m_LocalPosition: {x: -0.000000001437329, y: 0.036235344, z: 0.00000008306861}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8129163034839045664}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &220067908282461088
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 118357907620634866}
+  m_Layer: 0
+  m_Name: protoceratops_finger01-2.R_16
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &118357907620634866
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 220067908282461088}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0.000000024912739, y: 0.9414689, z: -0.33709988, w: -0.0000001325163}
+  m_LocalPosition: {x: -0.00000004134966, y: 0.036235332, z: 0.00000010030762}
+  m_LocalScale: {x: 1, y: 1.0000002, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4872653227693434395}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &525118551908420054
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 431760361692463406}
+  m_Layer: 0
+  m_Name: protoceratops_tail_01.M_4
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &431760361692463406
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 525118551908420054}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0.74386823, y: -0.036605958, z: -0.03279939, w: 0.6665166}
+  m_LocalPosition: {x: 0.0000000121776065, y: -0.08000004, z: -0.13999985}
+  m_LocalScale: {x: 1, y: 0.9999999, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 7228448452194412868}
+  m_Father: {fileID: 2235602260496237716}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &552958622961398795
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5190004570049096461}
+  m_Layer: 0
+  m_Name: protoceratops_finger04-1.R_23
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5190004570049096461
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 552958622961398795}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.20964135, y: -0.3892028, z: 0.30539685, w: 0.8433887}
+  m_LocalPosition: {x: -0.016388062, y: 0.13291709, z: 0.011919882}
+  m_LocalScale: {x: 0.99999994, y: 0.9999998, z: 0.99999994}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 5287523280112742922}
+  m_Father: {fileID: 4650120082219354920}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &579750870144971616
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5220706188303391119}
+  m_Layer: 0
+  m_Name: protoceratops_shoulder.L_47
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5220706188303391119
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 579750870144971616}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.5346702, y: -0.38443094, z: -0.114957124, w: 0.7437241}
+  m_LocalPosition: {x: -0.10013417, y: 0.08791829, z: 0.01510961}
+  m_LocalScale: {x: 1.0000001, y: 0.9999998, z: 0.99999964}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 5783800520567282123}
+  m_Father: {fileID: 8264338289927872956}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &853832673255057939
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8999743556447951901}
+  m_Layer: 0
+  m_Name: protoceratops_IKFoot.L_66
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8999743556447951901
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 853832673255057939}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: -0.00000017881453, z: -0, w: 1}
+  m_LocalPosition: {x: -0.19482401, y: 0.39300695, z: -0.060000036}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4853661775849735819}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &901251279947443397
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4650120082219354920}
+  m_Layer: 0
+  m_Name: protoceratops_foot.R_24
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4650120082219354920
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 901251279947443397}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0.6117889, y: 0.000040765586, z: 0.007708852, w: 0.7909835}
+  m_LocalPosition: {x: -0.00000020638107, y: 0.19237109, z: -0.0000000628829}
+  m_LocalScale: {x: 0.9999998, y: 1.0000001, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 4872653227693434395}
+  - {fileID: 4175956399412698180}
+  - {fileID: 3855570443499335580}
+  - {fileID: 5190004570049096461}
+  m_Father: {fileID: 7914782527102168941}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &950200824394766306
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7298630890364387826}
+  m_Layer: 0
+  m_Name: protoceratops_finger04-1.L_12
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7298630890364387826
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 950200824394766306}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.20964196, y: 0.38920334, z: -0.30539796, w: 0.8433879}
+  m_LocalPosition: {x: 0.01638831, y: 0.13291717, z: 0.011919795}
+  m_LocalScale: {x: 0.9999998, y: 0.99999994, z: 0.9999998}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 499051970970480481}
+  m_Father: {fileID: 5404158310454053090}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &954838239996358981
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7896331189723949908}
+  m_Layer: 0
+  m_Name: protoceratops_femur.L_15
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7896331189723949908
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 954838239996358981}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.4578984, y: -0.3214901, z: -0.009986372, w: 0.82877827}
+  m_LocalPosition: {x: -0.11999996, y: 0.11362531, z: 0.025348239}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 2891982437769720623}
+  m_Father: {fileID: 6500655677678275795}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &996570498758294409
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 499051970970480481}
+  m_Layer: 0
+  m_Name: protoceratops_finger04-2.L_11
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &499051970970480481
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 996570498758294409}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.3634223, y: 0.39660525, z: -0.17477983, w: 0.82466996}
+  m_LocalPosition: {x: -0.0000000047683715, y: 0.02904772, z: 0.000000009536743}
+  m_LocalScale: {x: 1, y: 1.0000001, z: 0.99999994}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7298630890364387826}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1063897819972018865
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2617017397039471705}
+  m_Layer: 0
+  m_Name: protoceratops_finger07-2.R_50
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2617017397039471705
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1063897819972018865}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.22278014, y: 0.7065695, z: -0.25299346, w: 0.62219197}
+  m_LocalPosition: {x: -0.000000067055225, y: 0.036235355, z: 0.0000000166893}
+  m_LocalScale: {x: 1.0000001, y: 1.0000005, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 5547168702794062279}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1144357432892320417
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2666069123827840702}
+  m_Layer: 0
+  m_Name: protoceratops_neck_02.M_33
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2666069123827840702
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1144357432892320417}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0.19162062, y: 0.00000037273213, z: -0.000000042035904, w: 0.9814691}
+  m_LocalPosition: {x: -1.1709744e-13, y: 0.0948683, z: 0.00000006139279}
+  m_LocalScale: {x: 1, y: 0.9999998, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 3249671852766803086}
+  m_Father: {fileID: 4257747984156318564}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1151708619152961773
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3182031712865965677}
+  m_Layer: 0
+  m_Name: protoceratops_finger09-1.R_56
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3182031712865965677
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1151708619152961773}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.43637818, y: 0.2200627, z: -0.15861213, w: 0.8578978}
+  m_LocalPosition: {x: 0.029613623, y: 0.032936253, z: 0.027609149}
+  m_LocalScale: {x: 1.0000001, y: 0.99999994, z: 1.0000001}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4100473167542934516}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1308002009660355322
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4257747984156318564}
+  m_Layer: 0
+  m_Name: protoceratops_neck_01.M_34
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4257747984156318564
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1308002009660355322}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.09516978, y: 0.00000005588622, z: -0.000000026172854, w: 0.99546105}
+  m_LocalPosition: {x: 3.7971729e-10, y: 0.13174427, z: -0.000890007}
+  m_LocalScale: {x: 1, y: 0.99999976, z: 0.99999994}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 2666069123827840702}
+  m_Father: {fileID: 8264338289927872956}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1339220348897287686
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8871287690591507145}
+  m_Layer: 0
+  m_Name: protoceratops_finger08-1.R_55
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8871287690591507145
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1339220348897287686}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.24197751, y: 0.3974526, z: -0.28646728, w: 0.8375051}
+  m_LocalPosition: {x: 0.01893269, y: 0.05002976, z: 0.02181497}
+  m_LocalScale: {x: 1, y: 0.9999998, z: 0.9999999}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 956734085854612782}
+  m_Father: {fileID: 4100473167542934516}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1489967101017787804
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7203482168396000819}
+  - component: {fileID: 3360078032113884815}
+  m_Layer: 0
+  m_Name: Protoceratops Model
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7203482168396000819
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1489967101017787804}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: -0.000000001789097, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 905946946102128457}
+  - {fileID: 8104924118997008520}
+  - {fileID: 1042544842346427470}
+  - {fileID: 1293179088164347514}
+  m_Father: {fileID: 5850938810253393285}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!111 &3360078032113884815
+Animation:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1489967101017787804}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Animation: {fileID: 7400000, guid: 37521b97783c60e46a87cb5f3c9d31cf, type: 2}
+  m_Animations:
+  - {fileID: 7400000, guid: 37521b97783c60e46a87cb5f3c9d31cf, type: 2}
+  m_WrapMode: 0
+  m_PlayAutomatically: 0
+  m_AnimatePhysics: 0
+  m_CullingType: 0
+--- !u!1 &1526756365236008229
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3474656269527796229}
+  m_Layer: 0
+  m_Name: protoceratops_finger02-1.L_8
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3474656269527796229
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1526756365236008229}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0.118292965, y: 0.41193962, z: -0.3207932, w: 0.8446326}
+  m_LocalPosition: {x: 0.017673219, y: 0.13110839, z: -0.0014381149}
+  m_LocalScale: {x: 1.0000001, y: 0.9999999, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 4703059268929514675}
+  m_Father: {fileID: 5404158310454053090}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1593642638762928889
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8264338289927872956}
+  m_Layer: 0
+  m_Name: protoceratops_chest.M_61
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8264338289927872956
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1593642638762928889}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.107686505, y: -0.00000007304722, z: 0.00000005386189, w: 0.9941849}
+  m_LocalPosition: {x: 3.0471624e-13, y: 0.08934503, z: -0.000000052452087}
+  m_LocalScale: {x: 1, y: 1.0000001, z: 1.0000002}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 4257747984156318564}
+  - {fileID: 5220706188303391119}
+  - {fileID: 8593321388099529891}
+  m_Father: {fileID: 1028305126374071106}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1624571995324393710
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5882331657455050728}
+  m_Layer: 0
+  m_Name: protoceratops_finger06-2.L_39
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5882331657455050728
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1624571995324393710}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.1774576, y: 0.8004585, z: -0.28661057, w: 0.49561015}
+  m_LocalPosition: {x: 0.000000085830685, y: 0.036235265, z: 0}
+  m_LocalScale: {x: 0.9999999, y: 0.9999999, z: 1.0000001}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8678315940825217703}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1630697972244097121
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5344391685866002323}
+  m_Layer: 0
+  m_Name: protoceratops_finger01-1.L_6
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5344391685866002323
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1630697972244097121}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0.31369704, y: 0.0053346474, z: -0.0019105264, w: 0.9495062}
+  m_LocalPosition: {x: 0.000013822168, y: 0.1321847, z: -0.0050935587}
+  m_LocalScale: {x: 0.9999999, y: 1, z: 1.0000001}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 2726280992654953912}
+  m_Father: {fileID: 5404158310454053090}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2065446294873436130
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4535237213216054517}
+  m_Layer: 0
+  m_Name: protoceratops_hand.L_44
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4535237213216054517
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2065446294873436130}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0.029428422, y: 0.2389306, z: 0.18076546, w: 0.95360893}
+  m_LocalPosition: {x: 0.0000000333786, y: 0.11661901, z: 0.000000023841856}
+  m_LocalScale: {x: 0.99999994, y: 0.9999998, z: 0.9999998}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 5499579512442897574}
+  - {fileID: 8678315940825217703}
+  - {fileID: 9143755509342908123}
+  - {fileID: 7096551837081072695}
+  - {fileID: 5135167861257319004}
+  m_Father: {fileID: 2710006302968548006}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2103055964552142085
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4434103052169976007}
+  m_Layer: 0
+  m_Name: protoceratops_tail_03.M_2
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4434103052169976007
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2103055964552142085}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.003672722, y: -0.00009150721, z: 0.02491806, w: 0.9996828}
+  m_LocalPosition: {x: -0.000000027306378, y: 0.22357672, z: 0.00000008698087}
+  m_LocalScale: {x: 0.9999999, y: 0.9999998, z: 0.99999994}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 5720962649178578748}
+  m_Father: {fileID: 7228448452194412868}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2198940415303777269
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5850938810253393285}
+  m_Layer: 0
+  m_Name: ProtoceratopsLegacy
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5850938810253393285
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2198940415303777269}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 7203482168396000819}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2252141263421665399
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6500655677678275795}
+  m_Layer: 0
+  m_Name: protoceratops_pelvis.M_64
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6500655677678275795
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2252141263421665399}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.642106, y: -0.00000086062414, z: -0.0000006649933, w: 0.76661587}
+  m_LocalPosition: {x: 0.00000001011688, y: -0.074974805, z: -0.116309665}
+  m_LocalScale: {x: 1, y: 0.99999994, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 7896331189723949908}
+  - {fileID: 258139314082030370}
+  - {fileID: 3105519301554346002}
+  m_Father: {fileID: 2235602260496237716}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2408109512119867266
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4703059268929514675}
+  m_Layer: 0
+  m_Name: protoceratops_finger02-2.L_7
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4703059268929514675
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2408109512119867266}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.22278018, y: 0.70656973, z: -0.25299293, w: 0.62219197}
+  m_LocalPosition: {x: -0.000000057220458, y: 0.036235347, z: -0.00000004529953}
+  m_LocalScale: {x: 0.99999976, y: 0.9999993, z: 0.99999964}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3474656269527796229}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2414027482527814251
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7228448452194412868}
+  m_Layer: 0
+  m_Name: protoceratops_tail_02.M_3
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7228448452194412868
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2414027482527814251}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.010001169, y: -0.00006628159, z: 0.006634674, w: 0.999928}
+  m_LocalPosition: {x: -0.0000000011920929, y: 0.18288371, z: -0.000000018813099}
+  m_LocalScale: {x: 0.99999994, y: 0.9999998, z: 0.99999976}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 4434103052169976007}
+  m_Father: {fileID: 431760361692463406}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2414620327224981234
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8681720434802073933}
+  m_Layer: 0
+  m_Name: protoceratops_tongue_01.M_29
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8681720434802073933
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2414620327224981234}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0.16837597, y: 0.0000010031507, z: 0.00000022667504, w: 0.98572284}
+  m_LocalPosition: {x: 0.000000006436403, y: 0.0760179, z: 0.0030621253}
+  m_LocalScale: {x: 1, y: 0.99999994, z: 0.9999998}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 5630489612495875640}
+  m_Father: {fileID: 7304065515442171010}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2531005451940781100
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3249671852766803086}
+  m_Layer: 0
+  m_Name: protoceratops_head.M_32
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3249671852766803086
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2531005451940781100}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0.031679288, y: -0.0000006082781, z: -0.00000002415884, w: 0.9994981}
+  m_LocalPosition: {x: 7.531753e-15, y: 0.090553835, z: 0.000000031590464}
+  m_LocalScale: {x: 1, y: 0.99999994, z: 0.9999999}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 7304065515442171010}
+  m_Father: {fileID: 2666069123827840702}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2598658796706989053
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7914782527102168941}
+  m_Layer: 0
+  m_Name: protoceratops_shin.R_25
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7914782527102168941
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2598658796706989053}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.4412919, y: -0.08839481, z: 0.20606087, w: 0.8688997}
+  m_LocalPosition: {x: -0.00000010132789, y: 0.23257816, z: -0.00000006318092}
+  m_LocalScale: {x: 1.0000001, y: 1.000001, z: 0.99999994}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 4650120082219354920}
+  m_Father: {fileID: 258139314082030370}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2674582904640915510
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5135167861257319004}
+  m_Layer: 0
+  m_Name: protoceratops_finger09-1.L_43
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5135167861257319004
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2674582904640915510}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.43637827, y: -0.2200624, z: 0.15861195, w: 0.8578979}
+  m_LocalPosition: {x: -0.029613642, y: 0.032936197, z: 0.027609212}
+  m_LocalScale: {x: 1, y: 0.99999994, z: 1.0000001}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4535237213216054517}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2757420971275071012
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4100473167542934516}
+  m_Layer: 0
+  m_Name: protoceratops_hand.R_57
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4100473167542934516
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2757420971275071012}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.3549899, y: -0.003722236, z: 0.021011032, w: 0.9346266}
+  m_LocalPosition: {x: -0.000000047683713, y: 0.11661899, z: 0.00000017225742}
+  m_LocalScale: {x: 0.99999994, y: 0.99999994, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 8129163034839045664}
+  - {fileID: 1967508971126847405}
+  - {fileID: 5547168702794062279}
+  - {fileID: 8871287690591507145}
+  - {fileID: 3182031712865965677}
+  m_Father: {fileID: 5854411458833472819}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &3069618761208065969
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5499579512442897574}
+  m_Layer: 0
+  m_Name: protoceratops_finger05-1.L_36
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5499579512442897574
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3069618761208065969}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0.27701634, y: -0.00000015986834, z: 0.00000006534768, w: 0.9608652}
+  m_LocalPosition: {x: -0.0027163925, y: 0.050502617, z: 0.0046417546}
+  m_LocalScale: {x: 0.99999994, y: 0.99999994, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 699190483685927534}
+  m_Father: {fileID: 4535237213216054517}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &3301263206168603098
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 905946946102128457}
+  m_Layer: 0
+  m_Name: Sketchfab_model
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &905946946102128457
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3301263206168603098}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+  m_LocalPosition: {x: -0, y: 0, z: 0}
+  m_LocalScale: {x: 100, y: 100, z: 100}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 8436774654929794581}
+  m_Father: {fileID: 7203482168396000819}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &3710806192819225758
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3855570443499335580}
+  m_Layer: 0
+  m_Name: protoceratops_finger03-1.R_21
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3855570443499335580
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3710806192819225758}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0.19947824, y: 0.32783297, z: -0.2574062, w: 0.88683486}
+  m_LocalPosition: {x: 0.020623453, y: 0.13061938, z: 0.0019292946}
+  m_LocalScale: {x: 0.9999998, y: 0.99999976, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 5769176696008017714}
+  m_Father: {fileID: 4650120082219354920}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &3863452540436957039
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2726280992654953912}
+  m_Layer: 0
+  m_Name: protoceratops_finger01-2.L_5
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2726280992654953912
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3863452540436957039}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0.000000070283285, y: 0.9414688, z: -0.33710024, w: -0.00000011627103}
+  m_LocalPosition: {x: -0.000000004270655, y: 0.036235273, z: -0.00000004749075}
+  m_LocalScale: {x: 1, y: 0.99999976, z: 0.9999998}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 5344391685866002323}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &3924971292027821665
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 9143755509342908123}
+  m_Layer: 0
+  m_Name: protoceratops_finger07-1.L_38
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &9143755509342908123
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3924971292027821665}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0.08566786, y: -0.41967025, z: 0.30248153, w: 0.8514945}
+  m_LocalPosition: {x: -0.020349536, y: 0.049259722, z: 0.008370533}
+  m_LocalScale: {x: 1.0000005, y: 0.9999999, z: 1.0000001}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 6832454355243416958}
+  m_Father: {fileID: 4535237213216054517}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &3947209238448781907
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 956734085854612782}
+  m_Layer: 0
+  m_Name: protoceratops_finger08-2.R_54
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &956734085854612782
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3947209238448781907}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.36342233, y: 0.39660552, z: -0.17477949, w: 0.8246699}
+  m_LocalPosition: {x: -0.000000028610229, y: 0.029047674, z: 0.000000057220458}
+  m_LocalScale: {x: 0.99999994, y: 0.99999964, z: 0.9999999}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8871287690591507145}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &3984354839154855061
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7981158639440473230}
+  m_Layer: 0
+  m_Name: protoceratops_IKFoot.R_67
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7981158639440473230
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3984354839154855061}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: -0.00000017881453, z: -0, w: 1}
+  m_LocalPosition: {x: 0.19482403, y: 0.39300695, z: 0.18590201}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4853661775849735819}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &4028086158103676162
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 258139314082030370}
+  m_Layer: 0
+  m_Name: protoceratops_femur.R_26
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &258139314082030370
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4028086158103676162}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.785341, y: 0.23010594, z: 0.050965834, w: 0.5724449}
+  m_LocalPosition: {x: 0.120000035, y: 0.11362529, z: 0.025347766}
+  m_LocalScale: {x: 0.99999964, y: 1, z: 1.0000002}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 7914782527102168941}
+  m_Father: {fileID: 6500655677678275795}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &4409445207961006216
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8436774654929794581}
+  m_Layer: 0
+  m_Name: GLTF_created_0
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8436774654929794581
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4409445207961006216}
+  serializedVersion: 2
+  m_LocalRotation: {x: -1.110225e-16, y: 0, z: -0, w: 1}
+  m_LocalPosition: {x: 0.00051120797, y: 0.3010275, z: 0.19676769}
+  m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 4853661775849735819}
+  m_Father: {fileID: 905946946102128457}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &4450199088576893448
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8593321388099529891}
+  m_Layer: 0
+  m_Name: protoceratops_shoulder.R_60
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8593321388099529891
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4450199088576893448}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.35988933, y: 0.18396242, z: -0.030069243, w: 0.9141846}
+  m_LocalPosition: {x: 0.10013415, y: 0.08791832, z: 0.015109668}
+  m_LocalScale: {x: 0.9999998, y: 0.9999996, z: 0.99999905}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 3780904238155308807}
+  m_Father: {fileID: 8264338289927872956}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &4450283750657021901
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4175956399412698180}
+  m_Layer: 0
+  m_Name: protoceratops_finger02-1.R_19
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4175956399412698180
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4450283750657021901}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0.11829269, y: -0.41193977, z: 0.32079214, w: 0.844633}
+  m_LocalPosition: {x: -0.017673014, y: 0.13110848, z: -0.0014379653}
+  m_LocalScale: {x: 1.0000001, y: 0.9999999, z: 0.9999998}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1886658061629509631}
+  m_Father: {fileID: 4650120082219354920}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &4729039962503949243
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3492085272717840580}
+  m_Layer: 0
+  m_Name: protoceratops_finger03-1.L_10
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3492085272717840580
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4729039962503949243}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0.1994787, y: -0.3278324, z: 0.25740573, w: 0.8868351}
+  m_LocalPosition: {x: -0.02062319, y: 0.13061951, z: 0.0019292755}
+  m_LocalScale: {x: 0.9999999, y: 1.0000002, z: 0.99999994}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 5225528867783285109}
+  m_Father: {fileID: 5404158310454053090}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &4998511987284534874
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3780904238155308807}
+  m_Layer: 0
+  m_Name: protoceratops_humerus.R_59
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3780904238155308807
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4998511987284534874}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.32195887, y: -0.17028558, z: 0.16645977, w: 0.9163168}
+  m_LocalPosition: {x: 0.00000006437301, y: 0.1603122, z: -0.00000018119812}
+  m_LocalScale: {x: 1.0000005, y: 0.99999994, z: 1.0000004}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 5854411458833472819}
+  m_Father: {fileID: 8593321388099529891}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &5236519831938265287
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1293179088164347514}
+  - component: {fileID: 7069006977827704104}
+  m_Layer: 0
+  m_Name: unnamed.002
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1293179088164347514
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5236519831938265287}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0.7071068, y: 0, z: 0, w: 0.7071067}
+  m_LocalPosition: {x: 0.0511208, y: 19.67677, z: -30.10275}
+  m_LocalScale: {x: 50, y: 50, z: 50}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7203482168396000819}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!137 &7069006977827704104
+SkinnedMeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5236519831938265287}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 3
+  m_RayTraceProcedural: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: 3ef1d1839322acb4193b62d98efa7a53, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  serializedVersion: 2
+  m_Quality: 0
+  m_UpdateWhenOffscreen: 1
+  m_SkinnedMotionVectors: 1
+  m_Mesh: {fileID: 7264441383221507816, guid: 4a05aa3361a603340a42ad8996107fc9, type: 3}
+  m_Bones:
+  - {fileID: 4853661775849735819}
+  - {fileID: 2235602260496237716}
+  - {fileID: 431760361692463406}
+  - {fileID: 7228448452194412868}
+  - {fileID: 4434103052169976007}
+  - {fileID: 5720962649178578748}
+  - {fileID: 6500655677678275795}
+  - {fileID: 7896331189723949908}
+  - {fileID: 2891982437769720623}
+  - {fileID: 5404158310454053090}
+  - {fileID: 5344391685866002323}
+  - {fileID: 2726280992654953912}
+  - {fileID: 3474656269527796229}
+  - {fileID: 4703059268929514675}
+  - {fileID: 3492085272717840580}
+  - {fileID: 5225528867783285109}
+  - {fileID: 7298630890364387826}
+  - {fileID: 499051970970480481}
+  - {fileID: 258139314082030370}
+  - {fileID: 7914782527102168941}
+  - {fileID: 4650120082219354920}
+  - {fileID: 4872653227693434395}
+  - {fileID: 118357907620634866}
+  - {fileID: 4175956399412698180}
+  - {fileID: 1886658061629509631}
+  - {fileID: 3855570443499335580}
+  - {fileID: 5769176696008017714}
+  - {fileID: 5190004570049096461}
+  - {fileID: 5287523280112742922}
+  - {fileID: 3105519301554346002}
+  - {fileID: 1028305126374071106}
+  - {fileID: 8264338289927872956}
+  - {fileID: 4257747984156318564}
+  - {fileID: 2666069123827840702}
+  - {fileID: 3249671852766803086}
+  - {fileID: 7304065515442171010}
+  - {fileID: 8681720434802073933}
+  - {fileID: 5630489612495875640}
+  - {fileID: 1824524938151401727}
+  - {fileID: 5220706188303391119}
+  - {fileID: 5783800520567282123}
+  - {fileID: 2710006302968548006}
+  - {fileID: 4535237213216054517}
+  - {fileID: 5499579512442897574}
+  - {fileID: 699190483685927534}
+  - {fileID: 9143755509342908123}
+  - {fileID: 6832454355243416958}
+  - {fileID: 8678315940825217703}
+  - {fileID: 5882331657455050728}
+  - {fileID: 7096551837081072695}
+  - {fileID: 8178809767098664813}
+  - {fileID: 5135167861257319004}
+  - {fileID: 8593321388099529891}
+  - {fileID: 3780904238155308807}
+  - {fileID: 5854411458833472819}
+  - {fileID: 4100473167542934516}
+  - {fileID: 8129163034839045664}
+  - {fileID: 3149550133903577128}
+  - {fileID: 5547168702794062279}
+  - {fileID: 2617017397039471705}
+  - {fileID: 1967508971126847405}
+  - {fileID: 3447139786683382935}
+  - {fileID: 8871287690591507145}
+  - {fileID: 956734085854612782}
+  - {fileID: 3182031712865965677}
+  m_BlendShapeWeights: []
+  m_RootBone: {fileID: 4853661775849735819}
+  m_AABB:
+    m_Center: {x: 0.0000016987324, y: 0.04435891, z: -0.0678385}
+    m_Extent: {x: 0.24824391, y: 0.90420645, z: 0.3048577}
+  m_DirtyAABB: 0
+--- !u!1 &5400115683708343809
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5404158310454053090}
+  m_Layer: 0
+  m_Name: protoceratops_foot.L_13
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5404158310454053090
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5400115683708343809}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0.39796174, y: 0.03651398, z: -0.0069144233, w: 0.91664904}
+  m_LocalPosition: {x: 0.00000019833445, y: 0.19237119, z: -0.00000006079674}
+  m_LocalScale: {x: 0.99999994, y: 1.0000004, z: 0.9999997}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 5344391685866002323}
+  - {fileID: 3474656269527796229}
+  - {fileID: 3492085272717840580}
+  - {fileID: 7298630890364387826}
+  m_Father: {fileID: 2891982437769720623}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &5442066443767045314
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5769176696008017714}
+  m_Layer: 0
+  m_Name: protoceratops_finger03-2.R_20
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5769176696008017714
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5442066443767045314}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.17745842, y: 0.80045813, z: -0.28661144, w: 0.49560988}
+  m_LocalPosition: {x: 0.000000047683713, y: 0.036235295, z: 0.000000047683713}
+  m_LocalScale: {x: 0.99999994, y: 1.0000004, z: 1.0000002}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3855570443499335580}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &5453250305897621383
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5720962649178578748}
+  m_Layer: 0
+  m_Name: protoceratops_tail_04.M_1
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5720962649178578748
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5453250305897621383}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.040608406, y: -0.0015021602, z: 0.03866042, w: 0.9984258}
+  m_LocalPosition: {x: 0.000000034486874, y: 0.24350314, z: 0.000000011296943}
+  m_LocalScale: {x: 0.99999976, y: 0.99999994, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4434103052169976007}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &5512461348036934450
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4872653227693434395}
+  m_Layer: 0
+  m_Name: protoceratops_finger01-1.R_17
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4872653227693434395
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5512461348036934450}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0.31369662, y: -0.0053345086, z: 0.0019096684, w: 0.9495064}
+  m_LocalPosition: {x: -0.000013667941, y: 0.13218465, z: -0.0050935466}
+  m_LocalScale: {x: 1, y: 0.9999998, z: 0.9999999}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 118357907620634866}
+  m_Father: {fileID: 4650120082219354920}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &5568849104176254298
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5547168702794062279}
+  m_Layer: 0
+  m_Name: protoceratops_finger07-1.R_51
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5547168702794062279
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5568849104176254298}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0.08566778, y: 0.41967028, z: -0.3024812, w: 0.85149455}
+  m_LocalPosition: {x: 0.02034951, y: 0.049259715, z: 0.008370489}
+  m_LocalScale: {x: 1.0000004, y: 1.0000001, z: 1.0000002}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 2617017397039471705}
+  m_Father: {fileID: 4100473167542934516}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &5726848096241458398
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3447139786683382935}
+  m_Layer: 0
+  m_Name: protoceratops_finger06-2.R_52
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3447139786683382935
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5726848096241458398}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0.17745781, y: 0.80045813, z: -0.28661102, w: -0.4956104}
+  m_LocalPosition: {x: -0.000000085830685, y: 0.03623536, z: -0.0000000333786}
+  m_LocalScale: {x: 1, y: 0.99999976, z: 0.99999994}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1967508971126847405}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &5985048761914276277
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6832454355243416958}
+  m_Layer: 0
+  m_Name: protoceratops_finger07-2.L_37
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6832454355243416958
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5985048761914276277}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.22277969, y: -0.7065698, z: 0.25299326, w: 0.6221919}
+  m_LocalPosition: {x: 0.000000042915342, y: 0.03623539, z: 0.000000019073486}
+  m_LocalScale: {x: 1, y: 1.0000004, z: 1.0000002}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 9143755509342908123}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &6096472558608726968
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 699190483685927534}
+  m_Layer: 0
+  m_Name: protoceratops_finger05-2.L_35
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &699190483685927534
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6096472558608726968}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0.00000004744552, y: 0.94146866, z: -0.33710054, w: -0.00000012444826}
+  m_LocalPosition: {x: 0.000000009497712, y: 0.036235347, z: 0.000000030360997}
+  m_LocalScale: {x: 1, y: 1.0000001, z: 0.99999994}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 5499579512442897574}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &6180680714285327654
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1028305126374071106}
+  m_Layer: 0
+  m_Name: protoceratops_spine01.M_62
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1028305126374071106
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6180680714285327654}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.11943344, y: 0.00000040493876, z: 0.000000019800739, w: 0.9928422}
+  m_LocalPosition: {x: -2.5364598e-13, y: 0.092231855, z: 0.0000000047683715}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 8264338289927872956}
+  m_Father: {fileID: 3105519301554346002}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &6220241513708931642
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8678315940825217703}
+  m_Layer: 0
+  m_Name: protoceratops_finger06-1.L_40
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8678315940825217703
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6220241513708931642}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0.16537894, y: 0.34220505, z: -0.24664693, w: 0.89146554}
+  m_LocalPosition: {x: 0.01797108, y: 0.048273638, z: 0.011328731}
+  m_LocalScale: {x: 1, y: 0.99999976, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 5882331657455050728}
+  m_Father: {fileID: 4535237213216054517}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &7117275264216827519
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2710006302968548006}
+  m_Layer: 0
+  m_Name: protoceratops_forearm.L_45
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2710006302968548006
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7117275264216827519}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0.5460715, y: -0.16673622, z: 0.015485286, w: 0.82083195}
+  m_LocalPosition: {x: -0.00000004529953, y: 0.1791647, z: -0.000000021457671}
+  m_LocalScale: {x: 1.0000001, y: 0.99999994, z: 1.0000004}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 4535237213216054517}
+  m_Father: {fileID: 5783800520567282123}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &7287329367303250571
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1967508971126847405}
+  m_Layer: 0
+  m_Name: protoceratops_finger06-1.R_53
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1967508971126847405
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7287329367303250571}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0.16537882, y: -0.34220517, z: 0.24664678, w: 0.8914656}
+  m_LocalPosition: {x: -0.017971078, y: 0.04827372, z: 0.01132862}
+  m_LocalScale: {x: 0.99999994, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 3447139786683382935}
+  m_Father: {fileID: 4100473167542934516}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &7364606061095237085
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8129163034839045664}
+  m_Layer: 0
+  m_Name: protoceratops_finger05-1.R_49
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8129163034839045664
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7364606061095237085}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0.27701637, y: 1.4934097e-10, z: 0.00000007057273, w: 0.9608652}
+  m_LocalPosition: {x: 0.0027163746, y: 0.0505027, z: 0.0046416433}
+  m_LocalScale: {x: 1, y: 1, z: 0.99999994}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 3149550133903577128}
+  m_Father: {fileID: 4100473167542934516}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &7437924414740151907
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2891982437769720623}
+  m_Layer: 0
+  m_Name: protoceratops_shin.L_14
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2891982437769720623
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7437924414740151907}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.5716691, y: 0.098421216, z: -0.2887648, w: 0.76165783}
+  m_LocalPosition: {x: 0.000000038146972, y: 0.23257816, z: -0.00000006198883}
+  m_LocalScale: {x: 1, y: 0.9999997, z: 0.99999917}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 5404158310454053090}
+  m_Father: {fileID: 7896331189723949908}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &7488132392851365535
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1824524938151401727}
+  m_Layer: 0
+  m_Name: protoceratops_tongue_03.M_27
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1824524938151401727
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7488132392851365535}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0.0891882, y: -0.0000025795223, z: 0.00000029439002, w: 0.99601483}
+  m_LocalPosition: {x: 8.9585224e-13, y: 0.032656703, z: -0.0000000095366754}
+  m_LocalScale: {x: 1, y: 1.0000001, z: 1.0000002}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 5630489612495875640}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &7580630239310052859
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5630489612495875640}
+  m_Layer: 0
+  m_Name: protoceratops_tongue_02.M_28
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5630489612495875640
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7580630239310052859}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.27510303, y: 0.00000059072016, z: 0.00000012176534, w: 0.96141475}
+  m_LocalPosition: {x: 4.1048054e-13, y: 0.06438682, z: 3.9790393e-15}
+  m_LocalScale: {x: 1, y: 1.0000001, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1824524938151401727}
+  m_Father: {fileID: 8681720434802073933}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &7590438348410712662
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2235602260496237716}
+  m_Layer: 0
+  m_Name: protoceratops_IKMove.M_65
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2235602260496237716
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7590438348410712662}
+  serializedVersion: 2
+  m_LocalRotation: {x: 1, y: 1.372319e-13, z: 0.00000019470718, w: -0.0000002663161}
+  m_LocalPosition: {x: 1.1750801e-14, y: -0.18300693, z: -0.000000047683702}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 6500655677678275795}
+  - {fileID: 431760361692463406}
+  m_Father: {fileID: 4853661775849735819}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &7686549023635939877
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5854411458833472819}
+  m_Layer: 0
+  m_Name: protoceratops_forearm.R_58
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5854411458833472819
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7686549023635939877}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0.5997401, y: 0.054058567, z: -0.028971786, w: 0.79784095}
+  m_LocalPosition: {x: -0.00000008106232, y: 0.17916484, z: -0.00000009179115}
+  m_LocalScale: {x: 0.99999994, y: 1.0000001, z: 0.9999996}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 4100473167542934516}
+  m_Father: {fileID: 3780904238155308807}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &7756731560796939354
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8178809767098664813}
+  m_Layer: 0
+  m_Name: protoceratops_finger08-2.L_41
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8178809767098664813
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7756731560796939354}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.36342266, y: -0.3966051, z: 0.17478028, w: 0.8246698}
+  m_LocalPosition: {x: -0.000000007152557, y: 0.029047655, z: -0.000000009536743}
+  m_LocalScale: {x: 1, y: 0.99999994, z: 0.9999999}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7096551837081072695}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &7975551564250436245
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7096551837081072695}
+  m_Layer: 0
+  m_Name: protoceratops_finger08-1.L_42
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7096551837081072695
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7975551564250436245}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.24197775, y: -0.39745227, z: 0.28646708, w: 0.8375053}
+  m_LocalPosition: {x: -0.018932696, y: 0.050029624, z: 0.021815022}
+  m_LocalScale: {x: 1.0000001, y: 1.0000001, z: 1.0000001}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 8178809767098664813}
+  m_Father: {fileID: 4535237213216054517}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &8020006033617994806
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3105519301554346002}
+  m_Layer: 0
+  m_Name: protoceratops_spine02.M_63
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3105519301554346002
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8020006033617994806}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.05697078, y: 0.0000009565455, z: -0.000000068374796, w: 0.9983759}
+  m_LocalPosition: {x: 4.8004265e-13, y: 0.19940107, z: 0.000000047683713}
+  m_LocalScale: {x: 1, y: 1.0000001, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1028305126374071106}
+  m_Father: {fileID: 6500655677678275795}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &8161467345603845653
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1886658061629509631}
+  m_Layer: 0
+  m_Name: protoceratops_finger02-2.R_18
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1886658061629509631
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8161467345603845653}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.22278011, y: -0.7065696, z: 0.25299275, w: 0.6221922}
+  m_LocalPosition: {x: 0.000000019073486, y: 0.036235385, z: -8.9406965e-10}
+  m_LocalScale: {x: 0.9999999, y: 1.0000004, z: 0.9999999}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4175956399412698180}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &8244231927895446590
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5527472518688986172}
+  m_Layer: 0
+  m_Name: protoceratops_IKHand.L_68
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5527472518688986172
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8244231927895446590}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.000000043711363, y: 1, z: 0.00000014901161, w: 0.00000013315807}
+  m_LocalPosition: {x: -0.120133996, y: 0.47062793, z: -0.21854797}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4853661775849735819}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &8253896958871838996
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1042544842346427470}
+  - component: {fileID: 72591818352084970}
+  m_Layer: 0
+  m_Name: unnamed.001
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1042544842346427470
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8253896958871838996}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0.7071068, y: 0, z: 0, w: 0.7071067}
+  m_LocalPosition: {x: 0.0511208, y: 19.67677, z: -30.10275}
+  m_LocalScale: {x: 50, y: 50, z: 50}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7203482168396000819}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!137 &72591818352084970
+SkinnedMeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8253896958871838996}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 3
+  m_RayTraceProcedural: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: b0d0d7df7bfa3c947a10d7fb628771f4, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  serializedVersion: 2
+  m_Quality: 0
+  m_UpdateWhenOffscreen: 1
+  m_SkinnedMotionVectors: 1
+  m_Mesh: {fileID: -7028404742258872492, guid: 4a05aa3361a603340a42ad8996107fc9, type: 3}
+  m_Bones:
+  - {fileID: 4853661775849735819}
+  - {fileID: 2235602260496237716}
+  - {fileID: 431760361692463406}
+  - {fileID: 7228448452194412868}
+  - {fileID: 4434103052169976007}
+  - {fileID: 5720962649178578748}
+  - {fileID: 6500655677678275795}
+  - {fileID: 7896331189723949908}
+  - {fileID: 2891982437769720623}
+  - {fileID: 5404158310454053090}
+  - {fileID: 5344391685866002323}
+  - {fileID: 2726280992654953912}
+  - {fileID: 3474656269527796229}
+  - {fileID: 4703059268929514675}
+  - {fileID: 3492085272717840580}
+  - {fileID: 5225528867783285109}
+  - {fileID: 7298630890364387826}
+  - {fileID: 499051970970480481}
+  - {fileID: 258139314082030370}
+  - {fileID: 7914782527102168941}
+  - {fileID: 4650120082219354920}
+  - {fileID: 4872653227693434395}
+  - {fileID: 118357907620634866}
+  - {fileID: 4175956399412698180}
+  - {fileID: 1886658061629509631}
+  - {fileID: 3855570443499335580}
+  - {fileID: 5769176696008017714}
+  - {fileID: 5190004570049096461}
+  - {fileID: 5287523280112742922}
+  - {fileID: 3105519301554346002}
+  - {fileID: 1028305126374071106}
+  - {fileID: 8264338289927872956}
+  - {fileID: 4257747984156318564}
+  - {fileID: 2666069123827840702}
+  - {fileID: 3249671852766803086}
+  - {fileID: 7304065515442171010}
+  - {fileID: 8681720434802073933}
+  - {fileID: 5630489612495875640}
+  - {fileID: 1824524938151401727}
+  - {fileID: 5220706188303391119}
+  - {fileID: 5783800520567282123}
+  - {fileID: 2710006302968548006}
+  - {fileID: 4535237213216054517}
+  - {fileID: 5499579512442897574}
+  - {fileID: 699190483685927534}
+  - {fileID: 9143755509342908123}
+  - {fileID: 6832454355243416958}
+  - {fileID: 8678315940825217703}
+  - {fileID: 5882331657455050728}
+  - {fileID: 7096551837081072695}
+  - {fileID: 8178809767098664813}
+  - {fileID: 5135167861257319004}
+  - {fileID: 8593321388099529891}
+  - {fileID: 3780904238155308807}
+  - {fileID: 5854411458833472819}
+  - {fileID: 4100473167542934516}
+  - {fileID: 8129163034839045664}
+  - {fileID: 3149550133903577128}
+  - {fileID: 5547168702794062279}
+  - {fileID: 2617017397039471705}
+  - {fileID: 1967508971126847405}
+  - {fileID: 3447139786683382935}
+  - {fileID: 8871287690591507145}
+  - {fileID: 956734085854612782}
+  - {fileID: 3182031712865965677}
+  m_BlendShapeWeights: []
+  m_RootBone: {fileID: 4853661775849735819}
+  m_AABB:
+    m_Center: {x: -0.0000010021031, y: -0.69610655, z: 0.03541729}
+    m_Extent: {x: 0.06939064, y: 0.022666067, z: 0.02257267}
+  m_DirtyAABB: 0
+--- !u!1 &8314806737783659128
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4853661775849735819}
+  m_Layer: 0
+  m_Name: protoceratops_move.M_70
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4853661775849735819
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8314806737783659128}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0.7071069, y: 0.000000106925725, z: -0.00000010692574, w: 0.7071067}
+  m_LocalPosition: {x: 3.35278e-24, y: 0.0000000150996, z: -0.02}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 8999743556447951901}
+  - {fileID: 7981158639440473230}
+  - {fileID: 5527472518688986172}
+  - {fileID: 88678068585146644}
+  - {fileID: 2235602260496237716}
+  m_Father: {fileID: 8436774654929794581}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &8348869377827169439
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5783800520567282123}
+  m_Layer: 0
+  m_Name: protoceratops_humerus.L_46
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5783800520567282123
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8348869377827169439}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.35872734, y: 0.16104464, z: -0.2751199, w: 0.87731886}
+  m_LocalPosition: {x: -0.00000015974044, y: 0.16031219, z: -0.00000012874602}
+  m_LocalScale: {x: 0.9999999, y: 0.9999995, z: 0.99999994}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 2710006302968548006}
+  m_Father: {fileID: 5220706188303391119}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &8631970905290560686
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 88678068585146644}
+  m_Layer: 0
+  m_Name: protoceratops_IKHand.R_69
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &88678068585146644
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8631970905290560686}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.000000043711363, y: 1, z: 0.00000014901161, w: 0.00000013315807}
+  m_LocalPosition: {x: 0.120133996, y: 0.47062796, z: -0.46444994}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4853661775849735819}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &8683854370612902922
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7304065515442171010}
+  m_Layer: 0
+  m_Name: protoceratops_jaw.M_30
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7304065515442171010
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8683854370612902922}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0.055082455, y: -0.0000010722497, z: -0.00000020470078, w: 0.9984818}
+  m_LocalPosition: {x: -0.0000000037786263, y: 0.046225812, z: 0.096722476}
+  m_LocalScale: {x: 1, y: 1, z: 1.0000001}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 8681720434802073933}
+  m_Father: {fileID: 3249671852766803086}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &8891094071088593868
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8104924118997008520}
+  - component: {fileID: 235140370527041044}
+  m_Layer: 0
+  m_Name: unnamed
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8104924118997008520
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8891094071088593868}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0.7071068, y: 0, z: 0, w: 0.7071067}
+  m_LocalPosition: {x: 0.0511208, y: 19.67677, z: -30.10275}
+  m_LocalScale: {x: 50, y: 50, z: 50}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7203482168396000819}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!137 &235140370527041044
+SkinnedMeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8891094071088593868}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 3
+  m_RayTraceProcedural: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: 6ca4f9806b3a526478e3b34720024cf4, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  serializedVersion: 2
+  m_Quality: 0
+  m_UpdateWhenOffscreen: 1
+  m_SkinnedMotionVectors: 1
+  m_Mesh: {fileID: 7794544536105779925, guid: 4a05aa3361a603340a42ad8996107fc9, type: 3}
+  m_Bones:
+  - {fileID: 4853661775849735819}
+  - {fileID: 2235602260496237716}
+  - {fileID: 431760361692463406}
+  - {fileID: 7228448452194412868}
+  - {fileID: 4434103052169976007}
+  - {fileID: 5720962649178578748}
+  - {fileID: 6500655677678275795}
+  - {fileID: 7896331189723949908}
+  - {fileID: 2891982437769720623}
+  - {fileID: 5404158310454053090}
+  - {fileID: 5344391685866002323}
+  - {fileID: 2726280992654953912}
+  - {fileID: 3474656269527796229}
+  - {fileID: 4703059268929514675}
+  - {fileID: 3492085272717840580}
+  - {fileID: 5225528867783285109}
+  - {fileID: 7298630890364387826}
+  - {fileID: 499051970970480481}
+  - {fileID: 258139314082030370}
+  - {fileID: 7914782527102168941}
+  - {fileID: 4650120082219354920}
+  - {fileID: 4872653227693434395}
+  - {fileID: 118357907620634866}
+  - {fileID: 4175956399412698180}
+  - {fileID: 1886658061629509631}
+  - {fileID: 3855570443499335580}
+  - {fileID: 5769176696008017714}
+  - {fileID: 5190004570049096461}
+  - {fileID: 5287523280112742922}
+  - {fileID: 3105519301554346002}
+  - {fileID: 1028305126374071106}
+  - {fileID: 8264338289927872956}
+  - {fileID: 4257747984156318564}
+  - {fileID: 2666069123827840702}
+  - {fileID: 3249671852766803086}
+  - {fileID: 7304065515442171010}
+  - {fileID: 8681720434802073933}
+  - {fileID: 5630489612495875640}
+  - {fileID: 1824524938151401727}
+  - {fileID: 5220706188303391119}
+  - {fileID: 5783800520567282123}
+  - {fileID: 2710006302968548006}
+  - {fileID: 4535237213216054517}
+  - {fileID: 5499579512442897574}
+  - {fileID: 699190483685927534}
+  - {fileID: 9143755509342908123}
+  - {fileID: 6832454355243416958}
+  - {fileID: 8678315940825217703}
+  - {fileID: 5882331657455050728}
+  - {fileID: 7096551837081072695}
+  - {fileID: 8178809767098664813}
+  - {fileID: 5135167861257319004}
+  - {fileID: 8593321388099529891}
+  - {fileID: 3780904238155308807}
+  - {fileID: 5854411458833472819}
+  - {fileID: 4100473167542934516}
+  - {fileID: 8129163034839045664}
+  - {fileID: 3149550133903577128}
+  - {fileID: 5547168702794062279}
+  - {fileID: 2617017397039471705}
+  - {fileID: 1967508971126847405}
+  - {fileID: 3447139786683382935}
+  - {fileID: 8871287690591507145}
+  - {fileID: 956734085854612782}
+  - {fileID: 3182031712865965677}
+  m_BlendShapeWeights: []
+  m_RootBone: {fileID: 4853661775849735819}
+  m_AABB:
+    m_Center: {x: -0.0000010468066, y: -0.6961066, z: 0.03541752}
+    m_Extent: {x: 0.069079876, y: 0.022345364, z: 0.022259483}
+  m_DirtyAABB: 0
+--- !u!1 &8914942555330293946
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5225528867783285109}
+  m_Layer: 0
+  m_Name: protoceratops_finger03-2.L_9
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5225528867783285109
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8914942555330293946}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0.17745769, y: 0.80045784, z: -0.28661206, w: -0.4956103}
+  m_LocalPosition: {x: -0.000000019073486, y: 0.03623524, z: -0.000000052452087}
+  m_LocalScale: {x: 1.0000001, y: 0.99999976, z: 0.99999994}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3492085272717840580}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &9162172604219787955
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5287523280112742922}
+  m_Layer: 0
+  m_Name: protoceratops_finger04-2.R_22
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5287523280112742922
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9162172604219787955}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.36342254, y: -0.39660633, z: 0.1747801, w: 0.82466924}
+  m_LocalPosition: {x: 0.000000019073486, y: 0.029047731, z: 0}
+  m_LocalScale: {x: 0.9999996, y: 0.9999996, z: 0.99999976}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 5190004570049096461}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

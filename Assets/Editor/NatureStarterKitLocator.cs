@@ -16,7 +16,7 @@ namespace JurassicWorld.Editor
         // NSk2 根目录候选名（不同版本/导入方式可能路径略有差异）
         private static readonly string[] RootCandidates =
         {
-            "Assets/NatureStarterKit2",
+            "Assets/ThirdParty/NatureStarterKit2",
             "Assets/Nature Starter Kit 2",
             "Assets/Nature Starter Kit",
             "Assets/NatureStarterKit"

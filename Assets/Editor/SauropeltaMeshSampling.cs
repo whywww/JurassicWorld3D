@@ -9,8 +9,10 @@ namespace JurassicWorld.Editor
         {
             skin.BakeMesh(mesh, false);
             string path = AssetDatabase.GetAssetPath(skin.sharedMesh);
+            bool protoceratopsEye = path.StartsWith("Assets/Dinosaurs/Protoceratops/Prepared/") &&
+                (skin.sharedMesh.name == "unnamed" || skin.sharedMesh.name == "unnamed.001");
             if (!path.StartsWith("Assets/Dinosaurs/Sauropelta/Source/") &&
-                !path.StartsWith(BaurusuchusSceneIntegration.SourceRoot + "/")) return;
+                !path.StartsWith(BaurusuchusSceneIntegration.SourceRoot + "/") && !protoceratopsEye) return;
             // These imported rigs bake the renderer's world scale despite useScale:false.
             // Remove it before callers transform the sampled vertices to world space.
             Vector3 scale = skin.transform.lossyScale;

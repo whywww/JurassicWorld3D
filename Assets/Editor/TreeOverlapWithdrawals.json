@@ -3,9 +3,9 @@
     "restoreReplayVerified": true,
     "withdrawn": [
         {
-            "key": "Scene|Assets/NatureStarterKit2/Nature/tree01.prefab|6.0207|-25.3442|264.2570",
+            "key": "Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree01.prefab|6.0207|-25.3442|264.2570",
             "kind": "Scene",
-            "prefab": "Assets/NatureStarterKit2/Nature/tree01.prefab",
+            "prefab": "Assets/ThirdParty/NatureStarterKit2/Nature/tree01.prefab",
             "name": "tree01_0353",
             "position": {
                 "x": 6.020717144012451,
@@ -47,9 +47,9 @@
             "hardBranches": false
         },
         {
-            "key": "Scene|Assets/NatureStarterKit2/Nature/tree01.prefab|6.2424|-25.7523|283.9633",
+            "key": "Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree01.prefab|6.2424|-25.7523|283.9633",
             "kind": "Scene",
-            "prefab": "Assets/NatureStarterKit2/Nature/tree01.prefab",
+            "prefab": "Assets/ThirdParty/NatureStarterKit2/Nature/tree01.prefab",
             "name": "tree01_0370",
             "position": {
                 "x": 6.2423930168151859,
@@ -91,9 +91,9 @@
             "hardBranches": false
         },
         {
-            "key": "Scene|Assets/NatureStarterKit2/Nature/tree04.prefab|12.8916|67.9447|217.7365",
+            "key": "Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree04.prefab|12.8916|67.9447|217.7365",
             "kind": "Scene",
-            "prefab": "Assets/NatureStarterKit2/Nature/tree04.prefab",
+            "prefab": "Assets/ThirdParty/NatureStarterKit2/Nature/tree04.prefab",
             "name": "tree04_0198",
             "position": {
                 "x": 12.891556739807129,
@@ -135,9 +135,9 @@
             "hardBranches": false
         },
         {
-            "key": "Scene|Assets/VegetationDiversity/Prefabs/FabTree_1.prefab|5.5139|-24.6227|288.2261",
+            "key": "Scene|Assets/Environment/Vegetation/Trees/Prepared/Prefabs/FabTree_1.prefab|5.5139|-24.6227|288.2261",
             "kind": "Scene",
-            "prefab": "Assets/VegetationDiversity/Prefabs/FabTree_1.prefab",
+            "prefab": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/FabTree_1.prefab",
             "name": "FabTree_1_0253",
             "position": {
                 "x": 5.51390266418457,
@@ -179,9 +179,9 @@
             "hardBranches": false
         },
         {
-            "key": "Scene|Assets/VegetationDiversity/Prefabs/FabTree_1.prefab|6.2095|-24.6952|239.9180",
+            "key": "Scene|Assets/Environment/Vegetation/Trees/Prepared/Prefabs/FabTree_1.prefab|6.2095|-24.6952|239.9180",
             "kind": "Scene",
-            "prefab": "Assets/VegetationDiversity/Prefabs/FabTree_1.prefab",
+            "prefab": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/FabTree_1.prefab",
             "name": "FabTree_1_0379",
             "position": {
                 "x": 6.209488391876221,
@@ -223,9 +223,9 @@
             "hardBranches": false
         },
         {
-            "key": "Scene|Assets/VegetationDiversity/Prefabs/FabTree_5.prefab|-47.4643|32.8868|134.0763",
+            "key": "Scene|Assets/Environment/Vegetation/Trees/Prepared/Prefabs/FabTree_5.prefab|-47.4643|32.8868|134.0763",
             "kind": "Scene",
-            "prefab": "Assets/VegetationDiversity/Prefabs/FabTree_5.prefab",
+            "prefab": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/FabTree_5.prefab",
             "name": "FabTree_5_0312",
             "position": {
                 "x": -47.464332580566409,
@@ -267,9 +267,9 @@
             "hardBranches": false
         },
         {
-            "key": "Terrain|Assets/NatureStarterKit2/Nature/tree01.prefab|-53.2391|-63.4796|5.2825",
+            "key": "Terrain|Assets/ThirdParty/NatureStarterKit2/Nature/tree01.prefab|-53.2391|-63.4796|5.2825",
             "kind": "Terrain",
-            "prefab": "Assets/NatureStarterKit2/Nature/tree01.prefab",
+            "prefab": "Assets/ThirdParty/NatureStarterKit2/Nature/tree01.prefab",
             "name": "tree01",
             "position": {
                 "x": -53.23909378051758,

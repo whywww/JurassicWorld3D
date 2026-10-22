@@ -1,0 +1,1 @@
+PASS: 2m roots / 0.25m low-wood gap; outside trees, retained poses/species/scales, terrain and dinosaur poses unchanged; repeat, undo/reapply and local recorded source-prefab replay identical. Post-generation hook is shared with Bake. Full 35m legacy reseeding was not committed because it changes outside trees/terrain. Navigation, wood profiles and foliage rebuilt.

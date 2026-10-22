@@ -226,8 +226,8 @@ namespace JurassicWorld.Editor
                     Vector2 p = retained != null ? site : site + new Vector2((float)random.NextDouble() - .5f, (float)random.NextDouble() - .5f) * .5f;
                     if (!Area.Contains(p) || !siteSafe(p) || BlockedBy(reserved, p, .85f) || BlockedBy(walking, p, .85f) || BlockedBy(spawnReservations, p, .85f)
                         || !trunkSafe(p, .85f) || stems.Any(s => Vector2.Distance(s.position, p) < s.radius + 1.6f)) continue;
-                    string treePath = retained != null ? retained.path : random.Next(3) == 0 ? "Assets/VegetationDiversity/Prefabs/Pachira_B.prefab"
-                        : "Assets/NatureStarterKit2/Nature/tree0" + (1 + random.Next(4)) + ".prefab";
+                    string treePath = retained != null ? retained.path : random.Next(3) == 0 ? "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/Pachira_B.prefab"
+                        : "Assets/ThirdParty/NatureStarterKit2/Nature/tree0" + (1 + random.Next(4)) + ".prefab";
                     var tree = CentralForestDensification.Instantiate(treePath, trees.transform);
                     tree.name = "RainforestTree_" + added;
                     tree.transform.rotation = Quaternion.Euler(0f, retained != null ? retained.yaw : (float)random.NextDouble() * 360f, 0f);
@@ -331,8 +331,8 @@ namespace JurassicWorld.Editor
                 Vector2 p = stem + new Vector2(Mathf.Sin(angle), Mathf.Cos(angle)) * spread;
                 if (!Area.Contains(p) || MainCreekIntegration.NearCreek(p.x, p.y, .5f)) continue;
                 bool fern = random.NextDouble() < .75;
-                string path = fern ? "Assets/Vegetation/Ferns/Fern02_" + "ABCD"[random.Next(4)] + ".prefab"
-                    : "Assets/NatureStarterKit2/Nature/bush0" + (random.Next(6) + 1) + ".prefab";
+                string path = fern ? "Assets/Environment/Vegetation/Fern02/Prepared/Prefabs/Fern02_" + "ABCD"[random.Next(4)] + ".prefab"
+                    : "Assets/ThirdParty/NatureStarterKit2/Nature/bush0" + (random.Next(6) + 1) + ".prefab";
                 var item = CentralForestDensification.Instantiate(path, group.transform); item.name = "RainforestUnderstory_" + count++;
                 item.transform.rotation = Quaternion.Euler(0f, (float)random.NextDouble() * 360f, 0f);
                 item.transform.localScale *= Mathf.Lerp(.4f, .8f, (float)random.NextDouble()) / CentralForestDensification.BoundsOf(item).size.y;

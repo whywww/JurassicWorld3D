@@ -40,7 +40,7 @@ def merge_material_uvs(mesh):
 for report in reports:
     bpy.ops.object.select_all(action='SELECT')
     bpy.ops.object.delete(use_global=False)
-    path = os.path.join(project, 'Assets/ThirdParty/VegetationDiversity/Prepared', report['name'] + '_LODs.fbx')
+    path = os.path.join(project, 'Assets/Environment/Vegetation/Trees/Prepared/Models', report['name'] + '_LODs.fbx')
     bpy.ops.import_scene.fbx(filepath=path)
     objects = sorted([obj for obj in bpy.data.objects if obj.type == 'MESH' and obj.name != 'Cube'], key=lambda obj: obj.name)
     high = objects[0]

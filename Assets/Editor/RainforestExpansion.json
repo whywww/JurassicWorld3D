@@ -23,7 +23,7 @@
             "target": 18,
             "trees": [
                 {
-                    "path": "Assets/NatureStarterKit2/Nature/tree04.prefab",
+                    "path": "Assets/ThirdParty/NatureStarterKit2/Nature/tree04.prefab",
                     "position": {
                         "x": -36.25,
                         "y": 3.75
@@ -32,7 +32,7 @@
                     "variation": 0.9391534328460693
                 },
                 {
-                    "path": "Assets/VegetationDiversity/Prefabs/Pachira_B.prefab",
+                    "path": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/Pachira_B.prefab",
                     "position": {
                         "x": -30.75,
                         "y": 19.25
@@ -41,7 +41,7 @@
                     "variation": 0.8849907517433167
                 },
                 {
-                    "path": "Assets/NatureStarterKit2/Nature/tree02.prefab",
+                    "path": "Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab",
                     "position": {
                         "x": -36.75,
                         "y": 11.25
@@ -50,7 +50,7 @@
                     "variation": 0.938962996006012
                 },
                 {
-                    "path": "Assets/NatureStarterKit2/Nature/tree02.prefab",
+                    "path": "Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab",
                     "position": {
                         "x": -39.25,
                         "y": 34.75
@@ -59,7 +59,7 @@
                     "variation": 1.094693660736084
                 },
                 {
-                    "path": "Assets/NatureStarterKit2/Nature/tree02.prefab",
+                    "path": "Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab",
                     "position": {
                         "x": -31.75,
                         "y": 2.25
@@ -68,7 +68,7 @@
                     "variation": 1.0846776962280274
                 },
                 {
-                    "path": "Assets/NatureStarterKit2/Nature/tree04.prefab",
+                    "path": "Assets/ThirdParty/NatureStarterKit2/Nature/tree04.prefab",
                     "position": {
                         "x": -34.75,
                         "y": 0.25
@@ -77,7 +77,7 @@
                     "variation": 1.0357648134231568
                 },
                 {
-                    "path": "Assets/NatureStarterKit2/Nature/tree01.prefab",
+                    "path": "Assets/ThirdParty/NatureStarterKit2/Nature/tree01.prefab",
                     "position": {
                         "x": -29.75,
                         "y": 22.25
@@ -86,7 +86,7 @@
                     "variation": 1.078861117362976
                 },
                 {
-                    "path": "Assets/NatureStarterKit2/Nature/tree01.prefab",
+                    "path": "Assets/ThirdParty/NatureStarterKit2/Nature/tree01.prefab",
                     "position": {
                         "x": -34.75,
                         "y": 23.25
@@ -95,7 +95,7 @@
                     "variation": 0.9760464429855347
                 },
                 {
-                    "path": "Assets/VegetationDiversity/Prefabs/Pachira_B.prefab",
+                    "path": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/Pachira_B.prefab",
                     "position": {
                         "x": -27.25,
                         "y": 24.75
@@ -104,7 +104,7 @@
                     "variation": 0.9351941347122192
                 },
                 {
-                    "path": "Assets/NatureStarterKit2/Nature/tree04.prefab",
+                    "path": "Assets/ThirdParty/NatureStarterKit2/Nature/tree04.prefab",
                     "position": {
                         "x": -33.75,
                         "y": 4.25
@@ -113,7 +113,7 @@
                     "variation": 0.8769571781158447
                 },
                 {
-                    "path": "Assets/VegetationDiversity/Prefabs/Pachira_B.prefab",
+                    "path": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/Pachira_B.prefab",
                     "position": {
                         "x": -36.25,
                         "y": -3.25
@@ -122,7 +122,7 @@
                     "variation": 0.91752690076828
                 },
                 {
-                    "path": "Assets/NatureStarterKit2/Nature/tree01.prefab",
+                    "path": "Assets/ThirdParty/NatureStarterKit2/Nature/tree01.prefab",
                     "position": {
                         "x": -33.75,
                         "y": 9.25
@@ -131,7 +131,7 @@
                     "variation": 1.113359808921814
                 },
                 {
-                    "path": "Assets/NatureStarterKit2/Nature/tree04.prefab",
+                    "path": "Assets/ThirdParty/NatureStarterKit2/Nature/tree04.prefab",
                     "position": {
                         "x": -38.75,
                         "y": 4.25
@@ -140,7 +140,7 @@
                     "variation": 0.8224089741706848
                 },
                 {
-                    "path": "Assets/VegetationDiversity/Prefabs/Pachira_B.prefab",
+                    "path": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/Pachira_B.prefab",
                     "position": {
                         "x": -38.75,
                         "y": 37.25
@@ -149,7 +149,7 @@
                     "variation": 1.1110050678253174
                 },
                 {
-                    "path": "Assets/NatureStarterKit2/Nature/tree04.prefab",
+                    "path": "Assets/ThirdParty/NatureStarterKit2/Nature/tree04.prefab",
                     "position": {
                         "x": -26.75,
                         "y": 20.25
@@ -158,7 +158,7 @@
                     "variation": 1.0540977716445923
                 },
                 {
-                    "path": "Assets/VegetationDiversity/Prefabs/Pachira_B.prefab",
+                    "path": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/Pachira_B.prefab",
                     "position": {
                         "x": -26.25,
                         "y": 7.75
@@ -167,7 +167,7 @@
                     "variation": 1.0974332094192505
                 },
                 {
-                    "path": "Assets/NatureStarterKit2/Nature/tree04.prefab",
+                    "path": "Assets/ThirdParty/NatureStarterKit2/Nature/tree04.prefab",
                     "position": {
                         "x": -36.75,
                         "y": 7.25
@@ -176,7 +176,7 @@
                     "variation": 1.1384716033935547
                 },
                 {
-                    "path": "Assets/NatureStarterKit2/Nature/tree02.prefab",
+                    "path": "Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab",
                     "position": {
                         "x": -29.25,
                         "y": 43.75
@@ -241,7 +241,7 @@
             "target": 26,
             "trees": [
                 {
-                    "path": "Assets/VegetationDiversity/Prefabs/Pachira_B.prefab",
+                    "path": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/Pachira_B.prefab",
                     "position": {
                         "x": 25.25,
                         "y": 8.25
@@ -250,7 +250,7 @@
                     "variation": 0.844132125377655
                 },
                 {
-                    "path": "Assets/NatureStarterKit2/Nature/tree04.prefab",
+                    "path": "Assets/ThirdParty/NatureStarterKit2/Nature/tree04.prefab",
                     "position": {
                         "x": 34.75,
                         "y": 9.75
@@ -259,7 +259,7 @@
                     "variation": 0.8585083484649658
                 },
                 {
-                    "path": "Assets/NatureStarterKit2/Nature/tree04.prefab",
+                    "path": "Assets/ThirdParty/NatureStarterKit2/Nature/tree04.prefab",
                     "position": {
                         "x": 35.25,
                         "y": 44.25
@@ -268,7 +268,7 @@
                     "variation": 1.103819489479065
                 },
                 {
-                    "path": "Assets/VegetationDiversity/Prefabs/Pachira_B.prefab",
+                    "path": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/Pachira_B.prefab",
                     "position": {
                         "x": 37.25,
                         "y": 10.25
@@ -277,7 +277,7 @@
                     "variation": 1.0691335201263428
                 },
                 {
-                    "path": "Assets/NatureStarterKit2/Nature/tree02.prefab",
+                    "path": "Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab",
                     "position": {
                         "x": 28.25,
                         "y": 9.25
@@ -286,7 +286,7 @@
                     "variation": 1.1079347133636475
                 },
                 {
-                    "path": "Assets/NatureStarterKit2/Nature/tree04.prefab",
+                    "path": "Assets/ThirdParty/NatureStarterKit2/Nature/tree04.prefab",
                     "position": {
                         "x": 31.25,
                         "y": -0.75
@@ -295,7 +295,7 @@
                     "variation": 1.1142598390579224
                 },
                 {
-                    "path": "Assets/VegetationDiversity/Prefabs/Pachira_B.prefab",
+                    "path": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/Pachira_B.prefab",
                     "position": {
                         "x": 38.75,
                         "y": -2.25
@@ -304,7 +304,7 @@
                     "variation": 1.0781750679016114
                 },
                 {
-                    "path": "Assets/VegetationDiversity/Prefabs/Pachira_B.prefab",
+                    "path": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/Pachira_B.prefab",
                     "position": {
                         "x": 32.25,
                         "y": 41.25
@@ -313,7 +313,7 @@
                     "variation": 0.8976060748100281
                 },
                 {
-                    "path": "Assets/NatureStarterKit2/Nature/tree01.prefab",
+                    "path": "Assets/ThirdParty/NatureStarterKit2/Nature/tree01.prefab",
                     "position": {
                         "x": 38.25,
                         "y": 36.25
@@ -322,7 +322,7 @@
                     "variation": 0.9736998677253723
                 },
                 {
-                    "path": "Assets/VegetationDiversity/Prefabs/Pachira_B.prefab",
+                    "path": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/Pachira_B.prefab",
                     "position": {
                         "x": 35.25,
                         "y": 33.25
@@ -331,7 +331,7 @@
                     "variation": 0.9164837598800659
                 },
                 {
-                    "path": "Assets/NatureStarterKit2/Nature/tree02.prefab",
+                    "path": "Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab",
                     "position": {
                         "x": 35.25,
                         "y": 27.25
@@ -340,7 +340,7 @@
                     "variation": 0.9503076672554016
                 },
                 {
-                    "path": "Assets/NatureStarterKit2/Nature/tree03.prefab",
+                    "path": "Assets/ThirdParty/NatureStarterKit2/Nature/tree03.prefab",
                     "position": {
                         "x": 34.25,
                         "y": 19.25
@@ -349,7 +349,7 @@
                     "variation": 1.0156970024108887
                 },
                 {
-                    "path": "Assets/NatureStarterKit2/Nature/tree02.prefab",
+                    "path": "Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab",
                     "position": {
                         "x": 35.25,
                         "y": 22.25
@@ -358,7 +358,7 @@
                     "variation": 0.9064074754714966
                 },
                 {
-                    "path": "Assets/VegetationDiversity/Prefabs/Pachira_B.prefab",
+                    "path": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/Pachira_B.prefab",
                     "position": {
                         "x": 32.75,
                         "y": 2.75
@@ -367,7 +367,7 @@
                     "variation": 0.8415811061859131
                 },
                 {
-                    "path": "Assets/VegetationDiversity/Prefabs/Pachira_B.prefab",
+                    "path": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/Pachira_B.prefab",
                     "position": {
                         "x": 27.75,
                         "y": 36.75
@@ -376,7 +376,7 @@
                     "variation": 0.8683900237083435
                 },
                 {
-                    "path": "Assets/NatureStarterKit2/Nature/tree01.prefab",
+                    "path": "Assets/ThirdParty/NatureStarterKit2/Nature/tree01.prefab",
                     "position": {
                         "x": 38.75,
                         "y": 5.75
@@ -385,7 +385,7 @@
                     "variation": 0.9152607321739197
                 },
                 {
-                    "path": "Assets/NatureStarterKit2/Nature/tree02.prefab",
+                    "path": "Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab",
                     "position": {
                         "x": 29.75,
                         "y": 42.75
@@ -394,7 +394,7 @@
                     "variation": 0.8664126992225647
                 },
                 {
-                    "path": "Assets/NatureStarterKit2/Nature/tree01.prefab",
+                    "path": "Assets/ThirdParty/NatureStarterKit2/Nature/tree01.prefab",
                     "position": {
                         "x": 31.25,
                         "y": 8.25
@@ -403,7 +403,7 @@
                     "variation": 1.011451005935669
                 },
                 {
-                    "path": "Assets/NatureStarterKit2/Nature/tree02.prefab",
+                    "path": "Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab",
                     "position": {
                         "x": 27.25,
                         "y": 6.25
@@ -412,7 +412,7 @@
                     "variation": 0.9839521646499634
                 },
                 {
-                    "path": "Assets/NatureStarterKit2/Nature/tree01.prefab",
+                    "path": "Assets/ThirdParty/NatureStarterKit2/Nature/tree01.prefab",
                     "position": {
                         "x": 34.25,
                         "y": -2.75
@@ -421,7 +421,7 @@
                     "variation": 0.9546779990196228
                 },
                 {
-                    "path": "Assets/NatureStarterKit2/Nature/tree04.prefab",
+                    "path": "Assets/ThirdParty/NatureStarterKit2/Nature/tree04.prefab",
                     "position": {
                         "x": 38.25,
                         "y": 26.25
@@ -465,7 +465,7 @@
             "status": "Density PASS",
             "originals": [
                 {
-                    "path": "Assets/NatureStarterKit2/Nature/tree01.prefab",
+                    "path": "Assets/ThirdParty/NatureStarterKit2/Nature/tree01.prefab",
                     "name": "Sapling_2",
                     "position": {
                         "x": 39.87578582763672,
@@ -487,7 +487,7 @@
                     "hardBranches": false
                 },
                 {
-                    "path": "Assets/VegetationDiversity/Prefabs/FirTree01.prefab",
+                    "path": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/FirTree01.prefab",
                     "name": "FirTree01_0133",
                     "position": {
                         "x": 39.87213897705078,
@@ -509,7 +509,7 @@
                     "hardBranches": false
                 },
                 {
-                    "path": "Assets/NatureStarterKit2/Nature/tree04.prefab",
+                    "path": "Assets/ThirdParty/NatureStarterKit2/Nature/tree04.prefab",
                     "name": "tree04_0221",
                     "position": {
                         "x": 39.67073059082031,
@@ -531,7 +531,7 @@
                     "hardBranches": false
                 },
                 {
-                    "path": "Assets/VegetationDiversity/Prefabs/TreeSmall02.prefab",
+                    "path": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/TreeSmall02.prefab",
                     "name": "TreeSmall02_0170",
                     "position": {
                         "x": 39.745574951171878,
@@ -553,7 +553,7 @@
                     "hardBranches": false
                 },
                 {
-                    "path": "Assets/VegetationDiversity/Prefabs/Pachira_B.prefab",
+                    "path": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/Pachira_B.prefab",
                     "name": "Pachira_B_0290",
                     "position": {
                         "x": 39.68307876586914,
@@ -641,7 +641,7 @@
             "status": "Existing density above 70%; no trees added",
             "originals": [
                 {
-                    "path": "Assets/VegetationDiversity/Prefabs/BananaTree.prefab",
+                    "path": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/BananaTree.prefab",
                     "name": "BananaTree_0308",
                     "position": {
                         "x": 5.228366374969482,
@@ -663,7 +663,7 @@
                     "hardBranches": false
                 },
                 {
-                    "path": "Assets/VegetationDiversity/Prefabs/TreeSmall02.prefab",
+                    "path": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/TreeSmall02.prefab",
                     "name": "TreeSmall02_0176",
                     "position": {
                         "x": 3.7659358978271486,
@@ -685,7 +685,7 @@
                     "hardBranches": false
                 },
                 {
-                    "path": "Assets/VegetationDiversity/Prefabs/Pachira_B.prefab",
+                    "path": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/Pachira_B.prefab",
                     "name": "LocalTree_056",
                     "position": {
                         "x": 4.964603424072266,
@@ -707,7 +707,7 @@
                     "hardBranches": false
                 },
                 {
-                    "path": "Assets/VegetationDiversity/Prefabs/FabTree_1.prefab",
+                    "path": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/FabTree_1.prefab",
                     "name": "FabTree_1_0379",
                     "position": {
                         "x": 6.209488391876221,
@@ -729,7 +729,7 @@
                     "hardBranches": false
                 },
                 {
-                    "path": "Assets/VegetationDiversity/Prefabs/Pachira_B.prefab",
+                    "path": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/Pachira_B.prefab",
                     "name": "Pachira_B_0226",
                     "position": {
                         "x": 5.183802604675293,
@@ -751,7 +751,7 @@
                     "hardBranches": false
                 },
                 {
-                    "path": "Assets/NatureStarterKit2/Nature/tree01.prefab",
+                    "path": "Assets/ThirdParty/NatureStarterKit2/Nature/tree01.prefab",
                     "name": "Sapling_1",
                     "position": {
                         "x": 6.073759078979492,
@@ -773,7 +773,7 @@
                     "hardBranches": false
                 },
                 {
-                    "path": "Assets/NatureStarterKit2/Nature/tree01.prefab",
+                    "path": "Assets/ThirdParty/NatureStarterKit2/Nature/tree01.prefab",
                     "name": "tree01_0388",
                     "position": {
                         "x": 4.196032524108887,
@@ -795,7 +795,7 @@
                     "hardBranches": false
                 },
                 {
-                    "path": "Assets/NatureStarterKit2/Nature/tree02.prefab",
+                    "path": "Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab",
                     "name": "Sapling_1",
                     "position": {
                         "x": 5.849298477172852,
@@ -817,7 +817,7 @@
                     "hardBranches": false
                 },
                 {
-                    "path": "Assets/VegetationDiversity/Prefabs/TreeSmall02.prefab",
+                    "path": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/TreeSmall02.prefab",
                     "name": "TreeSmall02_0278",
                     "position": {
                         "x": 5.452218532562256,
@@ -839,7 +839,7 @@
                     "hardBranches": false
                 },
                 {
-                    "path": "Assets/VegetationDiversity/Prefabs/BananaTree.prefab",
+                    "path": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/BananaTree.prefab",
                     "name": "BananaTree_0277",
                     "position": {
                         "x": 3.9876062870025636,
@@ -861,7 +861,7 @@
                     "hardBranches": false
                 },
                 {
-                    "path": "Assets/VegetationDiversity/Prefabs/Pachira_B.prefab",
+                    "path": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/Pachira_B.prefab",
                     "name": "Pachira_B_0193",
                     "position": {
                         "x": 5.7906999588012699,
@@ -883,7 +883,7 @@
                     "hardBranches": false
                 },
                 {
-                    "path": "Assets/NatureStarterKit2/Nature/tree02.prefab",
+                    "path": "Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab",
                     "name": "tree02_SceneTree",
                     "position": {
                         "x": 5.5336198806762699,
@@ -905,7 +905,7 @@
                     "hardBranches": false
                 },
                 {
-                    "path": "Assets/VegetationDiversity/Prefabs/FabTree_1.prefab",
+                    "path": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/FabTree_1.prefab",
                     "name": "FabTree_1_0253",
                     "position": {
                         "x": 5.51390266418457,
@@ -927,7 +927,7 @@
                     "hardBranches": false
                 },
                 {
-                    "path": "Assets/VegetationDiversity/Prefabs/TreeSmall02.prefab",
+                    "path": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/TreeSmall02.prefab",
                     "name": "TreeSmall02_0165",
                     "position": {
                         "x": 3.4995217323303224,
@@ -949,7 +949,7 @@
                     "hardBranches": false
                 },
                 {
-                    "path": "Assets/VegetationDiversity/Prefabs/Pachira_B.prefab",
+                    "path": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/Pachira_B.prefab",
                     "name": "Pachira_B_0288",
                     "position": {
                         "x": 3.809232711791992,
@@ -971,7 +971,7 @@
                     "hardBranches": false
                 },
                 {
-                    "path": "Assets/VegetationDiversity/Prefabs/FabTree_5.prefab",
+                    "path": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/FabTree_5.prefab",
                     "name": "FabTree_5_0354",
                     "position": {
                         "x": 5.818751811981201,
@@ -993,7 +993,7 @@
                     "hardBranches": false
                 },
                 {
-                    "path": "Assets/NatureStarterKit2/Nature/tree04.prefab",
+                    "path": "Assets/ThirdParty/NatureStarterKit2/Nature/tree04.prefab",
                     "name": "tree04_0399",
                     "position": {
                         "x": 6.175687789916992,
@@ -1015,7 +1015,7 @@
                     "hardBranches": false
                 },
                 {
-                    "path": "Assets/VegetationDiversity/Prefabs/Pachira_B.prefab",
+                    "path": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/Pachira_B.prefab",
                     "name": "Pachira_B_0233",
                     "position": {
                         "x": 5.365083694458008,
@@ -1037,7 +1037,7 @@
                     "hardBranches": false
                 },
                 {
-                    "path": "Assets/VegetationDiversity/Prefabs/TreeSmall02.prefab",
+                    "path": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/TreeSmall02.prefab",
                     "name": "TreeSmall02_0330",
                     "position": {
                         "x": 5.50284481048584,
@@ -1059,7 +1059,7 @@
                     "hardBranches": false
                 },
                 {
-                    "path": "Assets/NatureStarterKit2/Nature/tree01.prefab",
+                    "path": "Assets/ThirdParty/NatureStarterKit2/Nature/tree01.prefab",
                     "name": "LocalTree_003",
                     "position": {
                         "x": 4.517913818359375,
@@ -1081,7 +1081,7 @@
                     "hardBranches": false
                 },
                 {
-                    "path": "Assets/NatureStarterKit2/Nature/tree04.prefab",
+                    "path": "Assets/ThirdParty/NatureStarterKit2/Nature/tree04.prefab",
                     "name": "tree04_0391",
                     "position": {
                         "x": 4.828952789306641,
@@ -1103,7 +1103,7 @@
                     "hardBranches": false
                 },
                 {
-                    "path": "Assets/VegetationDiversity/Prefabs/Pachira_B.prefab",
+                    "path": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/Pachira_B.prefab",
                     "name": "Pachira_B_0321",
                     "position": {
                         "x": 5.936219215393066,
@@ -1125,7 +1125,7 @@
                     "hardBranches": false
                 },
                 {
-                    "path": "Assets/NatureStarterKit2/Nature/tree03.prefab",
+                    "path": "Assets/ThirdParty/NatureStarterKit2/Nature/tree03.prefab",
                     "name": "tree03_0377",
                     "position": {
                         "x": 6.0486602783203129,
@@ -1147,7 +1147,7 @@
                     "hardBranches": false
                 },
                 {
-                    "path": "Assets/NatureStarterKit2/Nature/tree03.prefab",
+                    "path": "Assets/ThirdParty/NatureStarterKit2/Nature/tree03.prefab",
                     "name": "tree03_SceneTree",
                     "position": {
                         "x": 5.299363136291504,
@@ -1169,7 +1169,7 @@
                     "hardBranches": false
                 },
                 {
-                    "path": "Assets/NatureStarterKit2/Nature/tree04.prefab",
+                    "path": "Assets/ThirdParty/NatureStarterKit2/Nature/tree04.prefab",
                     "name": "LocalTree_020",
                     "position": {
                         "x": 4.7868852615356449,
@@ -1191,7 +1191,7 @@
                     "hardBranches": false
                 },
                 {
-                    "path": "Assets/VegetationDiversity/Prefabs/Pachira_B.prefab",
+                    "path": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/Pachira_B.prefab",
                     "name": "Pachira_B_0364",
                     "position": {
                         "x": 4.387077331542969,
@@ -1213,7 +1213,7 @@
                     "hardBranches": false
                 },
                 {
-                    "path": "Assets/NatureStarterKit2/Nature/tree03.prefab",
+                    "path": "Assets/ThirdParty/NatureStarterKit2/Nature/tree03.prefab",
                     "name": "tree03_0195",
                     "position": {
                         "x": 3.9658443927764894,
@@ -1235,7 +1235,7 @@
                     "hardBranches": false
                 },
                 {
-                    "path": "Assets/NatureStarterKit2/Nature/tree04.prefab",
+                    "path": "Assets/ThirdParty/NatureStarterKit2/Nature/tree04.prefab",
                     "name": "LocalTree_074",
                     "position": {
                         "x": 4.264087200164795,
@@ -1257,7 +1257,7 @@
                     "hardBranches": false
                 },
                 {
-                    "path": "Assets/NatureStarterKit2/Nature/tree01.prefab",
+                    "path": "Assets/ThirdParty/NatureStarterKit2/Nature/tree01.prefab",
                     "name": "Sapling_1",
                     "position": {
                         "x": 5.777339935302734,
@@ -1279,7 +1279,7 @@
                     "hardBranches": false
                 },
                 {
-                    "path": "Assets/VegetationDiversity/Prefabs/TreeSmall02.prefab",
+                    "path": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/TreeSmall02.prefab",
                     "name": "LocalTree_018",
                     "position": {
                         "x": 4.389835357666016,
@@ -1301,7 +1301,7 @@
                     "hardBranches": false
                 },
                 {
-                    "path": "Assets/NatureStarterKit2/Nature/tree01.prefab",
+                    "path": "Assets/ThirdParty/NatureStarterKit2/Nature/tree01.prefab",
                     "name": "tree01_0374",
                     "position": {
                         "x": 5.042079925537109,
@@ -1323,7 +1323,7 @@
                     "hardBranches": false
                 },
                 {
-                    "path": "Assets/NatureStarterKit2/Nature/tree03.prefab",
+                    "path": "Assets/ThirdParty/NatureStarterKit2/Nature/tree03.prefab",
                     "name": "tree03_0329",
                     "position": {
                         "x": 6.360668182373047,
@@ -1345,7 +1345,7 @@
                     "hardBranches": false
                 },
                 {
-                    "path": "Assets/NatureStarterKit2/Nature/tree02.prefab",
+                    "path": "Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab",
                     "name": "tree02_0283",
                     "position": {
                         "x": 4.331594944000244,
@@ -1367,7 +1367,7 @@
                     "hardBranches": false
                 },
                 {
-                    "path": "Assets/NatureStarterKit2/Nature/tree02.prefab",
+                    "path": "Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab",
                     "name": "Sapling_1",
                     "position": {
                         "x": 4.468755722045898,
@@ -1389,7 +1389,7 @@
                     "hardBranches": false
                 },
                 {
-                    "path": "Assets/VegetationDiversity/Prefabs/TreeSmall02.prefab",
+                    "path": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/TreeSmall02.prefab",
                     "name": "TreeSmall02_0135",
                     "position": {
                         "x": 4.048074245452881,
@@ -1411,7 +1411,7 @@
                     "hardBranches": false
                 },
                 {
-                    "path": "Assets/NatureStarterKit2/Nature/tree04.prefab",
+                    "path": "Assets/ThirdParty/NatureStarterKit2/Nature/tree04.prefab",
                     "name": "tree04_0181",
                     "position": {
                         "x": 5.235681533813477,
@@ -1433,7 +1433,7 @@
                     "hardBranches": false
                 },
                 {
-                    "path": "Assets/NatureStarterKit2/Nature/tree01.prefab",
+                    "path": "Assets/ThirdParty/NatureStarterKit2/Nature/tree01.prefab",
                     "name": "tree01_0242",
                     "position": {
                         "x": 4.466827869415283,
@@ -1455,7 +1455,7 @@
                     "hardBranches": false
                 },
                 {
-                    "path": "Assets/VegetationDiversity/Prefabs/TreeSmall02.prefab",
+                    "path": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/TreeSmall02.prefab",
                     "name": "LocalTree_005",
                     "position": {
                         "x": 6.325103759765625,
@@ -1477,7 +1477,7 @@
                     "hardBranches": false
                 },
                 {
-                    "path": "Assets/NatureStarterKit2/Nature/tree03.prefab",
+                    "path": "Assets/ThirdParty/NatureStarterKit2/Nature/tree03.prefab",
                     "name": "tree03_0266",
                     "position": {
                         "x": 4.443360328674316,
@@ -1499,7 +1499,7 @@
                     "hardBranches": false
                 },
                 {
-                    "path": "Assets/VegetationDiversity/Prefabs/Pachira_B.prefab",
+                    "path": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/Pachira_B.prefab",
                     "name": "Pachira_B_0302",
                     "position": {
                         "x": 4.376666069030762,
@@ -1543,7 +1543,7 @@
             "target": 30,
             "trees": [
                 {
-                    "path": "Assets/NatureStarterKit2/Nature/tree01.prefab",
+                    "path": "Assets/ThirdParty/NatureStarterKit2/Nature/tree01.prefab",
                     "position": {
                         "x": 5.75,
                         "y": 52.75
@@ -1552,7 +1552,7 @@
                     "variation": 0.8208352327346802
                 },
                 {
-                    "path": "Assets/NatureStarterKit2/Nature/tree03.prefab",
+                    "path": "Assets/ThirdParty/NatureStarterKit2/Nature/tree03.prefab",
                     "position": {
                         "x": 3.25,
                         "y": 49.25
@@ -1561,7 +1561,7 @@
                     "variation": 0.969118058681488
                 },
                 {
-                    "path": "Assets/VegetationDiversity/Prefabs/Pachira_B.prefab",
+                    "path": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/Pachira_B.prefab",
                     "position": {
                         "x": -37.75,
                         "y": 48.25
@@ -1570,7 +1570,7 @@
                     "variation": 0.8977737426757813
                 },
                 {
-                    "path": "Assets/VegetationDiversity/Prefabs/Pachira_B.prefab",
+                    "path": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/Pachira_B.prefab",
                     "position": {
                         "x": 30.75,
                         "y": 52.75
@@ -1579,7 +1579,7 @@
                     "variation": 1.030600905418396
                 },
                 {
-                    "path": "Assets/VegetationDiversity/Prefabs/Pachira_B.prefab",
+                    "path": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/Pachira_B.prefab",
                     "position": {
                         "x": -6.25,
                         "y": 46.75
@@ -1588,7 +1588,7 @@
                     "variation": 0.9845976829528809
                 },
                 {
-                    "path": "Assets/NatureStarterKit2/Nature/tree04.prefab",
+                    "path": "Assets/ThirdParty/NatureStarterKit2/Nature/tree04.prefab",
                     "position": {
                         "x": 27.75,
                         "y": 48.75
@@ -1597,7 +1597,7 @@
                     "variation": 1.0183905363082886
                 },
                 {
-                    "path": "Assets/NatureStarterKit2/Nature/tree03.prefab",
+                    "path": "Assets/ThirdParty/NatureStarterKit2/Nature/tree03.prefab",
                     "position": {
                         "x": -4.25,
                         "y": 51.75
@@ -1606,7 +1606,7 @@
                     "variation": 1.002176284790039
                 },
                 {
-                    "path": "Assets/NatureStarterKit2/Nature/tree03.prefab",
+                    "path": "Assets/ThirdParty/NatureStarterKit2/Nature/tree03.prefab",
                     "position": {
                         "x": -7.25,
                         "y": 53.75
@@ -1615,7 +1615,7 @@
                     "variation": 0.8717381954193115
                 },
                 {
-                    "path": "Assets/VegetationDiversity/Prefabs/Pachira_B.prefab",
+                    "path": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/Pachira_B.prefab",
                     "position": {
                         "x": -8.75,
                         "y": 57.25
@@ -1624,7 +1624,7 @@
                     "variation": 0.8757053017616272
                 },
                 {
-                    "path": "Assets/NatureStarterKit2/Nature/tree02.prefab",
+                    "path": "Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab",
                     "position": {
                         "x": -9.75,
                         "y": 50.25
@@ -1633,7 +1633,7 @@
                     "variation": 0.9579493403434753
                 },
                 {
-                    "path": "Assets/NatureStarterKit2/Nature/tree02.prefab",
+                    "path": "Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab",
                     "position": {
                         "x": 35.75,
                         "y": 50.75
@@ -1642,7 +1642,7 @@
                     "variation": 1.0341014862060547
                 },
                 {
-                    "path": "Assets/NatureStarterKit2/Nature/tree04.prefab",
+                    "path": "Assets/ThirdParty/NatureStarterKit2/Nature/tree04.prefab",
                     "position": {
                         "x": -17.25,
                         "y": 55.75
@@ -1651,7 +1651,7 @@
                     "variation": 1.103339672088623
                 },
                 {
-                    "path": "Assets/NatureStarterKit2/Nature/tree02.prefab",
+                    "path": "Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab",
                     "position": {
                         "x": -16.75,
                         "y": 58.25
@@ -1660,7 +1660,7 @@
                     "variation": 0.9523788094520569
                 },
                 {
-                    "path": "Assets/NatureStarterKit2/Nature/tree04.prefab",
+                    "path": "Assets/ThirdParty/NatureStarterKit2/Nature/tree04.prefab",
                     "position": {
                         "x": 24.75,
                         "y": 48.75
@@ -1669,7 +1669,7 @@
                     "variation": 0.9540620446205139
                 },
                 {
-                    "path": "Assets/NatureStarterKit2/Nature/tree04.prefab",
+                    "path": "Assets/ThirdParty/NatureStarterKit2/Nature/tree04.prefab",
                     "position": {
                         "x": 30.75,
                         "y": 48.75
@@ -1678,7 +1678,7 @@
                     "variation": 0.8406081199645996
                 },
                 {
-                    "path": "Assets/VegetationDiversity/Prefabs/Pachira_B.prefab",
+                    "path": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/Pachira_B.prefab",
                     "position": {
                         "x": -15.25,
                         "y": 49.75
@@ -1687,7 +1687,7 @@
                     "variation": 0.9776366949081421
                 },
                 {
-                    "path": "Assets/NatureStarterKit2/Nature/tree02.prefab",
+                    "path": "Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab",
                     "position": {
                         "x": -4.75,
                         "y": 56.25
@@ -1696,7 +1696,7 @@
                     "variation": 1.0484508275985718
                 },
                 {
-                    "path": "Assets/NatureStarterKit2/Nature/tree04.prefab",
+                    "path": "Assets/ThirdParty/NatureStarterKit2/Nature/tree04.prefab",
                     "position": {
                         "x": -35.75,
                         "y": 50.25
@@ -1705,7 +1705,7 @@
                     "variation": 0.8235830068588257
                 },
                 {
-                    "path": "Assets/NatureStarterKit2/Nature/tree03.prefab",
+                    "path": "Assets/ThirdParty/NatureStarterKit2/Nature/tree03.prefab",
                     "position": {
                         "x": 26.25,
                         "y": 51.25
@@ -1714,7 +1714,7 @@
                     "variation": 1.0946909189224244
                 },
                 {
-                    "path": "Assets/VegetationDiversity/Prefabs/Pachira_B.prefab",
+                    "path": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/Pachira_B.prefab",
                     "position": {
                         "x": -23.25,
                         "y": 45.75
@@ -1723,7 +1723,7 @@
                     "variation": 0.9783666729927063
                 },
                 {
-                    "path": "Assets/VegetationDiversity/Prefabs/Pachira_B.prefab",
+                    "path": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/Pachira_B.prefab",
                     "position": {
                         "x": -39.25,
                         "y": 55.75
@@ -1732,7 +1732,7 @@
                     "variation": 0.9896907806396484
                 },
                 {
-                    "path": "Assets/NatureStarterKit2/Nature/tree04.prefab",
+                    "path": "Assets/ThirdParty/NatureStarterKit2/Nature/tree04.prefab",
                     "position": {
                         "x": -22.75,
                         "y": 57.25
@@ -1741,7 +1741,7 @@
                     "variation": 1.0797431468963624
                 },
                 {
-                    "path": "Assets/NatureStarterKit2/Nature/tree01.prefab",
+                    "path": "Assets/ThirdParty/NatureStarterKit2/Nature/tree01.prefab",
                     "position": {
                         "x": -28.25,
                         "y": 46.75
@@ -1750,7 +1750,7 @@
                     "variation": 0.9582703709602356
                 },
                 {
-                    "path": "Assets/VegetationDiversity/Prefabs/Pachira_B.prefab",
+                    "path": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/Pachira_B.prefab",
                     "position": {
                         "x": -11.75,
                         "y": 55.25
@@ -1759,7 +1759,7 @@
                     "variation": 0.924463152885437
                 },
                 {
-                    "path": "Assets/NatureStarterKit2/Nature/tree02.prefab",
+                    "path": "Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab",
                     "position": {
                         "x": -4.75,
                         "y": 49.25
@@ -1768,7 +1768,7 @@
                     "variation": 1.020193099975586
                 },
                 {
-                    "path": "Assets/NatureStarterKit2/Nature/tree01.prefab",
+                    "path": "Assets/ThirdParty/NatureStarterKit2/Nature/tree01.prefab",
                     "position": {
                         "x": -9.25,
                         "y": 45.75
@@ -1777,7 +1777,7 @@
                     "variation": 1.1297787427902222
                 },
                 {
-                    "path": "Assets/VegetationDiversity/Prefabs/Pachira_B.prefab",
+                    "path": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/Pachira_B.prefab",
                     "position": {
                         "x": -7.25,
                         "y": 49.75
@@ -1786,7 +1786,7 @@
                     "variation": 0.8310600519180298
                 },
                 {
-                    "path": "Assets/VegetationDiversity/Prefabs/Pachira_B.prefab",
+                    "path": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/Pachira_B.prefab",
                     "position": {
                         "x": -33.75,
                         "y": 45.25
@@ -1795,7 +1795,7 @@
                     "variation": 1.007826328277588
                 },
                 {
-                    "path": "Assets/NatureStarterKit2/Nature/tree04.prefab",
+                    "path": "Assets/ThirdParty/NatureStarterKit2/Nature/tree04.prefab",
                     "position": {
                         "x": -30.75,
                         "y": 46.25
@@ -1804,7 +1804,7 @@
                     "variation": 0.9179337024688721
                 },
                 {
-                    "path": "Assets/NatureStarterKit2/Nature/tree02.prefab",
+                    "path": "Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab",
                     "position": {
                         "x": 34.75,
                         "y": 46.75

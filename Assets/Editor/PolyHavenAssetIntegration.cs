@@ -10,9 +10,9 @@ using UnityEngine.SceneManagement;
 namespace JurassicWorld.Editor
 {
     /// <summary>
-    /// Poly Haven HQ 资产铸造：把 Assets/ThirdParty/PolyHaven 下的原始模型/贴图包装成
-    /// 【项目自有】的 Built-in RP material / prefab，放进 UnderstorySeeder 的资产门控目录
-    /// （Assets/Vegetation/Ferns|Rocks|Deadwood），从而让既有分布逻辑自动生效。
+    /// Poly Haven HQ 资产铸造：把 Assets/Environment 下各资产组 Source/ 的原始模型/贴图包装成
+    /// 【项目自有】的 Built-in RP material / prefab，放进对应资产组的 Prepared/ 与
+    /// UnderstorySeeder 的资产门控目录，从而让既有分布逻辑自动生效。
     ///
     /// 硬约束：
     ///  - Assets/ThirdParty/** 只读：不改源文件，也不改源 .meta 的【语义设置】。需要不同导入设置的
@@ -36,53 +36,62 @@ namespace JurassicWorld.Editor
     {
         // ================================================================ 源路径（只读）
 
-        private const string SourceRoot = "Assets/ThirdParty/PolyHaven";
+        private const string FernSourceRoot = "Assets/Environment/Vegetation/Fern02/Source";
+        private const string RockSourceRoot = "Assets/Environment/RocksAndDeadwood/RockMossSet01/Source";
+        private const string DeadwoodSourceRoot = "Assets/Environment/RocksAndDeadwood/Deadwood/Source";
 
-        private const string FernFbx = SourceRoot + "/Fern02/fern_02_4k.fbx";
-        private const string FernDiff = SourceRoot + "/Fern02/textures/fern_02_diff_4k.jpg";
-        private const string FernAlpha = SourceRoot + "/Fern02/textures/fern_02_alpha_4k.png";
-        private const string FernNormalSource = SourceRoot + "/Fern02/textures/fern_02_nor_gl_4k.exr";
-        private const string FernRough = SourceRoot + "/Fern02/textures/fern_02_rough_4k.exr";
+        private const string FernFbx = FernSourceRoot + "/fern_02_4k.fbx";
+        private const string FernDiff = FernSourceRoot + "/textures/fern_02_diff_4k.jpg";
+        private const string FernAlpha = FernSourceRoot + "/textures/fern_02_alpha_4k.png";
+        private const string FernNormalSource = FernSourceRoot + "/textures/fern_02_nor_gl_4k.exr";
+        private const string FernRough = FernSourceRoot + "/textures/fern_02_rough_4k.exr";
 
-        private const string RockFbx = SourceRoot + "/RockMossSet01/rock_moss_set_01_4k.fbx";
-        private const string RockDiff = SourceRoot + "/RockMossSet01/textures/rock_moss_set_01_diff_4k.jpg";
-        private const string RockNormal = SourceRoot + "/RockMossSet01/textures/rock_moss_set_01_nor_gl_4k.exr";
-        private const string RockRough = SourceRoot + "/RockMossSet01/textures/rock_moss_set_01_rough_4k.jpg";
+        private const string RockFbx = RockSourceRoot + "/rock_moss_set_01_4k.fbx";
+        private const string RockDiff = RockSourceRoot + "/textures/rock_moss_set_01_diff_4k.jpg";
+        private const string RockNormal = RockSourceRoot + "/textures/rock_moss_set_01_nor_gl_4k.exr";
+        private const string RockRough = RockSourceRoot + "/textures/rock_moss_set_01_rough_4k.jpg";
 
-        private const string TrunkFbx = SourceRoot + "/DeadTreeTrunk02/dead_tree_trunk_02_4k.fbx";
-        private const string TrunkDiff = SourceRoot + "/DeadTreeTrunk02/textures/dead_tree_trunk_02_diff_4k.jpg";
-        private const string TrunkNormal = SourceRoot + "/DeadTreeTrunk02/textures/dead_tree_trunk_02_nor_gl_4k.exr";
-        private const string TrunkRough = SourceRoot + "/DeadTreeTrunk02/textures/dead_tree_trunk_02_rough_4k.exr";
+        private const string TrunkFbx = DeadwoodSourceRoot + "/DeadTreeTrunk02/dead_tree_trunk_02_4k.fbx";
+        private const string TrunkDiff = DeadwoodSourceRoot + "/DeadTreeTrunk02/textures/dead_tree_trunk_02_diff_4k.jpg";
+        private const string TrunkNormal = DeadwoodSourceRoot + "/DeadTreeTrunk02/textures/dead_tree_trunk_02_nor_gl_4k.exr";
+        private const string TrunkRough = DeadwoodSourceRoot + "/DeadTreeTrunk02/textures/dead_tree_trunk_02_rough_4k.exr";
 
-        private const string StumpFbx = SourceRoot + "/TreeStump01/tree_stump_01_4k.fbx";
-        private const string StumpDiff = SourceRoot + "/TreeStump01/textures/tree_stump_01_diff_4k.jpg";
-        private const string StumpNormal = SourceRoot + "/TreeStump01/textures/tree_stump_01_nor_gl_4k.exr";
-        private const string StumpRough = SourceRoot + "/TreeStump01/textures/tree_stump_01_rough_4k.exr";
+        private const string StumpFbx = DeadwoodSourceRoot + "/TreeStump01/tree_stump_01_4k.fbx";
+        private const string StumpDiff = DeadwoodSourceRoot + "/TreeStump01/textures/tree_stump_01_diff_4k.jpg";
+        private const string StumpNormal = DeadwoodSourceRoot + "/TreeStump01/textures/tree_stump_01_nor_gl_4k.exr";
+        private const string StumpRough = DeadwoodSourceRoot + "/TreeStump01/textures/tree_stump_01_rough_4k.exr";
 
         // ================================================================ 项目自有输出路径
 
-        internal const string TextureFolder = "Assets/Textures/PolyHaven";
-        internal const string MaterialFolder = "Assets/Materials/PolyHaven";
+        private const string FernPrepared = "Assets/Environment/Vegetation/Fern02/Prepared";
+        private const string RockPrepared = "Assets/Environment/RocksAndDeadwood/RockMossSet01/Prepared";
+        private const string DeadwoodPrepared = "Assets/Environment/RocksAndDeadwood/Deadwood/Prepared";
+
+        private const string FernTextureFolder = FernPrepared + "/Textures";
+        private const string RockTextureFolder = RockPrepared + "/Textures";
+        private const string DeadwoodTextureFolder = DeadwoodPrepared + "/Textures";
 
         /// <summary>
         /// 校正 mesh 的输出目录：源 FBX 的作者空间几何（Z-up + 米）不能直接当 Unity 资产用，
-        /// 校正副本落在这里，prefab 只引用这里（源 FBX 仍是几何的唯一真源）。
+        /// 校正副本落在各自资产组的 Prepared/Models 下，prefab 只引用这里（源 FBX 仍是几何的唯一真源）。
         /// </summary>
-        internal const string MeshFolder = "Assets/Meshes/PolyHaven";
+        private const string FernModelFolder = FernPrepared + "/Models";
+        private const string RockModelFolder = RockPrepared + "/Models";
+        private const string DeadwoodModelFolder = DeadwoodPrepared + "/Models";
 
         /// <summary>Fern 法线贴图的 project-owned copy（源 importer 不可直接用作 Normal Map）。</summary>
-        internal const string FernNormalCopyPath = TextureFolder + "/Fern02_Normal.exr";
+        internal const string FernNormalCopyPath = FernTextureFolder + "/Fern02_Normal.exr";
 
-        internal const string FernAlbedoCutoutPath = TextureFolder + "/Fern02_AlbedoCutout.png";
-        internal const string FernSmoothnessPath = TextureFolder + "/Fern02_Smoothness.png";
-        internal const string RockSmoothnessPath = TextureFolder + "/RockMossSet01_Smoothness.png";
-        internal const string TrunkSmoothnessPath = TextureFolder + "/DeadTreeTrunk02_Smoothness.png";
-        internal const string StumpSmoothnessPath = TextureFolder + "/TreeStump01_Smoothness.png";
+        internal const string FernAlbedoCutoutPath = FernTextureFolder + "/Fern02_AlbedoCutout.png";
+        internal const string FernSmoothnessPath = FernTextureFolder + "/Fern02_Smoothness.png";
+        internal const string RockSmoothnessPath = RockTextureFolder + "/RockMossSet01_Smoothness.png";
+        internal const string TrunkSmoothnessPath = DeadwoodTextureFolder + "/DeadTreeTrunk02_Smoothness.png";
+        internal const string StumpSmoothnessPath = DeadwoodTextureFolder + "/TreeStump01_Smoothness.png";
 
-        private const string FernMaterialPath = MaterialFolder + "/Fern02_Cutout.mat";
-        private const string RockMaterialPath = MaterialFolder + "/RockMossSet01.mat";
-        private const string TrunkMaterialPath = MaterialFolder + "/DeadTreeTrunk02.mat";
-        private const string StumpMaterialPath = MaterialFolder + "/TreeStump01.mat";
+        internal const string FernMaterialPath = FernPrepared + "/Materials/Fern02_Cutout.mat";
+        private const string RockMaterialPath = RockPrepared + "/Materials/RockMossSet01.mat";
+        private const string TrunkMaterialPath = DeadwoodPrepared + "/Materials/DeadTreeTrunk02.mat";
+        private const string StumpMaterialPath = DeadwoodPrepared + "/Materials/TreeStump01.mat";
 
         internal const string FernShaderName = "Jurassic World/Foliage Cutout Double Sided";
 
@@ -162,8 +171,15 @@ namespace JurassicWorld.Editor
                 return false;
             }
 
-            JurassicWorldSceneBuilder.EnsureFolder(TextureFolder);
-            JurassicWorldSceneBuilder.EnsureFolder(MaterialFolder);
+            JurassicWorldSceneBuilder.EnsureFolder(FernTextureFolder);
+            JurassicWorldSceneBuilder.EnsureFolder(RockTextureFolder);
+            JurassicWorldSceneBuilder.EnsureFolder(DeadwoodTextureFolder);
+            JurassicWorldSceneBuilder.EnsureFolder(FernPrepared + "/Materials");
+            JurassicWorldSceneBuilder.EnsureFolder(RockPrepared + "/Materials");
+            JurassicWorldSceneBuilder.EnsureFolder(DeadwoodPrepared + "/Materials");
+            JurassicWorldSceneBuilder.EnsureFolder(FernModelFolder);
+            JurassicWorldSceneBuilder.EnsureFolder(RockModelFolder);
+            JurassicWorldSceneBuilder.EnsureFolder(DeadwoodModelFolder);
             JurassicWorldSceneBuilder.EnsureFolder(UnderstoryAssetLocator.FernFolder);
             JurassicWorldSceneBuilder.EnsureFolder(UnderstoryAssetLocator.RockFolder);
             JurassicWorldSceneBuilder.EnsureFolder(UnderstoryAssetLocator.DeadwoodFolder);
@@ -781,8 +797,9 @@ namespace JurassicWorld.Editor
             public string AssetName;
             public string Fbx;
             public string Token;
+            public string Folder;
 
-            public string Path => MeshFolder + "/" + AssetName + ".asset";
+            public string Path => Folder + "/" + AssetName + ".asset";
         }
 
         private static CorrectedMeshSpec[] CorrectedMeshSpecs()
@@ -796,7 +813,8 @@ namespace JurassicWorld.Editor
                 {
                     AssetName = "Fern02_" + letter.ToUpperInvariant(),
                     Fbx = FernFbx,
-                    Token = "fern_02_" + letter
+                    Token = "fern_02_" + letter,
+                    Folder = FernModelFolder
                 });
             }
 
@@ -805,7 +823,8 @@ namespace JurassicWorld.Editor
                 {
                     AssetName = "RockMossSet01_Rock0" + i,
                     Fbx = RockFbx,
-                    Token = "rock0" + i
+                    Token = "rock0" + i,
+                    Folder = RockModelFolder
                 });
 
             for (int i = 0; i < TrunkLodTransitions.Length; i++)
@@ -813,14 +832,16 @@ namespace JurassicWorld.Editor
                 {
                     AssetName = "LogTrunk02_LOD" + i,
                     Fbx = TrunkFbx,
-                    Token = "lod" + i
+                    Token = "lod" + i,
+                    Folder = DeadwoodModelFolder
                 });
 
             specs.Add(new CorrectedMeshSpec
             {
                 AssetName = "DeadwoodStump01",
                 Fbx = StumpFbx,
-                Token = "tree_stump_01"
+                Token = "tree_stump_01",
+                Folder = DeadwoodModelFolder
             });
 
             return specs.ToArray();
@@ -829,7 +850,14 @@ namespace JurassicWorld.Editor
         /// <summary>取已铸造的校正 mesh（供 prefab 铸造引用）；未铸造时返回 null。</summary>
         private static Mesh CorrectedMesh(string assetName)
         {
-            return AssetDatabase.LoadAssetAtPath<Mesh>(MeshFolder + "/" + assetName + ".asset");
+            return AssetDatabase.LoadAssetAtPath<Mesh>(CorrectedMeshFolder(assetName) + "/" + assetName + ".asset");
+        }
+
+        private static string CorrectedMeshFolder(string assetName)
+        {
+            if (assetName.StartsWith("Fern02_", StringComparison.Ordinal)) return FernModelFolder;
+            if (assetName.StartsWith("RockMossSet01_", StringComparison.Ordinal)) return RockModelFolder;
+            return DeadwoodModelFolder;
         }
 
         /// <summary>
@@ -857,7 +885,9 @@ namespace JurassicWorld.Editor
             if (pending.Count == 0)
                 return;
 
-            JurassicWorldSceneBuilder.EnsureFolder(MeshFolder);
+            JurassicWorldSceneBuilder.EnsureFolder(FernModelFolder);
+            JurassicWorldSceneBuilder.EnsureFolder(RockModelFolder);
+            JurassicWorldSceneBuilder.EnsureFolder(DeadwoodModelFolder);
 
             // 第一轮：不碰源资产 —— Editor 若允许直接读顶点，则源 .meta 全程不变。
             var deferred = new List<CorrectedMeshSpec>();
@@ -954,7 +984,7 @@ namespace JurassicWorld.Editor
         /// <summary>
         /// 产物是否可用：只使用非 readable 也能读的元数据，判定阶段不必触碰源 FBX。
         /// 覆盖几何包围盒与拓扑；【不含】法线/切线/UV —— 若只改这些通道的生成逻辑，
-        /// 需先删除 Assets/Meshes/PolyHaven 再 Bake 才会重建。
+        /// 需先删除各资产组 Prepared/Models 下的校正 mesh 再 Bake 才会重建。
         /// </summary>
         private static bool IsCorrectedMeshCurrent(Mesh corrected, Mesh source)
         {

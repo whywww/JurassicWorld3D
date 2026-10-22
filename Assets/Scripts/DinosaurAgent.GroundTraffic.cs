@@ -34,6 +34,7 @@ namespace JurassicWorld
                 case "Sauropelta": return DinosaurSpecies.Sauropelta;
                 case "Pachycephalosaurus": return DinosaurSpecies.Pachycephalosaurus;
                 case "Baurusuchus": return DinosaurSpecies.Baurusuchus;
+                case "Protoceratops": return DinosaurSpecies.Protoceratops;
                 case "Velociraptor": return DinosaurSpecies.Velociraptor;
                 default: return DinosaurSpecies.Other;
             }
@@ -53,7 +54,8 @@ namespace JurassicWorld
                     case DinosaurSpecies.Pachycephalosaurus: return 6;
                     case DinosaurSpecies.Baurusuchus: return 7;
                     case DinosaurSpecies.Velociraptor: return 8;
-                    default: return 9;
+                    case DinosaurSpecies.Protoceratops: return 9;
+                    default: return 10;
                 }
             }
         }

@@ -13,11 +13,11 @@ namespace JurassicWorld.Editor
     {
         internal const string RootName = "Autumn Deadwood Ecology Belt";
         private const string ScenePath = "Assets/Scenes/Main.unity";
-        private const string MeshFolder = "Assets/Terrain/DeadVegetation";
+        private const string MeshFolder = "Assets/Environment/RocksAndDeadwood/AutumnGroundedLog/Prepared/Models";
         private const string MossMeshPath = MeshFolder + "/AutumnMoss.asset";
-        private const string LogPath = "Assets/Vegetation/Deadwood/DeadwoodLogTrunk02.prefab";
-        private const string StumpPath = "Assets/Vegetation/Deadwood/DeadwoodStump01.prefab";
-        private const string MossMaterialPath = "Assets/Terrain/GroundEcology/Moss.mat";
+        private const string LogPath = "Assets/Environment/RocksAndDeadwood/Deadwood/Prepared/Prefabs/DeadwoodLogTrunk02.prefab";
+        private const string StumpPath = "Assets/Environment/RocksAndDeadwood/Deadwood/Prepared/Prefabs/DeadwoodStump01.prefab";
+        private const string MossMaterialPath = "Assets/Environment/Terrain/Prepared/GroundEcology/Surface/Moss.mat";
         private const int Seed = 20260930;
 
         // Seven neighboring autumn groups form one band, rather than a map-wide scatter.
@@ -205,7 +205,7 @@ namespace JurassicWorld.Editor
                 triangles.AddRange(new[] { first, first + 1, first + 2, first, first + 2, first + 3 });
             }
 
-            if (!AssetDatabase.IsValidFolder(MeshFolder)) AssetDatabase.CreateFolder("Assets/Terrain", "DeadVegetation");
+            if (!AssetDatabase.IsValidFolder(MeshFolder)) JurassicWorldSceneBuilder.EnsureFolder(MeshFolder);
             Mesh mesh = AssetDatabase.LoadAssetAtPath<Mesh>(MossMeshPath);
             if (mesh == null)
             {
