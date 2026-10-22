@@ -12,6 +12,13 @@ namespace JurassicWorld.Editor
     {
         internal const string Root = "Assets/Dinosaurs/Sauropelta/Prepared";
         internal const string PrefabPath = Root + "/SauropeltaLegacy.prefab";
+        internal const string PortraitPath = Root + "/Sauropelta.png";
+        internal static readonly DinosaurPortraitBuilder.PortraitFraming PortraitSettings =
+            new DinosaurPortraitBuilder.PortraitFraming(
+                new[] { "Bone.006" },
+                0.60f,
+                new Vector3(1f, 0.2f, 1f),
+                0.05f);
         private const string ModelPath = "Assets/Dinosaurs/Sauropelta/Source/Models/Sauropelta.fbx";
 
         [MenuItem("Jurassic World/Scene/Add or Update Sauropelta")]
@@ -24,7 +31,11 @@ namespace JurassicWorld.Editor
             EnsureAssets();
             var previous = Object.FindObjectsOfType<DinosaurAgent>(true).Where(a => a.name == "Sauropelta").ToArray();
             DinosaurAgent added = null;
-            try { added = JurassicWorldSceneBuilder.AddSauropeltaToCurrentScene(); }
+            try
+            {
+                added = JurassicWorldSceneBuilder.AddSauropeltaToCurrentScene();
+                DinosaurPortraitBuilder.BindPortrait(added, PortraitPath);
+            }
             catch
             {
                 foreach (var a in Object.FindObjectsOfType<DinosaurAgent>(true).Where(a => a.name == "Sauropelta" && !previous.Contains(a)))
@@ -106,6 +117,7 @@ namespace JurassicWorld.Editor
                 model.transform.localRotation *= Quaternion.Euler(0f, -Mathf.Atan2(forward.x, forward.z) * Mathf.Rad2Deg, 0f);
                 animation.AddClip(walk, "Walk"); animation.clip = walk;
                 PrefabUtility.SaveAsPrefabAsset(holder, PrefabPath);
+                DinosaurPortraitBuilder.EnsureHeadshotIfMissing(holder, "Sauropelta", PortraitPath, PortraitSettings);
             }
             finally { Object.DestroyImmediate(holder); }
         }
@@ -123,7 +135,7 @@ namespace JurassicWorld.Editor
                 throw new InvalidOperationException("Sauropelta navigation body does not match the 5m model: " + envelope.size);
             var data = new SerializedObject(agent);
             data.FindProperty("species").enumValueIndex = (int)DinosaurAgent.DinosaurSpecies.Sauropelta;
-            data.FindProperty("roamingMode").enumValueIndex = (int)DinosaurAgent.RoamingMode.Free;
+            data.FindProperty("roamingMode").enumValueIndex = (int)DinosaurAgent.RoamingMode.ContinuousFree;
             data.FindProperty("playerInteractionEnabled").boolValue = false;
             data.FindProperty("interactionBody").objectReferenceValue = body;
             data.FindProperty("safetyDistance").floatValue = 15f;

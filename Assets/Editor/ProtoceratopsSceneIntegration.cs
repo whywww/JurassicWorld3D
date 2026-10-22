@@ -39,7 +39,7 @@ namespace JurassicWorld.Editor
             EditorSceneManager.SaveScene(scene);
             Selection.activeGameObject = added.gameObject;
             SceneView.lastActiveSceneView?.FrameSelected();
-            Debug.Log("PROTOCERATOPS_ADDED: 2m, original Walk only, frozen stops, free roaming.");
+            Debug.Log("PROTOCERATOPS_ADDED: 2m, original WalkCycle only, shared continuous free roaming.");
         }
 
         internal static void EnsureAssets()
@@ -156,7 +156,7 @@ namespace JurassicWorld.Editor
                 throw new InvalidOperationException("Protoceratops navigation body does not match the 2m model: " + envelope.size);
             var data = new SerializedObject(agent);
             data.FindProperty("species").enumValueIndex = (int)DinosaurAgent.DinosaurSpecies.Protoceratops;
-            data.FindProperty("roamingMode").enumValueIndex = (int)DinosaurAgent.RoamingMode.Free;
+            data.FindProperty("roamingMode").enumValueIndex = (int)DinosaurAgent.RoamingMode.ContinuousFree;
             data.FindProperty("playerInteractionEnabled").boolValue = false;
             data.FindProperty("interactionBody").objectReferenceValue = body;
             data.FindProperty("safetyDistance").floatValue = 15f;

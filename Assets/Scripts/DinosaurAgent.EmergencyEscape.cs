@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.AI;
 
 namespace JurassicWorld
@@ -14,7 +14,8 @@ namespace JurassicWorld
         public float NoMovementDuration => emergencyStuckTime;
         public string EmergencyEscapeStatus { get; private set; } = "Inactive";
 
-        private bool EmergencyMovementExpected => !frontTestWaiting && (trafficLocked || freeRecoveryActive || frontRecoveryActive
+        private bool EmergencyMovementExpected => !frontTestWaiting
+            && (IsContinuousWalker && !frontActive && InteractionPhase == PlayerInteractionPhase.Inactive || trafficLocked || freeRecoveryActive || frontRecoveryActive
             || frontActive && FrontActionWaitingForSpace
             || !frontActive && (CurrentState != DinosaurState.Idle || IsSteppingTurn || routeRejoining
                 || freeRetryGoal || freeReplanFailures > 0 || !string.IsNullOrEmpty(RoamingBlockReason)));
@@ -47,6 +48,7 @@ namespace JurassicWorld
         private void BeginEmergencyEscape()
         {
             emergencyEscapeActive = true;
+            ResetContinuousSteering();
             emergencyOrigin = transform.position;
             emergencyHasGoal = false;
             emergencyRetry = 0f;
@@ -195,7 +197,15 @@ namespace JurassicWorld
             // legacy walkers cannot snap back to their pre-escape position.
             if (!IsFreeRoaming)
                 MovementCorridor.ProjectToCorridor(routeIndex, new Vector2(transform.position.x, transform.position.z), out routeArc, out _);
-            BeginIdle();
+            if (IsContinuousWalker)
+            {
+                ResetContinuousSteering();
+                hasCuriosityPath = false;
+                CurrentState = DinosaurState.RandomWalk;
+                stateTimer = 0f;
+                PickFreeGoalCore(false);
+            }
+            else BeginIdle();
             Debug.Log($"[Emergency escape] {DisplayName}: reached open ground; normal obstacle checks restored.", this);
         }
     }

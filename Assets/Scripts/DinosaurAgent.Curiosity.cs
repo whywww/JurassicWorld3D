@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.AI;
 
 namespace JurassicWorld
@@ -169,6 +169,7 @@ namespace JurassicWorld
 
         private bool PathFinished()
         {
+            if (IsContinuousWalker) AdvanceContinuousCorners();
             while (hasCuriosityPath && curiosityCorner < curiosityCorners.Length
                 && FlatDistance(transform.position, curiosityCorners[curiosityCorner]) <= .08f)
             {

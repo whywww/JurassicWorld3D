@@ -1,6 +1,6 @@
 # 原角龙接入
 
-Main 场景包含一只约 2 米的 Protoceratops（原角龙）。使用压缩包原生 WalkCycle；原始关键帧区间为 0.5–2.5 秒，转换保留完整的 2 秒步行循环，不包含起始静止等待。原生步速由四只脚采样约为 0.281 米/秒，移动和动画同步，停止时冻结并在移动时恢复。不启用脚部锁定或玩家互动。
+Main 场景包含一只约 2 米的 Protoceratops（原角龙）。使用压缩包原生 WalkCycle；原始关键帧区间为 0.5–2.5 秒，转换保留完整的 2 秒步行循环，不包含起始静止等待。原生步速由四只脚采样约为 0.281 米/秒，移动和动画同步。使用与最新蜥结龙相同的 `RoamingMode.ContinuousFree`：持续步行、行进中平滑转弯、提前绕障和目标接续；取消随机休息，只有无安全通路时冻结步态，通路恢复后继续前进。不启用脚部锁定或玩家互动。
 
 ## 资源和重建
 
@@ -13,11 +13,11 @@ Main 场景包含一只约 2 米的 Protoceratops（原角龙）。使用压缩�
 
 ## 行为和验证
 
-沿用小型恐龙自由漫游、导航身体扫掠、安全出生、同伴会车，以及对霸王龙 15 米避让、20 米解除的规则。物种枚举只在末尾追加，保留已有序列化值。
+直接复用 `DinosaurAgent.ContinuousRoam` 通用持续漫游实现，不添加原角龙专用转向或绕行分支。原有前视距离 3 米、最小转弯半径 2.5 米、绕障探测距离 3 米、转速变化上限 30 度/秒²均保留；保留导航身体扫掠、安全出生、同伴会车，以及对霸王龙 15 米避让、20 米解除的规则。物种枚举只在末尾追加，保留已有序列化值。
 
-验收菜单：`Jurassic World > Acceptance > Verify Protoceratops Main Roaming`；批处理入口为 `JurassicWorld.Editor.ProtoceratopsAcceptance.Run`。检查重复接入、现有对象保留、尺寸、导航、材质、2 秒原生动作、骨骼运动，以及至少 75 秒的移动、转向、循环、停步冻结和恢复。测试用固定种子只作用于 Play，不写回 Main。
+验收菜单：`Jurassic World > Acceptance > Verify Protoceratops Main Roaming`；批处理入口为 `JurassicWorld.Editor.ProtoceratopsAcceptance.Run`。直接读取已保存的 Main，不重新生成原角龙或地图。检查尺寸、导航、材质、2 秒原生动作、骨骼运动，以及至少 120 秒的持续移动、目标接续、行进转弯、循环、接地及安全阻挡；正常漫游不得进入 Idle 或原地转身。测试用固定种子只作用于 Play，不写回 Main。
 
-日志：`Logs/protoceratops-acceptance.txt`；截图：`Logs/protoceratops-model.png`、`Logs/protoceratops-walk.png`、`Logs/protoceratops-stop.png`；步态采样：`Logs/footprobe_原角龙_WalkCycle.csv`。
+日志：`Logs/protoceratops-acceptance.txt`；截图：`Logs/protoceratops-model.png`、`Logs/protoceratops-walk.png`、`Logs/protoceratops-curve.png`（行进转弯），受阻时另保存 `Logs/protoceratops-stop.png`；步态采样：`Logs/footprobe_原角龙_WalkCycle.csv`。
 
 ## 眼球专项验收
 

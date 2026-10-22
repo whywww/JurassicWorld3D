@@ -62,6 +62,7 @@ namespace JurassicWorld.Editor
             LocalTreeThinning.SeedConfigured();
             TreeHeightAdjustment.SeedConfigured();
             if (File.Exists(EnabledPath)) PrepareCurrent();
+            else WaterPlantCleanup.SeedConfigured();
         }
         private static void Save()
         {
@@ -73,6 +74,7 @@ namespace JurassicWorld.Editor
         public static void PrepareCurrent()
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode) throw new InvalidOperationException("Prepare foliage in edit mode.");
+            WaterPlantCleanup.SeedConfigured();
             var existing = Object.FindObjectOfType<FoliageTerrainConversion>();
             if (existing != null) { ValidateCurrent(); return; }
             Terrain terrain = Terrain.activeTerrain;
@@ -132,6 +134,8 @@ namespace JurassicWorld.Editor
                     Bounds bounds = FlexibleTreeBounds(tree.gameObject);
                     if (CanReach(bounds, addedSources)) PrepareTree(tree.gameObject, tree);
                 }
+                foreach (CenterGapGroundPlant plant in Object.FindObjectsOfType<CenterGapGroundPlant>())
+                    if (CanReach(FlexibleTreeBounds(plant.gameObject), addedSources)) PrepareTree(plant.gameObject, null);
                 ledger.removed = removed.ToArray();
                 ledger.retainedSignature = TreeSignature(retained.ToArray(), prototypes);
                 // Commit the Terrain array only after all profiles, material variants and meshes succeeded.

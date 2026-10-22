@@ -15,7 +15,7 @@ MonoBehaviour:
   clip: {fileID: 7400000, guid: 74c42b95e77d9484884b7dd35056372d, type: 2}
   groundSpeed: 0.22006987
   heightCorrection: -0.09828968
-  turnSpeed: 2
+  turnSpeed: 8
   loopStart: 0
   loopEnd: 5
   feet:

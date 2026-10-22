@@ -1,0 +1,558 @@
+{
+    "enabled": true,
+    "scenes": [
+        {
+            "id": "GlobalObjectId_V1-2-a0c167ec97c84f75a3cdbb04344cb644-95040614267565824-893176743",
+            "key": "02966c7ec45179946ab30543009f9b3b|GapTree_63|58.5707|-16.1750",
+            "guid": "02966c7ec45179946ab30543009f9b3b",
+            "name": "GapTree_63",
+            "parent": "Center Forest Gap Fill/Southeast",
+            "owner": "CenterGapFill",
+            "position": {
+                "x": 58.570674896240237,
+                "y": -0.0432329960167408,
+                "z": -16.174957275390626
+            },
+            "scale": {
+                "x": 7.6218647956848148,
+                "y": 7.6218647956848148,
+                "z": 7.6218647956848148
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.512982964515686,
+                "z": 0.0,
+                "w": 0.8583988547325134
+            },
+            "tree": true,
+            "ground": false,
+            "hardBranches": true,
+            "noColliders": true,
+            "radius": 0.32680848240852358
+        },
+        {
+            "id": "GlobalObjectId_V1-2-a0c167ec97c84f75a3cdbb04344cb644-159937702520499499-893176743",
+            "key": "28142a75ea07a0044b8868b557e9e408|Pachira_B|58.5707|-16.1750",
+            "guid": "28142a75ea07a0044b8868b557e9e408",
+            "name": "Pachira_B",
+            "parent": "Center Forest Gap Fill/Southeast/GapTree_63",
+            "owner": "CenterGapFill",
+            "position": {
+                "x": 58.570674896240237,
+                "y": -0.0432329960167408,
+                "z": -16.174957275390626
+            },
+            "scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.512982964515686,
+                "z": 0.0,
+                "w": 0.8583988547325134
+            },
+            "tree": false,
+            "ground": false,
+            "hardBranches": false,
+            "noColliders": true,
+            "radius": 0.0
+        },
+        {
+            "id": "GlobalObjectId_V1-2-a0c167ec97c84f75a3cdbb04344cb644-5615448573334761351-915136765",
+            "key": "35ffb4073a316ce41bf271d8da86badd|Fern02_D_0|56.8959|-6.6660",
+            "guid": "35ffb4073a316ce41bf271d8da86badd",
+            "name": "Fern02_D_0",
+            "parent": "Phase 2 Biome Vegetation/12_Tropical",
+            "owner": "ExistingScene",
+            "position": {
+                "x": 56.89591979980469,
+                "y": -0.6980586647987366,
+                "z": -6.666049003601074
+            },
+            "scale": {
+                "x": 8.916524887084961,
+                "y": 8.916524887084961,
+                "z": 8.916524887084961
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.8038569092750549,
+                "z": 0.0,
+                "w": -0.5948227047920227
+            },
+            "tree": false,
+            "ground": false,
+            "hardBranches": false,
+            "noColliders": true,
+            "radius": 0.0
+        },
+        {
+            "id": "GlobalObjectId_V1-2-a0c167ec97c84f75a3cdbb04344cb644-1709083563470222742-369745809",
+            "key": "4695cc0c26945e64da95218a444fa199|Fern02_B_2|61.2869|-10.5160",
+            "guid": "4695cc0c26945e64da95218a444fa199",
+            "name": "Fern02_B_2",
+            "parent": "Phase 2 Biome Vegetation/12_Tropical",
+            "owner": "ExistingScene",
+            "position": {
+                "x": 61.28693771362305,
+                "y": 0.02214309759438038,
+                "z": -10.516005516052246
+            },
+            "scale": {
+                "x": 4.442420959472656,
+                "y": 4.442420959472656,
+                "z": 4.442420959472656
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.23344536125659944,
+                "z": 0.0,
+                "w": 0.972369909286499
+            },
+            "tree": false,
+            "ground": false,
+            "hardBranches": false,
+            "noColliders": true,
+            "radius": 0.0
+        },
+        {
+            "id": "GlobalObjectId_V1-2-a0c167ec97c84f75a3cdbb04344cb644-6723943390678405403-1523077849",
+            "key": "7b9630af48f30ac4088e4d4fe53d707d|Creek Fern|58.3192|-6.3716",
+            "guid": "7b9630af48f30ac4088e4d4fe53d707d",
+            "name": "Creek Fern",
+            "parent": "Main East to North Creek",
+            "owner": "ExistingScene",
+            "position": {
+                "x": 58.319244384765628,
+                "y": -0.12755686044692994,
+                "z": -6.371622085571289
+            },
+            "scale": {
+                "x": 0.699999988079071,
+                "y": 0.699999988079071,
+                "z": 0.699999988079071
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.9762190580368042,
+                "z": 0.0,
+                "w": 0.2167864590883255
+            },
+            "tree": false,
+            "ground": false,
+            "hardBranches": false,
+            "noColliders": true,
+            "radius": 0.0
+        },
+        {
+            "id": "GlobalObjectId_V1-2-a0c167ec97c84f75a3cdbb04344cb644-6723943390678405403-1536713003",
+            "key": "7b9630af48f30ac4088e4d4fe53d707d|Creek Fern|59.9687|-0.5878",
+            "guid": "7b9630af48f30ac4088e4d4fe53d707d",
+            "name": "Creek Fern",
+            "parent": "Main East to North Creek",
+            "owner": "ExistingScene",
+            "position": {
+                "x": 59.96867370605469,
+                "y": -0.07205581665039063,
+                "z": -0.5878384113311768
+            },
+            "scale": {
+                "x": 0.699999988079071,
+                "y": 0.699999988079071,
+                "z": 0.699999988079071
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.18005762994289399,
+                "z": 0.0,
+                "w": 0.9836560487747192
+            },
+            "tree": false,
+            "ground": false,
+            "hardBranches": false,
+            "noColliders": true,
+            "radius": 0.0
+        },
+        {
+            "id": "GlobalObjectId_V1-2-a0c167ec97c84f75a3cdbb04344cb644-6723943390678405403-1147545042",
+            "key": "7b9630af48f30ac4088e4d4fe53d707d|Creek Fern|61.9083|-12.1554",
+            "guid": "7b9630af48f30ac4088e4d4fe53d707d",
+            "name": "Creek Fern",
+            "parent": "Main East to North Creek",
+            "owner": "ExistingScene",
+            "position": {
+                "x": 61.9083137512207,
+                "y": -0.09575790166854859,
+                "z": -12.155405044555664
+            },
+            "scale": {
+                "x": 0.699999988079071,
+                "y": 0.699999988079071,
+                "z": 0.699999988079071
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.7251494526863098,
+                "z": 0.0,
+                "w": 0.6885915398597717
+            },
+            "tree": false,
+            "ground": false,
+            "hardBranches": false,
+            "noColliders": true,
+            "radius": 0.0
+        },
+        {
+            "id": "GlobalObjectId_V1-2-a0c167ec97c84f75a3cdbb04344cb644-6723943390678405403-924128677",
+            "key": "7b9630af48f30ac4088e4d4fe53d707d|Creek Fern|62.3679|80.3851",
+            "guid": "7b9630af48f30ac4088e4d4fe53d707d",
+            "name": "Creek Fern",
+            "parent": "Main East to North Creek",
+            "owner": "ExistingScene",
+            "position": {
+                "x": 62.36787414550781,
+                "y": -0.07283580303192139,
+                "z": 80.3851318359375
+            },
+            "scale": {
+                "x": 0.699999988079071,
+                "y": 0.699999988079071,
+                "z": 0.699999988079071
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.9206738471984863,
+                "z": 0.0,
+                "w": 0.39033272862434389
+            },
+            "tree": false,
+            "ground": false,
+            "hardBranches": false,
+            "noColliders": true,
+            "radius": 0.0
+        },
+        {
+            "id": "GlobalObjectId_V1-2-a0c167ec97c84f75a3cdbb04344cb644-6723943390678405403-1350552562",
+            "key": "7b9630af48f30ac4088e4d4fe53d707d|Creek Fern|62.6824|-17.9392",
+            "guid": "7b9630af48f30ac4088e4d4fe53d707d",
+            "name": "Creek Fern",
+            "parent": "Main East to North Creek",
+            "owner": "ExistingScene",
+            "position": {
+                "x": 62.68238830566406,
+                "y": -0.10721331834793091,
+                "z": -17.939189910888673
+            },
+            "scale": {
+                "x": 0.699999988079071,
+                "y": 0.699999988079071,
+                "z": 0.699999988079071
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.6145467758178711,
+                "z": 0.0,
+                "w": 0.7888804078102112
+            },
+            "tree": false,
+            "ground": false,
+            "hardBranches": false,
+            "noColliders": true,
+            "radius": 0.0
+        },
+        {
+            "id": "GlobalObjectId_V1-2-a0c167ec97c84f75a3cdbb04344cb644-6723943390678405403-950342109",
+            "key": "7b9630af48f30ac4088e4d4fe53d707d|Creek Fern|64.4794|74.6014",
+            "guid": "7b9630af48f30ac4088e4d4fe53d707d",
+            "name": "Creek Fern",
+            "parent": "Main East to North Creek",
+            "owner": "ExistingScene",
+            "position": {
+                "x": 64.47940063476563,
+                "y": -0.09260600805282593,
+                "z": 74.60135650634766
+            },
+            "scale": {
+                "x": 0.699999988079071,
+                "y": 0.699999988079071,
+                "z": 0.699999988079071
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.5744399428367615,
+                "z": 0.0,
+                "w": -0.818546712398529
+            },
+            "tree": false,
+            "ground": false,
+            "hardBranches": false,
+            "noColliders": true,
+            "radius": 0.0
+        },
+        {
+            "id": "GlobalObjectId_V1-2-a0c167ec97c84f75a3cdbb04344cb644-6723943390678405403-384089049",
+            "key": "7b9630af48f30ac4088e4d4fe53d707d|Creek Fern|65.1174|16.7635",
+            "guid": "7b9630af48f30ac4088e4d4fe53d707d",
+            "name": "Creek Fern",
+            "parent": "Main East to North Creek",
+            "owner": "ExistingScene",
+            "position": {
+                "x": 65.11734771728516,
+                "y": -0.18735820055007935,
+                "z": 16.763511657714845
+            },
+            "scale": {
+                "x": 0.699999988079071,
+                "y": 0.699999988079071,
+                "z": 0.699999988079071
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.9999977350234985,
+                "z": 0.0,
+                "w": -0.0021312658209353687
+            },
+            "tree": false,
+            "ground": false,
+            "hardBranches": false,
+            "noColliders": true,
+            "radius": 0.0
+        },
+        {
+            "id": "GlobalObjectId_V1-2-a0c167ec97c84f75a3cdbb04344cb644-6723943390678405403-192980128",
+            "key": "7b9630af48f30ac4088e4d4fe53d707d|Creek Fern|65.8359|68.8176",
+            "guid": "7b9630af48f30ac4088e4d4fe53d707d",
+            "name": "Creek Fern",
+            "parent": "Main East to North Creek",
+            "owner": "ExistingScene",
+            "position": {
+                "x": 65.83592987060547,
+                "y": -0.10370421409606934,
+                "z": 68.81756591796875
+            },
+            "scale": {
+                "x": 0.699999988079071,
+                "y": 0.699999988079071,
+                "z": 0.699999988079071
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.07983633875846863,
+                "z": 0.0,
+                "w": -0.9968079924583435
+            },
+            "tree": false,
+            "ground": false,
+            "hardBranches": false,
+            "noColliders": true,
+            "radius": 0.0
+        },
+        {
+            "id": "GlobalObjectId_V1-2-a0c167ec97c84f75a3cdbb04344cb644-6723943390678405403-1634102787",
+            "key": "7b9630af48f30ac4088e4d4fe53d707d|Creek Fern|66.6939|63.0338",
+            "guid": "7b9630af48f30ac4088e4d4fe53d707d",
+            "name": "Creek Fern",
+            "parent": "Main East to North Creek",
+            "owner": "ExistingScene",
+            "position": {
+                "x": 66.6938705444336,
+                "y": -0.0804373025894165,
+                "z": 63.03378677368164
+            },
+            "scale": {
+                "x": 0.699999988079071,
+                "y": 0.699999988079071,
+                "z": 0.699999988079071
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.8139040470123291,
+                "z": 0.0,
+                "w": -0.5809993147850037
+            },
+            "tree": false,
+            "ground": false,
+            "hardBranches": false,
+            "noColliders": true,
+            "radius": 0.0
+        },
+        {
+            "id": "GlobalObjectId_V1-2-a0c167ec97c84f75a3cdbb04344cb644-6723943390678405403-1059530554",
+            "key": "7b9630af48f30ac4088e4d4fe53d707d|Creek Fern|67.8957|39.8987",
+            "guid": "7b9630af48f30ac4088e4d4fe53d707d",
+            "name": "Creek Fern",
+            "parent": "Main East to North Creek",
+            "owner": "ExistingScene",
+            "position": {
+                "x": 67.89569091796875,
+                "y": -0.09399735927581787,
+                "z": 39.89864730834961
+            },
+            "scale": {
+                "x": 0.699999988079071,
+                "y": 0.699999988079071,
+                "z": 0.699999988079071
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.6636166572570801,
+                "z": 0.0,
+                "w": -0.7480728030204773
+            },
+            "tree": false,
+            "ground": false,
+            "hardBranches": false,
+            "noColliders": true,
+            "radius": 0.0
+        },
+        {
+            "id": "GlobalObjectId_V1-2-a0c167ec97c84f75a3cdbb04344cb644-6723943390678405403-1366046147",
+            "key": "7b9630af48f30ac4088e4d4fe53d707d|Creek Fern|68.3414|34.1149",
+            "guid": "7b9630af48f30ac4088e4d4fe53d707d",
+            "name": "Creek Fern",
+            "parent": "Main East to North Creek",
+            "owner": "ExistingScene",
+            "position": {
+                "x": 68.34143829345703,
+                "y": -0.07542961835861206,
+                "z": 34.114864349365237
+            },
+            "scale": {
+                "x": 0.699999988079071,
+                "y": 0.699999988079071,
+                "z": 0.699999988079071
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.9625481963157654,
+                "z": 0.0,
+                "w": -0.2711107134819031
+            },
+            "tree": false,
+            "ground": false,
+            "hardBranches": false,
+            "noColliders": true,
+            "radius": 0.0
+        },
+        {
+            "id": "GlobalObjectId_V1-2-a0c167ec97c84f75a3cdbb04344cb644-6723943390678405403-706490391",
+            "key": "7b9630af48f30ac4088e4d4fe53d707d|Creek Fern|69.7899|28.3311",
+            "guid": "7b9630af48f30ac4088e4d4fe53d707d",
+            "name": "Creek Fern",
+            "parent": "Main East to North Creek",
+            "owner": "ExistingScene",
+            "position": {
+                "x": 69.7899169921875,
+                "y": -0.10489028692245484,
+                "z": 28.331083297729493
+            },
+            "scale": {
+                "x": 0.699999988079071,
+                "y": 0.699999988079071,
+                "z": 0.699999988079071
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.5217410922050476,
+                "z": 0.0,
+                "w": 0.8531038761138916
+            },
+            "tree": false,
+            "ground": false,
+            "hardBranches": false,
+            "noColliders": true,
+            "radius": 0.0
+        },
+        {
+            "id": "GlobalObjectId_V1-2-a0c167ec97c84f75a3cdbb04344cb644-6723943390678405403-1607656064",
+            "key": "7b9630af48f30ac4088e4d4fe53d707d|Creek Fern|69.8087|22.5473",
+            "guid": "7b9630af48f30ac4088e4d4fe53d707d",
+            "name": "Creek Fern",
+            "parent": "Main East to North Creek",
+            "owner": "ExistingScene",
+            "position": {
+                "x": 69.80872344970703,
+                "y": -0.10861575603485108,
+                "z": 22.547298431396486
+            },
+            "scale": {
+                "x": 0.699999988079071,
+                "y": 0.699999988079071,
+                "z": 0.699999988079071
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.9839009046554565,
+                "z": 0.0,
+                "w": 0.17871491611003877
+            },
+            "tree": false,
+            "ground": false,
+            "hardBranches": false,
+            "noColliders": true,
+            "radius": 0.0
+        },
+        {
+            "id": "GlobalObjectId_V1-2-a0c167ec97c84f75a3cdbb04344cb644-193742-996800967",
+            "key": "9c74caa742791864f9c678287121e6c9|bush03_3|54.6938|-6.8684",
+            "guid": "9c74caa742791864f9c678287121e6c9",
+            "name": "bush03_3",
+            "parent": "Phase 2 Biome Vegetation/12_Tropical",
+            "owner": "ExistingScene",
+            "position": {
+                "x": 54.69375228881836,
+                "y": 0.22122696042060853,
+                "z": -6.868399620056152
+            },
+            "scale": {
+                "x": 2.5170273780822756,
+                "y": 2.5170273780822756,
+                "z": 2.5170273780822756
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.7313537001609802,
+                "z": 0.0,
+                "w": 0.6819983720779419
+            },
+            "tree": false,
+            "ground": false,
+            "hardBranches": false,
+            "noColliders": true,
+            "radius": 0.0
+        },
+        {
+            "id": "GlobalObjectId_V1-2-a0c167ec97c84f75a3cdbb04344cb644-171474-1884184047",
+            "key": "f62058cb710fd1745a24102fff0edd46|bush06_1|63.5535|52.0302",
+            "guid": "f62058cb710fd1745a24102fff0edd46",
+            "name": "bush06_1",
+            "parent": "Phase 2 Biome Vegetation/29_Tropical",
+            "owner": "ExistingScene",
+            "position": {
+                "x": 63.55348587036133,
+                "y": -0.07632973790168762,
+                "z": 52.030155181884769
+            },
+            "scale": {
+                "x": 1.535356044769287,
+                "y": 1.535356044769287,
+                "z": 1.535356044769287
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.07845903933048248,
+                "z": 0.0,
+                "w": -0.9969173669815064
+            },
+            "tree": false,
+            "ground": false,
+            "hardBranches": false,
+            "noColliders": true,
+            "radius": 0.0
+        }
+    ],
+    "trees": [],
+    "details": []
+}

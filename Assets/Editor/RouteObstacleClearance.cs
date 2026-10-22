@@ -266,7 +266,7 @@ namespace JurassicWorld.Editor
             }
         }
 
-        private static bool IsWood(Material material)
+        internal static bool IsWood(Material material)
         {
             if (material == null) return false;
             string text = (material.name + " " + material.shader.name).ToLowerInvariant();

@@ -21,3 +21,7 @@
 - 75 秒漫游回归通过：16.66 米、21 度转向、28 次循环、3 次停步恢复；137 次接地及障碍检查通过，接地范围 -0.001 至 0.019 米，原生速度保持 0.281 米/秒。
 - 增量接入两次仍只有一只原角龙；原有地图的 10,722 个序列化对象未改变，其他恐龙保留。
 - 专项日志：`Logs/protoceratops-eyes-acceptance.txt`；近景：`Logs/protoceratops-eye-{left,front,right}-{时间}.png`；场景保留检查：`Logs/protoceratops-eye-scene-preservation.txt`。
+
+## 最新连续漫游模式
+原角龙已切换为与最新蜥结龙相同的 ContinuousFree。保存场景中的步速、动画和转向配置均保留，后续生成同样使用该模式。运行时与编辑器编译通过，五相位双眼检查通过。短时运行已观察到连续移动、目标接续和行进转弯，未出现 Idle；用户要求结束后停止验收，未完成完整120秒测试。
+65.5s; 18.44m; turns=164.0; movingFrames=761; frozenFrames=0; resumes=0; loops=32; handoffs=2; curveFrames=448; idleFrames=0; Walking curve; Inactive; 

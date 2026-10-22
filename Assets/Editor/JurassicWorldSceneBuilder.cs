@@ -76,6 +76,7 @@ namespace JurassicWorld.Editor
             TRexInteractionBake.BakeCurrentScene(false);
             RainforestSample.SeedConfigured();
             RainforestExpansion.SeedConfigured();
+            CenterForestGapFill.SeedConfigured();
             FoliageInteractionPreparation.SeedConfigured();
             PteradactalSceneIntegration.AddToCurrentScene();
         }

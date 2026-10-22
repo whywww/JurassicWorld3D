@@ -223,7 +223,7 @@ namespace JurassicWorld.Editor
             }
             return result;
         }
-        private static List<RainforestSample.ReservedPose> Reservations(Transform helpers)
+        internal static List<RainforestSample.ReservedPose> Reservations(Transform helpers)
         {
             var result=new List<RainforestSample.ReservedPose>();var layout=Object.FindObjectOfType<RainforestSampleLayout>();
             var agents=Object.FindObjectsOfType<DinosaurAgent>();var rex=agents.Single(a=>a.name=="Tyrannosaurus Rex");

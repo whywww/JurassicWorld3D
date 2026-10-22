@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 namespace JurassicWorld
@@ -362,6 +362,7 @@ namespace JurassicWorld
 
         private void Update()
         {
+            ObserveContinuousPeerMotion(Time.deltaTime);
             if (gaitProfile == null) { UpdateBehaviour(); return; }
             Vector3 before = transform.position;
             Quaternion beforeRotation = transform.rotation;

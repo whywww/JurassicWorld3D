@@ -20,11 +20,14 @@ namespace JurassicWorld.Editor
     {
         private const string Key = "JurassicWorld.ForestPlayAcceptance";
         private const string BaselineScene = "Assets/Scenes/RainforestExpansionBaseline.unity";
-        private static string ArtifactOutput => SessionState.GetBool(Key + ".TreeHeights", false) ? TreeHeightAdjustment.Output
+        private static string ArtifactOutput => SessionState.GetBool(Key + ".GapFill", false) ? CenterForestGapFill.Output+(SessionState.GetBool(Key+".GapBaseline",false)?"/Baseline":"")
+            : SessionState.GetBool(Key + ".TreeHeights", false) ? TreeHeightAdjustment.Output
             : SessionState.GetBool(Key + ".Baseline", false) ? RainforestExpansion.Output + "/Baseline"
             : SessionState.GetBool(Key + ".Expansion", false) ? RainforestExpansion.Output : RainforestSample.Output;
         public static void RunExpansion() { SessionState.SetBool(Key + ".Expansion", true); Run(); }
         public static void RunTreeHeights() { SessionState.SetBool(Key + ".TreeHeights", true); Run(); }
+        public static void RunGapFill() { SessionState.SetBool(Key + ".GapFill", true); Run(); }
+        public static void RunGapFillBaseline() { CenterGapFillPerformance.PrepareBaseline();SessionState.SetBool(Key + ".GapFill", true);SessionState.SetBool(Key+".GapBaseline",true);Run(); }
         public static void RunExpansionBaseline()
         {
             DinosaurGaitCalibration.Require(File.Exists(RainforestExpansion.Output + "/Checkpoint/Main.unity"),
@@ -85,7 +88,7 @@ namespace JurassicWorld.Editor
             if (!SessionState.GetBool(Key + ".Expansion", false) && File.Exists(prior) && !File.Exists(history))
                 File.WriteAllText(history, "> Historical result using the previous all-vertices/static-penetration assertions; not the current collision policy.\n\n" + File.ReadAllText(prior));
             Directory.CreateDirectory(ArtifactOutput);
-            EditorSceneManager.OpenScene(SessionState.GetBool(Key + ".Baseline", false) ? BaselineScene : "Assets/Scenes/Main.unity");
+            EditorSceneManager.OpenScene(SessionState.GetBool(Key+".GapBaseline",false)?CenterGapFillPerformance.Baseline:SessionState.GetBool(Key + ".Baseline", false) ? BaselineScene : "Assets/Scenes/Main.unity");
             if (SessionState.GetBool(Key + ".Baseline", false))
             {
                 FoliageInteractionPreparation.RestoreCurrent(); RainforestSample.RebuildNavigation("Assets/Navigation/RainforestExpansionBaselineNav.asset");
@@ -149,7 +152,9 @@ namespace JurassicWorld.Editor
             // Reload resets every normal runtime state, animation and foot anchor.
             loading = true;
             SceneManager.sceneLoaded += Loaded;
-            if (SessionState.GetBool(Key + ".Baseline", false))
+            if (SessionState.GetBool(Key+".GapBaseline",false))
+                EditorSceneManager.LoadSceneInPlayMode(CenterGapFillPerformance.Baseline,new LoadSceneParameters(LoadSceneMode.Single));
+            else if (SessionState.GetBool(Key + ".Baseline", false))
                 EditorSceneManager.LoadSceneInPlayMode(BaselineScene, new LoadSceneParameters(LoadSceneMode.Single));
             else SceneManager.LoadScene("Main");
         }
@@ -399,6 +404,7 @@ namespace JurassicWorld.Editor
             Report.AppendLine($"\nVisible-mesh diagnostics: {meshSamples} animal samples; {meshOverlapSamples} samples contained overlaps; {meshOverlapVertices} overlapping vertices total (vertices may recur across samples). These counts do not determine collision-contract success.");
             Report.AppendLine(error == null ? "\nRuntime collision contract: PASS" : "\nRuntime collision contract: FAIL\n\n" + error);
             File.WriteAllText(ArtifactOutput + "/NormalPlay.md", Report.ToString());
+            SessionState.SetBool(Key+".GapBaseline",false);SessionState.SetBool(Key+".GapFill",false);
             SessionState.SetBool(Key + ".Expansion", false);
             SessionState.SetBool(Key + ".Baseline", false);
             if (error == null) Debug.Log("FOREST_NORMAL_PLAY_PASS"); else Debug.LogException(error);

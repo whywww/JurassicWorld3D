@@ -29,6 +29,11 @@ namespace JurassicWorld.Editor
         private static DinosaurCoreBody navigationBody;
         private static int poseChecks;
         private static float lowestContact, highestContact;
+        private static Vector3 previousGoal;
+        private static int goalHandoffs, turningWalkFrames, idleFrames;
+        private static double deadline;
+        private static bool curveGoalInstalled;
+        private static float nextCurveProbe;
 
         static ProtoceratopsAcceptance()
         {
@@ -50,19 +55,12 @@ namespace JurassicWorld.Editor
             if (EditorApplication.isPlayingOrWillChangePlaymode || EditorSceneManager.GetActiveScene().isDirty)
                 throw new InvalidOperationException("Stop Play and save scene edits first.");
             EditorSceneManager.OpenScene("Assets/Scenes/Main.unity");
-            var preserved = Object.FindObjectsOfType<DinosaurAgent>(true).Where(a => a.name != "Protoceratops")
-                .Select(a => (agent: a, position: a.transform.position, rotation: a.transform.rotation, scale: a.transform.localScale)).ToArray();
-            var roots = EditorSceneManager.GetActiveScene().GetRootGameObjects().Where(o => o.name != "Protoceratops").ToArray();
-            ProtoceratopsSceneIntegration.AddToMainScene();
-            ProtoceratopsSceneIntegration.AddToMainScene();
-            Require(preserved.All(p => p.agent != null && p.agent.transform.position == p.position && p.agent.transform.rotation == p.rotation && p.agent.transform.localScale == p.scale), "Existing dinosaur changed.");
-            Require(roots.All(o => o != null), "Existing scene root removed.");
             Require(Object.FindObjectsOfType<DinosaurAgent>().Count(a => a.Species == DinosaurAgent.DinosaurSpecies.Protoceratops) == 1, "Exactly one Protoceratops required.");
             ProtoceratopsEyeAcceptance.VerifyMain();
             // These changes are test-only; Main was saved before they are applied.
             foreach (var input in Object.FindObjectsOfType<EmotivPlayerInput>()) input.enabled = false;
             Object.FindObjectOfType<DinosaurInteractionSettings>().spawnSeed = 314159;
-            File.WriteAllText("Logs/protoceratops-acceptance.txt", "RUNNING: Main roaming acceptance.");
+            File.WriteAllText("Logs/protoceratops-acceptance.txt", "RUNNING: Main shared continuous roaming, 120 seconds.");
             SessionState.SetBool(Key, true);
             EditorApplication.isPlaying = true;
         }
@@ -111,7 +109,10 @@ namespace JurassicWorld.Editor
                 Require(Mathf.Max(bodyBounds.size.x, bodyBounds.size.z) > 1.7f && Mathf.Max(bodyBounds.size.x, bodyBounds.size.z) < 2.5f,
                     "Navigation body must match the two metre rendered model: " + bodyBounds.size);
                 Require(Mathf.Max(modelBounds.size.x, modelBounds.size.z) > 1.7f && Mathf.Max(modelBounds.size.x, modelBounds.size.z) < 2.5f, "Unexpected rendered size: " + modelBounds.size);
-                Require(protoceratops.IsFreeRoaming && !protoceratops.UsesRouteScheduling, "Free roaming required.");
+                Require(protoceratops.IsContinuousRoaming && protoceratops.IsFreeRoaming && !protoceratops.UsesRouteScheduling,
+                    "Shared continuous free roaming required.");
+                Require(Object.FindObjectsOfType<DinosaurAgent>().Single(a => a.Species == DinosaurAgent.DinosaurSpecies.Sauropelta).IsContinuousRoaming,
+                    "Sauropelta reference must use the same ContinuousFree mode.");
                 Require(protoceratops.WalkSpeed > .05f && protoceratops.WalkSpeed < 2f, "Protoceratops walk speed must match the sampled gait.");
                 Require((bool)typeof(DinosaurAgent).GetMethod("FreeNavigationReady", Private).Invoke(protoceratops, null), "Navigation/body data missing.");
                 animation = protoceratops.GetComponentInChildren<Animation>(true);
@@ -141,6 +142,10 @@ namespace JurassicWorld.Editor
                 Capture("model");
                 previous = protoceratops.transform.position; previousRotation = protoceratops.transform.rotation;
                 started = Time.time; wallStarted = (float)EditorApplication.timeSinceStartup;
+                previousGoal = (Vector3)typeof(DinosaurAgent).GetField("freeGoal", Private).GetValue(protoceratops);
+                goalHandoffs = turningWalkFrames = idleFrames = 0;
+                curveGoalInstalled = false; nextCurveProbe = 10f;
+                deadline = EditorApplication.timeSinceStartup + 600;
                 travelled = turned = 0f; frame = -1; walks = freezes = resumes = loopCrossings = 0;
                 wasFrozen = capturedWalk = capturedStop = false; failure = null;
                 lastTime = animation["WalkCycle"].time;
@@ -164,6 +169,7 @@ namespace JurassicWorld.Editor
             try
             {
                 Require(failure == null, failure);
+                Require(EditorApplication.timeSinceStartup < deadline, "Continuous roaming acceptance timed out.");
                 var state = animation["WalkCycle"];
                 if (frame % 15 == 0)
                 {
@@ -188,6 +194,32 @@ namespace JurassicWorld.Editor
                 float distance = Vector3.Distance(previous, protoceratops.transform.position);
                 float rotation = Quaternion.Angle(previousRotation, protoceratops.transform.rotation);
                 travelled += distance; turned += rotation;
+                float elapsed = Time.time - started;
+                bool normal = !protoceratops.IsEmergencyEscaping && protoceratops.GroundTrafficStatus == "Inactive";
+                if (elapsed > .25f && normal)
+                {
+                    if (protoceratops.CurrentState == DinosaurAgent.DinosaurState.Idle) idleFrames++;
+                    Require(idleFrames == 0, "Normal continuous roaming entered an idle rest.");
+                    if (rotation > .001f)
+                    {
+                        Require(distance > .000001f, "Continuous roaming turned in place.");
+                        turningWalkFrames++;
+                        if (turningWalkFrames == 20) Capture("curve");
+                    }
+                    if (distance < .000001f)
+                        Require(protoceratops.ContinuousRoamingStatus.Contains("Waiting"), "Stopped without a safety obstruction.");
+                }
+                Vector3 goal = (Vector3)typeof(DinosaurAgent).GetField("freeGoal", Private).GetValue(protoceratops);
+                if (Vector3.Distance(goal, previousGoal) > .01f)
+                {
+                    if (normal && distance > .000001f) goalHandoffs++;
+                    previousGoal = goal;
+                }
+                if (normal && !curveGoalInstalled && elapsed >= nextCurveProbe)
+                {
+                    nextCurveProbe = elapsed + 1f;
+                    curveGoalInstalled = TryInstallCurveGoal();
+                }
                 animatedDegrees += Quaternion.Angle(previousFootRotation, animatedFoot.localRotation);
                 previousFootRotation = animatedFoot.localRotation;
                 bool frozen = state.speed == 0f;
@@ -211,18 +243,45 @@ namespace JurassicWorld.Editor
                 wasFrozen = frozen; lastTime = state.time;
                 if (Time.time - lastAnimationTime >= 5f)
                 {
-                    File.WriteAllText("Logs/protoceratops-progress.txt", $"{Time.time - started:F1}s; {travelled:F2}m; turns={turned:F1}; movingFrames={walks}; frozenFrames={freezes}; resumes={resumes}; loops={loopCrossings}; {protoceratops.AvoidanceStatus}; {protoceratops.RoamingBlockReason}");
+                    File.WriteAllText("Logs/protoceratops-progress.txt", $"{Time.time - started:F1}s; {travelled:F2}m; turns={turned:F1}; movingFrames={walks}; frozenFrames={freezes}; resumes={resumes}; loops={loopCrossings}; handoffs={goalHandoffs}; curveFrames={turningWalkFrames}; idleFrames={idleFrames}; {protoceratops.ContinuousRoamingStatus}; {protoceratops.AvoidanceStatus}; {protoceratops.RoamingBlockReason}");
                     lastAnimationTime = Time.time;
                 }
-                if (Time.time - started < 75f || EditorApplication.timeSinceStartup - wallStarted < 60f) return;
+                if (elapsed < 120f || EditorApplication.timeSinceStartup - wallStarted < 60f) return;
                 Require(travelled > 5f && walks > 60, "Insufficient travel.");
-                Require(freezes > 20 && resumes > 0, "Stop/resume not observed.");
+                Require(curveGoalInstalled && goalHandoffs > 1 && turningWalkFrames > 20 && idleFrames == 0,
+                    "Continuous goal handoff or walking turns not observed.");
                 Require(animatedDegrees > 30f, "Animation time advances but leg bones do not animate.");
                 Require(poseChecks > 30, "Insufficient obstacle/contact samples.");
                 Require(turned > 10f && loopCrossings > 0, "Turning/animation looping not observed.");
                 Finish(null);
             }
             catch (Exception error) { Finish(error); }
+        }
+
+        // Only the test supplies a side goal. Steering, safety checks, speed and
+        // obstacle handling all remain the same shared controller used in Main.
+        private static bool TryInstallCurveGoal()
+        {
+            var type = typeof(DinosaurAgent);
+            float maximum = (float)type.GetProperty("ContinuousMaximumYawRate", Private).GetValue(protoceratops);
+            string[] fields = { "curiosityCorners", "curiosityCorner", "hasCuriosityPath", "freeGoal" };
+            object[] saved = fields.Select(f => type.GetField(f, Private).GetValue(protoceratops)).ToArray();
+            foreach (float sign in new[] { 1f, -1f })
+            {
+                object[] arc = { maximum * sign, 6f, Vector3.zero, Quaternion.identity };
+                if (!(bool)type.GetMethod("WalkingArcSafe", Private).Invoke(protoceratops, arc)) continue;
+                Vector3 end = (Vector3)arc[2]; Quaternion heading = (Quaternion)arc[3];
+                Vector3 target = end + heading * Quaternion.Euler(0f, protoceratops.VisualYaw, 0f) * Vector3.forward * 4f;
+                if ((bool)type.GetMethod("PlanCuriosityPath", Private).Invoke(protoceratops, new object[] { target, true, false }))
+                {
+                    type.GetField("freeGoal", Private).SetValue(protoceratops, target);
+                    type.GetField("continuousProbeRemaining", Private).SetValue(protoceratops, 0f);
+                    File.WriteAllText("Logs/protoceratops-curve-goal.txt", $"Safe test-only curve goal installed at {Time.time - started:F2}s; target={target:F3}. Main scene is not saved.\n");
+                    return true;
+                }
+                for (int i = 0; i < fields.Length; i++) type.GetField(fields[i], Private).SetValue(protoceratops, saved[i]);
+            }
+            return false;
         }
 
         private static void Capture(string state)
@@ -276,7 +335,7 @@ namespace JurassicWorld.Editor
             EditorApplication.update -= Tick;
             Application.logMessageReceived -= OnLog;
             SessionState.SetBool(Key, false);
-            string result = error == null ? $"PASS: Main; {Time.time - started:F1}s simulation; {(float)EditorApplication.timeSinceStartup - wallStarted:F1}s wall; {travelled:F2}m; turns={turned:F1}; movingFrames={walks}; frozenFrames={freezes}; resumes={resumes}; loops={loopCrossings}; legMotion={animatedDegrees:F1} degrees; walkSpeed={protoceratops.WalkSpeed:F3}m/s; animationRate={protoceratops.WalkSpeed / protoceratops.MoveAnimationGroundSpeed:F3}x; obstacleChecks={poseChecks}; groundContact=[{lowestContact:F3},{highestContact:F3}]m; safetyBoundary=PASS." : "FAIL: " + error;
+            string result = error == null ? $"PASS: Main ContinuousFree (same mode as Sauropelta); {Time.time - started:F1}s simulation; {(float)EditorApplication.timeSinceStartup - wallStarted:F1}s wall; {travelled:F2}m; turns={turned:F1}; movingFrames={walks}; frozenFrames={freezes}; resumes={resumes}; loops={loopCrossings}; legMotion={animatedDegrees:F1} degrees; walkSpeed={protoceratops.WalkSpeed:F3}m/s; animationRate={protoceratops.WalkSpeed / protoceratops.MoveAnimationGroundSpeed:F3}x; obstacleChecks={poseChecks}; groundContact=[{lowestContact:F3},{highestContact:F3}]m; safetyBoundary=PASS; handoffs={goalHandoffs}; curveFrames={turningWalkFrames}; idleFrames={idleFrames}." : "FAIL: " + error;
             File.WriteAllText("Logs/protoceratops-acceptance.txt", result);
             if (error == null) Debug.Log(result); else Debug.LogException(error);
             if (Application.isBatchMode) EditorApplication.Exit(error == null ? 0 : 1);

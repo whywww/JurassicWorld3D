@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.AI;
 
 namespace JurassicWorld
@@ -75,15 +75,19 @@ namespace JurassicWorld
 
         private float BandPenetration(Vector3 position, Quaternion rotation, DinosaurCoreBody.Band a,
             DinosaurAgent peer, DinosaurCoreBody.Band b)
+            => BandPenetration(position, rotation, a, peer.transform.position, peer.transform.rotation, peer.VisualYaw, peer.MovementHeight, b);
+
+        private float BandPenetration(Vector3 position, Quaternion rotation, DinosaurCoreBody.Band a,
+            Vector3 peerPosition, Quaternion peerRotation, float peerYaw, float peerHeight, DinosaurCoreBody.Band b)
         {
-            if (a.bounds.max.y + MovementHeight <= b.bounds.min.y + peer.MovementHeight
-                || b.bounds.max.y + peer.MovementHeight <= a.bounds.min.y + MovementHeight) return 0f;
+            if (a.bounds.max.y + MovementHeight <= b.bounds.min.y + peerHeight
+                || b.bounds.max.y + peerHeight <= a.bounds.min.y + MovementHeight) return 0f;
             Vector3 f = rotation * Quaternion.Euler(0f, VisualYaw, 0f) * Vector3.forward;
-            Vector3 p = peer.GetVisualForward();
+            Vector3 p = peerRotation * Quaternion.Euler(0f, peerYaw, 0f) * Vector3.forward;
             Vector2 af = new Vector2(f.x, f.z), ar = new Vector2(af.y, -af.x);
             Vector2 bf = new Vector2(p.x, p.z), br = new Vector2(bf.y, -bf.x);
             Vector2 ac = new Vector2(position.x, position.z) + ar * a.bounds.center.x + af * a.bounds.center.z;
-            Vector2 bc = new Vector2(peer.transform.position.x, peer.transform.position.z) + br * b.bounds.center.x + bf * b.bounds.center.z;
+            Vector2 bc = new Vector2(peerPosition.x, peerPosition.z) + br * b.bounds.center.x + bf * b.bounds.center.z;
             Vector2 d = bc - ac;
             Vector3 ae = a.bounds.extents, be = b.bounds.extents;
             float Depth(Vector2 axis) => Mathf.Abs(Vector2.Dot(ar, axis)) * ae.x + Mathf.Abs(Vector2.Dot(af, axis)) * ae.z

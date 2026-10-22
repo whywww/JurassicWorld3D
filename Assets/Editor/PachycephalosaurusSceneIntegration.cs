@@ -12,6 +12,13 @@ namespace JurassicWorld.Editor
     {
         internal const string Root = "Assets/Dinosaurs/Pachycephalosaurus/Prepared";
         internal const string PrefabPath = Root + "/PachycephalosaurusRedLegacy.prefab";
+        internal const string PortraitPath = Root + "/Pachycephalosaurus.png";
+        internal static readonly DinosaurPortraitBuilder.PortraitFraming PortraitSettings =
+            new DinosaurPortraitBuilder.PortraitFraming(
+                new[] { "Head", "TopJaw", "BottomJaw" },
+                0.68f,
+                new Vector3(1f, 0.2f, 1f),
+                0.08f);
         private const string Source = "Assets/Dinosaurs/Pachycephalosaurus/Source/FerociousIndustries";
 
         [MenuItem("Jurassic World/Scene/Add or Update Red Pachycephalosaurus")]
@@ -27,6 +34,7 @@ namespace JurassicWorld.Editor
             try
             {
                 added = JurassicWorldSceneBuilder.AddPachycephalosaurusToCurrentScene();
+                DinosaurPortraitBuilder.BindPortrait(added, PortraitPath);
                 if (File.Exists(FoliageInteractionPreparation.EnabledPath)) FoliageInteractionPreparation.BakeInteractor(added);
             }
             catch
@@ -70,6 +78,7 @@ namespace JurassicWorld.Editor
                 model.transform.localRotation *= Quaternion.Euler(0f, -Mathf.Atan2(forward.x, forward.z) * Mathf.Rad2Deg, 0f);
                 foreach (var skin in model.GetComponentsInChildren<SkinnedMeshRenderer>(true)) skin.updateWhenOffscreen = true;
                 PrefabUtility.SaveAsPrefabAsset(holder, PrefabPath);
+                DinosaurPortraitBuilder.EnsureHeadshotIfMissing(holder, "Pachycephalosaurus", PortraitPath, PortraitSettings);
             }
             finally { Object.DestroyImmediate(holder); }
         }

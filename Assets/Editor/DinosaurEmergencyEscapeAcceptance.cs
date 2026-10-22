@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEditor;
@@ -37,6 +37,7 @@ namespace JurassicWorld.Editor
                 Require(data != null, "Could not build fixture navigation.");
                 settings.navigationData = data; settings.navigationAgentTypeId = build.agentTypeID;
                 instance = NavMesh.AddNavMeshData(data);
+                typeof(DinosaurInteractionSettings).GetField("navigationInstance", Private).SetValue(settings, instance);
                 // A solid enclosure makes ordinary clearance impossible, while the
                 // fallback can walk through it toward a verified clear endpoint.
                 settings.solidObstacles = new[] { new Bounds(new Vector3(0f, .5f, 0f), new Vector3(4f, 1f, 4f)) };
@@ -56,7 +57,7 @@ namespace JurassicWorld.Editor
                     Call(agent, "UpdateEmergencyEscape", 1f);
                     Require(agent.IsEmergencyEscaping, species + " failed to escape traffic after eight seconds.");
                     Require(!(bool)typeof(DinosaurAgent).GetField("trafficLocked", Private).GetValue(agent), "Traffic lock survived escape.");
-                    Require(!(bool)Call(agent, "ApplyFootRootCorrection", Vector3.forward), "Foot IK moved escape root.");
+                    Require(!agent.ApplyFootRootCorrection(Vector3.forward), "Foot IK moved escape root.");
                     Require(agent.transform.position.magnitude > .1f, "Escape did not translate through the enclosure.");
                     for (int frame = 0; frame < 400 && agent.IsEmergencyEscaping; frame++) Call(agent, "UpdateEmergencyEscape", .1f);
                     Require(!agent.IsEmergencyEscaping, species + " did not resume normal roaming.");

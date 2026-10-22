@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -90,6 +90,9 @@ namespace JurassicWorld.Editor
             var clip = animation.Cast<AnimationState>().Single(s => s.name == (agent.name == "Baurusuchus" ? "Run" : "Walk")).clip;
             var profile = ScriptableObject.CreateInstance<DinosaurGaitProfile>();
             profile.name = agent.name + " Gait"; profile.clip = clip;
+            var previousGait = agent.GaitProfile != null ? agent.GaitProfile
+                : AssetDatabase.LoadAssetAtPath<DinosaurGaitProfile>(JurassicWorldSceneBuilder.GetDinosaurPreparedFolder(agent.name) + "/Gait.asset");
+            profile.turnSpeed = previousGait != null ? previousGait.turnSpeed : agent.name == "Sauropelta" ? 10f : 2f;
             var feet = FootNames(agent.name).Select(n => animation.GetComponentsInChildren<Transform>(true).Single(t => t.name == n)).ToArray();
             profile.feet = new DinosaurGaitProfile.Foot[feet.Length];
             var lowestTime = new float[feet.Length];
@@ -175,7 +178,12 @@ namespace JurassicWorld.Editor
             Vector3 forwardAxis = Quaternion.Euler(0f, agent.VisualYaw, 0f) * Vector3.forward;
             // Include curved travel, turning in place, and resuming at arbitrary gait phases.
             // A straight-only envelope misses the outside leg after a turn begins mid-stance.
-            for (int mode = 0; mode < 3; mode++)
+            bool continuous = new SerializedObject(agent).FindProperty("roamingMode").enumValueIndex
+                == (int)DinosaurAgent.RoamingMode.ContinuousFree;
+            float turnTimeScale = continuous ? profile.groundSpeed / Mathf.Max(.01f, agent.WalkSpeed) : 1f;
+            // Continuous walkers turn only while translating. Animation samples
+            // use clip time, so account for playback speed when integrating yaw.
+            for (int mode = 0; mode < (continuous ? 2 : 3); mode++)
             for (int sign = -1; sign <= 1; sign += 2)
             for (int entry = 0; entry < 4; entry++)
             for (int f = 0; f < feet.Length; f++)
@@ -185,7 +193,7 @@ namespace JurassicWorld.Editor
                 for (int tick = 0; tick < 2 * steps; tick++)
                 {
                     int i = (tick + entry * steps / 4) % steps;
-                    Quaternion turn = Quaternion.Euler(0f, mode == 0 ? 0f : tick * dt * profile.turnSpeed * sign, 0f);
+                    Quaternion turn = Quaternion.Euler(0f, mode == 0 ? 0f : tick * dt * profile.turnSpeed * sign * turnTimeScale, 0f);
                     if (mode != 2) travel += turn * forwardAxis * (dt * profile.groundSpeed);
                     bool support = profile.feet[f].contact[i] >= .5f;
                     if (support && !planted)

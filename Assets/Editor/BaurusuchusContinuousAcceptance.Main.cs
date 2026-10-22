@@ -36,6 +36,7 @@ namespace JurassicWorld.Editor
         [MenuItem("Jurassic World/Acceptance/Verify Baurusuchus Continuous Walk in Main (144 FPS)")]
         public static void RunMain()
         {
+            Directory.CreateDirectory(Output);
             Require(!EditorApplication.isPlayingOrWillChangePlaymode && !EditorSceneManager.GetActiveScene().isDirty,
                 "Stop Play and save scene edits first.");
             EditorSceneManager.OpenScene("Assets/Scenes/Main.unity");

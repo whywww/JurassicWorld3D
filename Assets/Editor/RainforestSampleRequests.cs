@@ -28,6 +28,12 @@ namespace JurassicWorld.Editor
                 File.WriteAllText(statusPath, "RUNNING " + command);
                 switch (command)
                 {
+                    case "water-cleanup": WaterPlantCleanup.CleanAndVerify(); break;
+                    case "water-cleanup-undo": WaterPlantCleanup.Undo(); break;
+                    case "gap-fill": CenterForestGapFill.BuildAndVerify(); break;
+                    case "gap-play": ForestPlayAcceptance.RunGapFill(); break;
+                    case "gap-movement": RainforestSampleAcceptance.RunGapFillMovement(); break;
+                    case "gap-performance": CenterGapFillPerformance.Run(); break;
                     case "tree-heights": TreeHeightAdjustment.ApplyAndVerify(); break;
                     case "tree-height-audit": TreeHeightAdjustment.AuditCurrent(); break;
                     case "tree-height-undo": TreeHeightAdjustment.Undo(); break;

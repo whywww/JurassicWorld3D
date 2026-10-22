@@ -175,26 +175,26 @@ power **达到** Threshold 才接受方向，移动和转向速度按限制在 `
 
 下表 Poly Haven 资源使用 [CC0](https://polyhaven.com/license)。准备后的树木 Prefab 位于 `Assets/Environment/Vegetation/Trees/Prepared/Prefabs/`，原始来源位于 `Assets/Environment/Vegetation/Trees/Source/`。
 
-| 中文名 | 英文原名 | 来源／作者 | 许可 | 项目路径 | 状态 |
+| 中文名 | 英文原名 | 来源 | 许可 | 项目路径 | 状态 |
 |---|---|---|---|---|---|
-| 自然入门套件：树木、草地、灌木与天空盒 | Nature Starter Kit 2 | [Unity Asset Store](https://assetstore.unity.com/packages/3d/environments/nature-starter-kit-2-52977) | 待补充 | `Assets/ThirdParty/NatureStarterKit2/` | 使用中，基础森林和地表资源 |
-| 桌面树木包（树 1、5、10） | Desktop Trees Pack 60 (PC/Console) | [Fab](https://www.fab.com/listings/43b47da3-b552-4b6f-9deb-d638c26d3021)，Tree Master | [Fab Standard License](https://www.fab.com/eula) | `Assets/Environment/Vegetation/Trees/Prepared/Prefabs/FabTree_1.prefab`、`FabTree_5.prefab`、`FabTree_10.prefab` | 使用中 |
-| 香蕉树 | Banana Tree | [Sketchfab](https://sketchfab.com/3d-models/banana-tree-5cb46e64d7fc40978c3d6798017eced1)，Garecra | CC BY | `Assets/Environment/Vegetation/Trees/Prepared/Prefabs/BananaTree.prefab` | 使用中，东南侧香蕉林及热带植被 |
-| 岛屿树 01 | Island Tree 01 | [Poly Haven](https://polyhaven.com/a/island_tree_01)，Rico Cilliers、Rob Tuytel | CC0 | `Assets/Environment/Vegetation/Trees/Prepared/Prefabs/IslandTree01.prefab` | 使用中，中央森林 |
-| 岛屿树 02 | Island Tree 02 | [Poly Haven](https://polyhaven.com/a/island_tree_02)，Rico Cilliers、Rob Tuytel | CC0 | `Assets/Environment/Vegetation/Trees/Prepared/Prefabs/IslandTree02.prefab` | 使用中，景观树与林地 |
-| 岛屿树 03 | Island Tree 03 | [Poly Haven](https://polyhaven.com/a/island_tree_03)，Rico Cilliers、Rob Tuytel | CC0 | `Assets/Environment/Vegetation/Trees/Prepared/Prefabs/IslandTree03.prefab` | 使用中，中央森林 |
-| 小树 02 | Tree Small 02 | [Poly Haven](https://polyhaven.com/a/tree_small_02)，Rico Cilliers | CC0 | `Assets/Environment/Vegetation/Trees/Prepared/Prefabs/TreeSmall02.prefab` | 使用中，中央森林 |
-| 蓝花楹 | Jacaranda Tree | [Poly Haven](https://polyhaven.com/a/jacaranda_tree)，Rico Cilliers | CC0 | `Assets/Environment/Vegetation/Trees/Prepared/Prefabs/JacarandaTree.prefab` | 使用中，中央森林 |
-| 冷杉 01 | Fir Tree 01 | [Poly Haven](https://polyhaven.com/a/fir_tree_01)，Rico Cilliers、Rob Tuytel | CC0 | `Assets/Environment/Vegetation/Trees/Prepared/Prefabs/FirTree01.prefab` | 使用中，采用 A 变体 |
-| 发财树／瓜栗 | Pachira Aquatica 01 | [Poly Haven](https://polyhaven.com/a/pachira_aquatica_01)，Rico Cilliers、Rob Tuytel | CC0 | `Assets/Environment/Vegetation/Trees/Prepared/Prefabs/Pachira_B.prefab` | 使用中，林下 B 形态 |
-| 蕨类 02 | Fern 02 | [Poly Haven](https://polyhaven.com/a/fern_02)，Rico Cilliers、Rob Tuytel | CC0 | 源资源 `Assets/Environment/Vegetation/Fern02/Source/`；准备资源 `Assets/Environment/Vegetation/Fern02/Prepared/Prefabs/` | 使用中，四种蕨丛形态 |
+| 自然入门套件：树木、草地、灌木与天空盒 | Nature Starter Kit 2 | [Unity Asset Store](https://assetstore.unity.com/packages/3d/environments/nature-starter-kit-2-52977) | Standard Unity Asset Store EULA | `Assets/ThirdParty/NatureStarterKit2/` | 使用中，基础森林和地表资源 |
+| 桌面树木包（树 1、5、10） | Desktop Trees Pack 60 (PC/Console) | [Fab](https://www.fab.com/listings/43b47da3-b552-4b6f-9deb-d638c26d3021) | [Fab Standard License](https://www.fab.com/eula) | `Assets/Environment/Vegetation/Trees/Prepared/Prefabs/FabTree_1.prefab`、`FabTree_5.prefab`、`FabTree_10.prefab` | 使用中 |
+| 香蕉树 | Banana Tree | [Sketchfab](https://sketchfab.com/3d-models/banana-tree-5cb46e64d7fc40978c3d6798017eced1) | CC BY | `Assets/Environment/Vegetation/Trees/Prepared/Prefabs/BananaTree.prefab` | 使用中，东南侧香蕉林及热带植被 |
+| 岛屿树 01 | Island Tree 01 | [Poly Haven](https://polyhaven.com/a/island_tree_01) | CC0 | `Assets/Environment/Vegetation/Trees/Prepared/Prefabs/IslandTree01.prefab` | 使用中，中央森林 |
+| 岛屿树 02 | Island Tree 02 | [Poly Haven](https://polyhaven.com/a/island_tree_02) | CC0 | `Assets/Environment/Vegetation/Trees/Prepared/Prefabs/IslandTree02.prefab` | 使用中，景观树与林地 |
+| 岛屿树 03 | Island Tree 03 | [Poly Haven](https://polyhaven.com/a/island_tree_03) | CC0 | `Assets/Environment/Vegetation/Trees/Prepared/Prefabs/IslandTree03.prefab` | 使用中，中央森林 |
+| 小树 02 | Tree Small 02 | [Poly Haven](https://polyhaven.com/a/tree_small_02) | CC0 | `Assets/Environment/Vegetation/Trees/Prepared/Prefabs/TreeSmall02.prefab` | 使用中，中央森林 |
+| 蓝花楹 | Jacaranda Tree | [Poly Haven](https://polyhaven.com/a/jacaranda_tree) | CC0 | `Assets/Environment/Vegetation/Trees/Prepared/Prefabs/JacarandaTree.prefab` | 使用中，中央森林 |
+| 冷杉 01 | Fir Tree 01 | [Poly Haven](https://polyhaven.com/a/fir_tree_01) | CC0 | `Assets/Environment/Vegetation/Trees/Prepared/Prefabs/FirTree01.prefab` | 使用中，采用 A 变体 |
+| 发财树／瓜栗 | Pachira Aquatica 01 | [Poly Haven](https://polyhaven.com/a/pachira_aquatica_01) | CC0 | `Assets/Environment/Vegetation/Trees/Prepared/Prefabs/Pachira_B.prefab` | 使用中，林下 B 形态 |
+| 蕨类 02 | Fern 02 | [Poly Haven](https://polyhaven.com/a/fern_02) | CC0 | 源资源 `Assets/Environment/Vegetation/Fern02/Source/`；准备资源 `Assets/Environment/Vegetation/Fern02/Prepared/Prefabs/` | 使用中，四种蕨丛形态 |
 
 ### 岩石与枯木
 
 | 中文名 | 英文原名 | 来源／作者 | 许可 | 项目路径 | 状态 |
 |---|---|---|---|---|---|
 | 苔藓岩石组 01 | Rock Moss Set 01 | [Poly Haven](https://polyhaven.com/a/rock_moss_set_01) | CC0 | 源资源 `Assets/Environment/RocksAndDeadwood/RockMossSet01/Source/`；准备资源 `Assets/Environment/RocksAndDeadwood/RockMossSet01/Prepared/Prefabs/` | 使用中，六种岩石形态 |
-| 枯树干／倒木 02 | Dead Tree Trunk 02 | [Poly Haven](https://polyhaven.com/a/dead_tree_trunk_02)，Jenelle van Heerden、Rico Cilliers | CC0 | 源资源 `Assets/Environment/RocksAndDeadwood/Deadwood/Source/DeadTreeTrunk02/`；准备资源 `Assets/Environment/RocksAndDeadwood/Deadwood/Prepared/Prefabs/`；秋林适配 `Assets/Environment/RocksAndDeadwood/AutumnGroundedLog/Prepared/Prefabs/` | 使用中，包含秋林贴地倒木 |
+| 枯树干／倒木 02 | Dead Tree Trunk 02 | [Poly Haven](https://polyhaven.com/a/dead_tree_trunk_02) | CC0 | 源资源 `Assets/Environment/RocksAndDeadwood/Deadwood/Source/DeadTreeTrunk02/`；准备资源 `Assets/Environment/RocksAndDeadwood/Deadwood/Prepared/Prefabs/`；秋林适配 `Assets/Environment/RocksAndDeadwood/AutumnGroundedLog/Prepared/Prefabs/` | 使用中，包含秋林贴地倒木 |
 | 树桩 01 | Tree Stump 01 | [Poly Haven](https://polyhaven.com/a/tree_stump_01) | CC0 | 源资源 `Assets/Environment/RocksAndDeadwood/Deadwood/Source/TreeStump01/`；准备资源 `Assets/Environment/RocksAndDeadwood/Deadwood/Prepared/Prefabs/DeadwoodStump01.prefab` | 使用中 |
 
 ### 小溪与地形
@@ -207,14 +207,14 @@ power **达到** Threshold 才接受方向，移动和转向速度按限制在 `
 
 ## 环境与路线维护
 
-- 场景采用 **200m × 200m** Unity Terrain。主场景实际引用 `Assets/Environment/Terrain/Prepared/MainInteractionTerrain.asset`（交互烘焙生成）；`JurassicTerrainData.asset` 是基础地形；`MainCreekTerrain.asset` 是 `MainCreekIntegration` 的历史生成产物，当前场景不引用。地表包含草地、落叶、苔藓、根系及溪岸等多层配置。
-- 植被通过 Terrain Trees、Terrain Details 和普通 Prefab 三种方式组织；准备后的模型包含 LOD，交互用网格保留在 `Assets/Environment/Vegetation/Interaction/`。
-- 霸王龙与伶盗龙使用自由漫游；其他恐龙的路线由 `MovementCorridor` 等脚本约束。移动结合树干、岩石及恐龙之间的避障检查，具体障碍策略见下文。当前召唤和路口切换关闭。
-- 相机依据 `WorldBounds` 限制可探索范围，通过地形采样保持眼高，玩家可直接穿过树木，避免被树缝卡住；树木仍参与恐龙避障。地面恐龙仍使用固定移动高度，脚锁接地基准在启动时采样；修改恐龙路线所在区域的高度前，需要同步检查移动和脚锁逻辑。
+- 场景为 **200m × 200m** Unity Terrain。主场景引用 `MainInteractionTerrain.asset`（交互烘焙生成）；`JurassicTerrainData.asset` 是基础地形，`MainCreekTerrain.asset` 为历史生成物、当前未引用。地表由草地、落叶、苔藓、根系和溪岸等多层组成。
+- 植被通过 Terrain Trees、Terrain Details 和普通 Prefab 组织；模型含 LOD，交互用网格位于 `Assets/Environment/Vegetation/Interaction/`。
+- 当前启用的地面恐龙均为自由漫游，翼龙独立飞行；`MovementCorridor` 保留用于植被净空、调试标注和路线验收。移动会避让树干、岩石和其他恐龙，召唤与路口切换关闭。
+- 相机由 `WorldBounds` 限制探索范围，并采样地形保持眼高；玩家可穿过树木，树木只参与恐龙避障。地面恐龙使用固定移动高度，脚锁以该高度为接地基准；改动活动区地形高度时需同步检查移动和脚锁。
 
 ## 验收与菜单
 
-启动后检查：Console 无 C# 编译错误或丢失资源错误；霸王龙、伶盗龙和剑龙的材质、蒙皮及待机／移动动画正常；相机控制平滑，地图与指南针正常；森林、地表和小溪可见；霸王龙与伶盗龙自由漫游，伶盗龙在靠近霸王龙时主动撤离，剑龙保持路线活动。
+启动后检查：Console 无 C# 编译错误或丢失资源错误；霸王龙、伶盗龙、厚头龙、蜥结龙、包鲁鳄、原角龙的材质、蒙皮及待机／移动动画正常，翼龙飞行动作正常；相机控制平滑，地图与指南针正常；森林、地表和小溪可见；地面恐龙均自由漫游，小型恐龙靠近霸王龙时主动撤离。
 
 在编辑模式执行 **Jurassic World > Scene > Validate Scene**，或通过批处理入口 `JurassicWorld.Editor.JurassicProjectSetup.ValidateProject` 检查保存的主场景。此验证会打开 Main 场景，运行前处理未保存的场景改动；编辑态检查不能代替 Play 或 Windows 程序验收。
 
@@ -226,7 +226,7 @@ power **达到** Threshold 才接受方向，移动和转向速度按限制在 `
 - **Diagnostics**：性能比较、密度检查、纹理审计。
 - **Acceptance**：生产烘焙对账、截图和动态细节验收。
 
-打开或重建场景的菜单在 Play Mode 中禁用。五树比较预览流程已退役，历史截图、检查点和旧验证日志已清理；`Prepare Biome Vegetation` 与 `Prepare Five Forest Tree Species` 仍作为资源准备入口保留。
+打开或重建场景的菜单在 Play Mode 中禁用。`Prepare Biome Vegetation` 与 `Prepare Five Forest Tree Species` 仍作为资源准备入口保留。
 
 ## 避让规则
 
@@ -251,8 +251,6 @@ power **达到** Threshold 才接受方向，移动和转向速度按限制在 `
 **保持区间**：停步后 **10～15 米**不会自动恢复；需退到 **15 米外**且目标可见、路径可行。`ROAR` 或咬击可播完当前动作后恢复，两段张望可平滑中断；确定结束时先完成收尾动作再返回。
 
 **受阻与重试**：阶段 2 连续受阻 **2 秒**结束本轮，其它恐龙让行不计入；空间不足时每 **0.5 秒**搜索 **4／8／12／16 米**的互动点，结束阶段跳过不安全动作和大角度掉头。返回优先走记录路径，暂无安全出口时每 **2 秒**重试，找到可行路线后再转身；恢复漫游后 **10 秒**内不再发现玩家。跟随计时包含停步与绕行，返回只计实际行走。
-
-中心雨林样板位于 X[-25,25]、Z[-10,45]，可单独重建和撤销；布局、密度及验收说明见 [样板文档](Tools/VegetationDiversity/RainforestSample/README.md)。
 
 
 ## 当前边界

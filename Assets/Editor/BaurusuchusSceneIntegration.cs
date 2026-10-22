@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using System.Linq;
 using UnityEditor;
@@ -122,7 +122,9 @@ namespace JurassicWorld.Editor
             var body = RouteObstacleClearance.BakeInteractionBody(agent, new[] { animation["Run"].clip });
             var data = new SerializedObject(agent);
             data.FindProperty("species").enumValueIndex = (int)DinosaurAgent.DinosaurSpecies.Baurusuchus;
-            data.FindProperty("roamingMode").enumValueIndex = (int)DinosaurAgent.RoamingMode.Free;
+            data.FindProperty("roamingMode").enumValueIndex = (int)DinosaurAgent.RoamingMode.ContinuousFree;
+            if (agent.GaitProfile != null) data.FindProperty("continuousMinTurnRadius").floatValue
+                = Mathf.Max(.5f, agent.WalkSpeed / (agent.GaitProfile.turnSpeed * Mathf.Deg2Rad));
             data.FindProperty("playerInteractionEnabled").boolValue = false;
             data.FindProperty("interactionBody").objectReferenceValue = body;
             data.FindProperty("safetyDistance").floatValue = 15f;

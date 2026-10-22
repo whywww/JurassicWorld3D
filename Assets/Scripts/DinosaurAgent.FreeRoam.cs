@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -6,7 +6,8 @@ namespace JurassicWorld
 {
     public sealed partial class DinosaurAgent
     {
-        public enum RoamingMode { [InspectorName("路线漫游")] Route, [InspectorName("自由漫游")] Free }
+        public enum RoamingMode { [InspectorName("路线漫游")] Route = 0, [InspectorName("自由漫游（走停）")] Free = 1,
+            [InspectorName("自由漫游（连续）")] ContinuousFree = 2 }
         public enum DinosaurSpecies { Other, Tyrannosaurus, Velociraptor, Pachycephalosaurus, Sauropelta, Baurusuchus,
             Rajasaurus, Stegosaurus, Argentinosaurus, Protoceratops }
         private bool UsesSimpleFreeRoam => species == DinosaurSpecies.Velociraptor || species == DinosaurSpecies.Pachycephalosaurus
@@ -22,7 +23,8 @@ namespace JurassicWorld
         [SerializeField, InspectorName("漫游方式"), Tooltip("仅启动时读取。自由漫游需要此恐龙的导航、身体和动作数据。")]
         private RoamingMode roamingMode;
         private RoamingMode startupRoamingMode;
-        public bool IsFreeRoaming => startupRoamingMode == RoamingMode.Free;
+        public bool IsFreeRoaming => startupRoamingMode == RoamingMode.Free || startupRoamingMode == RoamingMode.ContinuousFree;
+        public bool IsContinuousRoaming => startupRoamingMode == RoamingMode.ContinuousFree;
         public bool UsesRouteScheduling => !IsFreeRoaming && !IsOffRouteInteraction;
         private Vector3 freeGoal;
         private int freeReplanFailures;
@@ -112,6 +114,7 @@ namespace JurassicWorld
         private bool NavigationRestPoint(Vector3 point)
         {
             if (!NavMesh.FindClosestEdge(point, out var edge, NavigationFilter) || edge.distance < .05f) return false;
+            if (IsContinuousWalker) return true;
             if (species != DinosaurSpecies.Pachycephalosaurus && species != DinosaurSpecies.Sauropelta
                 && species != DinosaurSpecies.Baurusuchus && species != DinosaurSpecies.Protoceratops) return true;
             // The longer animal must be able to turn after resting, rather than
@@ -140,7 +143,7 @@ namespace JurassicWorld
                 Vector2 next = new Vector2(corner.x, corner.z), delta = next - previous;
                 if (delta.sqrMagnitude < .0064f) continue;
                 Vector2 direction = delta.normalized;
-                string reason = UsesSimpleFreeRoam
+                string reason = UsesSimpleFreeRoam && !IsContinuousWalker
                     ? interactionSettings.StepBlockReason(previous, previous, heading, direction, interactionBody) : null;
                 reason = reason ?? interactionSettings.StepBlockReason(previous, next, direction, direction, interactionBody);
                 if (reason != null) { RoamingBlockReason = reason + " / path clearance"; return false; }
@@ -170,7 +173,7 @@ namespace JurassicWorld
             if (interactionSettings == null) interactionSettings = FindObjectOfType<DinosaurInteractionSettings>();
             if (curiosityPath == null) curiosityPath = new NavMeshPath();
             return interactionSettings != null && interactionSettings.NavigationReady && interactionBody != null
-                && (UsesSimpleFreeRoam || HasFootPhaseData);
+                && (IsContinuousWalker || UsesSimpleFreeRoam || HasFootPhaseData);
         }
 
         internal bool TryFreeSpawn(bool hasCamera, Vector2 camera, List<Vector2> occupied, List<float> radii,
@@ -250,6 +253,7 @@ namespace JurassicWorld
                 if (interactionSettings.PoseBlocked(new Vector2(hit.position.x, hit.position.z), new Vector2(arrival.x, arrival.z), interactionBody)
                     || FindBlockingPeer(new Vector2(hit.position.x, hit.position.z)) != null) continue;
                 if (!PlanCuriosityPath(hit.position, true)) continue;
+                if (IsContinuousWalker && !ContinuousGoalHasExit(curiosityCorners)) { hasCuriosityPath = false; continue; }
                 freeGoal = hit.position;
                 freeTurnsWithoutWalk = 0;
                 freeWalkSinceTurn = 0f;

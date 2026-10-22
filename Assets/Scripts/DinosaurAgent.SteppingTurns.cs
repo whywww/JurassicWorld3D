@@ -102,6 +102,9 @@ namespace JurassicWorld
             => TurnPoseAt(stepTurnOrigin, stepTurnRotation, frame, out position, out rotation);
 
         private bool StepPoseSafe(Vector3 from, Vector3 to, Quaternion fromRotation, Quaternion toRotation, bool constrainRoute)
+            => StepPoseSafeCore(from, to, fromRotation, toRotation, constrainRoute, true);
+
+        private bool StepPoseSafeCore(Vector3 from, Vector3 to, Quaternion fromRotation, Quaternion toRotation, bool constrainRoute, bool checkPeers)
         {
             if (interactionSettings == null || !interactionSettings.NavigationReady || interactionBody == null) return false;
             Vector3 f0 = fromRotation * Quaternion.Euler(0f, VisualYaw, 0f) * Vector3.forward;
@@ -116,8 +119,8 @@ namespace JurassicWorld
             if (interactionSettings.StepBlocked(a, b, new Vector2(f0.x, f0.z), new Vector2(f1.x, f1.z), interactionBody))
             { LastMovementBlock = "Body sweep"; return false; }
             if (!SafetySegmentAllowed(a, b, IsAvoidingTyrannosaurus)) { LastMovementBlock = "Safety distance"; return false; }
-            if (FindBlockingStep(a, b) != null) { LastMovementBlock = "Peer"; return false; }
-            if (!GroundPeerSweepSafe(from, to, fromRotation, toRotation, interactionBody))
+            if (checkPeers && FindBlockingStep(a, b) != null) { LastMovementBlock = "Peer"; return false; }
+            if (checkPeers && !GroundPeerSweepSafe(from, to, fromRotation, toRotation, interactionBody))
             { LastMovementBlock = "Peer body"; return false; }
             if (!NavigationStepFits(from, to)) { LastMovementBlock = "Navigation"; return false; }
             return true;

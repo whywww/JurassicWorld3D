@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using System.Linq;
 using UnityEditor;
@@ -49,7 +49,8 @@ namespace JurassicWorld.Editor
                     // Match runtime clip selection; unused root-motion clips must not inflate the envelope.
                     var body = RouteObstacleClearance.BakeInteractionBody(agent, clips);
                     data.FindProperty("interactionBody").objectReferenceValue = body;
-                    data.FindProperty("roamingMode").enumValueIndex = (int)DinosaurAgent.RoamingMode.Free;
+                    if (data.FindProperty("roamingMode").enumValueIndex != (int)DinosaurAgent.RoamingMode.ContinuousFree)
+                        data.FindProperty("roamingMode").enumValueIndex = (int)DinosaurAgent.RoamingMode.Free;
                     data.FindProperty("playerInteractionEnabled").boolValue = false;
                     data.FindProperty("safetyDistance").floatValue = 15f;
                     data.FindProperty("safetyReleaseDistance").floatValue = 20f;

@@ -50,7 +50,8 @@ namespace JurassicWorld.Editor
         private static bool performanceOnly;
         private static GameObject performanceRoot;
         private static bool expansionPerformance;
-        private static string ArtifactOutput => SessionState.GetBool(Key + ".TreeHeights", false) ? TreeHeightAdjustment.Output
+        private static string ArtifactOutput => SessionState.GetBool(Key + ".GapFill", false) ? CenterForestGapFill.Output
+            : SessionState.GetBool(Key + ".TreeHeights", false) ? TreeHeightAdjustment.Output
             : expansionPerformance ? RainforestExpansion.Output : RainforestSample.Output;
         private static bool recordingOnly;
         private static MediaEncoder encoder;
@@ -86,6 +87,7 @@ namespace JurassicWorld.Editor
         }
         public static void RunMovementOnly() { SessionState.SetBool(Key + ".MovementOnly", true); Run(); }
         public static void RunTreeHeightMovement() { SessionState.SetBool(Key + ".TreeHeights", true); RunMovementOnly(); }
+        public static void RunGapFillMovement() { SessionState.SetBool(Key + ".GapFill", true); RunMovementOnly(); }
         public static void RunPerformanceOnly() { SessionState.SetBool(Key + ".PerformanceOnly", true); Run(); }
         [MenuItem("Jurassic World/Diagnostics/Rainforest Expansion/Compare Performance")]
         public static void RunExpansionPerformance()
