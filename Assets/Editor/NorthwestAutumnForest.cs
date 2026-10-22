@@ -67,7 +67,7 @@ namespace JurassicWorld.Editor
                 for (int attempt = 0; attempt < 8; attempt++)
                 {
                     string name = autumn ? new[] { "FabTree_1", "FabTree_5", "FabTree_10" }[(salt + attempt) % 3] : "tree0" + (1 + (salt + attempt) % 3);
-                    string path = autumn ? "Assets/VegetationDiversity/Prefabs/" + name + ".prefab" : "Assets/NatureStarterKit2/Nature/" + name + ".prefab";
+                    string path = autumn ? "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/" + name + ".prefab" : "Assets/ThirdParty/NatureStarterKit2/Nature/" + name + ".prefab";
                     Vector2 point = p;
                     if (attempt >= 3)
                     { float a = (salt * 137.5f + attempt * 71f) * Mathf.Deg2Rad; point += new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * (attempt - 2) * .5f; }
@@ -170,7 +170,7 @@ namespace JurassicWorld.Editor
                 Transform parent = owned ? tree.transform.parent : backup.transform;
                 Vector2 p = XZ(tree.transform.position); Bounds before = CentralForestDensification.BoundsOf(tree.gameObject);
                 int species = 1 + (int)(Hash(p, 311) * 3f);
-                var green = CentralForestDensification.Instantiate("Assets/NatureStarterKit2/Nature/tree0" + species + ".prefab", parent);
+                var green = CentralForestDensification.Instantiate("Assets/ThirdParty/NatureStarterKit2/Nature/tree0" + species + ".prefab", parent);
                 green.name = "tree0" + species + "_AutumnHalf_" + tree.name;
                 green.transform.rotation = tree.transform.rotation;
                 green.transform.localScale *= before.size.y / CentralForestDensification.BoundsOf(green).size.y;

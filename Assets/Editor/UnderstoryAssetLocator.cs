@@ -18,9 +18,9 @@ namespace JurassicWorld.Editor
     {
         // ---------------------------------------------------------------- 候选目录（门控接口唯一定义点）
 
-        internal const string FernFolder = "Assets/Vegetation/Ferns";
-        internal const string RockFolder = "Assets/Vegetation/Rocks";
-        internal const string DeadwoodFolder = "Assets/Vegetation/Deadwood";
+        internal const string FernFolder = "Assets/Environment/Vegetation/Fern02/Prepared/Prefabs";
+        internal const string RockFolder = "Assets/Environment/RocksAndDeadwood/RockMossSet01/Prepared/Prefabs";
+        internal const string DeadwoodFolder = "Assets/Environment/RocksAndDeadwood/Deadwood/Prepared/Prefabs";
 
         // 名称关键词：包含任一 include 且不含任一 exclude 的 prefab 才被接受。
         // 排除词防止大树/灌木等高层植被被误归类为林下资产。

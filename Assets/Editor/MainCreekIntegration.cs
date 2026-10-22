@@ -15,12 +15,12 @@ namespace JurassicWorld.Editor
     public static class MainCreekIntegration
     {
         const string MainScene = "Assets/Scenes/Main.unity";
-        const string BackupScene = "Assets/CreekDemo/MainBeforeCreek.unity";
-        const string SourceTerrain = "Assets/Terrain/JurassicTerrainData.asset";
-        const string CreekTerrain = "Assets/CreekDemo/MainCreekTerrain.asset";
-        const string WaterMaterial = "Assets/CreekDemo/CrestCreekWater.mat";
-        const string WaveSpectrum = "Assets/CreekDemo/CreekRippleSpectrum.asset";
-        const string WetLayer = "Assets/CreekDemo/JungleCreekBank.terrainlayer";
+        const string BackupScene = "Assets/Environment/Creek/MainBeforeCreek.unity";
+        const string SourceTerrain = "Assets/Environment/Terrain/Prepared/JurassicTerrainData.asset";
+        const string CreekTerrain = "Assets/Environment/Creek/Prepared/MainCreekTerrain.asset";
+        const string WaterMaterial = "Assets/Environment/Creek/Prepared/CrestCreekWater.mat";
+        const string WaveSpectrum = "Assets/Environment/Creek/Prepared/CreekRippleSpectrum.asset";
+        const string WetLayer = "Assets/Environment/Creek/Prepared/JungleCreekBank.terrainlayer";
         const string RootName = "Main East to North Creek";
         const float StartZ = -25f;
         const float EndZ = 86f;
@@ -251,8 +251,9 @@ namespace JurassicWorld.Editor
                 if (instance == null) continue;
                 GameObject source = PrefabUtility.GetCorrespondingObjectFromSource(instance);
                 string path = source != null ? AssetDatabase.GetAssetPath(source) : "";
-                if (!path.StartsWith("Assets/Vegetation/") && !path.StartsWith("Assets/VegetationDiversity/") &&
-                    !path.StartsWith("Assets/NatureStarterKit2/")) continue;
+                if (!path.StartsWith("Assets/Environment/Vegetation/") &&
+                    !path.StartsWith("Assets/Environment/RocksAndDeadwood/") &&
+                    !path.StartsWith("Assets/ThirdParty/NatureStarterKit2/")) continue;
                 Vector3 p = instance.transform.position;
                 if (NearCreek(p.x, p.z, 4.2f)) removed.Add(instance);
             }
@@ -339,10 +340,10 @@ namespace JurassicWorld.Editor
         {
             string[] paths =
             {
-                "Assets/Vegetation/Rocks/RockMossSet01_Rock01.prefab",
-                "Assets/Vegetation/Rocks/RockMossSet01_Rock03.prefab",
-                "Assets/Vegetation/Rocks/RockMossSet01_Rock05.prefab",
-                "Assets/Vegetation/Ferns/Fern02_A.prefab"
+                "Assets/Environment/RocksAndDeadwood/RockMossSet01/Prepared/Prefabs/RockMossSet01_Rock01.prefab",
+                "Assets/Environment/RocksAndDeadwood/RockMossSet01/Prepared/Prefabs/RockMossSet01_Rock03.prefab",
+                "Assets/Environment/RocksAndDeadwood/RockMossSet01/Prepared/Prefabs/RockMossSet01_Rock05.prefab",
+                "Assets/Environment/Vegetation/Fern02/Prepared/Prefabs/Fern02_A.prefab"
             };
             var random = new System.Random(20260929);
             for (int i = 0; i < 74; i++)
@@ -362,7 +363,7 @@ namespace JurassicWorld.Editor
                 item.transform.localScale *= i % paths.Length == 3 ? 0.7f : 0.4f + (float)random.NextDouble() * 0.35f;
             }
             GameObject logPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(
-                "Assets/Vegetation/Deadwood/DeadwoodLogTrunk02.prefab");
+                "Assets/Environment/RocksAndDeadwood/Deadwood/Prepared/Prefabs/DeadwoodLogTrunk02.prefab");
             if (logPrefab == null) throw new FileNotFoundException("Missing creek log prefab.");
             foreach (float z in new[] { -9.5f, 23f, 51f, 76f })
             {

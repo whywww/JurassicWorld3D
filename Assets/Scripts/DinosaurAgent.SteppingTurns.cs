@@ -353,6 +353,7 @@ namespace JurassicWorld
 
         public bool ApplyFootRootCorrection(Vector3 correction)
         {
+            if (emergencyEscapeActive) return false;
             correction.y = 0f;
             if (trafficLocked && trafficHolding && !trafficMoving) return false;
             if (trafficLocked && trafficMoving)

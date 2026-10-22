@@ -20,7 +20,7 @@ namespace JurassicWorld.Editor
     /// </summary>
     public static class UnderstoryDensityCheck
     {
-        private const string TerrainDataPath = "Assets/Terrain/JurassicTerrainData.asset";
+        private const string TerrainDataPath = "Assets/Environment/Terrain/Prepared/JurassicTerrainData.asset";
         private const int MapSize = 48;           // ASCII 图 48×48（每字符 ≈4.2m）
 
         [MenuItem("Jurassic World/Diagnostics/Check Understory Density")]

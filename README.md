@@ -59,9 +59,10 @@ git lfs pull
 - `A/D` 或左/右方向键：持续向左/右转向并前进，相机平滑跟随。
 - 按住鼠标右键并移动鼠标：转动视角。
 - 指南针显示视线方向与角度（+Z 为北）；小地图固定北向上，黄色箭头标记玩家位置与行进方向。
-- 左上角“画质”按钮或 `F10`：选择低、中、高档，选择会自动保存，首次启动默认中档。纹理审计见 [Reports/TextureAudit.md](Reports/TextureAudit.md)。
+- 左上角“画质”按钮或 `F10`：选择低、中、高档，选择会自动保存，首次启动默认中档。
 
-当前 `DinosaurAgent` 的召唤开关关闭，`Space` 不触发召唤；旧召唤流程与信息卡代码仍保留，不作为当前启动验收要求。
+<details>
+<summary>Emotiv EPOC X 脑机接口的配置与连接</summary>
 
 ## Emotiv Headset：配置与连接
 
@@ -149,61 +150,65 @@ power **达到** Threshold 才接受方向，移动和转向速度按限制在 `
 | 断连后没有恢复 | 输入会自动清除；确认耳机和 Launcher 恢复在线，必要时停止 Play 后重新进入，重新完成授权／session 流程 |
 
 开发验证入口：**Jurassic World > Tests > Emotiv Input Acceptance**，检查四方向映射、阈值、速度缩放、键盘优先、超时和场景组件引用。该检查不代替真实耳机验证；完整验收需填写凭据后，用真实 Headset 或 Virtual Brainwear 走完上述连接日志并实际测试操作。
+</details>
 
 ## 3D 资产资源清单
 
 ### 恐龙与翼龙
 
-| 中文名 | 英文名／原始资源名 | 来源／作者 | 许可 | 项目路径 | 状态 |
+| 中文名 | 英文名 | 来源／作者 | 许可 | 项目路径 | 状态 |
 |---|---|---|---|---|---|
-| 霸王龙 | Tyrannosaurus Rex / T-Rex | SketchFab [T-REX](https://skfb.ly/oM76u)    | CC BY | `Assets/Dinosaurs/TRex/`（`Source` 原始，`Prepared` 适配） | 使用中 |
-| 伶盗龙 / 迅猛龙 | Velociraptor | SketchFab [PBR Velociraptor (Animated)](https://skfb.ly/oHoUE) | CC BY | `Assets/Dinosaurs/Velociraptor/`（`Source/Sketchfab` 原始，`Prepared` 适配；`Source/FerociousIndustries` UAS 原包） | 使用中 |
-| 厚头龙（红色） | Pachycephalosaurus | Ferocious Industries，已导入的 PBR Dinosaurs | Standard Unity Asset Store EULA | `Assets/Dinosaurs/Pachycephalosaurus/` （`Source/FerociousIndustries` 原始，`Prepared` 适配） | 使用中；Walk/Idle 自由漫游 |
+| 霸王龙 | Tyrannosaurus Rex | [SketchFab](https://skfb.ly/oM76u)    | CC BY | `Assets/Dinosaurs/TRex/`（`Source` 原始，`Prepared` 适配） | 使用中 |
+| 伶盗龙 / 迅猛龙 | Velociraptor | [SketchFab](https://skfb.ly/oHoUE) | CC BY | `Assets/Dinosaurs/Velociraptor/`（`Source/Sketchfab` 原始，`Prepared` 适配；`Source/FerociousIndustries` UAS 原包） | 使用中 |
+| 厚头龙（红色） | Pachycephalosaurus | [Unity Asset Store](https://assetstore.unity.com/packages/3d/characters/animals/pbr-animated-dinosaurs-256019), Ferocious Industries | Standard Unity Asset Store EULA | `Assets/Dinosaurs/Pachycephalosaurus/` （`Source/FerociousIndustries` 原始，`Prepared` 适配） | 使用中 |
+| 包鲁鳄 | Baurusuchus | Fab [Animated Baurusuchus](https://www.fab.com/listings/69ac72dc-187f-4db7-ad99-c524023113b6) | [Fab Standard License](https://www.fab.com/eula) | `Assets/Dinosaurs/Baurusuchus/` （`Source` 原始，`Prepared` 适配） | 使用中 |
+| 蜥结龙 | Sauropelta | Fab [Animated Sauropelta](https://www.fab.com/listings/de1b8487-8dbd-4105-80be-79bd64a3905e) | [Fab Standard License](https://www.fab.com/eula) | `Assets/Dinosaurs/Sauropelta/`（`Source` 原始，`Prepared` 适配） | 使用中 |
+| 原角龙 | Protoceratops | [SketchFab](https://skfb.ly/6xDZt) | [SketchFab Standard License](https://sketchfab.com/licenses) | `Assets/Dinosaurs/Protoceratops/`（`Source` 原始，`Prepared` 适配） | 使用中；2 米 |
+| 翼龙 | Pteradactal | [SketchFab](https://skfb.ly/o9nTY) | CC BY | `Assets/Dinosaurs/Pteradactal/`（`Source` 原始，`Prepared` 适配） | 使用中；5 米翼展，6–10 米低空飞行 |
 | 剑龙（绿色） | Stegosaurus | [Unity Asset Store](https://assetstore.unity.com/packages/3d/characters/animals/pbr-animated-dinosaurs-256019)，Ferocious Industries | Standard Unity Asset Store EULA | `Assets/Dinosaurs/Stegosaurus/` （`Source/FerociousIndustries` 原始，`Prepared` 适配） | 暂禁用 |
-| 胜王龙 | Rajasaurus | SketchFab [Animated Rajasaurus Free](https://skfb.ly/pFMxT) | CC BY-NC | `Assets/Dinosaurs/Rajasaurus/`（`Source` 原始，`Prepared` 适配） | 暂禁用 |
-| 阿根廷龙 | Argentinosaurus | SketchFab [Animated Argentinosaurus Free](https://skfb.ly/pEYQ6) | CC BY | `Assets/Dinosaurs/Argentinosaurus/`（`Source` 原始，`Prepared` 适配） | 暂禁用 |
-| 包鲁鳄 | Baurusuchus | Fab [Animated Baurusuchus](https://www.fab.com/listings/69ac72dc-187f-4db7-ad99-c524023113b6)，Anees Animates | [Fab Standard License](https://www.fab.com/eula) | `Assets/Dinosaurs/Baurusuchus/` （`Source` 原始，`Prepared` 适配） | 使用中；仅含 Running，站定与行走均持续播放，自由漫游 |
-| 蜥结龙 | Sauropelta | Fab [Animated Sauropelta (Free)](https://www.fab.com/listings/de1b8487-8dbd-4105-80be-79bd64a3905e)，Anees Animates | [Fab Standard License](https://www.fab.com/eula) | `Assets/Dinosaurs/Sauropelta/`（`Source` 原始，`Prepared` 适配） | 使用中；自由漫游，Walk 循环，停步冻结 |
-| 翼龙 | Pteradactal | SketchFab [Animated Flying Pteradactal Dinosaur Loop](https://skfb.ly/o9nTY)，LasquetiSpice | CC BY | `Assets/Dinosaurs/Pteradactal/`（`Source` 原始，`Prepared` 适配） | 使用中；5 米翼展，6–10 米低空飞行，独立于地面导航 |
+| 胜王龙 | Rajasaurus | [SketchFab](https://skfb.ly/pFMxT) | CC BY-NC | `Assets/Dinosaurs/Rajasaurus/`（`Source` 原始，`Prepared` 适配） | 暂禁用 |
+| 阿根廷龙 | Argentinosaurus | [SketchFab](https://skfb.ly/pEYQ6) | CC BY | `Assets/Dinosaurs/Argentinosaurus/`（`Source` 原始，`Prepared` 适配） | 暂禁用 |
 
 ### 植被
 
-下表 Poly Haven 资源使用 [CC0](https://polyhaven.com/license)。准备后的树木 Prefab 位于 `Assets/VegetationDiversity/Prefabs/`，原始来源位于 `Assets/ThirdParty/VegetationDiversity/`。
+环境资产统一位于 `Assets/Environment/`，按 `<类别>/<资产集>/{Source,Prepared}` 组织：`Source/` 保留厂商原始包，`Prepared/` 放项目使用的 prefab、材质、网格与贴图。完整索引见 [Assets/Environment/README.md](Assets/Environment/README.md)。
+
+下表 Poly Haven 资源使用 [CC0](https://polyhaven.com/license)。准备后的树木 Prefab 位于 `Assets/Environment/Vegetation/Trees/Prepared/Prefabs/`，原始来源位于 `Assets/Environment/Vegetation/Trees/Source/`。
 
 | 中文名 | 英文原名 | 来源／作者 | 许可 | 项目路径 | 状态 |
 |---|---|---|---|---|---|
-| 自然入门套件：树木、草地、灌木与天空盒 | Nature Starter Kit 2 | [Unity Asset Store](https://assetstore.unity.com/packages/3d/environments/nature-starter-kit-2-52977) | 待补充 | `Assets/NatureStarterKit2/` | 使用中，基础森林和地表资源 |
-| 桌面树木包（树 1、5、10） | Desktop Trees Pack 60 (PC/Console) | [Fab](https://www.fab.com/listings/43b47da3-b552-4b6f-9deb-d638c26d3021)，Tree Master | [Fab Standard License](https://www.fab.com/eula) | `Assets/VegetationDiversity/Prefabs/FabTree_1.prefab`、`FabTree_5.prefab`、`FabTree_10.prefab` | 使用中 |
-| 香蕉树 | Banana Tree | [Sketchfab](https://sketchfab.com/3d-models/banana-tree-5cb46e64d7fc40978c3d6798017eced1)，Garecra | CC BY | `Assets/VegetationDiversity/Prefabs/BananaTree.prefab` | 使用中，东南侧香蕉林及热带植被 |
-| 岛屿树 01 | Island Tree 01 | [Poly Haven](https://polyhaven.com/a/island_tree_01)，Rico Cilliers、Rob Tuytel | CC0 | `Assets/VegetationDiversity/Prefabs/IslandTree01.prefab` | 使用中，中央森林 |
-| 岛屿树 02 | Island Tree 02 | [Poly Haven](https://polyhaven.com/a/island_tree_02)，Rico Cilliers、Rob Tuytel | CC0 | `Assets/VegetationDiversity/Prefabs/IslandTree02.prefab` | 使用中，景观树与林地 |
-| 岛屿树 03 | Island Tree 03 | [Poly Haven](https://polyhaven.com/a/island_tree_03)，Rico Cilliers、Rob Tuytel | CC0 | `Assets/VegetationDiversity/Prefabs/IslandTree03.prefab` | 使用中，中央森林 |
-| 小树 02 | Tree Small 02 | [Poly Haven](https://polyhaven.com/a/tree_small_02)，Rico Cilliers | CC0 | `Assets/VegetationDiversity/Prefabs/TreeSmall02.prefab` | 使用中，中央森林 |
-| 蓝花楹 | Jacaranda Tree | [Poly Haven](https://polyhaven.com/a/jacaranda_tree)，Rico Cilliers | CC0 | `Assets/VegetationDiversity/Prefabs/JacarandaTree.prefab` | 使用中，中央森林 |
-| 冷杉 01 | Fir Tree 01 | [Poly Haven](https://polyhaven.com/a/fir_tree_01)，Rico Cilliers、Rob Tuytel | CC0 | `Assets/VegetationDiversity/Prefabs/FirTree01.prefab` | 使用中，采用 A 变体 |
-| 发财树／瓜栗 | Pachira Aquatica 01 | [Poly Haven](https://polyhaven.com/a/pachira_aquatica_01)，Rico Cilliers、Rob Tuytel | CC0 | `Assets/VegetationDiversity/Prefabs/Pachira_B.prefab` | 使用中，林下 B 形态 |
-| 蕨类 02 | Fern 02 | [Poly Haven](https://polyhaven.com/a/fern_02)，Rico Cilliers、Rob Tuytel | CC0 | 源资源 `Assets/ThirdParty/PolyHaven/Fern02/`；准备资源 `Assets/Vegetation/Ferns/` | 使用中，四种蕨丛形态 |
+| 自然入门套件：树木、草地、灌木与天空盒 | Nature Starter Kit 2 | [Unity Asset Store](https://assetstore.unity.com/packages/3d/environments/nature-starter-kit-2-52977) | 待补充 | `Assets/ThirdParty/NatureStarterKit2/` | 使用中，基础森林和地表资源 |
+| 桌面树木包（树 1、5、10） | Desktop Trees Pack 60 (PC/Console) | [Fab](https://www.fab.com/listings/43b47da3-b552-4b6f-9deb-d638c26d3021)，Tree Master | [Fab Standard License](https://www.fab.com/eula) | `Assets/Environment/Vegetation/Trees/Prepared/Prefabs/FabTree_1.prefab`、`FabTree_5.prefab`、`FabTree_10.prefab` | 使用中 |
+| 香蕉树 | Banana Tree | [Sketchfab](https://sketchfab.com/3d-models/banana-tree-5cb46e64d7fc40978c3d6798017eced1)，Garecra | CC BY | `Assets/Environment/Vegetation/Trees/Prepared/Prefabs/BananaTree.prefab` | 使用中，东南侧香蕉林及热带植被 |
+| 岛屿树 01 | Island Tree 01 | [Poly Haven](https://polyhaven.com/a/island_tree_01)，Rico Cilliers、Rob Tuytel | CC0 | `Assets/Environment/Vegetation/Trees/Prepared/Prefabs/IslandTree01.prefab` | 使用中，中央森林 |
+| 岛屿树 02 | Island Tree 02 | [Poly Haven](https://polyhaven.com/a/island_tree_02)，Rico Cilliers、Rob Tuytel | CC0 | `Assets/Environment/Vegetation/Trees/Prepared/Prefabs/IslandTree02.prefab` | 使用中，景观树与林地 |
+| 岛屿树 03 | Island Tree 03 | [Poly Haven](https://polyhaven.com/a/island_tree_03)，Rico Cilliers、Rob Tuytel | CC0 | `Assets/Environment/Vegetation/Trees/Prepared/Prefabs/IslandTree03.prefab` | 使用中，中央森林 |
+| 小树 02 | Tree Small 02 | [Poly Haven](https://polyhaven.com/a/tree_small_02)，Rico Cilliers | CC0 | `Assets/Environment/Vegetation/Trees/Prepared/Prefabs/TreeSmall02.prefab` | 使用中，中央森林 |
+| 蓝花楹 | Jacaranda Tree | [Poly Haven](https://polyhaven.com/a/jacaranda_tree)，Rico Cilliers | CC0 | `Assets/Environment/Vegetation/Trees/Prepared/Prefabs/JacarandaTree.prefab` | 使用中，中央森林 |
+| 冷杉 01 | Fir Tree 01 | [Poly Haven](https://polyhaven.com/a/fir_tree_01)，Rico Cilliers、Rob Tuytel | CC0 | `Assets/Environment/Vegetation/Trees/Prepared/Prefabs/FirTree01.prefab` | 使用中，采用 A 变体 |
+| 发财树／瓜栗 | Pachira Aquatica 01 | [Poly Haven](https://polyhaven.com/a/pachira_aquatica_01)，Rico Cilliers、Rob Tuytel | CC0 | `Assets/Environment/Vegetation/Trees/Prepared/Prefabs/Pachira_B.prefab` | 使用中，林下 B 形态 |
+| 蕨类 02 | Fern 02 | [Poly Haven](https://polyhaven.com/a/fern_02)，Rico Cilliers、Rob Tuytel | CC0 | 源资源 `Assets/Environment/Vegetation/Fern02/Source/`；准备资源 `Assets/Environment/Vegetation/Fern02/Prepared/Prefabs/` | 使用中，四种蕨丛形态 |
 
 ### 岩石与枯木
 
 | 中文名 | 英文原名 | 来源／作者 | 许可 | 项目路径 | 状态 |
 |---|---|---|---|---|---|
-| 苔藓岩石组 01 | Rock Moss Set 01 | [Poly Haven](https://polyhaven.com/a/rock_moss_set_01) | CC0 | 源资源 `Assets/ThirdParty/PolyHaven/RockMossSet01/`；准备资源 `Assets/Vegetation/Rocks/` | 使用中，六种岩石形态 |
-| 枯树干／倒木 02 | Dead Tree Trunk 02 | [Poly Haven](https://polyhaven.com/a/dead_tree_trunk_02)，Jenelle van Heerden、Rico Cilliers | CC0 | 源资源 `Assets/ThirdParty/PolyHaven/DeadTreeTrunk02/`；准备资源 `Assets/Vegetation/Deadwood/`；秋林适配 `Assets/Terrain/DeadVegetation/` | 使用中，包含秋林贴地倒木 |
-| 树桩 01 | Tree Stump 01 | [Poly Haven](https://polyhaven.com/a/tree_stump_01) | CC0 | 源资源 `Assets/ThirdParty/PolyHaven/TreeStump01/`；准备资源 `Assets/Vegetation/Deadwood/DeadwoodStump01.prefab` | 使用中 |
+| 苔藓岩石组 01 | Rock Moss Set 01 | [Poly Haven](https://polyhaven.com/a/rock_moss_set_01) | CC0 | 源资源 `Assets/Environment/RocksAndDeadwood/RockMossSet01/Source/`；准备资源 `Assets/Environment/RocksAndDeadwood/RockMossSet01/Prepared/Prefabs/` | 使用中，六种岩石形态 |
+| 枯树干／倒木 02 | Dead Tree Trunk 02 | [Poly Haven](https://polyhaven.com/a/dead_tree_trunk_02)，Jenelle van Heerden、Rico Cilliers | CC0 | 源资源 `Assets/Environment/RocksAndDeadwood/Deadwood/Source/DeadTreeTrunk02/`；准备资源 `Assets/Environment/RocksAndDeadwood/Deadwood/Prepared/Prefabs/`；秋林适配 `Assets/Environment/RocksAndDeadwood/AutumnGroundedLog/Prepared/Prefabs/` | 使用中，包含秋林贴地倒木 |
+| 树桩 01 | Tree Stump 01 | [Poly Haven](https://polyhaven.com/a/tree_stump_01) | CC0 | 源资源 `Assets/Environment/RocksAndDeadwood/Deadwood/Source/TreeStump01/`；准备资源 `Assets/Environment/RocksAndDeadwood/Deadwood/Prepared/Prefabs/DeadwoodStump01.prefab` | 使用中 |
 
 ### 小溪与地形
 
 | 中文名 | 英文名 | 来源／作者 | 许可 | 项目路径 | 状态 |
 |---|---|---|---|---|---|
 | Crest 水体系统 | Crest Ocean System | [Wave Harmonic 官方仓库](https://github.com/wave-harmonic/crest) | MIT | `Assets/Crest/` | 使用中，溪流水面渲染 |
-| 东侧至北侧小溪、溪岸与涟漪配置 | East-to-North Creek / Creek Bank / Ripple Spectrum | 项目自建，基于 Crest 和 Unity Terrain；见 `MainCreekIntegration` | 自建配置 | `Assets/CreekDemo/MainCreekTerrain.asset`、`CrestCreekWater.mat`、`CreekRippleSpectrum.asset`、`JungleCreekBank.terrainlayer` | 使用中 |
-| 侏罗纪地形与地表生态 | Jurassic Terrain / Ground Ecology | 项目自建地形、布局与派生配置；基础纹理引用 Nature Starter Kit 2 和现有环境资源 | 自建配置 | `Assets/Terrain/JurassicTerrainData.asset`、`Assets/Terrain/Layers/`、`Assets/Terrain/GroundEcology/` | 使用中；主场景使用小溪整合后的地形副本 |
+| 东侧至北侧小溪、溪岸与涟漪配置 | East-to-North Creek / Creek Bank / Ripple Spectrum | 项目自建，基于 Crest 和 Unity Terrain；见 `MainCreekIntegration` | 自建配置 | `Assets/Environment/Creek/Prepared/`（`MainCreekTerrain.asset`、`CrestCreekWater.mat`、`CreekRippleSpectrum.asset`、`JungleCreekBank.terrainlayer`） | 使用中；`MainCreekTerrain.asset` 为历史生成物，当前场景不引用 |
+| 侏罗纪地形与地表生态 | Jurassic Terrain / Ground Ecology | 项目自建地形、布局与派生配置；基础纹理引用 Nature Starter Kit 2 和现有环境资源 | 自建配置 | `Assets/Environment/Terrain/Prepared/`（`JurassicTerrainData.asset`、`MainInteractionTerrain.asset`、`Layers/`、`GroundEcology/`） | 使用中；主场景实际使用 `MainInteractionTerrain.asset` |
 
 ## 环境与路线维护
 
-- 场景采用 **200m × 200m** Unity Terrain，主场景使用 `MainCreekTerrain.asset`；基础地形保留在 `JurassicTerrainData.asset`。地表包含草地、落叶、苔藓、根系及溪岸等多层配置。
-- 植被通过 Terrain Trees、Terrain Details 和普通 Prefab 三种方式组织；准备后的模型包含 LOD，交互用网格保留在 `Assets/VegetationInteraction/`。
+- 场景采用 **200m × 200m** Unity Terrain。主场景实际引用 `Assets/Environment/Terrain/Prepared/MainInteractionTerrain.asset`（交互烘焙生成）；`JurassicTerrainData.asset` 是基础地形；`MainCreekTerrain.asset` 是 `MainCreekIntegration` 的历史生成产物，当前场景不引用。地表包含草地、落叶、苔藓、根系及溪岸等多层配置。
+- 植被通过 Terrain Trees、Terrain Details 和普通 Prefab 三种方式组织；准备后的模型包含 LOD，交互用网格保留在 `Assets/Environment/Vegetation/Interaction/`。
 - 霸王龙与伶盗龙使用自由漫游；其他恐龙的路线由 `MovementCorridor` 等脚本约束。移动结合树干、岩石及恐龙之间的避障检查，具体障碍策略见下文。当前召唤和路口切换关闭。
 - 相机依据 `WorldBounds` 限制可探索范围，通过地形采样保持眼高，玩家可直接穿过树木，避免被树缝卡住；树木仍参与恐龙避障。地面恐龙仍使用固定移动高度，脚锁接地基准在启动时采样；修改恐龙路线所在区域的高度前，需要同步检查移动和脚锁逻辑。
 
@@ -225,7 +230,7 @@ power **达到** Threshold 才接受方向，移动和转向速度按限制在 `
 
 ## 避让规则
 
-- 地面通行顺序：**霸王龙＞阿根廷龙＞剑龙＞胜王龙＞蜥结龙＞厚头龙＞包鲁鳄＞伶盗龙**。召唤和玩家交互优先，双方均在交互时按物种排序；返程恢复普通顺序，会车期间锁定先行权。
+- 地面通行顺序：**霸王龙＞阿根廷龙＞剑龙＞胜王龙＞蜥结龙＞厚头龙＞包鲁鳄＞伶盗龙＞原角龙**。召唤和玩家交互优先，双方均在交互时按物种排序；返程恢复普通顺序，会车期间锁定先行权。
 - 低优先级者主动侧移或后撤，窄路先退到宽处；先行者等待 **1.2 秒**后可绕行。解围后恢复原目标，受阻时持续重试，保留导航与防穿透检查。
 - 小恐龙与持有先行权的霸王龙水平距离小于 **15 米**时撤离，达到 **20 米**解除避让，闲站时同样生效。飞行单位不参与地面会车。
 - `F4` 调试窗可查看排名、交互优先状态、阻挡者和会车持续时间。
@@ -257,5 +262,5 @@ power **达到** Threshold 才接受方向，移动和转向速度按限制在 `
 - **玩法**：发布入口为主场景 `Assets/Scenes/Main.unity`，单场景、单人森林观察演示。包含键鼠漫游、HUD／小地图／指南针、画质档位、恐龙自由漫游与避让、霸王龙互动。`TRexFrontInteractionTest` 仅为开发调试场景，不属于发布内容。
 - **输入**：使用标准单相机和键鼠。Emotiv 脑控为可选输入，仅在 Windows 下通过本机蓝牙 Cortex 服务连接，需要 Launcher、应用凭据和已训练的 Mental Command profile；不提供训练或程序内配置界面，配置失败时键鼠仍可用。
 - **导航与场景**：恐龙导航使用烘焙好的 NavMesh 数据加项目内避让／通行规则，不在运行期重新烘焙；场景内容由编辑态 Bake 菜单维护，不做运行期程序化生成。可探索范围为固定的 200m × 200m Terrain。
-- **恐龙**：主场景当前启用霸王龙、伶盗龙、厚头龙、蜥结龙、包鲁鳄与翼龙。召唤关闭。
+- **恐龙**：主场景当前启用霸王龙、伶盗龙、厚头龙、蜥结龙、包鲁鳄、原角龙与翼龙。召唤关闭。
 - **资产**：运行模型使用已导入的 FBX／Prefab 和准备后的资源；模型缺失应检查 Console 和资源引用，不以占位模型替代。

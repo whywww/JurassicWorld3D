@@ -26,9 +26,8 @@ namespace JurassicWorld
         private int orbitIndex, destinationOrbit, direction = 1, destinationDirection;
         private float angle, destinationAngle, pathDistance, elapsed, bank, nextPass, nextRoam, passRemaining;
         private bool initialized;
-        private Renderer[] visualRenderers;
         public string DisplayName => "翼龙";
-        public string Description => "翼龙是能够飞行的史前爬行动物。它们的翼膜由伸长的第四指支撑，形成宽大的双翼。飞行时，翼龙既能振翅前进，也能展开双翼，借助气流滑翔。";
+        public string Description => "生活年代：晚白垩世\n体型：翼展约 6 米\n食性：肉食（食鱼）\n特点：第四指撑起翼膜，可振翅滑翔";
         public float MinimumHeight => minimumHeight;
         public float MaximumHeight => maximumHeight;
         public float HeightAboveGround => transform.position.y - airspace.Ground(transform.position.x, transform.position.z);
@@ -40,21 +39,6 @@ namespace JurassicWorld
         private const float TurnRate = 45f;
 
         private struct Candidate { public int orbit; public float angle, score; }
-
-        internal bool IsInView(Camera camera, Plane[] planes)
-        {
-            if (visualRenderers == null)
-                visualRenderers = GetComponentsInChildren<Renderer>(true);
-
-            foreach (var visual in visualRenderers)
-            {
-                if (visual == null || !visual.enabled || visual.forceRenderingOff ||
-                    !visual.gameObject.activeInHierarchy ||
-                    (camera.cullingMask & (1 << visual.gameObject.layer)) == 0) continue;
-                if (GeometryUtility.TestPlanesAABB(planes, visual.bounds)) return true;
-            }
-            return false;
-        }
 
         private void Start()
         {

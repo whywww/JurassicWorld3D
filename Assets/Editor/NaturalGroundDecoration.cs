@@ -13,7 +13,9 @@ namespace JurassicWorld.Editor
     [InitializeOnLoad]
     internal static class NaturalGroundDecoration
     {
-        private const string Folder = "Assets/Terrain/GroundEcology/Natural";
+        private const string Folder = "Assets/Environment/Terrain/Prepared/GroundEcology/Natural";
+        private const string Surface = "Assets/Environment/Terrain/Prepared/GroundEcology/Surface";
+        private const string Autumn = "Assets/Environment/RocksAndDeadwood/AutumnGroundedLog/Prepared/Models";
         private const string Atlas = Folder + "/ForestFloorAtlas.png";
         private const string Trigger = "Library/NaturalGroundRepair.request";
         private const string Output = "Logs/GroundDecoration";
@@ -70,7 +72,7 @@ namespace JurassicWorld.Editor
             string path = AssetDatabase.GetAssetPath(f.sharedMesh);
             foreach (string kind in Sources)
             {
-                string expected = kind == "AutumnMoss" ? "Assets/Terrain/DeadVegetation/AutumnMoss.asset" : "Assets/Terrain/GroundEcology/" + kind + ".asset";
+                string expected = (kind == "AutumnMoss" ? Autumn : Surface) + "/" + kind + ".asset";
                 if (path == expected) return kind;
             }
             return null;
@@ -95,7 +97,7 @@ namespace JurassicWorld.Editor
         }
         private static void EnsureAssets()
         {
-            if (!AssetDatabase.IsValidFolder(Folder)) AssetDatabase.CreateFolder("Assets/Terrain/GroundEcology", "Natural");
+            if (!AssetDatabase.IsValidFolder(Folder)) JurassicWorldSceneBuilder.EnsureFolder(Folder);
             if (!File.Exists(Atlas)) throw new InvalidOperationException("Missing natural forest floor atlas: " + Atlas);
             var importer = (TextureImporter)AssetImporter.GetAtPath(Atlas);
             if (importer == null) { AssetDatabase.ImportAsset(Atlas); importer = (TextureImporter)AssetImporter.GetAtPath(Atlas); }
@@ -115,8 +117,8 @@ namespace JurassicWorld.Editor
             if (shader == null) throw new InvalidOperationException("Missing foliage cutout shader.");
             if (material == null) { material = new Material(shader); AssetDatabase.CreateAsset(material, path); }
             material.shader = shader;
-            string texture = kind == "DarkGrass" ? "Assets/NatureStarterKit2/Textures/grass01.tga" :
-                kind == "Roots" ? "Assets/NatureStarterKit2/Textures/bark01.tga" : Atlas;
+            string texture = kind == "DarkGrass" ? "Assets/ThirdParty/NatureStarterKit2/Textures/grass01.tga" :
+                kind == "Roots" ? "Assets/ThirdParty/NatureStarterKit2/Textures/bark01.tga" : Atlas;
             material.mainTexture = AssetDatabase.LoadAssetAtPath<Texture2D>(texture);
             if (material.mainTexture == null) throw new InvalidOperationException("Missing ground decoration texture: " + texture);
             material.color = Color.white; material.SetFloat("_Cutoff", .4f); material.SetFloat("_Glossiness", 0f);
@@ -195,7 +197,7 @@ namespace JurassicWorld.Editor
             {
                 Mesh actual = renderer.GetComponent<MeshFilter>().sharedMesh;
                 string kind = Path.GetFileNameWithoutExtension(AssetDatabase.GetAssetPath(actual));
-                string original = kind == "AutumnMoss" ? "Assets/Terrain/DeadVegetation/AutumnMoss.asset" : "Assets/Terrain/GroundEcology/" + kind + ".asset";
+                string original = (kind == "AutumnMoss" ? Autumn : Surface) + "/" + kind + ".asset";
                 Mesh expected = Build(AssetDatabase.LoadAssetAtPath<Mesh>(original), renderer.transform, kind);
                 try
                 {
@@ -218,7 +220,7 @@ namespace JurassicWorld.Editor
                     if (mat == null) { lines.Add("Missing material: " + renderer.name); continue; }
                     string materialPath = AssetDatabase.GetAssetPath(mat);
                     inventory.Add(materialPath + " | " + (mat.shader != null ? mat.shader.name : "MISSING SHADER") + " | " + AssetDatabase.GetAssetPath(mat.mainTexture));
-                    if (Sources.Where(k => k != "AutumnMoss").Any(k => materialPath == "Assets/Terrain/GroundEcology/" + k + ".mat"))
+                    if (Sources.Where(k => k != "AutumnMoss").Any(k => materialPath == Surface + "/" + k + ".mat"))
                         throw new InvalidOperationException("Legacy ground material remains: " + renderer.name);
                     bool foliage = mat.shader != null && (mat.shader.name.Contains("Cutout") || mat.IsKeywordEnabled("_ALPHATEST_ON"));
                     if (foliage && mat.mainTexture == null) lines.Add("Cutout missing texture: " + renderer.name + " / " + AssetDatabase.GetAssetPath(mat));

@@ -394,7 +394,7 @@ namespace JurassicWorld.Editor
                 var random = new System.Random(zone.seed); var accepted = new List<RainforestTreeSizing.Tree>();
                 var candidates = zone.generated ? zone.trees : sites.SelectMany(p=>new[] {p+new Vector2(-.25f,-.25f),p+new Vector2(.25f,.25f)})
                     .OrderBy(_=>random.Next()).Select(p=>new RainforestTreeSizing.Tree { position=p,
-                        path=random.Next(3)==0 ? "Assets/VegetationDiversity/Prefabs/Pachira_B.prefab" : "Assets/NatureStarterKit2/Nature/tree0"+(1+random.Next(4))+".prefab",
+                        path=random.Next(3)==0 ? "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/Pachira_B.prefab" : "Assets/ThirdParty/NatureStarterKit2/Nature/tree0"+(1+random.Next(4))+".prefab",
                         yaw=(float)random.NextDouble()*360f, variation=Mathf.Lerp(.82f,1.14f,(float)random.NextDouble()) }).ToArray();
                 foreach (var candidate in candidates)
                 {
@@ -435,8 +435,8 @@ namespace JurassicWorld.Editor
                 float a=(float)random.NextDouble()*Mathf.PI*2, d=Mathf.Lerp(1.5f,3.5f,(float)random.NextDouble());
                 Vector2 p=stem.p+new Vector2(Mathf.Sin(a),Mathf.Cos(a))*d;
                 if(!zone.area.Contains(p)||MainCreekIntegration.NearCreek(p.x,p.y,.5f))continue;
-                string path=random.Next(4)<3 ? "Assets/Vegetation/Ferns/Fern02_"+"ABCD"[random.Next(4)]+".prefab"
-                    : "Assets/NatureStarterKit2/Nature/bush0"+(1+random.Next(6))+".prefab";
+                string path=random.Next(4)<3 ? "Assets/Environment/Vegetation/Fern02/Prepared/Prefabs/Fern02_"+"ABCD"[random.Next(4)]+".prefab"
+                    : "Assets/ThirdParty/NatureStarterKit2/Nature/bush0"+(1+random.Next(6))+".prefab";
                 var item=CentralForestDensification.Instantiate(path,root.transform);item.name="ExpansionUnderstory_"+count++;
                 item.transform.rotation=Quaternion.Euler(0,(float)random.NextDouble()*360,0);
                 item.transform.localScale*=Mathf.Lerp(.4f,.8f,(float)random.NextDouble())/CentralForestDensification.BoundsOf(item).size.y;

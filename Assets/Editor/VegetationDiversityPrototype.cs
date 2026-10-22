@@ -9,13 +9,13 @@ namespace JurassicWorld.Editor
     /// <summary>Prepares the vegetation assets used by the production biome passes.</summary>
     internal static class VegetationDiversityPrototype
     {
-        private const string Root = "Assets/VegetationDiversity";
-        private const string Materials = Root + "/Materials";
-        private const string Prefabs = Root + "/Prefabs";
-        private const string Source = "Assets/ThirdParty/VegetationDiversity";
-        private const string Prepared = Source + "/Prepared";
-        private const string Fab = Source + "/Source/FabDesktopTrees60";
-        private const string Banana = Source + "/Source/SketchfabBananaTree/textures";
+        private const string Root = "Assets/Environment/Vegetation/Trees";
+        private const string Materials = Root + "/Prepared/Materials";
+        private const string Prefabs = Root + "/Prepared/Prefabs";
+        private const string Source = Root + "/Source";
+        private const string Prepared = Root + "/Prepared/Models";
+        private const string Fab = Source + "/FabDesktopTrees60";
+        private const string Banana = Source + "/SketchfabBananaTree/textures";
         private const string Island = Source + "/PolyHaven/IslandTree02/textures";
         private const string Pachira = Source + "/PolyHaven/PachiraAquatica01/textures";
         [MenuItem("Jurassic World/Assets/Prepare Biome Vegetation")]

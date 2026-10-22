@@ -14,7 +14,7 @@ namespace JurassicWorld.Editor
     {
         internal static readonly Vector2 Center = new Vector2(12.5f, -37.7f);
         internal const string RootName = "Southeast Local Forest Repair";
-        private const string BaselinePath = "Assets/Terrain/GroundEcology/LocalForestRepairBaseline.asset";
+        private const string BaselinePath = "Assets/Environment/Terrain/Prepared/GroundEcology/LocalForestRepairBaseline.asset";
         private const string EnabledPath = "Assets/Editor/LocalForestRepairEnabled.json";
         private const string Output = "Tools/VegetationDiversity/LocalForestRepair";
         internal static TerrainData Baseline => AssetDatabase.LoadAssetAtPath<TerrainData>(BaselinePath);
@@ -86,14 +86,16 @@ namespace JurassicWorld.Editor
 
         private static void Apply(Terrain terrain)
         {
-            GameObject old = GameObject.Find(RootName);
-            if (old != null) UnityEngine.Object.DestroyImmediate(old);
+            LocalTreeThinning.RestoreForRegeneration();
             TerrainTreeObstacleRegistry.Invalidate();
             PaintGrass(terrain);
             GroundEcologyPass.RepaintLocalRegion(terrain);
+            GameObject old = GameObject.Find(RootName);
+            if (old != null) UnityEngine.Object.DestroyImmediate(old);
             var root = new GameObject(RootName);
             try { CentralForestDensification.PlantLocalRepair(root.transform); }
             catch { UnityEngine.Object.DestroyImmediate(root); throw; }
+            LocalTreeThinning.SeedConfigured();
         }
 
         private static int GrassIndex(TerrainData data)

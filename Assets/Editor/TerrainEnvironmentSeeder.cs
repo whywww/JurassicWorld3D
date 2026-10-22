@@ -39,7 +39,7 @@ namespace JurassicWorld.Editor
         private const float HillAmplitude = 0.2f;
 
         // --- Terrain Layer ---
-        private const string TerrainLayerFolder = "Assets/Terrain/Layers";
+        private const string TerrainLayerFolder = "Assets/Environment/Terrain/Prepared/Layers";
 
         // --- Detail (owned grass) ---
         private static readonly Color OwnedHealthyColor = new Color(0.30f, 0.60f, 0.22f);
@@ -133,8 +133,8 @@ namespace JurassicWorld.Editor
             PaintGroundLayers(data);
             PaintOwnedDetails(data);
 
-            // 岩石散布已退役：外围岩石由 UnderstorySeeder 的资产门控 cluster 分布独占（Assets/Vegetation/Rocks
-            // 下的 PolyHaven prefab）。原 ScatterRocks 的程序化 Sphere 属 debug 占位，已整体移除
+            // 岩石散布已退役：外围岩石由 UnderstorySeeder 的资产门控 cluster 分布独占（RockMossSet01
+            // 的 Prepared prefab）。原 ScatterRocks 的程序化 Sphere 属 debug 占位，已整体移除
             // （`Ground Pass Rocks` root 不再创建；DinosaurSpawnRandomizer 对缺失 root 静默跳过）。
             Debug.Log($"[GroundPass] PopulateGround 完成：4 layers, owned detail（岩石散布已退役，交由 Understory cluster 分布）。");
         }
@@ -145,7 +145,7 @@ namespace JurassicWorld.Editor
         {
             // Ensure folder exists
             if (!AssetDatabase.IsValidFolder(TerrainLayerFolder))
-                AssetDatabase.CreateFolder("Assets/Terrain", "Layers");
+                JurassicWorldSceneBuilder.EnsureFolder(TerrainLayerFolder);
 
             // Slot 0: load existing GrassLayer, do NOT modify its fields
             TerrainLayer slot0 = AssetDatabase.LoadAssetAtPath<TerrainLayer>(TerrainLayerFolder + "/GrassLayer.terrainlayer");

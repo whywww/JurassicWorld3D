@@ -383,6 +383,9 @@ namespace JurassicWorld
         private void UpdateBehaviour()
         {
             RestoreSideHeadPose();
+            // This must precede traffic/interaction early returns: their own retry
+            // clocks cannot provide a bound on the total time without movement.
+            if (UpdateEmergencyEscape(Time.deltaTime)) return;
             if (frontTestWaiting)
             {
                 if (!UpdatePlayerInteraction()) PlayClip(idleClip);
@@ -702,7 +705,7 @@ namespace JurassicWorld
         {
             waitingAtCrossing = false;
             CurrentState = DinosaurState.Idle;
-            stateTimer = IsContinuousWalker ? 0f : species == DinosaurSpecies.Pachycephalosaurus ? Range(2f, 4f) : Range(3f, 7f);
+            stateTimer = IsContinuousWalker ? 0f : species == DinosaurSpecies.Pachycephalosaurus ? Range(1f, 2f) : Range(3f, 7f);
             blockedTime = 0f;
             PlayClip(idleClip);
         }

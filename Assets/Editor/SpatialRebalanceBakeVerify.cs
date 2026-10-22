@@ -32,7 +32,7 @@ namespace JurassicWorld.Editor
     internal static class SpatialRebalanceBakeVerify
     {
         private const string MainScenePath = "Assets/Scenes/Main.unity";
-        private const string TerrainDataPath = "Assets/Terrain/JurassicTerrainData.asset";
+        private const string TerrainDataPath = "Assets/Environment/Terrain/Prepared/JurassicTerrainData.asset";
         private const string OutputPath = "Logs/spatial_rebalance/accounting.txt";
         private const float SdTolerance = 0.05f;
 

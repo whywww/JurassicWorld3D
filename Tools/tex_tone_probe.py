@@ -8,7 +8,7 @@ from PIL import Image
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("--textures", type=Path,
                     default=Path(__file__).resolve().parent.parent /
-                    "Assets/NatureStarterKit2/Textures",
+                    "Assets/ThirdParty/NatureStarterKit2/Textures",
                     help="Texture directory (default: project NatureStarterKit2 textures)")
 base = parser.parse_args().textures
 names = ["ground01.tga", "ground02.tga", "ground03.tga",

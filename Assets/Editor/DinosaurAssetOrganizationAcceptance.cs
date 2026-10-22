@@ -30,6 +30,7 @@ namespace JurassicWorld.Editor
                     PachycephalosaurusSceneIntegration.EnsureAssets();
                     StegosaurusSceneIntegration.EnsureAssets();
                     PteradactalSceneIntegration.EnsureAssets();
+                    ProtoceratopsSceneIntegration.EnsureAssets();
                     AssetDatabase.SaveAssets();
                 }
                 var after = new HashSet<string>(Directory.GetFiles("Assets/Dinosaurs", "*", SearchOption.AllDirectories)
@@ -43,7 +44,7 @@ namespace JurassicWorld.Editor
             }
             Verify();
             File.AppendAllText("Logs/dinosaur-asset-organization.txt",
-                "PASS: all five species adaptation generators ran twice; prepared file set unchanged; original prepared bytes restored.\n");
+                "PASS: all six species adaptation generators ran twice; prepared file set unchanged; original prepared bytes restored.\n");
             Debug.Log("DINOSAUR_ASSET_GENERATORS_PASS");
         }
 
@@ -81,7 +82,7 @@ namespace JurassicWorld.Editor
                 }
                 templates++;
             }
-            Require(templates == 8, "Expected all eight ground species, including disabled ones");
+            Require(templates == 9, "Expected all nine ground species, including disabled ones");
             Require(AssetDatabase.LoadAssetAtPath<GameObject>(PteradactalSceneIntegration.PrefabPath) != null,
                 "Missing prepared flying model");
 
@@ -115,7 +116,7 @@ namespace JurassicWorld.Editor
             Require(!scene.isDirty, "Verification unexpectedly changed Main");
             Directory.CreateDirectory("Logs");
             File.WriteAllText("Logs/dinosaur-asset-organization.txt",
-                $"PASS: 9 species; {agents.Length} enabled ground animals and 1 flyer; model, texture, prefab, animation, material and portrait references resolved; Main not saved.\n");
+                $"PASS: 10 species; {agents.Length} enabled ground animals and 1 flyer; model, texture, prefab, animation, material and portrait references resolved; Main not saved.\n");
             Debug.Log("DINOSAUR_ASSET_ORGANIZATION_PASS");
         }
 

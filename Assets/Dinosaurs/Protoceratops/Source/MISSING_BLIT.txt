@@ -1,0 +1,4 @@
+Textures with no pk-descramble and no viewer-blit (public CDN, often striped):
+  - protoceratops_rghnss_ORM.png uid=? 4096x4096
+
+Maps listed above could not be decoded (no API pk, decode failed).

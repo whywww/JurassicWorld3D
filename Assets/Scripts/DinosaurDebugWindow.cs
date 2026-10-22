@@ -28,7 +28,7 @@ namespace JurassicWorld
                 label = new GUIStyle(GUI.skin.label) { fontSize = 17, wordWrap = true };
                 title = new GUIStyle(label) { fontSize = 22, fontStyle = FontStyle.Bold };
             }
-            const float width = 650f, height = 280f;
+            const float width = 650f, height = 314f;
             float scale = Mathf.Max(.1f, Mathf.Min(1f, (Screen.width - 24f) / width, (Screen.height - 24f) / height));
             float y = anchorBottom ? Mathf.Max(12f, Screen.height - height * scale - 12f) : 12f;
             Matrix4x4 previousMatrix = GUI.matrix;
@@ -41,6 +41,7 @@ namespace JurassicWorld
                 : dinosaur.InteractionPhase.ToString();
             int stageDetail = stage.IndexOf(" (");
             if (stageDetail >= 0) stage = stage.Substring(0, stageDetail);
+            if (dinosaur.IsEmergencyEscaping) stage = "Emergency escape";
             string visibility = dinosaur.PlayerVisibilityStatus;
             if (dinosaur.PlayerLostSightTime > 0f) visibility += $"   lost {dinosaur.PlayerLostSightTime:F2}s";
             string reason = "--";
@@ -58,7 +59,8 @@ namespace JurassicWorld
             GUI.Label(new Rect(16, 134, 610, 28), "Reason: " + reason, label);
             GUI.Label(new Rect(16, 164, 610, 28), $"Priority: {dinosaur.GroundPriorityRank}   Player interaction: {dinosaur.HasInteractionRightOfWay}", label);
             GUI.Label(new Rect(16, 194, 610, 48), $"Traffic: {dinosaur.GroundTrafficStatus} | {dinosaur.GroundTrafficBlocker} | {dinosaur.GroundTrafficDuration:F1}s", label);
-            GUI.Label(new Rect(16, 246, 610, 28), $"{toggleKey}: show/hide" + (showResetHint ? "  |  R: reset" : ""), label);
+            GUI.Label(new Rect(16, 244, 610, 28), $"Stall: {dinosaur.NoMovementDuration:F1}/8s | {dinosaur.EmergencyEscapeStatus}", label);
+            GUI.Label(new Rect(16, 280, 610, 28), $"{toggleKey}: show/hide" + (showResetHint ? "  |  R: reset" : ""), label);
             GUI.matrix = previousMatrix;
         }
     }

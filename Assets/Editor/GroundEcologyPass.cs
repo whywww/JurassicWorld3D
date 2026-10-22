@@ -9,7 +9,8 @@ namespace JurassicWorld.Editor
     /// <summary>Final, deterministic surface pass over the baked paths and vegetation islands.</summary>
     internal static class GroundEcologyPass
     {
-        private const string AssetFolder = "Assets/Terrain/GroundEcology";
+        private const string AssetFolder = "Assets/Environment/Terrain/Prepared/GroundEcology";
+        private const string SurfaceFolder = AssetFolder + "/Surface";
         private const string RootName = "Ground Ecology";
         private const float TerrainHalf = 100f;
         private const int Seed = 271834;
@@ -327,7 +328,9 @@ namespace JurassicWorld.Editor
             System.Random random)
         {
             if (!AssetDatabase.IsValidFolder(AssetFolder))
-                AssetDatabase.CreateFolder("Assets/Terrain", "GroundEcology");
+                JurassicWorldSceneBuilder.EnsureFolder(AssetFolder);
+            if (!AssetDatabase.IsValidFolder(SurfaceFolder))
+                JurassicWorldSceneBuilder.EnsureFolder(SurfaceFolder);
             var leafVertices = new List<Vector3>(); var leafTriangles = new List<int>();
             var darkGrassVertices = new List<Vector3>(); var darkGrassTriangles = new List<int>();
             var mossVertices = new List<Vector3>(); var mossTriangles = new List<int>();
@@ -426,11 +429,11 @@ namespace JurassicWorld.Editor
             generated.SetVertices(vertices);
             generated.SetTriangles(triangles, 0);
             generated.RecalculateNormals();
-            string meshPath = AssetFolder + "/" + assetName + ".asset";
+            string meshPath = SurfaceFolder + "/" + assetName + ".asset";
             Mesh mesh = AssetDatabase.LoadAssetAtPath<Mesh>(meshPath);
             if (mesh == null) { AssetDatabase.CreateAsset(generated, meshPath); mesh = generated; }
             else { EditorUtility.CopySerialized(generated, mesh); UnityEngine.Object.DestroyImmediate(generated); EditorUtility.SetDirty(mesh); }
-            string materialPath = AssetFolder + "/" + assetName + ".mat";
+            string materialPath = SurfaceFolder + "/" + assetName + ".mat";
             Material material = AssetDatabase.LoadAssetAtPath<Material>(materialPath);
             if (material == null)
             {

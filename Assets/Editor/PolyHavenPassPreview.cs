@@ -13,7 +13,7 @@ namespace JurassicWorld.Editor
     /// HQ Asset Pass 的【完全非破坏性】Preview Bake + 统计报告。
     ///
     /// 非破坏性契约（硬性）：
-    ///  - 绝不写生产 Assets/Terrain/JurassicTerrainData.asset，也绝不让 Main.unity 变脏；
+    ///  - 绝不写生产 Assets/Environment/Terrain/Prepared/JurassicTerrainData.asset，也绝不让 Main.unity 变脏；
     ///  - TerrainData 用 Object.Instantiate 克隆，派生物（岩石/灌木/fern 密度）全部落在克隆体上；
     ///  - 临时 Single 场景承载全部 GameObject；结束/异常/取消都销毁临时对象与克隆体；
     ///  - 全程不调用 AssetDatabase.SaveAssets / EditorSceneManager.SaveScene；
@@ -31,7 +31,7 @@ namespace JurassicWorld.Editor
     /// </summary>
     public static class PolyHavenPassPreview
     {
-        private const string TerrainDataPath = "Assets/Terrain/JurassicTerrainData.asset";
+        private const string TerrainDataPath = "Assets/Environment/Terrain/Prepared/JurassicTerrainData.asset";
 
         /// <summary>Preview 缩小倍数（仅影响实例数量；正式 Bake 恒为 1）。</summary>
         private const int PreviewScaleFactor = 4;
@@ -231,7 +231,7 @@ namespace JurassicWorld.Editor
             if (layerCount == 0)
             {
                 failures++;
-                sb.AppendLine("[HQPreview]   FAIL: fern 层数为 0 —— 资产门控未生效（检查 Assets/Vegetation/Ferns）。");
+                sb.AppendLine("[HQPreview]   FAIL: fern 层数为 0 —— 资产门控未生效（检查 Assets/Environment/Vegetation/Fern02/Prepared/Prefabs）。");
             }
             else
             {
@@ -285,7 +285,7 @@ namespace JurassicWorld.Editor
             }
 
             Material fernMat = AssetDatabase.LoadAssetAtPath<Material>(
-                PolyHavenAssetIntegration.MaterialFolder + "/Fern02_Cutout.mat");
+                PolyHavenAssetIntegration.FernMaterialPath);
             float cutoff = fernMat != null ? fernMat.GetFloat("_Cutoff") : 0.35f;
 
             if (PolyHavenAssetIntegration.AnalyzeCutoutMask(cutoff,

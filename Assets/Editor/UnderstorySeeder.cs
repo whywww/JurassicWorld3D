@@ -15,7 +15,7 @@ namespace JurassicWorld.Editor
     ///    DestroyImmediate 再重建，重复 Bake 绝不叠加、关闭 Pass 整根移除；
     ///  - 现有 7 个 detail 层（bush01-06 mesh 层 + grass01 billboard 层）的【密度值】：cluster 化分区重绘，
     ///    逐层幂等写回（与现值比对，一致则跳过）；
-    ///  - 资产门控的 fern 原型尾随块（Assets/Vegetation/Ferns 出现 prefab 后自动追加）。
+    ///  - 资产门控的 fern 原型尾随块（Assets/Environment/Vegetation/Fern02/Prepared/Prefabs 出现 prefab 后自动追加）。
     ///
     /// 绝不触碰：树实例、heightmap / splat、其他 Pass 的根与原型对象、任何运行时脚本
     /// （含 DinosaurSpawnRandomizer —— 碰撞规避完全靠下述几何不变量，不靠运行时避让）。
@@ -108,7 +108,7 @@ namespace JurassicWorld.Editor
         private const float RockSinkRatioMin = 0.25f, RockSinkRatioMax = 0.45f;
         private const int RockPlacementAttempts = 1200;
         private const bool AddColliderForLargeRocks = false;
-        private const string RockMaterialPath = "Assets/Materials/RockNatural.mat";
+        private const string RockMaterialPath = "Assets/Environment/RocksAndDeadwood/RockMossSet01/Prepared/Materials/RockNatural.mat";
 
         // --- Hero 灌木（bush01-06 作为中层植被主角，cluster 化）---
         private const int HeroBushClusterCount = 16;
@@ -116,7 +116,7 @@ namespace JurassicWorld.Editor
         private const float HeroBushClusterMinGap = 8f;        // 簇心间最小间隙（米）
         private const float HeroBushScaleMin = 1.0f, HeroBushScaleMax = 2.2f;
 
-        // --- Fern（资产门控：Assets/Vegetation/Ferns 无合格 prefab 时 no-op）---
+        // --- Fern（资产门控：Assets/Environment/Vegetation/Fern02/Prepared/Prefabs 无合格 prefab 时 no-op）---
         private const int FernClusterCount = 320;
         private const int FernPerClusterMin = 4, FernPerClusterMax = 10;
         private const float FernClusterRadiusMin = 1.5f, FernClusterRadiusMax = 4f;
@@ -124,7 +124,7 @@ namespace JurassicWorld.Editor
         /// <summary>fern 变体分配的独立固定 salt（与既有 +7/+11/+100/+200/+900 等 salt 互不冲突）。</summary>
         private const int FernVariantSalt = UnderstoryRandomSeed + 900;
 
-        // --- Deadwood（资产门控：Assets/Vegetation/Deadwood 无合格 prefab 时 no-op）---
+        // --- Deadwood（资产门控：Assets/Environment/RocksAndDeadwood/Deadwood/Prepared/Prefabs 无合格 prefab 时 no-op）---
         private const int LogCountMin = 6, LogCountMax = 8;
         private const int StumpCountMin = 3, StumpCountMax = 5;
         private const bool AddColliderForDeadwood = false;
@@ -1351,7 +1351,7 @@ namespace JurassicWorld.Editor
         // ================================================================ Fern（资产门控接口）
 
         /// <summary>
-        /// Fern 门控：Assets/Vegetation/Ferns 无合格 prefab → no-op（仅日志提示目录）。
+        /// Fern 门控：Assets/Environment/Vegetation/Fern02/Prepared/Prefabs 无合格 prefab → no-op（仅日志提示目录）。
         /// 有资产 → 规范化尾随块（签名 = 资产路径在 Fern 目录下）：重建原型数组（非自有原样 + fern 尾随块），
         /// snapshot/restore 非自有层，然后按簇绘制密度（林内高密度簇 / 林缘混合 / mud 抑制 / 活动区+缓冲外）。
         /// 返回 fern 层数（0 = no-op）。
@@ -1622,7 +1622,7 @@ namespace JurassicWorld.Editor
         // ================================================================ Deadwood（资产门控接口）
 
         /// <summary>
-        /// 倒木/树桩门控：Assets/Vegetation/Deadwood 无合格 prefab → no-op（仅日志提示目录）。
+        /// 倒木/树桩门控：Assets/Environment/RocksAndDeadwood/Deadwood/Prepared/Prefabs 无合格 prefab → no-op（仅日志提示目录）。
         /// 有资产 → 先落展示环近林带固定位（3 倒木 + 2 树桩，森林已按同一布局让开空隙 → 玩家可见），
         /// 再按「近树冠/林缘加权、避通道、平坦矩形+缓冲外、min-gap 12m」补足到 6-8 倒木 + 3-5 树桩；
         /// 贴地 + 轻微沉入（0.12-0.3m）、随机朝向（展示位横置朝向草地）、静态合批、默认零 Collider（独立流 +3）。

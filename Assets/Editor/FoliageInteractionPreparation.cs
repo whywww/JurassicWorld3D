@@ -16,7 +16,7 @@ namespace JurassicWorld.Editor
         internal const string RootName = "Dinosaur Foliage Interaction";
         internal const string EnabledPath = "Assets/Editor/FoliageInteractionEnabled.json";
         private const string ScenePath = "Assets/Scenes/Main.unity";
-        private const string AssetsRoot = "Assets/VegetationInteraction";
+        private const string AssetsRoot = "Assets/Environment/Vegetation/Interaction/Prepared";
         private static readonly Dictionary<string, Mesh> Meshes = new Dictionary<string, Mesh>();
         private static readonly Dictionary<Material, Material> Materials = new Dictionary<Material, Material>();
         private static readonly Dictionary<Mesh, Bounds> FlexibleBounds = new Dictionary<Mesh, Bounds>();
@@ -59,6 +59,7 @@ namespace JurassicWorld.Editor
         internal static void SeedConfigured()
         {
             TreeOverlapCleanup.SeedConfigured();
+            LocalTreeThinning.SeedConfigured();
             TreeHeightAdjustment.SeedConfigured();
             if (File.Exists(EnabledPath)) PrepareCurrent();
         }

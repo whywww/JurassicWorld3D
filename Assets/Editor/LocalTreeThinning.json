@@ -1,0 +1,2731 @@
+{
+    "enabled": true,
+    "withdrawn": [
+        {
+            "key": "Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree01.prefab|LocalTree_003|4.5179|-24.9202|63.300",
+            "kind": "Scene",
+            "name": "LocalTree_003",
+            "prefab": "Assets/ThirdParty/NatureStarterKit2/Nature/tree01.prefab",
+            "parent": "Southeast Local Forest Repair",
+            "owner": "Southeast Local Forest Repair",
+            "reason": "根距不足2m: Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab|tree02_SceneTree|5.5336|-24.5918|357.000",
+            "position": {
+                "x": 4.517913818359375,
+                "y": -0.020085472613573076,
+                "z": -24.920148849487306
+            },
+            "scale": {
+                "x": 1.066110372543335,
+                "y": 1.066110372543335,
+                "z": 1.066110372543335
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.5247305035591126,
+                "z": 0.0,
+                "w": 0.8512684106826782
+            },
+            "terrainPosition": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "terrainWidth": 0.0,
+            "terrainHeight": 0.0,
+            "terrainRotation": 0.0,
+            "terrainColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "terrainLightmapColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "radius": 0.9181938171386719,
+            "hardBranches": false
+        },
+        {
+            "key": "Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree01.prefab|Sapling_1|5.7773|-24.7229|53.000",
+            "kind": "Scene",
+            "name": "Sapling_1",
+            "prefab": "Assets/ThirdParty/NatureStarterKit2/Nature/tree01.prefab",
+            "parent": "Phase 2 Vegetation Islands/A1_DinosaurFront",
+            "owner": "Phase 2 Vegetation Islands",
+            "reason": "根距不足2m: Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab|tree02_SceneTree|5.5336|-24.5918|357.000",
+            "position": {
+                "x": 5.777339935302734,
+                "y": 0.3178362548351288,
+                "z": -24.722888946533204
+            },
+            "scale": {
+                "x": 0.3923879861831665,
+                "y": 0.3923879861831665,
+                "z": 0.3923879861831665
+            },
+            "rotation": {
+                "x": 0.10130944103002548,
+                "y": 0.4433296024799347,
+                "z": -0.05051102489233017,
+                "w": 0.8891816139221191
+            },
+            "terrainPosition": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "terrainWidth": 0.0,
+            "terrainHeight": 0.0,
+            "terrainRotation": 0.0,
+            "terrainColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "terrainLightmapColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "radius": 0.699999988079071,
+            "hardBranches": false
+        },
+        {
+            "key": "Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree01.prefab|Sapling_1|6.0738|-24.8473|11.000",
+            "kind": "Scene",
+            "name": "Sapling_1",
+            "prefab": "Assets/ThirdParty/NatureStarterKit2/Nature/tree01.prefab",
+            "parent": "Phase 2 Vegetation Islands/A2_DinosaurBack",
+            "owner": "Phase 2 Vegetation Islands",
+            "reason": "根距不足2m: Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab|tree02_SceneTree|5.5336|-24.5918|357.000",
+            "position": {
+                "x": 6.073759078979492,
+                "y": 0.19090935587882996,
+                "z": -24.847312927246095
+            },
+            "scale": {
+                "x": 0.3982436954975128,
+                "y": 0.3982436954975128,
+                "z": 0.3982436954975128
+            },
+            "rotation": {
+                "x": -0.0954044982790947,
+                "y": 0.0954044982790947,
+                "z": 0.00918640848249197,
+                "w": 0.9908136129379273
+            },
+            "terrainPosition": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "terrainWidth": 0.0,
+            "terrainHeight": 0.0,
+            "terrainRotation": 0.0,
+            "terrainColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "terrainLightmapColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "radius": 0.699999988079071,
+            "hardBranches": false
+        },
+        {
+            "key": "Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree01.prefab|tree01_0242|4.4668|-24.2018|72.210",
+            "kind": "Scene",
+            "name": "tree01_0242",
+            "prefab": "Assets/ThirdParty/NatureStarterKit2/Nature/tree01.prefab",
+            "parent": "Central Forest Densification/Stage 1",
+            "owner": "Central Forest Densification",
+            "reason": "根距不足2m: Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab|tree02_SceneTree|5.5336|-24.5918|357.000",
+            "position": {
+                "x": 4.466827869415283,
+                "y": -0.020085472613573076,
+                "z": -24.201751708984376
+            },
+            "scale": {
+                "x": 1.0230224132537842,
+                "y": 1.0230224132537842,
+                "z": 1.0230224132537842
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.5892694592475891,
+                "z": 0.0,
+                "w": 0.8079366087913513
+            },
+            "terrainPosition": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "terrainWidth": 0.0,
+            "terrainHeight": 0.0,
+            "terrainRotation": 0.0,
+            "terrainColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "terrainLightmapColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "radius": 0.8810840845108032,
+            "hardBranches": false
+        },
+        {
+            "key": "Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree01.prefab|tree01_0374|5.0421|-23.7157|264.003",
+            "kind": "Scene",
+            "name": "tree01_0374",
+            "prefab": "Assets/ThirdParty/NatureStarterKit2/Nature/tree01.prefab",
+            "parent": "Central Forest Densification/Stage 1",
+            "owner": "Central Forest Densification",
+            "reason": "根距不足2m: Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab|tree02_SceneTree|5.5336|-24.5918|357.000",
+            "position": {
+                "x": 5.042079925537109,
+                "y": -0.020085472613573076,
+                "z": -23.71568489074707
+            },
+            "scale": {
+                "x": 0.8811105489730835,
+                "y": 0.8811105489730835,
+                "z": 0.8811105489730835
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.7431264519691467,
+                "z": 0.0,
+                "w": -0.6691510081291199
+            },
+            "terrainPosition": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "terrainWidth": 0.0,
+            "terrainHeight": 0.0,
+            "terrainRotation": 0.0,
+            "terrainColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "terrainLightmapColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "radius": 0.7588616013526917,
+            "hardBranches": false
+        },
+        {
+            "key": "Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree01.prefab|tree01_0388|4.1960|-23.1802|302.192",
+            "kind": "Scene",
+            "name": "tree01_0388",
+            "prefab": "Assets/ThirdParty/NatureStarterKit2/Nature/tree01.prefab",
+            "parent": "Central Forest Densification/Stage 1",
+            "owner": "Central Forest Densification",
+            "reason": "根距不足2m: Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab|tree02_SceneTree|5.5336|-24.5918|357.000",
+            "position": {
+                "x": 4.196032524108887,
+                "y": -0.020085472613573076,
+                "z": -23.180164337158204
+            },
+            "scale": {
+                "x": 0.8475210070610046,
+                "y": 0.8475210070610046,
+                "z": 0.8475210070610046
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.483344167470932,
+                "z": 0.0,
+                "w": -0.8754304051399231
+            },
+            "terrainPosition": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "terrainWidth": 0.0,
+            "terrainHeight": 0.0,
+            "terrainRotation": 0.0,
+            "terrainColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "terrainLightmapColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "radius": 0.729932427406311,
+            "hardBranches": false
+        },
+        {
+            "key": "Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree01.prefab|tree01_AutumnHalf_FabTree_1_0332|5.9885|-25.0872|251.809",
+            "kind": "Scene",
+            "name": "tree01_AutumnHalf_FabTree_1_0332",
+            "prefab": "Assets/ThirdParty/NatureStarterKit2/Nature/tree01.prefab",
+            "parent": "Central Forest Densification/Stage 1",
+            "owner": "Central Forest Densification",
+            "reason": "根距不足2m: Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab|tree02_SceneTree|5.5336|-24.5918|357.000",
+            "position": {
+                "x": 5.988481521606445,
+                "y": -0.020085472613573076,
+                "z": -25.08723258972168
+            },
+            "scale": {
+                "x": 1.068210244178772,
+                "y": 1.068210244178772,
+                "z": 1.068210244178772
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.8099977374076843,
+                "z": 0.0,
+                "w": -0.5864330530166626
+            },
+            "terrainPosition": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "terrainWidth": 0.0,
+            "terrainHeight": 0.0,
+            "terrainRotation": 0.0,
+            "terrainColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "terrainLightmapColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "radius": 0.8658844828605652,
+            "hardBranches": false
+        },
+        {
+            "key": "Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab|Sapling_1|5.8493|-24.2825|17.000",
+            "kind": "Scene",
+            "name": "Sapling_1",
+            "prefab": "Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab",
+            "parent": "Phase 2 Vegetation Islands/F_EastApproach",
+            "owner": "Phase 2 Vegetation Islands",
+            "reason": "根距不足2m: Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab|tree02_SceneTree|5.5336|-24.5918|357.000",
+            "position": {
+                "x": 5.849298477172852,
+                "y": 0.30847689509391787,
+                "z": -24.28250503540039
+            },
+            "scale": {
+                "x": 0.3241073787212372,
+                "y": 0.3241073787212372,
+                "z": 0.3241073787212372
+            },
+            "rotation": {
+                "x": 0.1119597777724266,
+                "y": 0.14685925841331483,
+                "z": -0.01673249900341034,
+                "w": 0.9826583862304688
+            },
+            "terrainPosition": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "terrainWidth": 0.0,
+            "terrainHeight": 0.0,
+            "terrainRotation": 0.0,
+            "terrainColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "terrainLightmapColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "radius": 0.699999988079071,
+            "hardBranches": false
+        },
+        {
+            "key": "Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab|tree02_0283|4.3316|-23.4514|138.195",
+            "kind": "Scene",
+            "name": "tree02_0283",
+            "prefab": "Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab",
+            "parent": "Central Forest Densification/Stage 1",
+            "owner": "Central Forest Densification",
+            "reason": "根距不足2m: Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab|tree02_SceneTree|5.5336|-24.5918|357.000",
+            "position": {
+                "x": 4.331594944000244,
+                "y": -0.020085472613573076,
+                "z": -23.451416015625
+            },
+            "scale": {
+                "x": 0.6388605833053589,
+                "y": 0.6388605833053589,
+                "z": 0.6388605833053589
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.934188961982727,
+                "z": 0.0,
+                "w": 0.3567785620689392
+            },
+            "terrainPosition": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "terrainWidth": 0.0,
+            "terrainHeight": 0.0,
+            "terrainRotation": 0.0,
+            "terrainColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "terrainLightmapColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "radius": 0.6908520460128784,
+            "hardBranches": false
+        },
+        {
+            "key": "Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree03.prefab|tree03_0150|6.2868|-25.1639|322.561",
+            "kind": "Scene",
+            "name": "tree03_0150",
+            "prefab": "Assets/ThirdParty/NatureStarterKit2/Nature/tree03.prefab",
+            "parent": "Central Forest Densification/Stage 1",
+            "owner": "Central Forest Densification",
+            "reason": "根距不足2m: Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab|tree02_SceneTree|5.5336|-24.5918|357.000",
+            "position": {
+                "x": 6.286769390106201,
+                "y": -0.020085472613573076,
+                "z": -25.16384506225586
+            },
+            "scale": {
+                "x": 0.9124729633331299,
+                "y": 0.9124729633331299,
+                "z": 0.9124729633331299
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.32093751430511477,
+                "z": 0.0,
+                "w": -0.9471004009246826
+            },
+            "terrainPosition": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "terrainWidth": 0.0,
+            "terrainHeight": 0.0,
+            "terrainRotation": 0.0,
+            "terrainColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "terrainLightmapColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "radius": 0.7371176481246948,
+            "hardBranches": false
+        },
+        {
+            "key": "Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree03.prefab|tree03_0195|3.9658|-24.9659|260.579",
+            "kind": "Scene",
+            "name": "tree03_0195",
+            "prefab": "Assets/ThirdParty/NatureStarterKit2/Nature/tree03.prefab",
+            "parent": "Central Forest Densification/Stage 1",
+            "owner": "Central Forest Densification",
+            "reason": "根距不足2m: Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab|tree02_SceneTree|5.5336|-24.5918|357.000",
+            "position": {
+                "x": 3.9658443927764894,
+                "y": -0.020085472613573076,
+                "z": -24.965900421142579
+            },
+            "scale": {
+                "x": 0.9385758638381958,
+                "y": 0.9385758638381958,
+                "z": 0.9385758638381958
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.7627857327461243,
+                "z": 0.0,
+                "w": -0.6466513276100159
+            },
+            "terrainPosition": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "terrainWidth": 0.0,
+            "terrainHeight": 0.0,
+            "terrainRotation": 0.0,
+            "terrainColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "terrainLightmapColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "radius": 0.7582041621208191,
+            "hardBranches": false
+        },
+        {
+            "key": "Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree03.prefab|tree03_0244|6.2762|-25.7870|200.611",
+            "kind": "Scene",
+            "name": "tree03_0244",
+            "prefab": "Assets/ThirdParty/NatureStarterKit2/Nature/tree03.prefab",
+            "parent": "Central Forest Densification/Stage 1",
+            "owner": "Central Forest Densification",
+            "reason": "根距不足2m: Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab|tree02_SceneTree|5.5336|-24.5918|357.000",
+            "position": {
+                "x": 6.276202201843262,
+                "y": -0.020085472613573076,
+                "z": -25.786968231201173
+            },
+            "scale": {
+                "x": 1.0365761518478394,
+                "y": 1.0365761518478394,
+                "z": 1.0365761518478394
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.9838675260543823,
+                "z": 0.0,
+                "w": -0.17889881134033204
+            },
+            "terrainPosition": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "terrainWidth": 0.0,
+            "terrainHeight": 0.0,
+            "terrainRotation": 0.0,
+            "terrainColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "terrainLightmapColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "radius": 0.8373711705207825,
+            "hardBranches": false
+        },
+        {
+            "key": "Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree03.prefab|tree03_0266|4.4434|-23.3730|305.287",
+            "kind": "Scene",
+            "name": "tree03_0266",
+            "prefab": "Assets/ThirdParty/NatureStarterKit2/Nature/tree03.prefab",
+            "parent": "Central Forest Densification/Stage 1",
+            "owner": "Central Forest Densification",
+            "reason": "根距不足2m: Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab|tree02_SceneTree|5.5336|-24.5918|357.000",
+            "position": {
+                "x": 4.443360328674316,
+                "y": -0.020085472613573076,
+                "z": -23.373004913330079
+            },
+            "scale": {
+                "x": 0.8994076251983643,
+                "y": 0.8994076251983643,
+                "z": 0.8994076251983643
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.45952942967414858,
+                "z": 0.0,
+                "w": -0.8881625533103943
+            },
+            "terrainPosition": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "terrainWidth": 0.0,
+            "terrainHeight": 0.0,
+            "terrainRotation": 0.0,
+            "terrainColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "terrainLightmapColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "radius": 0.7265630960464478,
+            "hardBranches": false
+        },
+        {
+            "key": "Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree03.prefab|tree03_0329|6.3607|-24.8742|356.004",
+            "kind": "Scene",
+            "name": "tree03_0329",
+            "prefab": "Assets/ThirdParty/NatureStarterKit2/Nature/tree03.prefab",
+            "parent": "Central Forest Densification/Stage 1",
+            "owner": "Central Forest Densification",
+            "reason": "根距不足2m: Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab|tree02_SceneTree|5.5336|-24.5918|357.000",
+            "position": {
+                "x": 6.360668182373047,
+                "y": -0.020085472613573076,
+                "z": -24.87421417236328
+            },
+            "scale": {
+                "x": 0.8579735159873962,
+                "y": 0.8579735159873962,
+                "z": 0.8579735159873962
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.03486871346831322,
+                "z": 0.0,
+                "w": -0.9993919134140015
+            },
+            "terrainPosition": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "terrainWidth": 0.0,
+            "terrainHeight": 0.0,
+            "terrainRotation": 0.0,
+            "terrainColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "terrainLightmapColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "radius": 0.693091630935669,
+            "hardBranches": false
+        },
+        {
+            "key": "Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree03.prefab|tree03_0377|6.0487|-24.9478|224.616",
+            "kind": "Scene",
+            "name": "tree03_0377",
+            "prefab": "Assets/ThirdParty/NatureStarterKit2/Nature/tree03.prefab",
+            "parent": "Central Forest Densification/Stage 1",
+            "owner": "Central Forest Densification",
+            "reason": "根距不足2m: Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab|tree02_SceneTree|5.5336|-24.5918|357.000",
+            "position": {
+                "x": 6.0486602783203129,
+                "y": -0.020085472613573076,
+                "z": -24.947803497314454
+            },
+            "scale": {
+                "x": 0.8727659583091736,
+                "y": 0.8727659583091736,
+                "z": 0.8727659583091736
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.9251582026481628,
+                "z": 0.0,
+                "w": -0.37958186864852908
+            },
+            "terrainPosition": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "terrainWidth": 0.0,
+            "terrainHeight": 0.0,
+            "terrainRotation": 0.0,
+            "terrainColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "terrainLightmapColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "radius": 0.7050412893295288,
+            "hardBranches": false
+        },
+        {
+            "key": "Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree03.prefab|tree03_AutumnHalf_FabTree_5_0396|6.0498|-25.7525|276.968",
+            "kind": "Scene",
+            "name": "tree03_AutumnHalf_FabTree_5_0396",
+            "prefab": "Assets/ThirdParty/NatureStarterKit2/Nature/tree03.prefab",
+            "parent": "Central Forest Densification/Stage 1",
+            "owner": "Central Forest Densification",
+            "reason": "根距不足2m: Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab|tree02_SceneTree|5.5336|-24.5918|357.000",
+            "position": {
+                "x": 6.049796104431152,
+                "y": -0.020085472613573076,
+                "z": -25.752485275268556
+            },
+            "scale": {
+                "x": 1.7984634637832642,
+                "y": 1.7984634637832642,
+                "z": 1.7984634637832642
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.6628279685974121,
+                "z": 0.0,
+                "w": -0.7487717270851135
+            },
+            "terrainPosition": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "terrainWidth": 0.0,
+            "terrainHeight": 0.0,
+            "terrainRotation": 0.0,
+            "terrainColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "terrainLightmapColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "radius": 0.9962344169616699,
+            "hardBranches": false
+        },
+        {
+            "key": "Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree03.prefab|tree03_SceneTree|5.2994|-23.7799|104.000",
+            "kind": "Scene",
+            "name": "tree03_SceneTree",
+            "prefab": "Assets/ThirdParty/NatureStarterKit2/Nature/tree03.prefab",
+            "parent": "Phase 2 Biome Vegetation/08_Transition",
+            "owner": "Phase 2 Biome Vegetation",
+            "reason": "根距不足2m: Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab|tree02_SceneTree|5.5336|-24.5918|357.000",
+            "position": {
+                "x": 5.299363136291504,
+                "y": -0.030085472390055658,
+                "z": -23.779897689819337
+            },
+            "scale": {
+                "x": 0.9284200072288513,
+                "y": 0.9284200072288513,
+                "z": 0.9284200072288513
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": -0.7880107164382935,
+                "z": 0.0,
+                "w": -0.6156615018844605
+            },
+            "terrainPosition": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "terrainWidth": 0.0,
+            "terrainHeight": 0.0,
+            "terrainRotation": 0.0,
+            "terrainColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "terrainLightmapColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "radius": 0.800000011920929,
+            "hardBranches": false
+        },
+        {
+            "key": "Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree03.prefab|tree03_SceneTree|5.9278|-25.0274|149.000",
+            "kind": "Scene",
+            "name": "tree03_SceneTree",
+            "prefab": "Assets/ThirdParty/NatureStarterKit2/Nature/tree03.prefab",
+            "parent": "Phase 2 Biome Vegetation/23_Transition",
+            "owner": "Phase 2 Biome Vegetation",
+            "reason": "根距不足2m: Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab|tree02_SceneTree|5.5336|-24.5918|357.000",
+            "position": {
+                "x": 5.927755355834961,
+                "y": -0.030085472390055658,
+                "z": -25.027372360229493
+            },
+            "scale": {
+                "x": 0.9284200072288513,
+                "y": 0.9284200072288513,
+                "z": 0.9284200072288513
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": -0.9636304378509522,
+                "z": 0.0,
+                "w": -0.267238587141037
+            },
+            "terrainPosition": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "terrainWidth": 0.0,
+            "terrainHeight": 0.0,
+            "terrainRotation": 0.0,
+            "terrainColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "terrainLightmapColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "radius": 0.800000011920929,
+            "hardBranches": false
+        },
+        {
+            "key": "Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree04.prefab|LocalTree_020|4.7869|-23.4132|113.950",
+            "kind": "Scene",
+            "name": "LocalTree_020",
+            "prefab": "Assets/ThirdParty/NatureStarterKit2/Nature/tree04.prefab",
+            "parent": "Southeast Local Forest Repair",
+            "owner": "Southeast Local Forest Repair",
+            "reason": "根距不足2m: Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab|tree02_SceneTree|5.5336|-24.5918|357.000",
+            "position": {
+                "x": 4.7868852615356449,
+                "y": -0.020085472613573076,
+                "z": -23.41318702697754
+            },
+            "scale": {
+                "x": 1.049515724182129,
+                "y": 1.049515724182129,
+                "z": 1.049515724182129
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.8384316563606262,
+                "z": 0.0,
+                "w": 0.5450068712234497
+            },
+            "terrainPosition": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "terrainWidth": 0.0,
+            "terrainHeight": 0.0,
+            "terrainRotation": 0.0,
+            "terrainColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "terrainLightmapColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "radius": 0.6947258710861206,
+            "hardBranches": false
+        },
+        {
+            "key": "Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree04.prefab|LocalTree_074|4.2641|-23.3701|125.039",
+            "kind": "Scene",
+            "name": "LocalTree_074",
+            "prefab": "Assets/ThirdParty/NatureStarterKit2/Nature/tree04.prefab",
+            "parent": "Southeast Local Forest Repair",
+            "owner": "Southeast Local Forest Repair",
+            "reason": "根距不足2m: Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab|tree02_SceneTree|5.5336|-24.5918|357.000",
+            "position": {
+                "x": 4.264087200164795,
+                "y": -0.020085472613573076,
+                "z": -23.370086669921876
+            },
+            "scale": {
+                "x": 1.0561292171478272,
+                "y": 1.0561292171478272,
+                "z": 1.0561292171478272
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.8871684074401856,
+                "z": 0.0,
+                "w": 0.4614458382129669
+            },
+            "terrainPosition": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "terrainWidth": 0.0,
+            "terrainHeight": 0.0,
+            "terrainRotation": 0.0,
+            "terrainColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "terrainLightmapColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "radius": 0.6991036534309387,
+            "hardBranches": false
+        },
+        {
+            "key": "Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree04.prefab|tree04_0181|5.2357|-24.9795|357.203",
+            "kind": "Scene",
+            "name": "tree04_0181",
+            "prefab": "Assets/ThirdParty/NatureStarterKit2/Nature/tree04.prefab",
+            "parent": "Central Forest Densification/Stage 1",
+            "owner": "Central Forest Densification",
+            "reason": "根距不足2m: Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab|tree02_SceneTree|5.5336|-24.5918|357.000",
+            "position": {
+                "x": 5.235681533813477,
+                "y": -0.020085472613573076,
+                "z": -24.979480743408204
+            },
+            "scale": {
+                "x": 1.034067988395691,
+                "y": 1.034067988395691,
+                "z": 1.034067988395691
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.02440273016691208,
+                "z": 0.0,
+                "w": -0.9997022151947022
+            },
+            "terrainPosition": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "terrainWidth": 0.0,
+            "terrainHeight": 0.0,
+            "terrainRotation": 0.0,
+            "terrainColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "terrainLightmapColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "radius": 0.6845002174377441,
+            "hardBranches": false
+        },
+        {
+            "key": "Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree04.prefab|tree04_0375|7.8888|-26.9223|224.202",
+            "kind": "Scene",
+            "name": "tree04_0375",
+            "prefab": "Assets/ThirdParty/NatureStarterKit2/Nature/tree04.prefab",
+            "parent": "Central Forest Densification/Stage 1",
+            "owner": "Central Forest Densification",
+            "reason": "0–3m木质间隔不足0.25m: Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree01.prefab|tree01_0297|9.3131|-28.9356|37.071",
+            "position": {
+                "x": 7.888835906982422,
+                "y": -0.020085472613573076,
+                "z": -26.922306060791017
+            },
+            "scale": {
+                "x": 1.0509873628616334,
+                "y": 1.0509873628616334,
+                "z": 1.0509873628616334
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.9265215396881104,
+                "z": 0.0,
+                "w": -0.3762417435646057
+            },
+            "terrainPosition": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "terrainWidth": 0.0,
+            "terrainHeight": 0.0,
+            "terrainRotation": 0.0,
+            "terrainColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "terrainLightmapColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "radius": 0.6956999897956848,
+            "hardBranches": false
+        },
+        {
+            "key": "Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree04.prefab|tree04_0391|4.8290|-23.1648|232.284",
+            "kind": "Scene",
+            "name": "tree04_0391",
+            "prefab": "Assets/ThirdParty/NatureStarterKit2/Nature/tree04.prefab",
+            "parent": "Central Forest Densification/Stage 1",
+            "owner": "Central Forest Densification",
+            "reason": "根距不足2m: Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab|tree02_SceneTree|5.5336|-24.5918|357.000",
+            "position": {
+                "x": 4.828952789306641,
+                "y": -0.020085472613573076,
+                "z": -23.1648006439209
+            },
+            "scale": {
+                "x": 1.0255895853042603,
+                "y": 1.0255895853042603,
+                "z": 1.0255895853042603
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.8977064490318298,
+                "z": 0.0,
+                "w": -0.4405941069126129
+            },
+            "terrainPosition": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "terrainWidth": 0.0,
+            "terrainHeight": 0.0,
+            "terrainRotation": 0.0,
+            "terrainColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "terrainLightmapColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "radius": 0.6788879036903381,
+            "hardBranches": false
+        },
+        {
+            "key": "Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree04.prefab|tree04_0399|6.1757|-24.7143|313.043",
+            "kind": "Scene",
+            "name": "tree04_0399",
+            "prefab": "Assets/ThirdParty/NatureStarterKit2/Nature/tree04.prefab",
+            "parent": "Central Forest Densification/Stage 1",
+            "owner": "Central Forest Densification",
+            "reason": "根距不足2m: Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab|tree02_SceneTree|5.5336|-24.5918|357.000",
+            "position": {
+                "x": 6.175687789916992,
+                "y": -0.020085472613573076,
+                "z": -24.714340209960939
+            },
+            "scale": {
+                "x": 0.9193423986434937,
+                "y": 0.9193423986434937,
+                "z": 0.9193423986434937
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.39840662479400637,
+                "z": 0.0,
+                "w": -0.9172089099884033
+            },
+            "terrainPosition": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "terrainWidth": 0.0,
+            "terrainHeight": 0.0,
+            "terrainRotation": 0.0,
+            "terrainColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "terrainLightmapColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "radius": 0.6085577607154846,
+            "hardBranches": false
+        },
+        {
+            "key": "Scene|Assets/Environment/Vegetation/Trees/Prepared/Prefabs/BananaTree.prefab|BananaTree_0277|3.9876|-22.6948|20.225",
+            "kind": "Scene",
+            "name": "BananaTree_0277",
+            "prefab": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/BananaTree.prefab",
+            "parent": "Central Forest Densification/Stage 1",
+            "owner": "Central Forest Densification",
+            "reason": "根距不足2m: Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab|Sapling_1|4.4688|-22.6810|190.000",
+            "position": {
+                "x": 3.9876062870025636,
+                "y": 0.09544740617275238,
+                "z": -22.694805145263673
+            },
+            "scale": {
+                "x": 0.8431015014648438,
+                "y": 0.8431015014648438,
+                "z": 0.8431015014648438
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.1755775809288025,
+                "z": 0.0,
+                "w": 0.9844655990600586
+            },
+            "terrainPosition": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "terrainWidth": 0.0,
+            "terrainHeight": 0.0,
+            "terrainRotation": 0.0,
+            "terrainColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "terrainLightmapColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "radius": 0.3873783051967621,
+            "hardBranches": false
+        },
+        {
+            "key": "Scene|Assets/Environment/Vegetation/Trees/Prepared/Prefabs/BananaTree.prefab|BananaTree_0308|5.2284|-23.6661|221.650",
+            "kind": "Scene",
+            "name": "BananaTree_0308",
+            "prefab": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/BananaTree.prefab",
+            "parent": "Central Forest Densification/Stage 1",
+            "owner": "Central Forest Densification",
+            "reason": "根距不足2m: Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab|tree02_SceneTree|5.5336|-24.5918|357.000",
+            "position": {
+                "x": 5.228366374969482,
+                "y": 0.08562682569026947,
+                "z": -23.666118621826173
+            },
+            "scale": {
+                "x": 0.7714354991912842,
+                "y": 0.7714354991912842,
+                "z": 0.7714354991912842
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.9346696138381958,
+                "z": 0.0,
+                "w": -0.35551756620407107
+            },
+            "terrainPosition": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "terrainWidth": 0.0,
+            "terrainHeight": 0.0,
+            "terrainRotation": 0.0,
+            "terrainColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "terrainLightmapColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "radius": 0.3544500768184662,
+            "hardBranches": false
+        },
+        {
+            "key": "Scene|Assets/Environment/Vegetation/Trees/Prepared/Prefabs/FabTree_1.prefab|FabTree_1_0210|6.1706|-25.3389|87.581",
+            "kind": "Scene",
+            "name": "FabTree_1_0210",
+            "prefab": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/FabTree_1.prefab",
+            "parent": "Central Forest Densification/Stage 1",
+            "owner": "Central Forest Densification",
+            "reason": "根距不足2m: Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab|tree02_SceneTree|5.5336|-24.5918|357.000",
+            "position": {
+                "x": 6.170600891113281,
+                "y": -0.02008499577641487,
+                "z": -25.338884353637697
+            },
+            "scale": {
+                "x": 0.6723804473876953,
+                "y": 0.6723804473876953,
+                "z": 0.6723804473876953
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.6920260787010193,
+                "z": 0.0,
+                "w": 0.7218725681304932
+            },
+            "terrainPosition": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "terrainWidth": 0.0,
+            "terrainHeight": 0.0,
+            "terrainRotation": 0.0,
+            "terrainColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "terrainLightmapColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "radius": 0.7451096773147583,
+            "hardBranches": false
+        },
+        {
+            "key": "Scene|Assets/Environment/Vegetation/Trees/Prepared/Prefabs/FabTree_1.prefab|FabTree_1_0387|5.9338|-25.1570|134.304",
+            "kind": "Scene",
+            "name": "FabTree_1_0387",
+            "prefab": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/FabTree_1.prefab",
+            "parent": "Central Forest Densification/Stage 1",
+            "owner": "Central Forest Densification",
+            "reason": "根距不足2m: Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab|tree02_SceneTree|5.5336|-24.5918|357.000",
+            "position": {
+                "x": 5.933831214904785,
+                "y": -0.02008499577641487,
+                "z": -25.157039642333986
+            },
+            "scale": {
+                "x": 0.6574150323867798,
+                "y": 0.6574150323867798,
+                "z": 0.6574150323867798
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.9215376973152161,
+                "z": 0.0,
+                "w": 0.3882889151573181
+            },
+            "terrainPosition": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "terrainWidth": 0.0,
+            "terrainHeight": 0.0,
+            "terrainRotation": 0.0,
+            "terrainColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "terrainLightmapColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "radius": 0.7285255193710327,
+            "hardBranches": false
+        },
+        {
+            "key": "Scene|Assets/Environment/Vegetation/Trees/Prepared/Prefabs/FabTree_10.prefab|FabTree_10_Canopy_0_82|6.0846|-25.5993|158.260",
+            "kind": "Scene",
+            "name": "FabTree_10_Canopy_0_82",
+            "prefab": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/FabTree_10.prefab",
+            "parent": "Central Forest Densification/Stage 1/Route Canopy Anchors",
+            "owner": "Central Forest Densification",
+            "reason": "根距不足2m: Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab|tree02_SceneTree|5.5336|-24.5918|357.000",
+            "position": {
+                "x": 6.084625720977783,
+                "y": -0.020085472613573076,
+                "z": -25.599323272705079
+            },
+            "scale": {
+                "x": 0.6583844423294067,
+                "y": 0.6583844423294067,
+                "z": 0.6583844423294067
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.9820575714111328,
+                "z": 0.0,
+                "w": 0.18858134746551515
+            },
+            "terrainPosition": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "terrainWidth": 0.0,
+            "terrainHeight": 0.0,
+            "terrainRotation": 0.0,
+            "terrainColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "terrainLightmapColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "radius": 1.100000023841858,
+            "hardBranches": false
+        },
+        {
+            "key": "Scene|Assets/Environment/Vegetation/Trees/Prepared/Prefabs/FabTree_10.prefab|FabTree_10_Canopy_5_18|6.0941|-25.9092|89.740",
+            "kind": "Scene",
+            "name": "FabTree_10_Canopy_5_18",
+            "prefab": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/FabTree_10.prefab",
+            "parent": "Central Forest Densification/Stage 1/Route Canopy Anchors",
+            "owner": "Central Forest Densification",
+            "reason": "根距不足2m: Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab|tree02_SceneTree|5.5336|-24.5918|357.000",
+            "position": {
+                "x": 6.094141006469727,
+                "y": -0.020085472613573076,
+                "z": -25.909168243408204
+            },
+            "scale": {
+                "x": 0.6583844423294067,
+                "y": 0.6583844423294067,
+                "z": 0.6583844423294067
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.705500602722168,
+                "z": 0.0,
+                "w": 0.7087093591690064
+            },
+            "terrainPosition": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "terrainWidth": 0.0,
+            "terrainHeight": 0.0,
+            "terrainRotation": 0.0,
+            "terrainColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "terrainLightmapColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "radius": 1.100000023841858,
+            "hardBranches": false
+        },
+        {
+            "key": "Scene|Assets/Environment/Vegetation/Trees/Prepared/Prefabs/FabTree_5.prefab|FabTree_5_0246|6.3278|-25.4788|104.053",
+            "kind": "Scene",
+            "name": "FabTree_5_0246",
+            "prefab": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/FabTree_5.prefab",
+            "parent": "Central Forest Densification/Stage 1",
+            "owner": "Central Forest Densification",
+            "reason": "根距不足2m: Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab|tree02_SceneTree|5.5336|-24.5918|357.000",
+            "position": {
+                "x": 6.327785491943359,
+                "y": -0.02008499577641487,
+                "z": -25.478797912597658
+            },
+            "scale": {
+                "x": 0.5851858258247376,
+                "y": 0.5851858258247376,
+                "z": 0.5851858258247376
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.7882959246635437,
+                "z": 0.0,
+                "w": 0.6152963042259216
+            },
+            "terrainPosition": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "terrainWidth": 0.0,
+            "terrainHeight": 0.0,
+            "terrainRotation": 0.0,
+            "terrainColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "terrainLightmapColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "radius": 0.8169229030609131,
+            "hardBranches": false
+        },
+        {
+            "key": "Scene|Assets/Environment/Vegetation/Trees/Prepared/Prefabs/FabTree_5.prefab|FabTree_5_0338|6.3562|-25.7803|112.082",
+            "kind": "Scene",
+            "name": "FabTree_5_0338",
+            "prefab": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/FabTree_5.prefab",
+            "parent": "Central Forest Densification/Stage 1",
+            "owner": "Central Forest Densification",
+            "reason": "根距不足2m: Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab|tree02_SceneTree|5.5336|-24.5918|357.000",
+            "position": {
+                "x": 6.356242656707764,
+                "y": -0.02008499577641487,
+                "z": -25.780344009399415
+            },
+            "scale": {
+                "x": 0.6266264915466309,
+                "y": 0.6266264915466309,
+                "z": 0.6266264915466309
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.8294395804405212,
+                "z": 0.0,
+                "w": 0.5585964918136597
+            },
+            "terrainPosition": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "terrainWidth": 0.0,
+            "terrainHeight": 0.0,
+            "terrainRotation": 0.0,
+            "terrainColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "terrainLightmapColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "radius": 0.8747742772102356,
+            "hardBranches": false
+        },
+        {
+            "key": "Scene|Assets/Environment/Vegetation/Trees/Prepared/Prefabs/FabTree_5.prefab|FabTree_5_0354|5.8188|-24.4638|300.497",
+            "kind": "Scene",
+            "name": "FabTree_5_0354",
+            "prefab": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/FabTree_5.prefab",
+            "parent": "Central Forest Densification/Stage 1",
+            "owner": "Central Forest Densification",
+            "reason": "根距不足2m: Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab|tree02_SceneTree|5.5336|-24.5918|357.000",
+            "position": {
+                "x": 5.818751811981201,
+                "y": -0.02008499577641487,
+                "z": -24.46379280090332
+            },
+            "scale": {
+                "x": 0.5728298425674439,
+                "y": 0.5728298425674439,
+                "z": 0.5728298425674439
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.49623748660087588,
+                "z": 0.0,
+                "w": -0.8681868314743042
+            },
+            "terrainPosition": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "terrainWidth": 0.0,
+            "terrainHeight": 0.0,
+            "terrainRotation": 0.0,
+            "terrainColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "terrainLightmapColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "radius": 0.799673855304718,
+            "hardBranches": false
+        },
+        {
+            "key": "Scene|Assets/Environment/Vegetation/Trees/Prepared/Prefabs/IslandTree01.prefab|LocalTree_077|3.0684|-28.3386|21.225",
+            "kind": "Scene",
+            "name": "LocalTree_077",
+            "prefab": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/IslandTree01.prefab",
+            "parent": "Southeast Local Forest Repair",
+            "owner": "Southeast Local Forest Repair",
+            "reason": "0–3m木质间隔不足0.25m: Scene|Assets/Environment/Vegetation/Trees/Prepared/Prefabs/JacarandaTree.prefab|JacarandaTree_0317|1.5340|-29.9510|181.345",
+            "position": {
+                "x": 3.068434715270996,
+                "y": -0.017570633441209794,
+                "z": -28.33857536315918
+            },
+            "scale": {
+                "x": 1.0624264478683472,
+                "y": 1.0624264478683472,
+                "z": 1.0624264478683472
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.18416699767112733,
+                "z": 0.0,
+                "w": 0.9828949570655823
+            },
+            "terrainPosition": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "terrainWidth": 0.0,
+            "terrainHeight": 0.0,
+            "terrainRotation": 0.0,
+            "terrainColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "terrainLightmapColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "radius": 0.7437137961387634,
+            "hardBranches": false
+        },
+        {
+            "key": "Scene|Assets/Environment/Vegetation/Trees/Prepared/Prefabs/IslandTree02.prefab|IslandTree02_0236|6.0300|-25.3133|122.189",
+            "kind": "Scene",
+            "name": "IslandTree02_0236",
+            "prefab": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/IslandTree02.prefab",
+            "parent": "Central Forest Densification/Stage 1",
+            "owner": "Central Forest Densification",
+            "reason": "根距不足2m: Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab|tree02_SceneTree|5.5336|-24.5918|357.000",
+            "position": {
+                "x": 6.0299787521362309,
+                "y": 0.02517257258296013,
+                "z": -25.313255310058595
+            },
+            "scale": {
+                "x": 2.660360336303711,
+                "y": 2.660360336303711,
+                "z": 2.660360336303711
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.8754163384437561,
+                "z": 0.0,
+                "w": 0.4833696782588959
+            },
+            "terrainPosition": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "terrainWidth": 0.0,
+            "terrainHeight": 0.0,
+            "terrainRotation": 0.0,
+            "terrainColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "terrainLightmapColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "radius": 0.9970406889915466,
+            "hardBranches": false
+        },
+        {
+            "key": "Scene|Assets/Environment/Vegetation/Trees/Prepared/Prefabs/JacarandaTree.prefab|JacarandaTree_Canopy_0_50|3.6795|-25.9450|96.500",
+            "kind": "Scene",
+            "name": "JacarandaTree_Canopy_0_50",
+            "prefab": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/JacarandaTree.prefab",
+            "parent": "Central Forest Densification/Stage 1/Route Canopy Anchors",
+            "owner": "Central Forest Densification",
+            "reason": "0–3m木质间隔不足0.25m: Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab|Sapling_1|4.4688|-22.6810|190.000",
+            "position": {
+                "x": 3.6794681549072267,
+                "y": -0.04065718129277229,
+                "z": -25.945037841796876
+            },
+            "scale": {
+                "x": 0.9985024929046631,
+                "y": 0.9985024929046631,
+                "z": 0.9985024929046631
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.746057391166687,
+                "z": 0.0,
+                "w": 0.6658816933631897
+            },
+            "terrainPosition": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "terrainWidth": 0.0,
+            "terrainHeight": 0.0,
+            "terrainRotation": 0.0,
+            "terrainColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "terrainLightmapColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "radius": 0.8500000238418579,
+            "hardBranches": false
+        },
+        {
+            "key": "Scene|Assets/Environment/Vegetation/Trees/Prepared/Prefabs/JacarandaTree.prefab|JacarandaTree_Canopy_2_82|3.6099|-25.9732|324.260",
+            "kind": "Scene",
+            "name": "JacarandaTree_Canopy_2_82",
+            "prefab": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/JacarandaTree.prefab",
+            "parent": "Central Forest Densification/Stage 1/Route Canopy Anchors",
+            "owner": "Central Forest Densification",
+            "reason": "根距不足2m: Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab|tree02_0293|3.2040|-26.7596|77.600",
+            "position": {
+                "x": 3.609851837158203,
+                "y": -0.04065718129277229,
+                "z": -25.973194122314454
+            },
+            "scale": {
+                "x": 0.9985024929046631,
+                "y": 0.9985024929046631,
+                "z": 0.9985024929046631
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.30685827136039736,
+                "z": 0.0,
+                "w": -0.9517552256584168
+            },
+            "terrainPosition": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "terrainWidth": 0.0,
+            "terrainHeight": 0.0,
+            "terrainRotation": 0.0,
+            "terrainColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "terrainLightmapColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "radius": 0.8500000238418579,
+            "hardBranches": false
+        },
+        {
+            "key": "Scene|Assets/Environment/Vegetation/Trees/Prepared/Prefabs/Pachira_B.prefab|LocalTree_056|4.9646|-23.3634|260.541",
+            "kind": "Scene",
+            "name": "LocalTree_056",
+            "prefab": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/Pachira_B.prefab",
+            "parent": "Southeast Local Forest Repair",
+            "owner": "Southeast Local Forest Repair",
+            "reason": "根距不足2m: Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab|tree02_SceneTree|5.5336|-24.5918|357.000",
+            "position": {
+                "x": 4.964603424072266,
+                "y": 0.04076061770319939,
+                "z": -23.3634033203125
+            },
+            "scale": {
+                "x": 7.957923412322998,
+                "y": 7.957923412322998,
+                "z": 7.957923412322998
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.7630031704902649,
+                "z": 0.0,
+                "w": -0.6463947296142578
+            },
+            "terrainPosition": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "terrainWidth": 0.0,
+            "terrainHeight": 0.0,
+            "terrainRotation": 0.0,
+            "terrainColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "terrainLightmapColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "radius": 0.5849450826644898,
+            "hardBranches": false
+        },
+        {
+            "key": "Scene|Assets/Environment/Vegetation/Trees/Prepared/Prefabs/Pachira_B.prefab|Pachira_B_0149|2.4165|-28.6461|221.479",
+            "kind": "Scene",
+            "name": "Pachira_B_0149",
+            "prefab": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/Pachira_B.prefab",
+            "parent": "Central Forest Densification/Stage 1",
+            "owner": "Central Forest Densification",
+            "reason": "根距不足2m: Scene|Assets/Environment/Vegetation/Trees/Prepared/Prefabs/JacarandaTree.prefab|JacarandaTree_0317|1.5340|-29.9510|181.345",
+            "position": {
+                "x": 2.4165000915527345,
+                "y": 0.0432494692504406,
+                "z": -28.646121978759767
+            },
+            "scale": {
+                "x": 8.283422470092774,
+                "y": 8.283422470092774,
+                "z": 8.283422470092774
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.9352012276649475,
+                "z": 0.0,
+                "w": -0.3541167974472046
+            },
+            "terrainPosition": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "terrainWidth": 0.0,
+            "terrainHeight": 0.0,
+            "terrainRotation": 0.0,
+            "terrainColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "terrainLightmapColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "radius": 0.6088707447052002,
+            "hardBranches": false
+        },
+        {
+            "key": "Scene|Assets/Environment/Vegetation/Trees/Prepared/Prefabs/Pachira_B.prefab|Pachira_B_0193|5.7907|-23.9964|15.469",
+            "kind": "Scene",
+            "name": "Pachira_B_0193",
+            "prefab": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/Pachira_B.prefab",
+            "parent": "Central Forest Densification/Stage 1",
+            "owner": "Central Forest Densification",
+            "reason": "根距不足2m: Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab|tree02_SceneTree|5.5336|-24.5918|357.000",
+            "position": {
+                "x": 5.7906999588012699,
+                "y": 0.03759513422846794,
+                "z": -23.99634552001953
+            },
+            "scale": {
+                "x": 7.543933868408203,
+                "y": 7.543933868408203,
+                "z": 7.543933868408203
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.13458509743213654,
+                "z": 0.0,
+                "w": 0.9909020662307739
+            },
+            "terrainPosition": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "terrainWidth": 0.0,
+            "terrainHeight": 0.0,
+            "terrainRotation": 0.0,
+            "terrainColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "terrainLightmapColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "radius": 0.5545148849487305,
+            "hardBranches": false
+        },
+        {
+            "key": "Scene|Assets/Environment/Vegetation/Trees/Prepared/Prefabs/Pachira_B.prefab|Pachira_B_0194|7.1168|-25.9257|248.052",
+            "kind": "Scene",
+            "name": "Pachira_B_0194",
+            "prefab": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/Pachira_B.prefab",
+            "parent": "Central Forest Densification/Stage 1",
+            "owner": "Central Forest Densification",
+            "reason": "根距不足2m: Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree01.prefab|tree01_0202|7.0298|-26.1858|53.658",
+            "position": {
+                "x": 7.116765975952148,
+                "y": 0.042904239147901538,
+                "z": -25.925687789916993
+            },
+            "scale": {
+                "x": 8.238275527954102,
+                "y": 8.238275527954102,
+                "z": 8.238275527954102
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.8287824988365173,
+                "z": 0.0,
+                "w": -0.5595709085464478
+            },
+            "terrainPosition": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "terrainWidth": 0.0,
+            "terrainHeight": 0.0,
+            "terrainRotation": 0.0,
+            "terrainColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "terrainLightmapColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "radius": 0.6055522561073303,
+            "hardBranches": false
+        },
+        {
+            "key": "Scene|Assets/Environment/Vegetation/Trees/Prepared/Prefabs/Pachira_B.prefab|Pachira_B_0226|5.1838|-23.1807|69.438",
+            "kind": "Scene",
+            "name": "Pachira_B_0226",
+            "prefab": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/Pachira_B.prefab",
+            "parent": "Central Forest Densification/Stage 1",
+            "owner": "Central Forest Densification",
+            "reason": "根距不足2m: Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab|tree02_SceneTree|5.5336|-24.5918|357.000",
+            "position": {
+                "x": 5.183802604675293,
+                "y": 0.03331075236201286,
+                "z": -23.180662155151368
+            },
+            "scale": {
+                "x": 6.983604431152344,
+                "y": 6.983604431152344,
+                "z": 6.983604431152344
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.5695524215698242,
+                "z": 0.0,
+                "w": 0.8219550251960754
+            },
+            "terrainPosition": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "terrainWidth": 0.0,
+            "terrainHeight": 0.0,
+            "terrainRotation": 0.0,
+            "terrainColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "terrainLightmapColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "radius": 0.5133280158042908,
+            "hardBranches": false
+        },
+        {
+            "key": "Scene|Assets/Environment/Vegetation/Trees/Prepared/Prefabs/Pachira_B.prefab|Pachira_B_0233|5.3651|-24.7590|134.772",
+            "kind": "Scene",
+            "name": "Pachira_B_0233",
+            "prefab": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/Pachira_B.prefab",
+            "parent": "Central Forest Densification/Stage 1",
+            "owner": "Central Forest Densification",
+            "reason": "根距不足2m: Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab|tree02_SceneTree|5.5336|-24.5918|357.000",
+            "position": {
+                "x": 5.365083694458008,
+                "y": 0.043149810284376147,
+                "z": -24.75898551940918
+            },
+            "scale": {
+                "x": 8.270392417907715,
+                "y": 8.270392417907715,
+                "z": 8.270392417907715
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.9231160879135132,
+                "z": 0.0,
+                "w": 0.38452136516571047
+            },
+            "terrainPosition": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "terrainWidth": 0.0,
+            "terrainHeight": 0.0,
+            "terrainRotation": 0.0,
+            "terrainColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "terrainLightmapColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "radius": 0.6079130172729492,
+            "hardBranches": false
+        },
+        {
+            "key": "Scene|Assets/Environment/Vegetation/Trees/Prepared/Prefabs/Pachira_B.prefab|Pachira_B_0248|3.7558|-25.4676|172.456",
+            "kind": "Scene",
+            "name": "Pachira_B_0248",
+            "prefab": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/Pachira_B.prefab",
+            "parent": "Central Forest Densification/Stage 1",
+            "owner": "Central Forest Densification",
+            "reason": "根距不足2m: Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab|tree02_SceneTree|5.5336|-24.5918|357.000",
+            "position": {
+                "x": 3.755807876586914,
+                "y": 0.05027208849787712,
+                "z": -25.467571258544923
+            },
+            "scale": {
+                "x": 9.201851844787598,
+                "y": 9.201851844787598,
+                "z": 9.201851844787598
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.9978335499763489,
+                "z": 0.0,
+                "w": 0.06578895449638367
+            },
+            "terrainPosition": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "terrainWidth": 0.0,
+            "terrainHeight": 0.0,
+            "terrainRotation": 0.0,
+            "terrainColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "terrainLightmapColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "radius": 0.6763796806335449,
+            "hardBranches": false
+        },
+        {
+            "key": "Scene|Assets/Environment/Vegetation/Trees/Prepared/Prefabs/Pachira_B.prefab|Pachira_B_0269|3.5046|-25.2416|87.657",
+            "kind": "Scene",
+            "name": "Pachira_B_0269",
+            "prefab": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/Pachira_B.prefab",
+            "parent": "Central Forest Densification/Stage 1",
+            "owner": "Central Forest Densification",
+            "reason": "0–3m木质间隔不足0.25m: Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab|Sapling_1|4.4688|-22.6810|190.000",
+            "position": {
+                "x": 3.504589080810547,
+                "y": 0.03265438601374626,
+                "z": -25.24155616760254
+            },
+            "scale": {
+                "x": 6.897764205932617,
+                "y": 6.897764205932617,
+                "z": 6.897764205932617
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.6924993395805359,
+                "z": 0.0,
+                "w": 0.7214184999465942
+            },
+            "terrainPosition": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "terrainWidth": 0.0,
+            "terrainHeight": 0.0,
+            "terrainRotation": 0.0,
+            "terrainColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "terrainLightmapColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "radius": 0.5070183277130127,
+            "hardBranches": false
+        },
+        {
+            "key": "Scene|Assets/Environment/Vegetation/Trees/Prepared/Prefabs/Pachira_B.prefab|Pachira_B_0288|3.8092|-24.6957|341.822",
+            "kind": "Scene",
+            "name": "Pachira_B_0288",
+            "prefab": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/Pachira_B.prefab",
+            "parent": "Central Forest Densification/Stage 1",
+            "owner": "Central Forest Densification",
+            "reason": "根距不足2m: Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab|tree02_SceneTree|5.5336|-24.5918|357.000",
+            "position": {
+                "x": 3.809232711791992,
+                "y": 0.03648863360285759,
+                "z": -24.695682525634767
+            },
+            "scale": {
+                "x": 7.3991804122924809,
+                "y": 7.3991804122924809,
+                "z": 7.3991804122924809
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.15797244012355805,
+                "z": 0.0,
+                "w": -0.9874435663223267
+            },
+            "terrainPosition": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "terrainWidth": 0.0,
+            "terrainHeight": 0.0,
+            "terrainRotation": 0.0,
+            "terrainColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "terrainLightmapColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "radius": 0.5438748002052307,
+            "hardBranches": false
+        },
+        {
+            "key": "Scene|Assets/Environment/Vegetation/Trees/Prepared/Prefabs/Pachira_B.prefab|Pachira_B_0302|4.3767|-23.3564|194.126",
+            "kind": "Scene",
+            "name": "Pachira_B_0302",
+            "prefab": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/Pachira_B.prefab",
+            "parent": "Central Forest Densification/Stage 1",
+            "owner": "Central Forest Densification",
+            "reason": "根距不足2m: Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab|tree02_SceneTree|5.5336|-24.5918|357.000",
+            "position": {
+                "x": 4.376666069030762,
+                "y": 0.04857788607478142,
+                "z": -23.356386184692384
+            },
+            "scale": {
+                "x": 8.980299949645996,
+                "y": 8.980299949645996,
+                "z": 8.980299949645996
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.9924111366271973,
+                "z": 0.0,
+                "w": -0.1229642853140831
+            },
+            "terrainPosition": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "terrainWidth": 0.0,
+            "terrainHeight": 0.0,
+            "terrainRotation": 0.0,
+            "terrainColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "terrainLightmapColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "radius": 0.6600946187973023,
+            "hardBranches": false
+        },
+        {
+            "key": "Scene|Assets/Environment/Vegetation/Trees/Prepared/Prefabs/Pachira_B.prefab|Pachira_B_0321|5.9362|-24.8707|135.864",
+            "kind": "Scene",
+            "name": "Pachira_B_0321",
+            "prefab": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/Pachira_B.prefab",
+            "parent": "Central Forest Densification/Stage 1",
+            "owner": "Central Forest Densification",
+            "reason": "根距不足2m: Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab|tree02_SceneTree|5.5336|-24.5918|357.000",
+            "position": {
+                "x": 5.936219215393066,
+                "y": 0.038885217159986499,
+                "z": -24.870651245117189
+            },
+            "scale": {
+                "x": 7.712640762329102,
+                "y": 7.712640762329102,
+                "z": 7.712640762329102
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.9267399907112122,
+                "z": 0.0,
+                "w": 0.37570327520370486
+            },
+            "terrainPosition": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "terrainWidth": 0.0,
+            "terrainHeight": 0.0,
+            "terrainRotation": 0.0,
+            "terrainColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "terrainLightmapColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "radius": 0.5669156312942505,
+            "hardBranches": false
+        },
+        {
+            "key": "Scene|Assets/Environment/Vegetation/Trees/Prepared/Prefabs/Pachira_B.prefab|Pachira_B_0364|4.3871|-22.5276|246.824",
+            "kind": "Scene",
+            "name": "Pachira_B_0364",
+            "prefab": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/Pachira_B.prefab",
+            "parent": "Central Forest Densification/Stage 1",
+            "owner": "Central Forest Densification",
+            "reason": "根距不足2m: Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab|Sapling_1|4.4688|-22.6810|190.000",
+            "position": {
+                "x": 4.387077331542969,
+                "y": 0.0423799566924572,
+                "z": -22.527568817138673
+            },
+            "scale": {
+                "x": 8.16972541809082,
+                "y": 8.16972541809082,
+                "z": 8.16972541809082
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.8347305059432983,
+                "z": 0.0,
+                "w": -0.5506587028503418
+            },
+            "terrainPosition": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "terrainWidth": 0.0,
+            "terrainHeight": 0.0,
+            "terrainRotation": 0.0,
+            "terrainColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "terrainLightmapColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "radius": 0.6005135178565979,
+            "hardBranches": false
+        },
+        {
+            "key": "Scene|Assets/Environment/Vegetation/Trees/Prepared/Prefabs/TreeSmall02.prefab|LocalTree_005|6.3251|-24.4164|208.550",
+            "kind": "Scene",
+            "name": "LocalTree_005",
+            "prefab": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/TreeSmall02.prefab",
+            "parent": "Southeast Local Forest Repair",
+            "owner": "Southeast Local Forest Repair",
+            "reason": "根距不足2m: Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab|tree02_SceneTree|5.5336|-24.5918|357.000",
+            "position": {
+                "x": 6.325103759765625,
+                "y": -0.019292492419481279,
+                "z": -24.416370391845704
+            },
+            "scale": {
+                "x": 0.8987743258476257,
+                "y": 0.8987743258476257,
+                "z": 0.8987743258476257
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.9691232442855835,
+                "z": 0.0,
+                "w": -0.24657678604125977
+            },
+            "terrainPosition": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "terrainWidth": 0.0,
+            "terrainHeight": 0.0,
+            "terrainRotation": 0.0,
+            "terrainColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "terrainLightmapColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "radius": 0.40487685799598696,
+            "hardBranches": false
+        },
+        {
+            "key": "Scene|Assets/Environment/Vegetation/Trees/Prepared/Prefabs/TreeSmall02.prefab|LocalTree_018|4.3898|-23.0457|211.401",
+            "kind": "Scene",
+            "name": "LocalTree_018",
+            "prefab": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/TreeSmall02.prefab",
+            "parent": "Southeast Local Forest Repair",
+            "owner": "Southeast Local Forest Repair",
+            "reason": "根距不足2m: Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab|tree02_SceneTree|5.5336|-24.5918|357.000",
+            "position": {
+                "x": 4.389835357666016,
+                "y": -0.019148487597703935,
+                "z": -23.045705795288087
+            },
+            "scale": {
+                "x": 1.061983346939087,
+                "y": 1.061983346939087,
+                "z": 1.061983346939087
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.9626896381378174,
+                "z": 0.0,
+                "w": -0.27060797810554507
+            },
+            "terrainPosition": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "terrainWidth": 0.0,
+            "terrainHeight": 0.0,
+            "terrainRotation": 0.0,
+            "terrainColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "terrainLightmapColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "radius": 0.47839874029159548,
+            "hardBranches": false
+        },
+        {
+            "key": "Scene|Assets/Environment/Vegetation/Trees/Prepared/Prefabs/TreeSmall02.prefab|LocalTree_024|6.9471|-25.6480|224.745",
+            "kind": "Scene",
+            "name": "LocalTree_024",
+            "prefab": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/TreeSmall02.prefab",
+            "parent": "Southeast Local Forest Repair",
+            "owner": "Southeast Local Forest Repair",
+            "reason": "根距不足2m: Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab|tree02_SceneTree|5.5336|-24.5918|357.000",
+            "position": {
+                "x": 6.947072982788086,
+                "y": -0.019249577075242997,
+                "z": -25.64799690246582
+            },
+            "scale": {
+                "x": 0.9474442005157471,
+                "y": 0.9474442005157471,
+                "z": 0.9474442005157471
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.9247304201126099,
+                "z": 0.0,
+                "w": -0.3806227147579193
+            },
+            "terrainPosition": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "terrainWidth": 0.0,
+            "terrainHeight": 0.0,
+            "terrainRotation": 0.0,
+            "terrainColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "terrainLightmapColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "radius": 0.42680150270462038,
+            "hardBranches": false
+        },
+        {
+            "key": "Scene|Assets/Environment/Vegetation/Trees/Prepared/Prefabs/TreeSmall02.prefab|TreeSmall02_0135|4.0481|-23.0701|165.898",
+            "kind": "Scene",
+            "name": "TreeSmall02_0135",
+            "prefab": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/TreeSmall02.prefab",
+            "parent": "Central Forest Densification/Stage 1",
+            "owner": "Central Forest Densification",
+            "reason": "0–3m木质间隔不足0.25m: Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab|tree02_SceneTree|5.5336|-24.5918|357.000",
+            "position": {
+                "x": 4.048074245452881,
+                "y": -0.019110340625047685,
+                "z": -23.07006072998047
+            },
+            "scale": {
+                "x": 1.1051472425460816,
+                "y": 1.1051472425460816,
+                "z": 1.1051472425460816
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.9924374222755432,
+                "z": 0.0,
+                "w": 0.12275159358978272
+            },
+            "terrainPosition": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "terrainWidth": 0.0,
+            "terrainHeight": 0.0,
+            "terrainRotation": 0.0,
+            "terrainColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "terrainLightmapColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "radius": 0.49784302711486819,
+            "hardBranches": false
+        },
+        {
+            "key": "Scene|Assets/Environment/Vegetation/Trees/Prepared/Prefabs/TreeSmall02.prefab|TreeSmall02_0165|3.4995|-24.8708|209.042",
+            "kind": "Scene",
+            "name": "TreeSmall02_0165",
+            "prefab": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/TreeSmall02.prefab",
+            "parent": "Central Forest Densification/Stage 1",
+            "owner": "Central Forest Densification",
+            "reason": "0–3m木质间隔不足0.25m: Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab|Sapling_1|4.4688|-22.6810|190.000",
+            "position": {
+                "x": 3.4995217323303224,
+                "y": -0.019267696887254716,
+                "z": -24.870807647705079
+            },
+            "scale": {
+                "x": 0.9270181655883789,
+                "y": 0.9270181655883789,
+                "z": 0.9270181655883789
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.9680566191673279,
+                "z": 0.0,
+                "w": -0.2507316768169403
+            },
+            "terrainPosition": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "terrainWidth": 0.0,
+            "terrainHeight": 0.0,
+            "terrainRotation": 0.0,
+            "terrainColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "terrainLightmapColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "radius": 0.4176000654697418,
+            "hardBranches": false
+        },
+        {
+            "key": "Scene|Assets/Environment/Vegetation/Trees/Prepared/Prefabs/TreeSmall02.prefab|TreeSmall02_0176|3.7659|-24.7382|33.495",
+            "kind": "Scene",
+            "name": "TreeSmall02_0176",
+            "prefab": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/TreeSmall02.prefab",
+            "parent": "Central Forest Densification/Stage 1",
+            "owner": "Central Forest Densification",
+            "reason": "根距不足2m: Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab|tree02_SceneTree|5.5336|-24.5918|357.000",
+            "position": {
+                "x": 3.7659358978271486,
+                "y": -0.019112247973680497,
+                "z": -24.738155364990236
+            },
+            "scale": {
+                "x": 1.1029163599014283,
+                "y": 1.1029163599014283,
+                "z": 1.1029163599014283
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.2881565988063812,
+                "z": 0.0,
+                "w": 0.9575833082199097
+            },
+            "terrainPosition": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "terrainWidth": 0.0,
+            "terrainHeight": 0.0,
+            "terrainRotation": 0.0,
+            "terrainColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "terrainLightmapColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "radius": 0.4968380630016327,
+            "hardBranches": false
+        },
+        {
+            "key": "Scene|Assets/Environment/Vegetation/Trees/Prepared/Prefabs/TreeSmall02.prefab|TreeSmall02_0255|2.4462|-28.3947|308.225",
+            "kind": "Scene",
+            "name": "TreeSmall02_0255",
+            "prefab": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/TreeSmall02.prefab",
+            "parent": "Central Forest Densification/Stage 1",
+            "owner": "Central Forest Densification",
+            "reason": "根距不足2m: Scene|Assets/Environment/Vegetation/Trees/Prepared/Prefabs/JacarandaTree.prefab|JacarandaTree_0317|1.5340|-29.9510|181.345",
+            "position": {
+                "x": 2.446239471435547,
+                "y": -0.019150394946336747,
+                "z": -28.394668579101564
+            },
+            "scale": {
+                "x": 1.0598288774490357,
+                "y": 1.0598288774490357,
+                "z": 1.0598288774490357
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.43660688400268557,
+                "z": 0.0,
+                "w": -0.8996524214744568
+            },
+            "terrainPosition": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "terrainWidth": 0.0,
+            "terrainHeight": 0.0,
+            "terrainRotation": 0.0,
+            "terrainColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "terrainLightmapColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "radius": 0.4774281978607178,
+            "hardBranches": false
+        },
+        {
+            "key": "Scene|Assets/Environment/Vegetation/Trees/Prepared/Prefabs/TreeSmall02.prefab|TreeSmall02_0278|5.4522|-23.9262|225.267",
+            "kind": "Scene",
+            "name": "TreeSmall02_0278",
+            "prefab": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/TreeSmall02.prefab",
+            "parent": "Central Forest Densification/Stage 1",
+            "owner": "Central Forest Densification",
+            "reason": "根距不足2m: Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab|tree02_SceneTree|5.5336|-24.5918|357.000",
+            "position": {
+                "x": 5.452218532562256,
+                "y": -0.019148964434862138,
+                "z": -23.926225662231447
+            },
+            "scale": {
+                "x": 1.0613834857940674,
+                "y": 1.0613834857940674,
+                "z": 1.0613834857940674
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.9229869246482849,
+                "z": 0.0,
+                "w": -0.3848313093185425
+            },
+            "terrainPosition": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "terrainWidth": 0.0,
+            "terrainHeight": 0.0,
+            "terrainRotation": 0.0,
+            "terrainColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "terrainLightmapColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "radius": 0.47812846302986147,
+            "hardBranches": false
+        },
+        {
+            "key": "Scene|Assets/Environment/Vegetation/Trees/Prepared/Prefabs/TreeSmall02.prefab|TreeSmall02_0330|5.5028|-23.7875|218.246",
+            "kind": "Scene",
+            "name": "TreeSmall02_0330",
+            "prefab": "Assets/Environment/Vegetation/Trees/Prepared/Prefabs/TreeSmall02.prefab",
+            "parent": "Central Forest Densification/Stage 1",
+            "owner": "Central Forest Densification",
+            "reason": "根距不足2m: Scene|Assets/ThirdParty/NatureStarterKit2/Nature/tree02.prefab|tree02_SceneTree|5.5336|-24.5918|357.000",
+            "position": {
+                "x": 5.50284481048584,
+                "y": -0.01935400441288948,
+                "z": -23.787494659423829
+            },
+            "scale": {
+                "x": 0.8290283679962158,
+                "y": 0.8290283679962158,
+                "z": 0.8290283679962158
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.9448167681694031,
+                "z": 0.0,
+                "w": -0.32759925723075869
+            },
+            "terrainPosition": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "terrainWidth": 0.0,
+            "terrainHeight": 0.0,
+            "terrainRotation": 0.0,
+            "terrainColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "terrainLightmapColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "radius": 0.3734579384326935,
+            "hardBranches": false
+        }
+    ]
+}

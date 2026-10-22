@@ -14,11 +14,13 @@ namespace JurassicWorld
         // retry clocks or the recovery exemptions. Kept private to avoid a public debug API.
         private bool ForestStaticClippingAllowed => IsSteppingTurn && (stepTurnUse == TurnUse.Wander || stepTurnUse == TurnUse.FrontRecovery)
             || frontActive && frontAction != null && !frontPeerClearing;
-        private string ForestCollisionStage => ForestStaticClippingAllowed ? (IsSteppingTurn ? "Wander performance" : "Interaction performance")
+        private string ForestCollisionStage => emergencyEscapeActive ? "Emergency escape (obstacles ignored)"
+            : ForestStaticClippingAllowed ? (IsSteppingTurn ? "Wander performance" : "Interaction performance")
             : (freeRecoveryActive && !frontActive || frontRecoveryActive) ? "Recovery" : frontActive ? "Interaction travel / wait" : "Ordinary travel / idle";
 
         private string ForestCollisionFailure(bool spawning, float previousBoundary, float previousNavDistance)
         {
+            if (!spawning && emergencyEscapeActive) return null;
             if (interactionSettings == null || interactionBody == null) return "Missing collision data";
             bool performance = !spawning && ForestStaticClippingAllowed;
             bool recovery = !spawning && !performance && (freeRecoveryActive && !frontActive || frontRecoveryActive);
