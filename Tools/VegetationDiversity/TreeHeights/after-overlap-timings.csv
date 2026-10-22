@@ -1,0 +1,5 @@
+view,camera_render_cpu_median_ms,draw_calls_median,gpu_available_samples,gpu_median_ms
+0,14.7085,0,0,unavailable
+1,14.8833,0,0,unavailable
+2,17.1683,0,0,unavailable
+3,12.2524,0,0,unavailable

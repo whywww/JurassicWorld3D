@@ -85737,7 +85737,7 @@ MonoBehaviour:
       yaw: -90.75435
       authoredYaw: 0.7543926
     blendDuration: 0.12
-    turnPlaybackSpeed: 0.2
+    turnPlaybackSpeed: 1
     bodyBands:
     - layer: 3
       bounds:
@@ -114344,7 +114344,7 @@ MonoBehaviour:
       yaw: 90.43273
       authoredYaw: -0.4327464
     blendDuration: 0.12
-    turnPlaybackSpeed: 0.2
+    turnPlaybackSpeed: 1
     bodyBands:
     - layer: 3
       bounds:

@@ -18,7 +18,7 @@ namespace JurassicWorld.Editor
         internal const string EnabledPath = "Assets/Editor/RainforestSampleEnabled.json";
         internal static readonly Rect Area = Rect.MinMaxRect(-25f, -10f, 25f, 45f);
         private const int Seed = 731716;
-        private sealed class ReservedPose
+        internal sealed class ReservedPose
         {
             internal Vector2 position, forward;
             internal DinosaurCoreBody body;
@@ -83,11 +83,11 @@ namespace JurassicWorld.Editor
             var root = GameObject.Find(RootName); if (root != null) Object.DestroyImmediate(root);
             TerrainTreeObstacleRegistry.Invalidate();
         }
-        internal static void RebuildNavigation()
+        internal static void RebuildNavigation(string navigationPath = null)
         {
             var rex = Object.FindObjectsOfType<DinosaurAgent>().Single(a => a.name == "Tyrannosaurus Rex");
             var body = new SerializedObject(rex).FindProperty("interactionBody").objectReferenceValue as DinosaurCoreBody;
-            TRexInteractionBake.RebuildObstaclesAndNavigation(Object.FindObjectOfType<DinosaurInteractionSettings>(), body);
+            TRexInteractionBake.RebuildObstaclesAndNavigation(Object.FindObjectOfType<DinosaurInteractionSettings>(), body, navigationPath);
         }
 
         private static List<Stem> Stems(Terrain terrain)
@@ -263,7 +263,7 @@ namespace JurassicWorld.Editor
             RebuildNavigation();
         }
 
-        private static List<ReservedPose> PerformancePoses(DinosaurInteractionProfile profile, Vector3 origin, Quaternion rotation, float yaw, Transform parent)
+        internal static List<ReservedPose> PerformancePoses(DinosaurInteractionProfile profile, Vector3 origin, Quaternion rotation, float yaw, Transform parent)
         {
             var result = new List<ReservedPose>();
             var introductions = new[] {
@@ -304,7 +304,7 @@ namespace JurassicWorld.Editor
             }
             return result;
         }
-        private static bool BlockedBy(List<ReservedPose> poses, Vector2 p, float radius, float bottom = -100f, float top = 100f)
+        internal static bool BlockedBy(List<ReservedPose> poses, Vector2 p, float radius, float bottom = -100f, float top = 100f)
             => poses.Any(pose => pose.body.Intersects(pose.position, pose.forward,
                 new TreeTrunkSection { center = p, radius = radius, bottom = bottom, top = top }));
         private static IEnumerable<Vector2> Grid(float step)
@@ -344,7 +344,7 @@ namespace JurassicWorld.Editor
         private static Vector2 XZ(Vector3 p) => new Vector2(p.x, p.z);
         internal static string Signature() => string.Join("\n", GameObject.Find(RootName).GetComponentsInChildren<Transform>(true)
             .Select(t => t.name + t.position.ToString("F6") + t.rotation.ToString("F6") + t.lossyScale.ToString("F6")));
-        private sealed class Snapshot
+        internal sealed class Snapshot
         {
             private readonly TerrainData data = Terrain.activeTerrain.terrainData;
             private readonly TreeInstance[] trees = Terrain.activeTerrain.terrainData.treeInstances;

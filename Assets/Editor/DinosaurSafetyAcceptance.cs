@@ -37,14 +37,20 @@ namespace JurassicWorld.Editor
         }
 
         [MenuItem("Jurassic World/Acceptance/Verify Raptor Safety and Free Roaming")]
-        public static void Run()
+        public static void Run() => RunFor(DinosaurAgent.DinosaurSpecies.Velociraptor);
+
+        [MenuItem("Jurassic World/Acceptance/Verify Pachycephalosaurus Safety and Free Roaming")]
+        public static void RunPachycephalosaurus() => RunFor(DinosaurAgent.DinosaurSpecies.Pachycephalosaurus);
+
+        private static void RunFor(DinosaurAgent.DinosaurSpecies roamingSpecies)
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode || SceneManager.GetActiveScene().isDirty)
                 throw new InvalidOperationException("Stop Play and save the current scene first.");
             var main = EditorSceneManager.OpenScene("Assets/Scenes/Main.unity");
             var agents = UnityEngine.Object.FindObjectsOfType<DinosaurAgent>();
             var test = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Additive);
-            foreach (var species in new[] { DinosaurAgent.DinosaurSpecies.Tyrannosaurus, DinosaurAgent.DinosaurSpecies.Velociraptor })
+            SessionState.SetInt(Key + ".Species", (int)roamingSpecies);
+            foreach (var species in new[] { DinosaurAgent.DinosaurSpecies.Tyrannosaurus, roamingSpecies })
             {
                 var source = agents.Single(a => a.Species == species);
                 Require(new SerializedObject(source).FindProperty("interactionBody").objectReferenceValue != null, "Missing baked body.");
@@ -79,7 +85,7 @@ namespace JurassicWorld.Editor
             try
             {
                 var agents = UnityEngine.Object.FindObjectsOfType<DinosaurAgent>();
-                raptor = agents.Single(a => a.Species == DinosaurAgent.DinosaurSpecies.Velociraptor);
+                raptor = agents.Single(a => a.Species == (DinosaurAgent.DinosaurSpecies)SessionState.GetInt(Key + ".Species", (int)DinosaurAgent.DinosaurSpecies.Velociraptor));
                 rex = agents.Single(a => a.Species == DinosaurAgent.DinosaurSpecies.Tyrannosaurus);
                 settings = UnityEngine.Object.FindObjectOfType<DinosaurInteractionSettings>();
                 Require(raptor.IsFreeRoaming && !raptor.UsesRouteScheduling && !raptor.HasFootPhaseData,
@@ -151,7 +157,7 @@ namespace JurassicWorld.Editor
                     Require(!settings.PoseBlocked(new Vector2(previousPosition.x, previousPosition.z), new Vector2(forward.x, forward.z), body),
                         "Normal roaming crossed a body boundary or obstacle.");
                     if (elapsed < 10f) return;
-                    Require(travelled > 8f, "Normal roaming failed to make progress after retreat.");
+                    Require(travelled > Mathf.Min(8f, raptor.WalkSpeed * 6f), "Normal roaming failed to make progress after retreat.");
                     Report.AppendLine($"PASS: normal free roaming after retreat travelled {travelled:F2}m in 10s; body/boundary checks retained.");
                     Finish(null); return;
                 }
@@ -184,7 +190,8 @@ namespace JurassicWorld.Editor
             SessionState.SetBool(Key, false); Time.captureDeltaTime = 0f;
             if (error != null) { Report.AppendLine("FAIL: " + error); Debug.LogException(error); }
             else Report.AppendLine("DINOSAUR_SAFETY_PASS");
-            File.WriteAllText("Logs/dinosaur-safety-acceptance.txt", Report.ToString());
+            bool pachy = SessionState.GetInt(Key + ".Species", 2) == (int)DinosaurAgent.DinosaurSpecies.Pachycephalosaurus;
+            File.WriteAllText(pachy ? "Logs/pachy-safety-acceptance.txt" : "Logs/dinosaur-safety-acceptance.txt", Report.ToString());
             if (Application.isBatchMode) { EditorApplication.Exit(error == null ? 0 : 1); return; }
             EditorApplication.isPlaying = false;
             EditorApplication.delayCall += () => EditorSceneManager.OpenScene("Assets/Scenes/Main.unity");

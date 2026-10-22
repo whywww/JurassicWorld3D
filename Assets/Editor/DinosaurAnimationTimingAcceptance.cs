@@ -14,7 +14,7 @@ namespace JurassicWorld.Editor
     // Isolated motion timing in Play, with the production pose checks and foot solver.
     // No automatic behaviour selection: advance one selected action per simulated frame.
     [InitializeOnLoad]
-    public static class DinosaurAnimationTimingAcceptance
+    public static partial class DinosaurAnimationTimingAcceptance
     {
         private const string Key = "JurassicWorld.AnimationTiming";
         private const BindingFlags Flags = BindingFlags.Instance | BindingFlags.NonPublic;
@@ -86,6 +86,7 @@ namespace JurassicWorld.Editor
         }
         private static void Prepare()
         {
+            if (SessionState.GetBool(Key + ".Turns", false)) { PrepareTurnScenario(); return; }
             if ((bool)Get("frontActive")) Call("FinishFrontInteraction");
             Call("ClearSteppingTurn"); Set("peers", new[] { rex });
             Set("frontTestControlled", true); Set("frontTestWaiting", true);
@@ -124,6 +125,7 @@ namespace JurassicWorld.Editor
         {
             if (!EditorApplication.isPlaying || Time.frameCount == lastFrame) return;
             lastFrame = Time.frameCount;
+            if (SessionState.GetBool(Key + ".Turns", false)) { TickTurnScenario(); return; }
             try
             {
                 Require(EditorApplication.timeSinceStartup < deadline, "Timing test wall timeout.");
@@ -164,8 +166,10 @@ namespace JurassicWorld.Editor
             encoder?.Dispose(); encoder = null; Time.captureDeltaTime = 0f; Time.timeScale = 1f;
             if (target != null) { if (camera != null) camera.targetTexture = null; target.Release(); Object.DestroyImmediate(target); }
             if (frame != null) Object.DestroyImmediate(frame);
-            string result = error == null ? "PASS ANIMATION_TIMING" : "FAILED " + error;
-            File.WriteAllText(RainforestSample.Output + "/AnimationTimingAfter.md", result + "\n\n" + Report);
+            bool turns = SessionState.GetBool(Key + ".Turns", false);
+            SessionState.SetBool(Key + ".Turns", false);
+            string result = error == null ? (turns ? "PASS TURN_SYNCHRONIZATION" : "PASS ANIMATION_TIMING") : "FAILED " + error;
+            File.WriteAllText(RainforestSample.Output + (turns ? "/TurnSynchronization.md" : "/AnimationTimingAfter.md"), result + "\n\n" + Report);
             File.WriteAllText("Logs/rainforest-status.txt", result);
             if (error == null) Debug.Log(result); else Debug.LogException(error);
             if (Application.isBatchMode) EditorApplication.Exit(error == null ? 0 : 1); else EditorApplication.isPlaying = false;

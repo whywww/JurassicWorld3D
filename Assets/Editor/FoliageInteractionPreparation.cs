@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -56,7 +56,12 @@ namespace JurassicWorld.Editor
             ValidateCurrent();
             Debug.Log("FOLIAGE_SCENE_VALID: tree ledger, mesh streams and material references are intact.");
         }
-        internal static void SeedConfigured() { if (File.Exists(EnabledPath)) PrepareCurrent(); }
+        internal static void SeedConfigured()
+        {
+            TreeOverlapCleanup.SeedConfigured();
+            TreeHeightAdjustment.SeedConfigured();
+            if (File.Exists(EnabledPath)) PrepareCurrent();
+        }
         private static void Save()
         {
             EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
@@ -442,6 +447,17 @@ namespace JurassicWorld.Editor
         {
             var interactor = agent.GetComponent<DinosaurFoliageInteractor>() ?? agent.gameObject.AddComponent<DinosaurFoliageInteractor>();
             var capsules = new List<DinosaurFoliageInteractor.Capsule>();
+            // These vendors use numeric bone names for spine/neck and tail chains.
+            string[] explicitBody = agent.Species == DinosaurAgent.DinosaurSpecies.Sauropelta
+                ? new[] { "Bone", "Bone.001", "Bone.002", "Bone.003", "Bone.004", "Bone.005", "Bone.006", "Bone.015", "Bone.016", "Bone.017" }
+                : agent.Species == DinosaurAgent.DinosaurSpecies.Baurusuchus
+                ? new[] { "Bone", "Bone.001", "Bone.002", "Bone.003", "Bone.004", "Bone.012", "Bone.013", "Bone.014", "Bone.015", "Bone.016", "Bone.017", "Bone.018", "Bone.019", "Bone.020", "Bone.021" }
+                : Array.Empty<string>();
+            string[] explicitTail = agent.Species == DinosaurAgent.DinosaurSpecies.Sauropelta
+                ? Enumerable.Range(7, 8).Select(i => "Bone." + i.ToString("000")).ToArray()
+                : agent.Species == DinosaurAgent.DinosaurSpecies.Baurusuchus
+                ? Enumerable.Range(5, 7).Select(i => "Bone." + i.ToString("000")).ToArray()
+                : Array.Empty<string>();
             foreach (SkinnedMeshRenderer skin in agent.GetComponentsInChildren<SkinnedMeshRenderer>(true))
             {
                 Mesh mesh = skin.sharedMesh;
@@ -453,7 +469,8 @@ namespace JurassicWorld.Editor
                     if (bone == null) continue;
                     string name = bone.name.ToLowerInvariant();
                     if (!(name.Contains("tail") || name.Contains("spine") || name.Contains("hips") || name.Contains("pelvis") ||
-                        name.Contains("chest") || name.Contains("breast") || name.Contains("neck") || name.Contains("head") || name == "root")) continue;
+                        name.Contains("chest") || name.Contains("breast") || name.Contains("neck") || name.Contains("head") || name == "root"
+                        || explicitBody.Contains(bone.name) || explicitTail.Contains(bone.name))) continue;
                     Bounds bounds = new Bounds(); bool first = true;
                     for (int i = 0; i < vertices.Length && i < weights.Length; i++)
                     {
@@ -475,7 +492,7 @@ namespace JurassicWorld.Editor
                         end = bounds.center + direction * length, radius = Mathf.Max(.025f, radial * boneScale) });
                 }
             }
-            if (capsules.Count == 0 || !capsules.Any(c => c.bone.name.IndexOf("tail", StringComparison.OrdinalIgnoreCase) >= 0))
+            if (capsules.Count == 0 || !capsules.Any(c => c.bone.name.IndexOf("tail", StringComparison.OrdinalIgnoreCase) >= 0 || explicitTail.Contains(c.bone.name)))
                 throw new InvalidOperationException("Body and tail bone profile required for " + agent.name);
             interactor.capsules = capsules.ToArray(); interactor.animationEnvelope = MeasureAnimationEnvelope(agent);
             EditorUtility.SetDirty(interactor);
@@ -501,7 +518,7 @@ namespace JurassicWorld.Editor
                         state.clip.SampleAnimation(animation.gameObject, state.length * sample / 12f);
                         foreach (SkinnedMeshRenderer skin in clone.GetComponentsInChildren<SkinnedMeshRenderer>(true))
                         {
-                            skin.BakeMesh(baked);
+                            SauropeltaMeshSampling.Bake(skin, baked);
                             IncludeBounds(ref result, ref first, baked.bounds, holder.transform.worldToLocalMatrix * skin.transform.localToWorldMatrix);
                         }
                     }

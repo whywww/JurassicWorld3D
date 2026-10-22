@@ -141,7 +141,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--fbx", type=Path,
                         default=Path(__file__).resolve().parent.parent /
-                        "Assets/Resources/Dinosaurs/TRex/source/T-Rex.fbx",
+                        "Assets/Dinosaurs/TRex/Source/source/T-Rex.fbx",
                         help="FBX input (default: project T-Rex asset)")
     fbx_path = parser.parse_args().fbx
     print("Parsing FBX...")

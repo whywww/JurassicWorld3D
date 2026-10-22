@@ -15,7 +15,7 @@ namespace JurassicWorld.Editor
         private const BindingFlags Private = BindingFlags.Instance | BindingFlags.NonPublic;
         private static DinosaurAgent rex, raptor;
         private static Vector3 previous, goal;
-        private static float started, travelled, maximumDeparture;
+        private static float started, travelled, maximumDeparture, walkingStarted;
         private static int frame, goals, turns, stage;
         private static bool wasTurning;
         private static bool disabled;
@@ -73,6 +73,7 @@ namespace JurassicWorld.Editor
                 previous = rex.transform.position; goal = Vector3.zero;
                 travelled = maximumDeparture = 0f; goals = turns = stage = frame = 0; wasTurning = false;
                 started = Time.time;
+                walkingStarted = (float)Get("freeRoamWalkTravel");
                 Time.captureDeltaTime = 1f / 30f;
                 if (turnsOnly)
                 {
@@ -145,8 +146,8 @@ namespace JurassicWorld.Editor
                 float elapsed = Time.time - started;
                 if (stage == 0 && elapsed >= 35f)
                 {
-                    Require(travelled > 5f && goals > 0 && maximumDeparture > 2f,
-                        $"Free roaming did not make off-route progress. seed={DinosaurSpawnRandomizer.LastSpawnSeed}, position={position}, travelled={travelled:F3}, goals={goals}, turn={rex.IsSteppingTurn}, turnTime={rex.StepTurnClipTime:F5}, clip={Get("activeClip")}, blocked={Get("curiosityBlockedTime")}");
+                    Require((float)Get("freeRoamWalkTravel") - walkingStarted > 5f && goals > 0 && maximumDeparture > 2f,
+                        $"Free roaming did not make off-route walking progress. seed={DinosaurSpawnRandomizer.LastSpawnSeed}, position={position}, travelled={travelled:F3}, walking={(float)Get("freeRoamWalkTravel") - walkingStarted:F3}, goals={goals}, turn={rex.IsSteppingTurn}, turnTime={rex.StepTurnClipTime:F5}, clip={Get("activeClip")}, blocked={Get("curiosityBlockedTime")}");
                     if (disabled) { Finish(null); return; }
                     if (rex.IsSteppingTurn) return;
                     typeof(DinosaurAgent).GetMethod("FinishFreeInteraction", Private).Invoke(rex, null);
@@ -183,7 +184,7 @@ namespace JurassicWorld.Editor
             EditorApplication.update -= Tick; SessionState.SetBool(Key, false); Time.captureDeltaTime = 0f;
             CleanupTurnObstacles();
             if (settings != null && originalObstacles != null) settings.solidObstacles = originalObstacles;
-            string result = error == null ? turnsOnly ? "PASS 8 left/right turns through solids, trees, boundary and off-NavMesh; peer gate and recovery contracts. Short smoke; visual Play feedback required." : $"PASS free roaming {(disabled ? "interaction OFF" : "ON + local interaction exit + blocked stop")}: travelled={travelled:F2}m goals={goals} turns={turns} departure={maximumDeparture:F2}m; raptor uses free roaming. Short smoke; visual Play feedback required." : error.ToString();
+            string result = error == null ? turnsOnly ? "PASS 8 left/right turns through solids, trees, boundary and off-NavMesh; peer gate and recovery contracts. Short smoke; visual Play feedback required." : $"PASS free roaming {(disabled ? "interaction OFF" : "ON + local interaction exit + blocked stop")}: travelled={travelled:F2}m walking={(float)Get("freeRoamWalkTravel") - walkingStarted:F2}m goals={goals} turns={turns} departure={maximumDeparture:F2}m; raptor uses free roaming. Short smoke; visual Play feedback required." : error.ToString();
             Directory.CreateDirectory("Logs"); File.WriteAllText(turnsOnly ? "Logs/trex-free-turn-result.txt" : disabled ? "Logs/trex-free-roam-off-result.txt" : "Logs/trex-free-roam-result.txt", result);
             if (error == null) Debug.Log(result); else Debug.LogException(error);
             if (Application.isBatchMode) EditorApplication.Exit(error == null ? 0 : 1); else EditorApplication.isPlaying = false;

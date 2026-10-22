@@ -19,6 +19,18 @@ namespace JurassicWorld.Editor
     public static class ForestPlayAcceptance
     {
         private const string Key = "JurassicWorld.ForestPlayAcceptance";
+        private const string BaselineScene = "Assets/Scenes/RainforestExpansionBaseline.unity";
+        private static string ArtifactOutput => SessionState.GetBool(Key + ".TreeHeights", false) ? TreeHeightAdjustment.Output
+            : SessionState.GetBool(Key + ".Baseline", false) ? RainforestExpansion.Output + "/Baseline"
+            : SessionState.GetBool(Key + ".Expansion", false) ? RainforestExpansion.Output : RainforestSample.Output;
+        public static void RunExpansion() { SessionState.SetBool(Key + ".Expansion", true); Run(); }
+        public static void RunTreeHeights() { SessionState.SetBool(Key + ".TreeHeights", true); Run(); }
+        public static void RunExpansionBaseline()
+        {
+            File.Copy(RainforestExpansion.Output + "/Checkpoint/Main.unity", BaselineScene, true);
+            AssetDatabase.ImportAsset(BaselineScene);
+            SessionState.SetBool(Key + ".Baseline", true); RunExpansion();
+        }
         private const BindingFlags Flags = BindingFlags.Instance | BindingFlags.NonPublic;
         private static readonly int[] Rates = { 30, 60, 144 };
         private static readonly StringBuilder Report = new StringBuilder();
@@ -29,6 +41,8 @@ namespace JurassicWorld.Editor
         private static int rate, frame;
         private static float began;
         private static float lastCheckpoint, maximumFootError;
+        private static int footFailures, totalFootFailures, caseFailures;
+        private static string firstFootFailure;
         private static DinosaurFootLock[] feet;
         private static int originalVSync, originalFrameRate;
         private static bool loading;
@@ -64,11 +78,18 @@ namespace JurassicWorld.Editor
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode || EditorSceneManager.GetActiveScene().isDirty)
                 throw new InvalidOperationException("Save the scene and stop Play before acceptance.");
-            string prior = RainforestSample.Output + "/NormalPlay.md";
-            string history = RainforestSample.Output + "/NormalPlay.BeforeCollisionPolicy.md";
-            if (File.Exists(prior) && !File.Exists(history))
+            string prior = ArtifactOutput + "/NormalPlay.md";
+            string history = ArtifactOutput + "/NormalPlay.BeforeCollisionPolicy.md";
+            if (!SessionState.GetBool(Key + ".Expansion", false) && File.Exists(prior) && !File.Exists(history))
                 File.WriteAllText(history, "> Historical result using the previous all-vertices/static-penetration assertions; not the current collision policy.\n\n" + File.ReadAllText(prior));
-            EditorSceneManager.OpenScene("Assets/Scenes/Main.unity");
+            Directory.CreateDirectory(ArtifactOutput);
+            EditorSceneManager.OpenScene(SessionState.GetBool(Key + ".Baseline", false) ? BaselineScene : "Assets/Scenes/Main.unity");
+            if (SessionState.GetBool(Key + ".Baseline", false))
+            {
+                FoliageInteractionPreparation.RestoreCurrent(); RainforestSample.RebuildNavigation("Assets/Navigation/RainforestExpansionBaselineNav.asset");
+                FoliageInteractionPreparation.SeedConfigured();
+                EditorSceneManager.SaveScene(EditorSceneManager.GetActiveScene()); AssetDatabase.SaveAssets();
+            }
             foreach (var agent in Object.FindObjectsOfType<DinosaurAgent>())
             {
                 SessionState.SetVector3(Key + agent.name + ".position", agent.transform.position);
@@ -95,6 +116,7 @@ namespace JurassicWorld.Editor
                 Report.Clear(); Report.AppendLine("# Normal Play regression — runtime collision policy\n");
                 meshSamples = meshOverlapSamples = meshOverlapVertices = 0;
                 RecoveryDistances.Clear();
+                totalFootFailures = caseFailures = 0;
                 Report.AppendLine("Births and ordinary travel use the runtime collision envelope. Special performances may overlap static scenery; peer body checks remain active. Recovery permits only unretired original overlaps and inward boundary/navigation movement. Rendered-mesh overlaps are visual diagnostics, not collision failures. Historical strict-mesh results: NormalPlay.BeforeCollisionPolicy.md.\n");
                 Report.AppendLine("All agents, navigation, skeletal animation, foot locking and foliage interaction remain active. First minute is rendered continuously and recorded; remaining movement frames run with AlwaysAnimate and camera renders at 30-second checkpoints. GPU/CPU rendering cost is measured separately in Performance.md.\n");
                 // Exercise the actual startup sampler; no reserved clearing placements.
@@ -125,7 +147,9 @@ namespace JurassicWorld.Editor
             // Reload resets every normal runtime state, animation and foot anchor.
             loading = true;
             SceneManager.sceneLoaded += Loaded;
-            SceneManager.LoadScene("Main");
+            if (SessionState.GetBool(Key + ".Baseline", false))
+                EditorSceneManager.LoadSceneInPlayMode(BaselineScene, new LoadSceneParameters(LoadSceneMode.Single));
+            else SceneManager.LoadScene("Main");
         }
 
         private static void Loaded(Scene scene, LoadSceneMode mode)
@@ -148,6 +172,7 @@ namespace JurassicWorld.Editor
             travelled = new float[agents.Length]; stoppedAt = Enumerable.Repeat(Time.time, agents.Length).ToArray();
             feet = agents.Select(a => a.GetComponent<DinosaurFootLock>()).ToArray();
             maximumFootError = 0f;
+            footFailures = 0; firstFootFailure = null;
             began = Time.time; frame = -1;
             lastCheckpoint = began;
             foreach (var agent in agents) CheckPose(agent);
@@ -162,7 +187,7 @@ namespace JurassicWorld.Editor
                 capture = new GameObject("Normal Play recording").AddComponent<Camera>();
                 capture.CopyFrom(Camera.main); capture.enabled = false; capture.targetTexture = target;
                 pixels = new Texture2D(640, 360, TextureFormat.RGBA32, false);
-                video = new MediaEncoder(RainforestSample.Output + "/NormalPlay.mp4",
+                video = new MediaEncoder(ArtifactOutput + "/NormalPlay.mp4",
                     new VideoTrackAttributes { frameRate = new MediaRational(10), width = 640, height = 360, includeAlpha = false });
                 nextCapture = Time.time;
                 vegetationBounds = Object.FindObjectsOfType<Renderer>().Where(r => r.enabled && r.gameObject.activeInHierarchy
@@ -286,7 +311,7 @@ namespace JurassicWorld.Editor
             capture.Render(); var old = RenderTexture.active; RenderTexture.active = target;
             pixels.ReadPixels(new Rect(0, 0, 640, 360), 0, 0); pixels.Apply(); RenderTexture.active = old;
             video.AddFrame(pixels);
-            if (Time.time - began < .15f) File.WriteAllBytes(RainforestSample.Output + "/NormalPlay.png", pixels.EncodeToPNG());
+            if (Time.time - began < .15f) File.WriteAllBytes(ArtifactOutput + "/NormalPlay.png", pixels.EncodeToPNG());
         }
 
         private static void CloseVideo()
@@ -316,7 +341,11 @@ namespace JurassicWorld.Editor
                         float error = Mathf.Max(feet[i].LeftPlanted ? feet[i].LeftPlantError : 0f,
                             feet[i].RightPlanted ? feet[i].RightPlantError : 0f);
                         maximumFootError = Mathf.Max(maximumFootError, error);
-                        Require(error <= .25f, $"Planted foot drift {error:F4}m: " + Diagnostic(agent));
+                        if (error > .25f)
+                        {
+                            footFailures++; totalFootFailures++;
+                            if (firstFootFailure == null) firstFootFailure = $"Planted foot drift {error:F4}m: " + Diagnostic(agent);
+                        }
                     }
                     if (Vector3.Distance(lastProgress[i], agent.transform.position) > .5f)
                     { lastProgress[i] = agent.transform.position; stoppedAt[i] = Time.time; }
@@ -332,7 +361,7 @@ namespace JurassicWorld.Editor
                     Debug.Log("FOREST_PLAY_PROGRESS " + progress);
                     if (playerCamera != null && !playerCamera.enabled) playerCamera.Render();
                     foreach (var agent in agents) CheckRenderedBody(agent, $"checkpoint {Rates[rate]} FPS / {Time.time - began:F1}s");
-                    File.WriteAllText(RainforestSample.Output + "/NormalPlay.md", Report + "\n" + progress);
+                    File.WriteAllText(ArtifactOutput + "/NormalPlay.md", Report + "\n" + progress);
                 }
                 if (Time.time - began < duration) return;
                 for (int i = 0; i < agents.Length; i++)
@@ -340,12 +369,22 @@ namespace JurassicWorld.Editor
                     Require(travelled[i] > 5f, "No initial movement: " + Diagnostic(agents[i]));
                     Report.AppendLine($"- {Rates[rate]} FPS / {duration:F0}s / {agents[i].DisplayName}: {travelled[i]:F2}m; runtime collision contract passed; no root jumps or prolonged static stall. Static overlaps permitted only by the active policy.");
                 }
-                Debug.Log($"FOREST_PLAY_CASE_PASS fps={Rates[rate]}");
-                Report.AppendLine($"Maximum planted-foot error at {Rates[rate]} FPS: {maximumFootError:F4}m (limit 0.25m).\n");
-                if (++rate == Rates.Length) Finish(null); else StartCase();
+                Debug.Log($"FOREST_PLAY_CASE_COMPLETED fps={Rates[rate]} foot={(footFailures == 0 ? "PASS" : "FAIL")}");
+                Report.AppendLine($"Maximum planted-foot error at {Rates[rate]} FPS: {maximumFootError:F4}m (limit 0.25m); {(footFailures == 0 ? "PASS" : "FAIL")} / {footFailures} failing animal frames.\n");
+                if (firstFootFailure != null) Report.AppendLine(firstFootFailure + "\n");
+                if (++rate == Rates.Length) Finish(MovementFailure()); else StartCase();
             }
-            catch (Exception error) { Finish(error); }
+            catch (Exception error)
+            {
+                caseFailures++;
+                CloseVideo();
+                Report.AppendLine($"\nFAIL {Rates[rate]} FPS case stopped at {Time.time-began:F2}s; maximum foot error {maximumFootError:F4}m; {footFailures} foot-error frames.\n\n{error}\n");
+                if(firstFootFailure!=null)Report.AppendLine(firstFootFailure+"\n");
+                if(++rate<Rates.Length)StartCase();else Finish(MovementFailure());
+            }
         }
+        private static Exception MovementFailure() => totalFootFailures == 0 && caseFailures == 0 ? null
+            : new InvalidOperationException($"Movement checks failed: {caseFailures} aborted FPS cases; planted-foot threshold exceeded in {totalFootFailures} animal frames. Threshold remains 0.25m; failed cases are not counted as complete ten-minute runs.");
 
         private static void Finish(Exception error)
         {
@@ -354,10 +393,12 @@ namespace JurassicWorld.Editor
             if (playerCamera != null) playerCamera.enabled = true;
             CloseVideo();
             SceneManager.sceneLoaded -= Loaded; EditorApplication.delayCall -= InitializeCase;
-            Directory.CreateDirectory(RainforestSample.Output);
+            Directory.CreateDirectory(ArtifactOutput);
             Report.AppendLine($"\nVisible-mesh diagnostics: {meshSamples} animal samples; {meshOverlapSamples} samples contained overlaps; {meshOverlapVertices} overlapping vertices total (vertices may recur across samples). These counts do not determine collision-contract success.");
             Report.AppendLine(error == null ? "\nRuntime collision contract: PASS" : "\nRuntime collision contract: FAIL\n\n" + error);
-            File.WriteAllText(RainforestSample.Output + "/NormalPlay.md", Report.ToString());
+            File.WriteAllText(ArtifactOutput + "/NormalPlay.md", Report.ToString());
+            SessionState.SetBool(Key + ".Expansion", false);
+            SessionState.SetBool(Key + ".Baseline", false);
             if (error == null) Debug.Log("FOREST_NORMAL_PLAY_PASS"); else Debug.LogException(error);
             if (Application.isBatchMode) EditorApplication.Exit(error == null ? 0 : 1);
             else EditorApplication.isPlaying = false;

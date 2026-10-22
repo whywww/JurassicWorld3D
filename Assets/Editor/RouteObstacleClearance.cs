@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Collections;
@@ -139,7 +139,7 @@ namespace JurassicWorld.Editor
                 foreach (Renderer renderer in model.GetComponentsInChildren<Renderer>(true))
                 {
                     Mesh mesh = null; bool baked = false;
-                    if (renderer is SkinnedMeshRenderer skin) { mesh = new Mesh(); skin.BakeMesh(mesh); baked = true; }
+                    if (renderer is SkinnedMeshRenderer skin) { mesh = new Mesh(); SauropeltaMeshSampling.Bake(skin, mesh); baked = true; }
                     else mesh = renderer.GetComponent<MeshFilter>()?.sharedMesh;
                     if (mesh == null) continue;
                     float[] weights = null;
@@ -218,6 +218,9 @@ namespace JurassicWorld.Editor
 
         private static string[] CoreBones(DinosaurAgent agent)
         {
+            if (agent.name == "Sauropelta") return new[] { "Bone", "Bone.001", "Bone.002", "Bone.003", "Bone.L", "Bone.R", "Bone.L.003", "Bone.R.003" };
+            if (agent.name == "Baurusuchus") return new[] { "Bone", "Bone.001", "Bone.002", "Bone.003" };
+            if (agent.name == "Pachycephalosaurus") return new[] { "Root", "Spine1", "Spine2", "Spine3", "Pelvis", "Hip.L", "Hip.R", "Shoulder.L", "Shoulder.R" };
             if (agent.name.Contains("Tyrannosaurus")) return new[] { "jt_Spine1_C", "jt_Spine2_C", "jt_Hips_C", "jt_Hip_R", "jt_Hip_L" };
             if (agent.name.Contains("Velociraptor")) return new[] { "Root", "Spine_1", "Spine_2", "Spine_3", "Pelvis.R", "Pelvis.L", "Hip.R", "Hip.L", "Breast.R", "Breast.L" };
             if (agent.name == "Stegosaurus") return new[] { "Root", "Spine1", "Spine2", "Spine3", "Pelvis", "Hip.L", "Hip.R", "Shoulder.L", "Shoulder.R", "Gut" };
@@ -642,6 +645,41 @@ namespace JurassicWorld.Editor
                 AddCircle(item, Vector2.zero, radius);
                 item.Sections.Add(new TreeTrunkSection { center = Vector2.zero, radius = radius, bottom = -100f, top = 100f });
                 return clearance.IsClear(item, position);
+            };
+        }
+
+        // Stable per-sweep conflicts allow a resize to preserve pre-existing overlaps while
+        // rejecting any new route/body contact. Include full bodies and all wood heights.
+        internal static Func<Transform, HashSet<int>> CreateHeightConflictProbe(Terrain terrain)
+        {
+            var clearance = new RouteObstacleClearance(terrain, false);
+            clearance.bodyBottom = -1f; clearance.bodyTop = 40f;
+            var ids = clearance.cells.Values.SelectMany(v => v).Distinct().Select((s, i) => new { s, i }).ToDictionary(v => v.s, v => v.i);
+            return tree =>
+            {
+                var marker = tree.GetComponent<SceneTreeObstacle>();
+                var item = new Obstacle { IsTree = true, Position = new Vector2(tree.position.x, tree.position.z), RuntimeTrunkRadius = marker.Radius };
+                clearance.AddStemSections(item, tree, tree.localToWorldMatrix, marker.Radius);
+                foreach (var shape in item.Shapes) foreach (var p in shape) item.Reach = Mathf.Max(item.Reach, p.magnitude);
+                var result = new HashSet<int>(); var visited = new HashSet<Sweep>();
+                var a = Cell(item.Position - Vector2.one * item.Reach); var b = Cell(item.Position + Vector2.one * item.Reach);
+                for (int x = a.x; x <= b.x; x++) for (int z = a.y; z <= b.y; z++)
+                {
+                    if (!clearance.cells.TryGetValue(new Vector2Int(x,z),out var sweeps)) continue;
+                    foreach(var sweep in sweeps)
+                    {
+                        if(!visited.Add(sweep))continue;
+                        foreach(var section in item.Sections)
+                        {
+                            if(section.top<=sweep.Layer*HeightLayer || section.bottom>=(sweep.Layer+1)*HeightLayer)continue;
+                            Vector2 delta=section.center+item.Position-sweep.Center;
+                            float dx=Mathf.Max(Mathf.Abs(Vector2.Dot(delta,sweep.Right))-sweep.Extents.x,0);
+                            float dz=Mathf.Max(Mathf.Abs(Vector2.Dot(delta,sweep.Forward))-sweep.Extents.y,0);
+                            if(dx*dx+dz*dz<section.radius*section.radius) { result.Add(ids[sweep]); break; }
+                        }
+                    }
+                }
+                return result;
             };
         }
 

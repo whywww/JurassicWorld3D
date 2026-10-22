@@ -22,7 +22,7 @@ The original **Poly Haven Five Tree Preview** showed one each of Island Tree 01,
 
 The comparison build, validation and capture commands have been retired. Existing inactive preview backups remain as historical records. Prepare the approved species through **Jurassic World > Assets > Prepare Five Forest Tree Species**; use the Central Forest commands for production planting.
 
-To reproduce the new assets, run `Download-FiveTreePreview.ps1`, then run `prepare_five_tree_preview.py` and `reduce_preview_foliage_lods.py` with Blender in background mode and the project directory after `--`. Source hashes are in each downloaded asset's manifest; triangle counts and native dimensions are in `Tools/VegetationDiversity/five-tree-model-report.json`.
+To reproduce the new assets, run `Download-FiveTreePreview.ps1`, then run `prepare_five_tree_preview.py` and `reduce_preview_foliage_lods.py` with Blender in background mode and the project directory after `--`. Run the two preparation scripts in that order; the first regenerates the intermediate report used by the second.
 
 The base **Phase 2 Biome Vegetation** pass adds 30 vegetation groups, one banana grove, 60 trees and 180 fern/bush instances. Its original west-autumn/east-tropical arrangement is subsequently corrected by the northwest regional pass during Bake. The 12 banana trees remain in the southeast grove (x=50–70, z=-65 to -35). Use the Central Forest commands for the revised layout; a full Bake reapplies the region and confirmed stage after the base passes.
 

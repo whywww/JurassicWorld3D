@@ -2,7 +2,7 @@
 
 基于 Unity Built-in Render Pipeline 的恐龙森林探索项目。Unity 版本为 **`2022.3.62f3c1`**（以 `ProjectSettings/ProjectVersion.txt` 为准）。
 
-场景包含森林、香蕉林、草地与蕨类、苔藓岩石、枯木，以及从东侧延伸至北侧的 Crest 小溪。霸王龙与伶盗龙在可通行林地自由漫游，伶盗龙主动与霸王龙保持安全距离，其他恐龙沿路线活动，玩家可步行观察。
+场景包含森林、香蕉林、草地与蕨类、苔藓岩石、枯木，以及从东侧延伸至北侧的 Crest 小溪。霸王龙、伶盗龙与红色厚头龙在可通行林地自由漫游；伶盗龙和厚头龙主动与霸王龙保持安全距离，厚头龙轮换 Walk/Idle 动画，玩家可步行观察。
 
 ## 安装与启动
 
@@ -45,13 +45,6 @@ git lfs pull
 
 **普通启动直接使用保存好的 Main 场景，无需重新 Bake。** `Bake Scene (Edit Mode)` 会重建场景内容，用于主动维护或重建；执行前保存需要保留的场景改动。
 
-### 资源完整性
-
-- `Assets/NatureStarterKit2/`、`Assets/Crest/`、`Assets/FerociousIndustries/` 及现有准备后的模型、材质均已有 Git 跟踪内容。完整检出后无需无条件重新导入 Nature Starter Kit 2。
-- 若 Console 提示模型、材质或脚本丢失，先确认仓库文件完整，再按下方资产清单恢复对应目录。Asset Store 资源缺失时，从原商品页通过自己的账号获取并导入，保留项目引用所需路径。
-- 原始 ZIP 被 `.gitignore` 排除，不能假定克隆后包含全部下载压缩包。正常运行使用已导入资源；只有重新制作资产时才需要对应原始文件及准备工具。不要用 Bake 代替补齐缺失资源。
-- Package Manager 恢复失败时，检查 Unity 包源网络和 Console 报错，再重新解析依赖；不要添加已移除的 glTFast Git 地址。
-
 ### 构建与启动 Windows 程序
 
 1. 在 Unity Hub 中为该编辑器安装 Windows 构建支持；使用 IL2CPP 时还需对应的 **Windows Build Support (IL2CPP)** 及工具链。
@@ -66,8 +59,7 @@ git lfs pull
 - `A/D` 或左/右方向键：持续向左/右转向并前进，相机平滑跟随。
 - 按住鼠标右键并移动鼠标：转动视角。
 - 指南针显示视线方向与角度（+Z 为北）；小地图固定北向上，黄色箭头标记玩家位置与行进方向。
-- 左上角“画质”按钮或 `F10`：选择低、中、高档，选择会自动保存，首次启动默认中档。
-- 画质菜单中的“测量 15 秒”：比较三档表现，结果追加到 `Application.persistentDataPath/quality-benchmark.csv`。纹理审计见 [Reports/TextureAudit.md](Reports/TextureAudit.md)。
+- 左上角“画质”按钮或 `F10`：选择低、中、高档，选择会自动保存，首次启动默认中档。纹理审计见 [Reports/TextureAudit.md](Reports/TextureAudit.md)。
 
 当前 `DinosaurAgent` 的召唤开关关闭，`Space` 不触发召唤；旧召唤流程与信息卡代码仍保留，不作为当前启动验收要求。
 
@@ -160,22 +152,23 @@ power **达到** Threshold 才接受方向，移动和转向速度按限制在 `
 
 ## 3D 资产资源清单
 
-以下按当前项目文件与来源记录整理。中文名称用于项目识别，英文名称保留物种名或原始资产名；不明确树种的模型使用通用名称。状态区分“使用中”“暂禁用”“归档”。来源页无法核实或缺少记录的信息标注为“待补充”，不将相似商品视作已确认来源。
-
 ### 恐龙与翼龙
 
 | 中文名 | 英文名／原始资源名 | 来源／作者 | 许可 | 项目路径 | 状态 |
 |---|---|---|---|---|---|
-| 霸王龙 | Tyrannosaurus Rex / T-Rex | SketchFab [T-REX](https://skfb.ly/oM76u)    | CC BY | `Assets/Resources/Dinosaurs/TRex/` | 使用中 |
-| 伶盗龙 / 迅猛龙 | Velociraptor | SketchFab [PBR Velociraptor (Animated)](https://skfb.ly/oHoUE) | CC BY | `Assets/Resources/Dinosaurs/Velociraptor/` | 使用中 |
-| 剑龙（绿色） | Stegosaurus | [Unity Asset Store](https://assetstore.unity.com/packages/3d/characters/animals/pbr-animated-dinosaurs-256019)，Ferocious Industries | Standard Unity Asset Store EULA | 源资源 `Assets/FerociousIndustries/PBRDinosaurs/PBRStegasaurus/`；适配资源 `Assets/Dinosaurs/Stegosaurus/` | 暂禁用 |
-| 胜王龙 | Rajasaurus | SketchFab [Animated Rajasaurus Free](https://skfb.ly/pFMxT) | 待补充 | `Assets/Resources/Dinosaurs/Rajasaurus/` | 暂禁用 |
-| 阿根廷龙 | Argentinosaurus | SketchFab [Animated Argentinosaurus Free](https://skfb.ly/pEYQ6) | 待补充 | `Assets/Resources/Dinosaurs/Argentinosaurus/` | 暂禁用 |
-
+| 霸王龙 | Tyrannosaurus Rex / T-Rex | SketchFab [T-REX](https://skfb.ly/oM76u)    | CC BY | `Assets/Dinosaurs/TRex/`（`Source` 原始，`Prepared` 适配） | 使用中 |
+| 伶盗龙 / 迅猛龙 | Velociraptor | SketchFab [PBR Velociraptor (Animated)](https://skfb.ly/oHoUE) | CC BY | `Assets/Dinosaurs/Velociraptor/`（`Source/Sketchfab` 原始，`Prepared` 适配；`Source/FerociousIndustries` UAS 原包） | 使用中 |
+| 厚头龙（红色） | Pachycephalosaurus | Ferocious Industries，已导入的 PBR Dinosaurs | Standard Unity Asset Store EULA | `Assets/Dinosaurs/Pachycephalosaurus/` （`Source/FerociousIndustries` 原始，`Prepared` 适配） | 使用中；Walk/Idle 自由漫游 |
+| 剑龙（绿色） | Stegosaurus | [Unity Asset Store](https://assetstore.unity.com/packages/3d/characters/animals/pbr-animated-dinosaurs-256019)，Ferocious Industries | Standard Unity Asset Store EULA | `Assets/Dinosaurs/Stegosaurus/` （`Source/FerociousIndustries` 原始，`Prepared` 适配） | 暂禁用 |
+| 胜王龙 | Rajasaurus | SketchFab [Animated Rajasaurus Free](https://skfb.ly/pFMxT) | CC BY-NC | `Assets/Dinosaurs/Rajasaurus/`（`Source` 原始，`Prepared` 适配） | 暂禁用 |
+| 阿根廷龙 | Argentinosaurus | SketchFab [Animated Argentinosaurus Free](https://skfb.ly/pEYQ6) | CC BY | `Assets/Dinosaurs/Argentinosaurus/`（`Source` 原始，`Prepared` 适配） | 暂禁用 |
+| 包鲁鳄 | Baurusuchus | Fab [Animated Baurusuchus](https://www.fab.com/listings/69ac72dc-187f-4db7-ad99-c524023113b6)，Anees Animates | [Fab Standard License](https://www.fab.com/eula) | `Assets/Dinosaurs/Baurusuchus/` （`Source` 原始，`Prepared` 适配） | 使用中；仅含 Running，站定与行走均持续播放，自由漫游 |
+| 蜥结龙 | Sauropelta | Fab [Animated Sauropelta (Free)](https://www.fab.com/listings/de1b8487-8dbd-4105-80be-79bd64a3905e)，Anees Animates | [Fab Standard License](https://www.fab.com/eula) | `Assets/Dinosaurs/Sauropelta/`（`Source` 原始，`Prepared` 适配） | 使用中；自由漫游，Walk 循环，停步冻结 |
+| 翼龙 | Pteradactal | SketchFab [Animated Flying Pteradactal Dinosaur Loop](https://skfb.ly/o9nTY)，LasquetiSpice | CC BY | `Assets/Dinosaurs/Pteradactal/`（`Source` 原始，`Prepared` 适配） | 使用中；5 米翼展，6–10 米低空飞行，独立于地面导航 |
 
 ### 植被
 
-下表 Poly Haven 资源使用 [CC0](https://polyhaven.com/license)。准备后的树木 Prefab 位于 `Assets/VegetationDiversity/Prefabs/`，原始来源及下载记录位于 `Assets/ThirdParty/VegetationDiversity/`。
+下表 Poly Haven 资源使用 [CC0](https://polyhaven.com/license)。准备后的树木 Prefab 位于 `Assets/VegetationDiversity/Prefabs/`，原始来源位于 `Assets/ThirdParty/VegetationDiversity/`。
 
 | 中文名 | 英文原名 | 来源／作者 | 许可 | 项目路径 | 状态 |
 |---|---|---|---|---|---|
@@ -207,10 +200,6 @@ power **达到** Threshold 才接受方向，移动和转向速度按限制在 `
 | 东侧至北侧小溪、溪岸与涟漪配置 | East-to-North Creek / Creek Bank / Ripple Spectrum | 项目自建，基于 Crest 和 Unity Terrain；见 `MainCreekIntegration` | 自建配置 | `Assets/CreekDemo/MainCreekTerrain.asset`、`CrestCreekWater.mat`、`CreekRippleSpectrum.asset`、`JungleCreekBank.terrainlayer` | 使用中 |
 | 侏罗纪地形与地表生态 | Jurassic Terrain / Ground Ecology | 项目自建地形、布局与派生配置；基础纹理引用 Nature Starter Kit 2 和现有环境资源 | 自建配置 | `Assets/Terrain/JurassicTerrainData.asset`、`Assets/Terrain/Layers/`、`Assets/Terrain/GroundEcology/` | 使用中；主场景使用小溪整合后的地形副本 |
 
-### 来源记录与署名
-
-详细植被来源、作者、原始压缩包哈希和下载记录见 [Assets/VegetationDiversity/SOURCES.md](Assets/VegetationDiversity/SOURCES.md)。五种新增森林树的来源目录包含 `download-manifest.json`；模型统计见 `Tools/VegetationDiversity/five-tree-model-report.json`。
-
 ## 环境与路线维护
 
 - 场景采用 **200m × 200m** Unity Terrain，主场景使用 `MainCreekTerrain.asset`；基础地形保留在 `JurassicTerrainData.asset`。地表包含草地、落叶、苔藓、根系及溪岸等多层配置。
@@ -234,35 +223,39 @@ power **达到** Threshold 才接受方向，移动和转向速度按限制在 `
 
 打开或重建场景的菜单在 Play Mode 中禁用。五树比较预览流程已退役，历史截图、检查点和旧验证日志已清理；`Prepare Biome Vegetation` 与 `Prepare Five Forest Tree Species` 仍作为资源准备入口保留。
 
-## 当前边界
-
-以 Unity Editor 演示为主要验证目标，Windows 程序通过现有菜单构建并另行验收。项目使用标准单相机和旧版 Input API，未接入 BCI、裸眼 3D 厂商 SDK、NavMesh 或多恐龙选择。当前运行模型采用已导入的 FBX／Prefab；模型缺失应检查 Console 和资源引用，不以占位模型替代。
-
 ## 避让规则
 
-- 霸王龙优先通行；伶盗龙与霸王龙根节点的水平距离小于 **15 米**时主动撤离，达到 **20 米**时解除避让，中间区间保持避让状态。
-- 霸王龙主动靠近时，闲站的伶盗龙也要撤离。解除避让后重新选择自由漫游目标。
-- 伶盗龙在导航边缘无法边转弯边前进时，若原地转向安全，则先转向再移动，避免同一步被反复拒绝而卡住。
-- 霸王龙的 `WaitingForPeerClearance` 表示身体碰撞检查正在等待同伴让开，不表示通行优先级被反转；仍保留防穿透检查。
+- 地面通行顺序：**霸王龙＞阿根廷龙＞剑龙＞胜王龙＞蜥结龙＞厚头龙＞包鲁鳄＞伶盗龙**。召唤和玩家交互优先，双方均在交互时按物种排序；返程恢复普通顺序，会车期间锁定先行权。
+- 低优先级者主动侧移或后撤，窄路先退到宽处；先行者等待 **1.2 秒**后可绕行。解围后恢复原目标，受阻时持续重试，保留导航与防穿透检查。
+- 小恐龙与持有先行权的霸王龙水平距离小于 **15 米**时撤离，达到 **20 米**解除避让，闲站时同样生效。飞行单位不参与地面会车。
+- `F4` 调试窗可查看排名、交互优先状态、阻挡者和会车持续时间。
 
 ## 霸王龙互动动画流程
 
-霸王龙把硬树干、样板区的硬枝及大型岩石作为移动和视线障碍。大型岩石按 `Environment Props/Rock_Large_*` 与 `Understory Pass/Rocks/Rock_*_Hero` 分类；柔性叶片、草、蕨类、灌木、小石和低矮倒木树桩不阻挡。岩石障碍范围排除附带植物，树木使用已烘焙的硬木分段。
-
+霸王龙只把硬树干、样板区硬枝和大型岩石当作移动与视线障碍；柔性叶片、草、蕨类、灌木、小石、低矮倒木和树桩不阻挡。大型岩石按 `Environment Props/Rock_Large_*` 与 `Understory Pass/Rocks/Rock_*_Hero` 识别。
 
 | 阶段 | 玩家方向与角度范围 | 动画顺序 | 播放方式／条件 |
 |---|---|---|---|
-| **1. 发现与观察** | 正前方：偏角 **≤20°** | `idle investigate` → `idle investigae out` → `Big roar step` | 玩家在 **32 米内**，持续可见 **0.3 秒**后触发；各播放一次，约 **9.77 秒** |
-|  | 左／右侧：对应侧偏角 **>20°且≤50°** | `look left/right` → `roar left/right` | 玩家在 **32 米内**，持续可见 **0.3 秒**后触发；按发现时的侧别匹配，各一次，约 **8.2 秒** |
-| **2. 跟随** | 从正前方发现：初始偏角 **≤20°** | `walk head low` 循环 | 发现动作完成后开始；距离 **>10 米**时继续跟随，**≤10 米**请求停步。近距离互动中退至 **>15 米**且目标可见、路径可行时恢复。实际跟随累计最多 **30 秒** |
-|  | 从左／右侧发现：初始偏角 **>20°且≤50°** |  `walk head low` 循环 | 吼叫完整结束后默认 **0.4 秒**接管（Inspector：`Side Roar Handoff Duration`）：按当前支撑脚匹配步行相位，平滑提升步速，并保持头部世界朝向，避免回正后再次转向。双脚着地时限制旋转，单脚支撑时绕支撑点转向，保留初始两次落脚约束，身体与行进方向差不超过 **10°** 后淡出；仍在绕行转向时最多保持 **2 秒**后平滑解除。受阻时冻结进度，停步或退出时清理；大角度仍使用现有导航转向，不固定插入 90° 转身。受阻两秒退出及冷却规则不变 |
-| **3. 停步互动／结束** | 所有方向 | `ROAR` → `look forward 2` → 随机 `bite close left/right` → `look forward 2` | 距离 **≤10 米**请求近距离停步；连续失去视线 **3 秒**、实际跟随达到 **30 秒**或掉头空间不足时请求结束。完整动作约 **10.5～11 秒**；两段张望各播放前 **2 秒** |
-| **4. 掉头与返回** | 所有方向 | `turn 180 right` → `walk slow loop` → 恢复自由漫游 | 最后张望结束时玩家仍在 **15 米内**，或本轮已确定结束，则掉头返回。掉头约 **2.7 秒**，净转向 **170°**；沿跟随记录反向行走最多 **10 秒**，提前到达起点则结束。掉头后保留 **0.25 秒**落脚混合，随后按正常步速和 **65°/秒**转向返回，不因初始对齐而放慢脚步；按记录顺序连接前方约 **4 米**的较早路径点，大角度使用现有导航转身 |
+| **1. 发现与观察** | 正前方：偏角 **≤20°** | `idle investigate` → `idle investigae out` → `Big roar step` | 玩家在 **32 米内**持续可见 **0.3 秒**后触发；各播一次，约 **9.77 秒** |
+|  | 左／右侧：对应侧偏角 **>20°且≤50°** | `look left/right` → `roar left/right` | 玩家在 **32 米内**持续可见 **0.3 秒**后触发；按发现侧播放，各一次，约 **8.2 秒** |
+| **2. 跟随** | 从正前方发现：初始偏角 **≤20°** | `walk head low` 循环 | 发现动作结束后开始；**>10 米**继续跟随，**≤10 米**停步；退到 **>15 米**且目标可见、路径可行时恢复；累计最多 **30 秒** |
+|  | 从左／右侧发现：初始偏角 **>20°且≤50°** | `walk head low` 循环 | 吼叫结束后 **0.4 秒**接管，按支撑脚平滑接步；转向最多 **2 秒**，大角度交给导航转向，不固定插入 90° 转身。受阻时冻结进度，退出时清理 |
+| **3. 停步互动／结束** | 所有方向 | `ROAR` → `look forward 2` → 随机 `bite close left/right` → `look forward 2` | **≤10 米**请求停步；连续失去视线 **3 秒**、跟随满 **30 秒**或掉头空间不足时结束。完整动作约 **10.5～11 秒**；两段张望各取前 **2 秒** |
+| **4. 掉头与返回** | 所有方向 | `turn 180 right` → `walk slow loop` → 恢复自由漫游 | 本轮结束或无法恢复跟随时掉头。掉头约 **2.7 秒**、转 **170°**；沿记录路径原路返回，最多 **3 秒**，提前到起点即结束。转身不检查静态障碍，只有其它恐龙能中断；转后前 **2 秒**不检查障碍和 NavMesh，之后恢复正常碰撞 |
 
-距离 **10～15 米**为停步后的保持区间：已经停步时不会自动恢复跟随；必须退到 **15 米以外**并满足恢复条件。
+**保持区间**：停步后 **10～15 米**不会自动恢复；需退到 **15 米外**且目标可见、路径可行。`ROAR` 或咬击可播完当前动作后恢复，两段张望可平滑中断；确定结束时先完成收尾动作再返回。
 
-近距离互动允许恢复时，`ROAR` 或咬击播完当前动作后恢复，两段张望可平滑中断。因丢失目标、超时或空间不足确定结束后，完成剩余结束动作再返回。
-
-受阻时选择安全的张望或待机动画，窗口以 `Follow (TryingToDetour)` 等形式显示状态。正面与侧面在阶段 2（含侧面起跑）尝试绕行；连续受阻 **2 秒**仍不能恢复移动，则结束跟随，本轮不再恢复。其他恐龙的让行等待不触发此超时。表演开始前检查完整动作及混合包络；空间不足时每 **0.5 秒**搜索附近 **4／8／12／16 米**的互动位置，持续失败则自然结束。结束阶段跳过不安全的动作及大角度掉头，返回优先使用记录路径；暂无安全出口时待机并每 **2 秒**重试。所有阶段均检查静态障碍，不再等待后穿障。受阻等待不计入实际跟随或返回行走时间，恢复漫游后保留 **10 秒发现冷却**。表演按动画正常时序推进，转身保留原有播放倍率；脚锁只限制实际根修正量，不拖慢整段动画。根轨迹在接触切换处连续重建。
+**受阻与重试**：阶段 2 连续受阻 **2 秒**结束本轮，其它恐龙让行不计入；空间不足时每 **0.5 秒**搜索 **4／8／12／16 米**的互动点，结束阶段跳过不安全动作和大角度掉头。返回优先走记录路径，暂无安全出口时每 **2 秒**重试，找到可行路线后再转身；恢复漫游后 **10 秒**内不再发现玩家。跟随计时包含停步与绕行，返回只计实际行走。
 
 中心雨林样板位于 X[-25,25]、Z[-10,45]，可单独重建和撤销；布局、密度及验收说明见 [样板文档](Tools/VegetationDiversity/RainforestSample/README.md)。
+
+
+## 当前边界
+
+项目以 **Windows 平台 + Unity Editor** 演示为主要验证目标，Windows 独立程序通过现有菜单构建并另行验收；未验证 macOS、Linux、移动端或主机。
+
+- **玩法**：发布入口为主场景 `Assets/Scenes/Main.unity`，单场景、单人森林观察演示。包含键鼠漫游、HUD／小地图／指南针、画质档位、恐龙自由漫游与避让、霸王龙互动。`TRexFrontInteractionTest` 仅为开发调试场景，不属于发布内容。
+- **输入**：使用标准单相机和键鼠。Emotiv 脑控为可选输入，仅在 Windows 下通过本机蓝牙 Cortex 服务连接，需要 Launcher、应用凭据和已训练的 Mental Command profile；不提供训练或程序内配置界面，配置失败时键鼠仍可用。
+- **导航与场景**：恐龙导航使用烘焙好的 NavMesh 数据加项目内避让／通行规则，不在运行期重新烘焙；场景内容由编辑态 Bake 菜单维护，不做运行期程序化生成。可探索范围为固定的 200m × 200m Terrain。
+- **恐龙**：主场景当前启用霸王龙、伶盗龙、厚头龙、蜥结龙、包鲁鳄与翼龙。召唤关闭。
+- **资产**：运行模型使用已导入的 FBX／Prefab 和准备后的资源；模型缺失应检查 Console 和资源引用，不以占位模型替代。

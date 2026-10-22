@@ -1,0 +1,1 @@
+PASS: standalone build, 300 game seconds; distance=1487.05m; maxXZ=36.99m; AGL=6.46..9.85m; local geometry clearance passed; front passes=4; animation playing; observed wraps=28

@@ -1,0 +1,10 @@
+{
+    "enabled": false,
+    "centerMin": 5.0,
+    "centerMainMax": 8.0,
+    "centerMax": 10.0,
+    "outerMin": 8.0,
+    "outerMainMax": 12.0,
+    "outerMax": 14.0,
+    "transition": 10.0
+}

@@ -46,7 +46,7 @@ namespace JurassicWorld.Editor
             Debug.Log($"JURASSIC_SCENE_BAKED: 已在编辑态烘焙 Main.unity（相机 / 方向光 / 天空 / 草地 / HUD / {JurassicWorldSceneBuilder.EnabledDinosaurCount} 只恐龙）。");
         }
 
-        // 验证性重导入入口（实验用）：对 Assets/Resources/Dinosaurs 下所有 .fbx 强制重新导入，
+        // 验证性重导入入口（实验用）：对 Assets/Dinosaurs 下所有 .fbx 强制重新导入，
         // 用于验证「恐龙 FBX 导入设置是否发生漂移」——若 .meta 未变、git diff 为空，则说明重导入是 no-op，
         // 排除「导入管线状态漂移导致脚部悬空」这一假设；配合 BakeScene 使用，把烘焙前的模型状态刷新到磁盘。
         [MenuItem("Jurassic World/Assets/Reimport Dinosaur Models")]
@@ -57,7 +57,7 @@ namespace JurassicWorld.Editor
 
         public static void ReimportDinosaurModels()
         {
-            const string root = "Assets/Resources/Dinosaurs";
+            const string root = "Assets/Dinosaurs";
             string[] guids = AssetDatabase.FindAssets("t:Model", new[] { root });
             Debug.Log($"[Reimport] 在 {root} 下发现 {guids.Length} 个 Model 资产，开始逐个强制重导入...");
             int index = 0;
@@ -276,7 +276,7 @@ namespace JurassicWorld.Editor
                             throw new InvalidDataException($"路线「{routeName}」弧长 {sample.Distance:F1}m 被实体 {obstacle.name} 阻挡。");
                     }
                     int segmentCount = count - (MovementCorridor.IsClosed(route) ? 0 : 1);
-                    for (int j = i + 2; i < segmentCount && i < segmentCount; j++)
+                    for (int j = i + 2; j < segmentCount && i < segmentCount; j++)
                     {
                         if (MovementCorridor.IsClosed(route) && i == 0 && j == count - 1) continue;
                         Vector2 a = sample.Position;

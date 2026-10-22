@@ -12,16 +12,16 @@ namespace JurassicWorld
 
         // Acceptance queries observe the same gates without advancing locomotion, animation,
         // retry clocks or the recovery exemptions. Kept private to avoid a public debug API.
-        private bool ForestStaticClippingAllowed => IsSteppingTurn && stepTurnUse == TurnUse.Wander
+        private bool ForestStaticClippingAllowed => IsSteppingTurn && (stepTurnUse == TurnUse.Wander || stepTurnUse == TurnUse.FrontRecovery)
             || frontActive && frontAction != null && !frontPeerClearing;
         private string ForestCollisionStage => ForestStaticClippingAllowed ? (IsSteppingTurn ? "Wander performance" : "Interaction performance")
-            : freeRecoveryActive && !frontActive ? "Recovery" : frontActive ? "Interaction travel / wait" : "Ordinary travel / idle";
+            : (freeRecoveryActive && !frontActive || frontRecoveryActive) ? "Recovery" : frontActive ? "Interaction travel / wait" : "Ordinary travel / idle";
 
         private string ForestCollisionFailure(bool spawning, float previousBoundary, float previousNavDistance)
         {
             if (interactionSettings == null || interactionBody == null) return "Missing collision data";
             bool performance = !spawning && ForestStaticClippingAllowed;
-            bool recovery = !spawning && !performance && freeRecoveryActive && !frontActive;
+            bool recovery = !spawning && !performance && (freeRecoveryActive && !frontActive || frontRecoveryActive);
             var body = !spawning && (performance || frontActive) && frontProbeBody != null ? frontProbeBody : interactionBody;
             if (FrontPeerPoseBlocked(transform.position, transform.rotation, body)) return "Peer body";
             if (performance) return null;

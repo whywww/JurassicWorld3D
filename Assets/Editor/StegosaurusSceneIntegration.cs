@@ -10,9 +10,9 @@ namespace JurassicWorld.Editor
 {
     public static class StegosaurusSceneIntegration
     {
-        internal const string Root = "Assets/Dinosaurs/Stegosaurus";
+        internal const string Root = "Assets/Dinosaurs/Stegosaurus/Prepared";
         internal const string PrefabPath = Root + "/StegosaurusGreenLegacy.prefab";
-        private const string Source = "Assets/FerociousIndustries/PBRDinosaurs/PBRStegasaurus";
+        private const string Source = "Assets/Dinosaurs/Stegosaurus/Source/FerociousIndustries";
 
         [MenuItem("Jurassic World/Scene/Add or Update Green Stegosaurus")]
         private static void AddMenu() => JurassicMenuGuard.Run(AddToMainScene, true);
@@ -22,8 +22,7 @@ namespace JurassicWorld.Editor
 
         internal static void EnsureAssets()
         {
-            if (!AssetDatabase.IsValidFolder("Assets/Dinosaurs")) AssetDatabase.CreateFolder("Assets", "Dinosaurs");
-            if (!AssetDatabase.IsValidFolder(Root)) AssetDatabase.CreateFolder("Assets/Dinosaurs", "Stegosaurus");
+            JurassicWorldSceneBuilder.EnsureFolder(Root);
             var clips = AssetDatabase.LoadAllAssetsAtPath(Source + "/Models/LODG/Stegasaurus_LODG.fbx").OfType<AnimationClip>().ToArray();
             AnimationClip idle = CopyClip(clips, "Armature|Stegasaurus_IdleA", Root + "/Idle.anim");
             AnimationClip walk = CopyClip(clips, "Armature|Stegasaurus_Walk", Root + "/Walk.anim");
@@ -99,12 +98,6 @@ namespace JurassicWorld.Editor
                 throw;
             }
             foreach (DinosaurAgent agent in previous) Object.DestroyImmediate(agent.gameObject);
-            foreach (HudController hud in Object.FindObjectsOfType<HudController>())
-            {
-                var serialized = new SerializedObject(hud);
-                serialized.FindProperty("expectedDinosaurCount").intValue = JurassicWorldSceneBuilder.EnabledDinosaurCount;
-                serialized.ApplyModifiedPropertiesWithoutUndo();
-            }
             EditorSceneManager.MarkSceneDirty(stegosaurus.gameObject.scene);
             AssetDatabase.SaveAssets();
             EditorSceneManager.SaveScene(stegosaurus.gameObject.scene);

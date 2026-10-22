@@ -145,8 +145,9 @@ namespace JurassicWorld
         private void RefreshFrontPoseEnvelope()
         {
             if (!frontActive || frontEnvelope == null || frontEnvelopeMotion == null) return;
-            var motion = IsSteppingTurn ? stepTurnMotion : frontAction ?? frontEnvelopeMotion;
-            float time = IsSteppingTurn ? stepTurnTime : frontAction != null ? frontActionTime : FrontStateTime(motion);
+            var motion = IsSteppingTurn ? stepTurnMotion : trafficMoving
+                ? interactionProfile.Find(InteractionMotionRole.Walk) ?? frontEnvelopeMotion : frontAction ?? frontEnvelopeMotion;
+            float time = IsSteppingTurn ? stepTurnTime : !trafficMoving && frontAction != null ? frontActionTime : FrontStateTime(motion);
             frontEnvelope.bands = FrontPoseBands(motion, time);
         }
 

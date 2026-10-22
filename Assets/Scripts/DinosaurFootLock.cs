@@ -60,6 +60,7 @@ namespace JurassicWorld
             if (feet.Count < 2)
                 Debug.LogWarning((agent != null ? agent.DisplayName : name) + "未找到足够的脚部骨骼，已停用落脚锁定。", this);
             BindTRexFeet(visualRoot);
+            BindGaitFeet();
         }
 
         /// <summary>
@@ -110,6 +111,7 @@ namespace JurassicWorld
 
         private void LateUpdate()
         {
+            if (gaitFeet != null) { UpdateGaitFeet(Time.deltaTime); return; }
             if (agent != null && agent.HasFootPhaseData && leftSupport != null && rightSupport != null)
             { UpdateTRexFeet(); return; }
             if (agent == null || feet.Count < 2)

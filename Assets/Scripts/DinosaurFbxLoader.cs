@@ -56,7 +56,6 @@ namespace JurassicWorld
                     modelRoot.transform, agent, footBoneNames, footLockJointDepth, releaseFootLockOnRise,
                     footContactHeight, footRiseThreshold, footLockDistanceLimit);
             }
-            HudController.ReportLoaded(displayName);
         }
 
         private void Fail(string message)

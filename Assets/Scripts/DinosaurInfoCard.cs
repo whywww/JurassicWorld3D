@@ -4,7 +4,7 @@ using UnityEngine.UI;
 namespace JurassicWorld
 {
     // 信息卡是 HUD Canvas 下的屏幕空间子面板（左上角锚定）。
-    // 运行期自动检测：当恐龙出现在视野中心附近且距离较近时淡入显示，偏离时淡出。
+    // 翼龙入画时优先显示；地面恐龙在视野中心附近且距离较近时显示。
     // 烘焙态通过 SceneBuilder SetField 写入 canvasGroup / titleText / bodyText 引用。
     // 阈值参数在 Inspector 中可调（有代码默认值，不需要 SetField 注入）。
     public sealed class DinosaurInfoCard : MonoBehaviour
@@ -26,6 +26,8 @@ namespace JurassicWorld
         // ---- 运行期状态 ----
         private Camera cachedCamera;
         private DinosaurAgent[] agentCache;
+        private PteradactalFlightController[] flyerCache;
+        private readonly Plane[] frustumPlanes = new Plane[6];
         private DinosaurAgent currentTarget;
 
         private void Awake()
@@ -43,6 +45,7 @@ namespace JurassicWorld
         {
             cachedCamera = Camera.main;
             agentCache = FindObjectsOfType<DinosaurAgent>();
+            flyerCache = FindObjectsOfType<PteradactalFlightController>();
         }
 
         private void OnDestroy()
@@ -73,13 +76,32 @@ namespace JurassicWorld
             if (cachedCamera == null)
             {
                 cachedCamera = Camera.main;
-                if (cachedCamera == null) return;
+                if (cachedCamera == null)
+                {
+                    currentTarget = null;
+                    fadeTarget = 0f;
+                    return;
+                }
             }
+            if (flyerCache == null || flyerCache.Length == 0)
+                flyerCache = FindObjectsOfType<PteradactalFlightController>();
+
+            GeometryUtility.CalculateFrustumPlanes(cachedCamera, frustumPlanes);
+            foreach (var flyer in flyerCache)
+            {
+                if (flyer == null || !flyer.isActiveAndEnabled ||
+                    !flyer.IsInView(cachedCamera, frustumPlanes)) continue;
+
+                currentTarget = null;
+                ApplyText(flyer.DisplayName, flyer.Description);
+                fadeTarget = 1f;
+                return;
+            }
+
             // 惰性获取 Agent 列表
             if (agentCache == null || agentCache.Length == 0)
             {
                 agentCache = FindObjectsOfType<DinosaurAgent>();
-                if (agentCache.Length == 0) return;
             }
 
             EvaluateAutoDisplay();

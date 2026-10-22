@@ -280,6 +280,7 @@ namespace JurassicWorld.Editor
             // The local pass owns planting here once enabled; a full Bake must not first
             // fill its reserved action spaces with the older central planting pass.
             if (File.Exists(RainforestSample.EnabledPath) && RainforestSample.Area.Contains(p)) return false;
+            if (RainforestExpansion.Owns(p)) return false;
             if (MainCreekIntegration.NearCreek(p.x, p.y, radius + 1.5f)) return false;
             Vector3 local = new Vector3(p.x, 0f, p.y) - c.Terrain.transform.position;
             if (c.Terrain.terrainData.GetSteepness(local.x / c.Terrain.terrainData.size.x,
@@ -497,7 +498,7 @@ namespace JurassicWorld.Editor
                     if (!SiteSafe(c, p, radius) || !c.TrunkSafe(p, radius) || c.Stems.Any(s => Vector2.Distance(s.Point, p) < s.Radius + radius + .8f)) continue;
                     GameObject tree = Instantiate(spec.Path, anchors.transform);
                     tree.name = spec.Name + "_Canopy_" + route + "_" + Mathf.RoundToInt(fraction * 100f);
-                    tree.transform.localScale *= (autumn ? 18f : 19.4f) / BoundsOf(tree).size.y;
+                    tree.transform.localScale *= spec.Height / BoundsOf(tree).size.y;
                     tree.transform.rotation = Quaternion.Euler(0f, (route * 83f + fraction * 193f) % 360f, 0f);
                     var marker = tree.GetComponent<SceneTreeObstacle>() ?? tree.AddComponent<SceneTreeObstacle>(); marker.SetRadius(radius);
                     Ground(tree, c.Terrain, p);

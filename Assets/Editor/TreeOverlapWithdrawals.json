@@ -1,0 +1,314 @@
+{
+    "enabled": true,
+    "restoreReplayVerified": true,
+    "withdrawn": [
+        {
+            "key": "Scene|Assets/NatureStarterKit2/Nature/tree01.prefab|6.0207|-25.3442|264.2570",
+            "kind": "Scene",
+            "prefab": "Assets/NatureStarterKit2/Nature/tree01.prefab",
+            "name": "tree01_0353",
+            "position": {
+                "x": 6.020717144012451,
+                "y": -0.020085472613573076,
+                "z": -25.344160079956056
+            },
+            "scale": {
+                "x": 1.0068131685256959,
+                "y": 1.0068131685256959,
+                "z": 1.0068131685256959
+            },
+            "localPosition": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.7416422367095947,
+                "z": 0.0,
+                "w": -0.670795738697052
+            },
+            "width": 0.0,
+            "height": 0.0,
+            "treeRotation": 0.0,
+            "radius": 0.8671237230300903,
+            "color": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "lightmap": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "hardBranches": false
+        },
+        {
+            "key": "Scene|Assets/NatureStarterKit2/Nature/tree01.prefab|6.2424|-25.7523|283.9633",
+            "kind": "Scene",
+            "prefab": "Assets/NatureStarterKit2/Nature/tree01.prefab",
+            "name": "tree01_0370",
+            "position": {
+                "x": 6.2423930168151859,
+                "y": -0.020085472613573076,
+                "z": -25.752330780029298
+            },
+            "scale": {
+                "x": 0.9828932285308838,
+                "y": 0.9828932285308838,
+                "z": 0.9828932285308838
+            },
+            "localPosition": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.6159135699272156,
+                "z": 0.0,
+                "w": -0.7878137230873108
+            },
+            "width": 0.0,
+            "height": 0.0,
+            "treeRotation": 0.0,
+            "radius": 0.8465225696563721,
+            "color": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "lightmap": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "hardBranches": false
+        },
+        {
+            "key": "Scene|Assets/NatureStarterKit2/Nature/tree04.prefab|12.8916|67.9447|217.7365",
+            "kind": "Scene",
+            "prefab": "Assets/NatureStarterKit2/Nature/tree04.prefab",
+            "name": "tree04_0198",
+            "position": {
+                "x": 12.891556739807129,
+                "y": -0.020085472613573076,
+                "z": 67.94471740722656
+            },
+            "scale": {
+                "x": 1.0753889083862305,
+                "y": 1.0753889083862305,
+                "z": 1.0753889083862305
+            },
+            "localPosition": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.9462646245956421,
+                "z": 0.0,
+                "w": -0.32339343428611758
+            },
+            "width": 0.0,
+            "height": 0.0,
+            "treeRotation": 0.0,
+            "radius": 0.7118526101112366,
+            "color": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "lightmap": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "hardBranches": false
+        },
+        {
+            "key": "Scene|Assets/VegetationDiversity/Prefabs/FabTree_1.prefab|5.5139|-24.6227|288.2261",
+            "kind": "Scene",
+            "prefab": "Assets/VegetationDiversity/Prefabs/FabTree_1.prefab",
+            "name": "FabTree_1_0253",
+            "position": {
+                "x": 5.51390266418457,
+                "y": -0.02008499577641487,
+                "z": -24.62267303466797
+            },
+            "scale": {
+                "x": 0.6129270792007446,
+                "y": 0.6129270792007446,
+                "z": 0.6129270792007446
+            },
+            "localPosition": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.5861877202987671,
+                "z": 0.0,
+                "w": -0.8101752400398254
+            },
+            "width": 0.0,
+            "height": 0.0,
+            "treeRotation": 0.0,
+            "radius": 0.6792253851890564,
+            "color": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "lightmap": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "hardBranches": false
+        },
+        {
+            "key": "Scene|Assets/VegetationDiversity/Prefabs/FabTree_1.prefab|6.2095|-24.6952|239.9180",
+            "kind": "Scene",
+            "prefab": "Assets/VegetationDiversity/Prefabs/FabTree_1.prefab",
+            "name": "FabTree_1_0379",
+            "position": {
+                "x": 6.209488391876221,
+                "y": -0.02008499577641487,
+                "z": -24.69516372680664
+            },
+            "scale": {
+                "x": 0.5960547924041748,
+                "y": 0.5960547924041748,
+                "z": 0.5960547924041748
+            },
+            "localPosition": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.8663830161094666,
+                "z": 0.0,
+                "w": -0.49938008189201357
+            },
+            "width": 0.0,
+            "height": 0.0,
+            "treeRotation": 0.0,
+            "radius": 0.6605281233787537,
+            "color": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "lightmap": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "hardBranches": false
+        },
+        {
+            "key": "Scene|Assets/VegetationDiversity/Prefabs/FabTree_5.prefab|-47.4643|32.8868|134.0763",
+            "kind": "Scene",
+            "prefab": "Assets/VegetationDiversity/Prefabs/FabTree_5.prefab",
+            "name": "FabTree_5_0312",
+            "position": {
+                "x": -47.464332580566409,
+                "y": -0.02008499577641487,
+                "z": 32.88675308227539
+            },
+            "scale": {
+                "x": 0.5901283025741577,
+                "y": 0.5901283025741577,
+                "z": 0.5901283025741577
+            },
+            "localPosition": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.9207648038864136,
+                "z": 0.0,
+                "w": 0.3901181221008301
+            },
+            "width": 0.0,
+            "height": 0.0,
+            "treeRotation": 0.0,
+            "radius": 0.8238226175308228,
+            "color": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "lightmap": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0
+            },
+            "hardBranches": false
+        },
+        {
+            "key": "Terrain|Assets/NatureStarterKit2/Nature/tree01.prefab|-53.2391|-63.4796|5.2825",
+            "kind": "Terrain",
+            "prefab": "Assets/NatureStarterKit2/Nature/tree01.prefab",
+            "name": "tree01",
+            "position": {
+                "x": -53.23909378051758,
+                "y": -0.00008547306060791016,
+                "z": -63.47957992553711
+            },
+            "scale": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "localPosition": {
+                "x": 0.23380452394485475,
+                "y": 0.07999145239591599,
+                "z": 0.18260210752487184
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": 0.0
+            },
+            "width": 0.9829542636871338,
+            "height": 0.914023220539093,
+            "treeRotation": 5.282464027404785,
+            "radius": 0.0,
+            "color": {
+                "r": 255,
+                "g": 255,
+                "b": 255,
+                "a": 255
+            },
+            "lightmap": {
+                "r": 255,
+                "g": 255,
+                "b": 255,
+                "a": 255
+            },
+            "hardBranches": false
+        }
+    ]
+}

@@ -1,8 +1,5 @@
 using System.Collections.Generic;
-using System.IO;
-using System.Text;
 using UnityEngine;
-using UnityEngine.Profiling;
 using UnityEngine.SceneManagement;
 
 namespace JurassicWorld
@@ -15,17 +12,10 @@ namespace JurassicWorld
         private const int Medium = 1;
         private const int High = 2;
         private static readonly string[] TierLabels = { "低", "中", "高" };
-        private static readonly string[] TierNames = { "Low", "Medium", "High" };
 
         private readonly Dictionary<Terrain, TerrainBaseline> terrainBaselines = new Dictionary<Terrain, TerrainBaseline>();
         private int selectedTier = Medium;
         private bool menuOpen;
-        private float benchmarkElapsed;
-        private int benchmarkFrames;
-        private double benchmarkTextureMiBSum;
-        private double benchmarkAllocatedMiBSum;
-        private string benchmarkResult;
-        private const float BenchmarkSeconds = 15f;
 
         private struct TerrainBaseline
         {
@@ -83,14 +73,6 @@ namespace JurassicWorld
         {
             if (Input.GetKeyDown(KeyCode.F10))
                 menuOpen = !menuOpen;
-
-            if (benchmarkFrames == 0 && benchmarkElapsed <= 0f) return;
-            benchmarkElapsed += Time.unscaledDeltaTime;
-            benchmarkFrames++;
-            benchmarkTextureMiBSum += Texture.currentTextureMemory / 1048576.0;
-            benchmarkAllocatedMiBSum += Profiler.GetTotalAllocatedMemoryLong() / 1048576.0;
-            if (benchmarkElapsed >= BenchmarkSeconds)
-                FinishBenchmark();
         }
 
         private void SelectTier(int tier)
@@ -101,49 +83,6 @@ namespace JurassicWorld
             PlayerPrefs.SetInt(PreferenceKey, tier);
             PlayerPrefs.Save();
             menuOpen = false;
-            benchmarkElapsed = 0f;
-            benchmarkFrames = 0;
-        }
-
-        private void StartBenchmark()
-        {
-            benchmarkElapsed = Mathf.Epsilon;
-            benchmarkFrames = 0;
-            benchmarkTextureMiBSum = 0;
-            benchmarkAllocatedMiBSum = 0;
-            benchmarkResult = null;
-            menuOpen = false;
-        }
-
-        private void FinishBenchmark()
-        {
-            double fps = benchmarkFrames / benchmarkElapsed;
-            double textureMiB = benchmarkTextureMiBSum / benchmarkFrames;
-            double allocatedMiB = benchmarkAllocatedMiBSum / benchmarkFrames;
-            string path = Path.Combine(Application.persistentDataPath, "quality-benchmark.csv");
-            bool newFile = !File.Exists(path);
-            var csv = new StringBuilder();
-            if (newFile)
-                csv.AppendLine("utc,tier,scene,width,height,seconds,average_fps,average_texture_mib,average_unity_allocated_mib");
-            csv.Append(System.DateTime.UtcNow.ToString("o")).Append(',').Append(TierNames[selectedTier]).Append(',')
-                .Append(SceneManager.GetActiveScene().name).Append(',').Append(Screen.width).Append(',')
-                .Append(Screen.height).Append(',').Append(benchmarkElapsed.ToString("F2", System.Globalization.CultureInfo.InvariantCulture))
-                .Append(',').Append(fps.ToString("F1", System.Globalization.CultureInfo.InvariantCulture))
-                .Append(',').Append(textureMiB.ToString("F1", System.Globalization.CultureInfo.InvariantCulture))
-                .Append(',').Append(allocatedMiB.ToString("F1", System.Globalization.CultureInfo.InvariantCulture))
-                .AppendLine();
-            benchmarkResult = string.Format("{0:F1} FPS / 纹理 {1:F1} MiB", fps, textureMiB);
-            try
-            {
-                File.AppendAllText(path, csv.ToString());
-                Debug.Log("[GraphicsQuality] " + benchmarkResult + "；记录：" + path);
-            }
-            catch (System.Exception exception)
-            {
-                Debug.LogWarning("[GraphicsQuality] 无法保存测量结果：" + exception.Message);
-            }
-            benchmarkElapsed = 0f;
-            benchmarkFrames = 0;
         }
 
         private void ApplyTerrainTier()
@@ -176,22 +115,14 @@ namespace JurassicWorld
                 menuOpen = !menuOpen;
 
             if (!menuOpen)
-            {
-                if (benchmarkFrames > 0)
-                    GUI.Label(new Rect(x, y + rowHeight, 250f, 28f), "测量中 " + Mathf.CeilToInt(BenchmarkSeconds - benchmarkElapsed) + " 秒");
-                else if (!string.IsNullOrEmpty(benchmarkResult))
-                    GUI.Label(new Rect(x, y + rowHeight, 280f, 28f), benchmarkResult);
                 return;
-            }
-            GUI.Box(new Rect(x, y + rowHeight + 4f, width, rowHeight * 4f + 16f), "选择画质");
+            GUI.Box(new Rect(x, y + rowHeight + 4f, width, rowHeight * 3f + 16f), "选择画质");
             for (int tier = Low; tier <= High; tier++)
             {
                 string label = TierLabels[tier] + (tier == selectedTier ? "  ✓" : "");
                 if (GUI.Button(new Rect(x + 8f, y + rowHeight + 26f + tier * rowHeight, width - 16f, rowHeight - 4f), label))
                     SelectTier(tier);
             }
-            if (GUI.Button(new Rect(x + 8f, y + rowHeight + 26f + 3f * rowHeight, width - 16f, rowHeight - 4f), "测量 15 秒"))
-                StartBenchmark();
         }
     }
 }

@@ -228,7 +228,8 @@ namespace JurassicWorld.Editor
                 maximumOffset = Mathf.Max(maximumOffset, root.magnitude);
                 yaw = nextYaw;
             }
-            motion.turnPlaybackSpeed = motion.role == InteractionMotionRole.Turn180Look || Mathf.Abs(motion.turnDegrees) < 1f
+            motion.turnPlaybackSpeed = motion.role == InteractionMotionRole.TurnLeft || motion.role == InteractionMotionRole.TurnRight
+                || motion.role == InteractionMotionRole.Turn180Look || Mathf.Abs(motion.turnDegrees) < 1f
                 ? 1f : Mathf.Clamp(90f / Mathf.Max(90f, peakRate), .2f, 1f);
             motion.blendDuration = .12f;
             Debug.Log($"TURN_CALIBRATION {motion.sourceName}: frames={frames.Length}, rootYaw={yaw:F2}, authoredYaw={frames[frames.Length - 1].authoredYaw:F2}, maxRootOffset={maximumOffset:F3}, playback={motion.turnPlaybackSpeed:F3}.");
@@ -245,11 +246,29 @@ namespace JurassicWorld.Editor
             return count == 0 ? Vector2.zero : delta / count;
         }
 
+        public static void Repair90DegreeTurns()
+        {
+            if (EditorApplication.isPlayingOrWillChangePlaymode) throw new InvalidOperationException("Stop Play before repairing turn samples.");
+            foreach (string path in new[] { "Assets/Navigation/TRexCuriosity.asset", "Assets/Scenes/TRexFrontTestAssets/SideInteractionProfile.asset" })
+            {
+                var profile = AssetDatabase.LoadAssetAtPath<DinosaurInteractionProfile>(path);
+                if (profile == null) throw new InvalidOperationException("Missing turn profile: " + path);
+                foreach (var role in new[] { InteractionMotionRole.TurnLeft, InteractionMotionRole.TurnRight })
+                {
+                    var motion = profile.Find(role);
+                    if (motion == null) throw new InvalidOperationException("Missing turn: " + role + " in " + path);
+                    ReconstructTurn(motion);
+                }
+                EditorUtility.SetDirty(profile);
+            }
+            AssetDatabase.SaveAssets();
+        }
+
         public static void RepairLegacyRootContinuity()
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode) throw new InvalidOperationException("Stop Play before repairing root samples.");
             var profile = AssetDatabase.LoadAssetAtPath<DinosaurInteractionProfile>("Assets/Navigation/TRexCuriosity.asset");
-            var report = new StringBuilder("# Legacy root continuity\n\nRebuild rootOffset and smooth the legacy 90-degree root heading across contact transitions. Clip assets, net heading, contacts and playback multipliers are preserved.\n\n");
+            var report = new StringBuilder("# Legacy root continuity\n\nRebuild rootOffset and smooth the legacy 90-degree root heading across contact transitions. Clip assets, net heading and contacts are preserved; 90-degree turns use original playback speed.\n\n");
             foreach (var motion in profile.motions)
             {
                 if (motion.role != InteractionMotionRole.TurnLeft && motion.role != InteractionMotionRole.TurnRight
@@ -259,16 +278,16 @@ namespace JurassicWorld.Editor
                 for (int i = 1; i < frames.Length; i++) before = Mathf.Max(before, Vector2.Distance(frames[i-1].rootOffset, frames[i].rootOffset));
                 if (motion.role == InteractionMotionRole.TurnLeft || motion.role == InteractionMotionRole.TurnRight)
                 {
-                    float playback = motion.turnPlaybackSpeed, blend = motion.blendDuration;
+                    float blend = motion.blendDuration;
                     ReconstructTurn(motion);
-                    motion.turnPlaybackSpeed = playback; motion.blendDuration = blend;
+                    motion.blendDuration = blend;
                 }
                 for (int i = 1; i < frames.Length; i++)
                 {
                     Vector2 delta = SupportTravel(frames[i-1], frames[i], frames[i-1].yaw, frames[i].yaw);
                     root += delta; frames[i].rootOffset = root; after = Mathf.Max(after, delta.magnitude);
                 }
-                report.AppendLine($"- {motion.sourceName}: max adjacent root step {before:F4} → {after:F4}m; playback {motion.turnPlaybackSpeed:F4} unchanged.");
+                report.AppendLine($"- {motion.sourceName}: max adjacent root step {before:F4} → {after:F4}m; playback {motion.turnPlaybackSpeed:F4}.");
             }
             EditorUtility.SetDirty(profile); AssetDatabase.SaveAssets();
             File.WriteAllText(RainforestSample.Output + "/RootContinuity.md", report.ToString());

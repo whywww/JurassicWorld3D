@@ -14,17 +14,13 @@ namespace JurassicWorld.Editor
             try
             {
                 EditorSceneManager.OpenScene("Assets/Scenes/Main.unity");
-                Directory.CreateDirectory("Assets/UI/DinosaurPortraits");
                 foreach (DinosaurAgent agent in UnityEngine.Object.FindObjectsOfType<DinosaurAgent>())
                 {
-                    string path = "Assets/UI/DinosaurPortraits/" + agent.name + ".png";
-                    Capture(agent, path);
-                    AssetDatabase.ImportAsset(path);
-                    var importer = (TextureImporter)AssetImporter.GetAtPath(path);
-                    importer.textureType = TextureImporterType.Sprite;
-                    importer.mipmapEnabled = false;
-                    importer.textureCompression = TextureImporterCompression.Uncompressed;
-                    importer.SaveAndReimport();
+                    string folder = JurassicWorldSceneBuilder.GetDinosaurPreparedFolder(agent.name);
+                    JurassicWorldSceneBuilder.EnsureFolder(folder);
+                    string path = folder + "/" + agent.name + ".png";
+                    CaptureModel(agent.GetComponent<DinosaurFbxLoader>().ModelRoot, agent.name, path);
+                    ConfigurePortraitImport(path);
                     var settings = new SerializedObject(agent);
                     settings.FindProperty("minimapPortrait").objectReferenceValue = AssetDatabase.LoadAssetAtPath<Sprite>(path);
                     settings.ApplyModifiedPropertiesWithoutUndo();
@@ -35,9 +31,19 @@ namespace JurassicWorld.Editor
             catch (Exception error) { Debug.LogException(error); EditorApplication.Exit(1); }
         }
 
-        private static void Capture(DinosaurAgent agent, string path)
+        internal static void ConfigurePortraitImport(string path)
         {
-            GameObject clone = UnityEngine.Object.Instantiate(agent.GetComponent<DinosaurFbxLoader>().ModelRoot);
+            AssetDatabase.ImportAsset(path);
+            var importer = (TextureImporter)AssetImporter.GetAtPath(path);
+            importer.textureType = TextureImporterType.Sprite;
+            importer.mipmapEnabled = false;
+            importer.textureCompression = TextureImporterCompression.Uncompressed;
+            importer.SaveAndReimport();
+        }
+
+        internal static void CaptureModel(GameObject modelRoot, string agentName, string path)
+        {
+            GameObject clone = UnityEngine.Object.Instantiate(modelRoot);
             var cameraObject = new GameObject("Portrait Camera", typeof(Camera));
             var lightObject = new GameObject("Portrait Light", typeof(Light));
             var target = new RenderTexture(128, 128, 24);
@@ -55,7 +61,7 @@ namespace JurassicWorld.Editor
                 Transform head = clone.GetComponentsInChildren<Transform>().FirstOrDefault(t => t.name.ToLowerInvariant().Contains("head") && !t.name.ToLowerInvariant().Contains("end"));
                 Vector3 center = head != null ? head.position : bounds.center;
                 float frame = Mathf.Max(bounds.size.x, bounds.size.y, bounds.size.z) * 0.16f;
-                Debug.Log("PORTRAIT_HEAD " + agent.name + " " + (head != null ? head.name : "fallback") + " frame=" + frame);
+                Debug.Log("PORTRAIT_HEAD " + agentName + " " + (head != null ? head.name : "fallback") + " frame=" + frame);
                 Camera camera = cameraObject.GetComponent<Camera>();
                 camera.enabled = false;
                 camera.orthographic = true;
@@ -67,7 +73,7 @@ namespace JurassicWorld.Editor
                 camera.farClipPlane = frame * 20f;
                 camera.transform.position = center + new Vector3(1f, 0.25f, 1f).normalized * frame * 5f;
                 camera.transform.LookAt(center);
-                Vector3 offset = agent.name == "Tyrannosaurus Rex" ? camera.transform.right * frame * 0.3f - camera.transform.up * frame * 0.05f : camera.transform.up * frame * 0.2f;
+                Vector3 offset = agentName == "Tyrannosaurus Rex" ? camera.transform.right * frame * 0.3f - camera.transform.up * frame * 0.05f : camera.transform.up * frame * 0.2f;
                 camera.transform.position += offset;
                 camera.orthographicSize = frame * 0.7f;
                 Light light = lightObject.GetComponent<Light>();

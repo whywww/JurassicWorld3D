@@ -1,0 +1,22 @@
+{
+  "actions": [
+    {
+      "name": "PixCap Animation",
+      "frames": [
+        0.0,
+        256.6000061035156
+      ]
+    }
+  ],
+  "materials": [
+    {
+      "name": "material0",
+      "textures": {
+        "BASE COLOR": "Texture1.png",
+        "METALLIC ROUGHNESS": "Texture2.png",
+        "NORMAL MAP": "Texture0.png",
+        "OCCLUSION": "Texture3.png"
+      }
+    }
+  ]
+}

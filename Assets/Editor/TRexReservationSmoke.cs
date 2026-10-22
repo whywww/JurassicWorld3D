@@ -21,10 +21,11 @@ namespace JurassicWorld.Editor
         private static int frame, scenario, phase;
         private static float began, phaseBegan, waitBegan, maxReturnWalked, maxActionTime;
         private static Vector3 previous, anchor;
-        private static bool sawEnding, sawTurn, sawReturn, sawWait, sawHistoryEnd, sawPeer;
+        private static bool sawEnding, sawTurn, sawReturn, sawWait, sawHistoryEnd, sawPeer, sawFreeWalk;
         private static GameObject peerObject;
         private static List<Vector3> trail;
         private static int trailCount;
+        private static Vector3 returnStart;
         private static readonly System.Text.StringBuilder report = new System.Text.StringBuilder();
         private static object Get(string field) => typeof(DinosaurAgent).GetField(field, Flags).GetValue(rex);
         private static void Set(string field, object value) => typeof(DinosaurAgent).GetField(field, Flags).SetValue(rex, value);
@@ -76,8 +77,8 @@ namespace JurassicWorld.Editor
             Call("BeginInteractionSequence", false, false); Call("BeginFrontFollow", false);
             Require(rex.IsFrontInteractionActive && rex.FrontInteractionStage.StartsWith("Follow"), "Fixture did not enter Follow.");
             phase = 0; phaseBegan = began = Time.time; waitBegan = -1f;
-            maxReturnWalked = maxActionTime = 0f; previous = anchor = rex.transform.position;
-            sawEnding = sawTurn = sawReturn = sawWait = sawHistoryEnd = sawPeer = false;
+            maxReturnWalked = maxActionTime = 0f; previous = anchor = returnStart = rex.transform.position;
+            sawEnding = sawTurn = sawReturn = sawWait = sawHistoryEnd = sawPeer = sawFreeWalk = false;
             trail = (List<Vector3>)Get("frontTrail"); trailCount = 0;
         }
         private static void Tick()
@@ -137,8 +138,11 @@ namespace JurassicWorld.Editor
             if (phase == 0)
             {
                 Require(rex.FrontInteractionStage.StartsWith("Follow"), "Fixture did not follow before the clipping test.");
-                if (Time.time - began < 1.5f) return;
+                // A longer trail leaves route left after the guaranteed opening walk, so the
+                // static block is actually observed instead of the return finishing first.
+                if (Time.time - began < 4f) return;
                 Require(Vector3.Distance(anchor, rex.transform.position) > .5f, "Follow did not move before the clipping test.");
+                Set("frontReturnWalkTime", 8f);
                 // The performance envelope sits inside a solid obstacle; only walking may be blocked.
                 settings.solidObstacles = new[] { new Bounds(rex.transform.position + Vector3.up * 3f, new Vector3(8f, 8f, 8f)) };
                 Call("BeginFrontEnding"); phase = 1; phaseBegan = Time.time;
@@ -155,13 +159,21 @@ namespace JurassicWorld.Editor
                 }
                 if (!rex.FrontInteractionStage.StartsWith("ReturnWalk")) return;
                 sawReturn = true;
-                // Same obstacle moved onto the walking path from the actual pose.
-                settings.solidObstacles = new[] { new Bounds(rex.transform.position + Vector3.up * 3f, new Vector3(8f, 6f, 8f)) };
+                returnStart = rex.transform.position;
+                // A body-wide obstacle moved onto the walking path from the actual pose.
+                settings.solidObstacles = new[] { new Bounds(rex.transform.position + Vector3.up * 3f, new Vector3(12f, 6f, 12f)) };
                 phase = 2; phaseBegan = Time.time; waitBegan = -1f;
                 return;
             }
             if (phase == 2)
             {
+                // The first two seconds after ending deliberately ignore static scenery.
+                if (rex.ReturnFreeWalkActive)
+                {
+                    Require(!Flag("frontWaiting") && !Flag("frontPeerClearing"), "Guaranteed walk waited for scenery: " + rex.FrontBlockingReason);
+                    if (Vector3.Distance(returnStart, rex.transform.position) > .3f) sawFreeWalk = true;
+                    return;
+                }
                 if (Flag("frontWaiting") && waitBegan < 0f)
                 {
                     waitBegan = Time.time; anchor = rex.transform.position;
@@ -188,8 +200,8 @@ namespace JurassicWorld.Editor
                 Require(Time.time - phaseBegan < 20f, "Return did not resume and finish after the static obstacle was cleared.");
                 return;
             }
-            Require(sawEnding && sawTurn && sawReturn && sawWait, "Clipping fixture skipped animation, turn, return or static walking wait.");
-            report.AppendLine($"PASS special animation: {maxActionTime:F2}s of performance progress with the body inside a solid obstacle; the same obstacle then stopped ReturnWalk until cleared.");
+            Require(sawEnding && sawTurn && sawReturn && sawWait && sawFreeWalk, "Clipping fixture skipped animation, turn, guaranteed walk, return or static walking wait.");
+            report.AppendLine($"PASS special animation: {maxActionTime:F2}s of performance progress with the body inside a solid obstacle; the guaranteed opening walk crossed it, then the same obstacle stopped ReturnWalk until cleared.");
             Next();
         }
         private static void TickPeerPriority()
@@ -205,12 +217,13 @@ namespace JurassicWorld.Editor
             }
             if (phase == 1)
             {
-                if (Flag("frontWaiting") && waitBegan < 0f)
+                if ((Flag("frontWaiting") || rex.GroundTrafficDuration > 0f && rex.GroundTrafficBlocker != "--") && waitBegan < 0f)
                 {
                     waitBegan = Time.time; anchor = rex.transform.position;
                     sawPeer = true;
                     Require(rex.FrontInteractionStage.Contains("WaitingForPeerClearance") || rex.FrontInteractionStage.Contains("YieldingToPeer")
-                        || rex.FrontInteractionStage.Contains("PassingPeer"), "Peer block was not reported as a peer conflict: " + rex.FrontInteractionStage);
+                        || rex.FrontInteractionStage.Contains("PassingPeer") || rex.GroundTrafficStatus != "Inactive",
+                        "Peer block was not reported as a peer conflict: " + rex.FrontInteractionStage);
                 }
                 // The priority holder keeps its pose while the other dinosaur is expected to clear.
                 if (waitBegan >= 0f && Time.time - waitBegan < 1f && !Flag("frontPeerClearing"))

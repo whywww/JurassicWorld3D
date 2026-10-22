@@ -1,0 +1,31 @@
+{
+  "animals": [
+    {
+      "species": "Sauropelta",
+      "walkSpeed": 0.65,
+      "groundSpeed": 0.20366047,
+      "visualY": 0.029076375,
+      "loopStart": 0.0,
+      "loopEnd": 5.0,
+      "footLock": false
+    },
+    {
+      "species": "Pachycephalosaurus",
+      "walkSpeed": 1.3939292,
+      "groundSpeed": 1.3939292,
+      "visualY": 0.015803236,
+      "loopStart": 0.0,
+      "loopEnd": 1.625,
+      "footLock": true
+    },
+    {
+      "species": "Baurusuchus",
+      "walkSpeed": 0.8,
+      "groundSpeed": 0.35691664,
+      "visualY": 0.015853190000000003,
+      "loopStart": 0.0,
+      "loopEnd": 6.666667,
+      "footLock": false
+    }
+  ]
+}

@@ -74,7 +74,7 @@ namespace JurassicWorld.Editor
             {
                 string path = PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(marker.gameObject);
                 float height = CentralForestDensification.BoundsOf(marker.gameObject).size.y, basis = BaseHeight(path);
-                if (height < basis * .82f - .01f || height > basis * 1.14f + .01f)
+                if (!TreeHeightAdjustment.Enabled && (height < basis * .82f - .01f || height > basis * 1.14f + .01f))
                     throw new InvalidOperationException("Sample tree size outside species range: " + marker.name);
                 bool retained = original.Any(t => t.path == path && Vector2.Distance(t.position,
                     new Vector2(marker.transform.position.x, marker.transform.position.z)) < .001f);

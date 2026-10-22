@@ -75,6 +75,7 @@ namespace JurassicWorld
 
         public void ResetSupportAnchors()
         {
+            ResetGaitFeet();
             EndReturnHandoff();
             EndSideHandoff();
             supportRecoveryUntil = 0f;

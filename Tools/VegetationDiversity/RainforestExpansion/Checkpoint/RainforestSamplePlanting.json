@@ -1,0 +1,266 @@
+{
+    "trees": [
+        {
+            "path": "Assets/NatureStarterKit2/Nature/tree03.prefab",
+            "position": {
+                "x": 20.170185089111329,
+                "y": -2.841198444366455
+            },
+            "yaw": 139.05892944335938,
+            "variation": 1.0123695135116578
+        },
+        {
+            "path": "Assets/NatureStarterKit2/Nature/tree02.prefab",
+            "position": {
+                "x": -24.060606002807618,
+                "y": 20.87519645690918
+            },
+            "yaw": 95.64665985107422,
+            "variation": 1.091041922569275
+        },
+        {
+            "path": "Assets/VegetationDiversity/Prefabs/Pachira_B.prefab",
+            "position": {
+                "x": -4.89536190032959,
+                "y": 27.7371768951416
+            },
+            "yaw": 339.67822265625,
+            "variation": 1.029120922088623
+        },
+        {
+            "path": "Assets/VegetationDiversity/Prefabs/Pachira_B.prefab",
+            "position": {
+                "x": 24.974559783935548,
+                "y": 41.91624069213867
+            },
+            "yaw": 209.46029663085938,
+            "variation": 1.0141807794570923
+        },
+        {
+            "path": "Assets/VegetationDiversity/Prefabs/Pachira_B.prefab",
+            "position": {
+                "x": 11.310639381408692,
+                "y": 3.4325432777404787
+            },
+            "yaw": 58.31982421875,
+            "variation": 0.8766278028488159
+        },
+        {
+            "path": "Assets/NatureStarterKit2/Nature/tree01.prefab",
+            "position": {
+                "x": 13.061410903930664,
+                "y": -5.535982131958008
+            },
+            "yaw": 201.1068878173828,
+            "variation": 0.9149184823036194
+        },
+        {
+            "path": "Assets/VegetationDiversity/Prefabs/Pachira_B.prefab",
+            "position": {
+                "x": 22.282564163208009,
+                "y": -9.497357368469239
+            },
+            "yaw": 89.3812484741211,
+            "variation": 0.9797804355621338
+        },
+        {
+            "path": "Assets/VegetationDiversity/Prefabs/Pachira_B.prefab",
+            "position": {
+                "x": 9.278911590576172,
+                "y": -1.6349142789840699
+            },
+            "yaw": 118.63008880615235,
+            "variation": 1.1074026823043824
+        },
+        {
+            "path": "Assets/NatureStarterKit2/Nature/tree02.prefab",
+            "position": {
+                "x": -5.516304016113281,
+                "y": 43.46684265136719
+            },
+            "yaw": 213.50271606445313,
+            "variation": 1.085378646850586
+        },
+        {
+            "path": "Assets/VegetationDiversity/Prefabs/Pachira_B.prefab",
+            "position": {
+                "x": -23.16218376159668,
+                "y": 32.90644454956055
+            },
+            "yaw": 189.99496459960938,
+            "variation": 0.9856976270675659
+        },
+        {
+            "path": "Assets/NatureStarterKit2/Nature/tree01.prefab",
+            "position": {
+                "x": -14.006630897521973,
+                "y": 30.684528350830079
+            },
+            "yaw": 233.49282836914063,
+            "variation": 1.0896527767181397
+        },
+        {
+            "path": "Assets/NatureStarterKit2/Nature/tree03.prefab",
+            "position": {
+                "x": 17.282499313354493,
+                "y": -4.401068210601807
+            },
+            "yaw": 237.77871704101563,
+            "variation": 0.8761776685714722
+        },
+        {
+            "path": "Assets/VegetationDiversity/Prefabs/Pachira_B.prefab",
+            "position": {
+                "x": 9.088730812072754,
+                "y": 41.911651611328128
+            },
+            "yaw": 38.019874572753909,
+            "variation": 0.9992366433143616
+        },
+        {
+            "path": "Assets/VegetationDiversity/Prefabs/Pachira_B.prefab",
+            "position": {
+                "x": -13.094339370727539,
+                "y": 26.651851654052736
+            },
+            "yaw": 18.25674057006836,
+            "variation": 0.9235205054283142
+        },
+        {
+            "path": "Assets/NatureStarterKit2/Nature/tree01.prefab",
+            "position": {
+                "x": 17.26331901550293,
+                "y": 3.3652379512786867
+            },
+            "yaw": 96.35785675048828,
+            "variation": 1.1201730966567994
+        },
+        {
+            "path": "Assets/NatureStarterKit2/Nature/tree03.prefab",
+            "position": {
+                "x": -20.159530639648439,
+                "y": 32.527732849121097
+            },
+            "yaw": 136.90115356445313,
+            "variation": 0.9069398641586304
+        },
+        {
+            "path": "Assets/NatureStarterKit2/Nature/tree02.prefab",
+            "position": {
+                "x": -16.579402923583986,
+                "y": 21.567081451416017
+            },
+            "yaw": 122.52413940429688,
+            "variation": 0.8722986578941345
+        },
+        {
+            "path": "Assets/NatureStarterKit2/Nature/tree04.prefab",
+            "position": {
+                "x": 15.062942504882813,
+                "y": -1.8215500116348267
+            },
+            "yaw": 194.0263671875,
+            "variation": 0.9847328662872315
+        },
+        {
+            "path": "Assets/VegetationDiversity/Prefabs/Pachira_B.prefab",
+            "position": {
+                "x": 6.746078014373779,
+                "y": -3.4083786010742189
+            },
+            "yaw": 135.44419860839845,
+            "variation": 1.1176649332046509
+        },
+        {
+            "path": "Assets/NatureStarterKit2/Nature/tree03.prefab",
+            "position": {
+                "x": 23.948198318481447,
+                "y": 39.49889373779297
+            },
+            "yaw": 225.82879638671876,
+            "variation": 0.9617680907249451
+        },
+        {
+            "path": "Assets/NatureStarterKit2/Nature/tree02.prefab",
+            "position": {
+                "x": 22.985742568969728,
+                "y": 44.99900817871094
+            },
+            "yaw": 198.53927612304688,
+            "variation": 1.133788824081421
+        },
+        {
+            "path": "Assets/NatureStarterKit2/Nature/tree03.prefab",
+            "position": {
+                "x": 23.455379486083986,
+                "y": -2.8547143936157228
+            },
+            "yaw": 29.818830490112306,
+            "variation": 0.9301395416259766
+        },
+        {
+            "path": "Assets/VegetationDiversity/Prefabs/Pachira_B.prefab",
+            "position": {
+                "x": 6.783369064331055,
+                "y": 40.48388671875
+            },
+            "yaw": 152.1834716796875,
+            "variation": 0.9233195185661316
+        },
+        {
+            "path": "Assets/NatureStarterKit2/Nature/tree01.prefab",
+            "position": {
+                "x": -17.639795303344728,
+                "y": 31.077198028564454
+            },
+            "yaw": 191.5428924560547,
+            "variation": 1.135988473892212
+        },
+        {
+            "path": "Assets/VegetationDiversity/Prefabs/Pachira_B.prefab",
+            "position": {
+                "x": 20.267099380493165,
+                "y": 0.893351674079895
+            },
+            "yaw": 246.90191650390626,
+            "variation": 0.9161454439163208
+        },
+        {
+            "path": "Assets/VegetationDiversity/Prefabs/Pachira_B.prefab",
+            "position": {
+                "x": 19.9079647064209,
+                "y": -7.343323230743408
+            },
+            "yaw": 218.09725952148438,
+            "variation": 0.869319498538971
+        },
+        {
+            "path": "Assets/VegetationDiversity/Prefabs/Pachira_B.prefab",
+            "position": {
+                "x": 16.044260025024415,
+                "y": -8.752447128295899
+            },
+            "yaw": 315.463134765625,
+            "variation": 0.8211883902549744
+        },
+        {
+            "path": "Assets/NatureStarterKit2/Nature/tree04.prefab",
+            "position": {
+                "x": 6.3910932540893559,
+                "y": 0.11124742031097412
+            },
+            "yaw": 118.35345458984375,
+            "variation": 1.0497689247131348
+        },
+        {
+            "path": "Assets/NatureStarterKit2/Nature/tree02.prefab",
+            "position": {
+                "x": -10.231244087219239,
+                "y": 42.24085235595703
+            },
+            "yaw": 243.75177001953126,
+            "variation": 1.0211946964263917
+        }
+    ],
+    "layout": "{\"clearingPositions\":[{\"x\":-14.0,\"y\":0.009172201156616211,\"z\":5.0},{\"x\":14.0,\"y\":0.009172201156616211,\"z\":27.0}],\"clearingRotations\":[{\"x\":0.0,\"y\":0.0,\"z\":0.0,\"w\":1.0},{\"x\":0.0,\"y\":0.0,\"z\":0.0,\"w\":1.0}],\"corridor\":[{\"x\":-14.0,\"y\":0.009172201156616211,\"z\":5.0},{\"x\":-4.0,\"y\":0.009172201156616211,\"z\":14.0},{\"x\":5.0,\"y\":0.009172201156616211,\"z\":21.0},{\"x\":14.0,\"y\":0.009172201156616211,\"z\":27.0}],\"referenceDensity\":0.076171875,\"plantableArea\":585.0,\"corridorArea\":989.0,\"clearingArea\":1176.0,\"originalTrees\":0,\"plantedTrees\":29}"
+}

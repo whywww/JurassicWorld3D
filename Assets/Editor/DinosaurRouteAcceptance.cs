@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -205,10 +206,12 @@ namespace JurassicWorld.Editor
         private static void OnPlayModeChanged(PlayModeStateChange state)
         {
             if (state != PlayModeStateChange.EnteredPlayMode) return;
-            agents = UnityEngine.Object.FindObjectsOfType<DinosaurAgent>();
-            if (agents.Length != JurassicWorldSceneBuilder.EnabledDinosaurCount || agents.Length < 2 || agents.Length > RoutePairs.GetLength(1))
+            var all = UnityEngine.Object.FindObjectsOfType<DinosaurAgent>();
+            agents = all.Where(a => a.Species == DinosaurAgent.DinosaurSpecies.Tyrannosaurus
+                || a.Species == DinosaurAgent.DinosaurSpecies.Velociraptor).ToArray();
+            if (all.Length != JurassicWorldSceneBuilder.EnabledDinosaurCount || agents.Length < 2 || agents.Length > RoutePairs.GetLength(1))
             {
-                Finish(new InvalidOperationException("Route verification expects the configured enabled dinosaur count (two or three)."));
+                Finish(new InvalidOperationException("Route verification needs T-Rex and Velociraptor route participants, and the scene total must equal the configured enabled count."));
                 return;
             }
             previous = new Vector3[agents.Length];

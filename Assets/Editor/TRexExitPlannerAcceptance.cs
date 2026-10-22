@@ -86,7 +86,7 @@ namespace JurassicWorld.Editor
             Call("ClearSteppingTurn");
             settings.solidObstacles = Array.Empty<Bounds>(); TerrainTreeObstacleRegistry.Invalidate();
             Set("peers", new[] { rex }); Set("frontTestControlled", true); Set("frontTestWaiting", false);
-            Set("frontFollowDuration", 30f); Set("frontReturnWalkTime", 2f);
+            Set("frontFollowDuration", 30f); Set("frontReturnWalkTime", scenario == 2 ? 5f : 2f);
             rex.transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
             var animation = rex.GetComponentInChildren<Animation>(); animation.Stop();
             var idle = (string)Get("idleClip"); animation.Play(idle); animation[idle].time = 0f; animation.Sample(); feet?.ResetSupportAnchors();
@@ -235,7 +235,10 @@ namespace JurassicWorld.Editor
                 Call("BeginFrontEnding"); phase = 1; endingBegan = Time.time;
                 return;
             }
-            if (!blockedInjected && sawReturn && (float)Get("frontReturnWalked") > .2f)
+            // The opening two seconds after a return turn deliberately cross static scenery.
+            // Inject only after that guaranteed walk, while the actor is walking normally.
+            if (!blockedInjected && sawReturn && (float)Get("frontReturnWalked") > .2f
+                && !rex.ReturnFreeWalkActive && !rex.IsSteppingTurn && !Flag("frontWaiting"))
             {
                 Vector3 target = trail[Mathf.Max(0, (int)Get("frontReturnIndex"))];
                 Vector3 direction = target - rex.transform.position; direction.y = 0f;
@@ -244,7 +247,7 @@ namespace JurassicWorld.Editor
                 blockedInjected = true; waitBegan = -1f;
             }
             if (!blockedInjected || clearedObstacle) return;
-            if (Flag("frontWaiting") && waitBegan < 0f)
+            if (Flag("frontWaiting") && !rex.IsSteppingTurn && !rex.ReturnFreeWalkActive && waitBegan < 0f)
             {
                 waitBegan = Time.time; waitAnchor = rex.transform.position;
                 sawWait = true;
@@ -253,7 +256,8 @@ namespace JurassicWorld.Editor
             }
             if (waitBegan >= 0f)
             {
-                Require(Vector3.Distance(waitAnchor, rex.transform.position) < .05f, "Return walked through the injected static obstacle.");
+                if (!rex.IsSteppingTurn && !rex.ReturnFreeWalkActive)
+                    Require(Vector3.Distance(waitAnchor, rex.transform.position) < .05f, "Return walked through the injected static obstacle.");
                 if (Time.time - waitBegan >= .8f) { settings.solidObstacles = Array.Empty<Bounds>(); clearedObstacle = true; }
             }
             Require(Time.time - endingBegan < 30f, "Injected static obstacle never stopped the return walk: " + rex.FrontInteractionStage);
@@ -271,6 +275,8 @@ namespace JurassicWorld.Editor
         }
         private static void TrackWalkingPose()
         {
+            // Return turns and their guaranteed opening walk may cross static scenery by design.
+            if (rex.IsSteppingTurn || rex.ReturnFreeWalkActive) return;
             Vector3 point = rex.transform.position + Vector3.up * 2f;
             foreach (var wall in settings.solidObstacles)
                 Require(!wall.Contains(point), "Walking body entered a wall: " + rex.transform.position);

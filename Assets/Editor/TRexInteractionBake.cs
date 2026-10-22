@@ -345,7 +345,7 @@ namespace JurassicWorld.Editor
             Debug.Log($"TREX_LARGE_OBSTACLES_REBUILT: {settings.solidObstacles.Length} large rocks; trunks only; soft plants and small props excluded.");
         }
 
-        internal static void RebuildObstaclesAndNavigation(DinosaurInteractionSettings settings, DinosaurCoreBody body)
+        internal static void RebuildObstaclesAndNavigation(DinosaurInteractionSettings settings, DinosaurCoreBody body, string navigationPath = null)
         {
             TerrainTreeObstacleRegistry.Invalidate();
             settings.solidObstacles = SolidProps().Select(BoundsOf).Where(b => b.size.sqrMagnitude > .001f).ToArray();
@@ -356,7 +356,7 @@ namespace JurassicWorld.Editor
                 .Where(b => b != null && b.bands.Length > 0)
                 .Select(b => Mathf.Max(.35f, b.bands.Max(band => Mathf.Abs(band.bounds.center.x) + band.bounds.extents.x) + .15f))
                 .DefaultIfEmpty(1f).Min();
-            BuildNavigation(settings, body);
+            BuildNavigation(settings, body, navigationPath ?? DataPath);
             EditorUtility.SetDirty(settings);
         }
 
@@ -672,7 +672,7 @@ namespace JurassicWorld.Editor
             return true;
         }
 
-        private static void BuildNavigation(DinosaurInteractionSettings settings, DinosaurCoreBody body)
+        private static void BuildNavigation(DinosaurInteractionSettings settings, DinosaurCoreBody body, string navigationPath)
         {
             var sources = new List<NavMeshBuildSource>();
             Rect area = WorldBounds.DinosaurActivityXZ;
@@ -702,8 +702,8 @@ namespace JurassicWorld.Editor
             var data = NavMeshBuilder.BuildNavMeshData(build, sources, bounds, Vector3.zero, Quaternion.identity);
             if (data == null) throw new InvalidOperationException("NavMesh build failed.");
             data.name = "TRex Interaction NavMesh";
-            var existing = AssetDatabase.LoadAssetAtPath<NavMeshData>(DataPath);
-            if (existing == null) AssetDatabase.CreateAsset(data, DataPath);
+            var existing = AssetDatabase.LoadAssetAtPath<NavMeshData>(navigationPath);
+            if (existing == null) AssetDatabase.CreateAsset(data, navigationPath);
             else { EditorUtility.CopySerialized(data, existing); Object.DestroyImmediate(data); data = existing; EditorUtility.SetDirty(data); }
             settings.navigationData = data;
             var instance = NavMesh.AddNavMeshData(data);

@@ -28,7 +28,7 @@ namespace JurassicWorld
                 label = new GUIStyle(GUI.skin.label) { fontSize = 17, wordWrap = true };
                 title = new GUIStyle(label) { fontSize = 22, fontStyle = FontStyle.Bold };
             }
-            const float width = 650f, height = 216f;
+            const float width = 650f, height = 280f;
             float scale = Mathf.Max(.1f, Mathf.Min(1f, (Screen.width - 24f) / width, (Screen.height - 24f) / height));
             float y = anchorBottom ? Mathf.Max(12f, Screen.height - height * scale - 12f) : 12f;
             Matrix4x4 previousMatrix = GUI.matrix;
@@ -54,9 +54,11 @@ namespace JurassicWorld
             GUI.Label(new Rect(16, 10, 610, 30), "Debug window", title);
             GUI.Label(new Rect(16, 42, 610, 28), $"Angle: {dinosaur.PlayerInteractionAngle:F1}°   Distance: {distance:F1} m   Visibility: {visibility}", label);
             GUI.Label(new Rect(16, 74, 610, 28), $"Stage: {stage}", label);
-            GUI.Label(new Rect(16, 104, 610, 28), $"Animation: {dinosaur.CurrentAnimationSourceName}  {dinosaur.FrontActionPlaybackTime:F2}s", label);
+            GUI.Label(new Rect(16, 104, 610, 28), $"Animation: {dinosaur.CurrentAnimationSourceName}  {dinosaur.CurrentAnimationPlaybackTime:F2}s", label);
             GUI.Label(new Rect(16, 134, 610, 28), "Reason: " + reason, label);
-            GUI.Label(new Rect(16, 178, 610, 28), $"{toggleKey}: show/hide" + (showResetHint ? "  |  R: reset" : ""), label);
+            GUI.Label(new Rect(16, 164, 610, 28), $"Priority: {dinosaur.GroundPriorityRank}   Player interaction: {dinosaur.HasInteractionRightOfWay}", label);
+            GUI.Label(new Rect(16, 194, 610, 48), $"Traffic: {dinosaur.GroundTrafficStatus} | {dinosaur.GroundTrafficBlocker} | {dinosaur.GroundTrafficDuration:F1}s", label);
+            GUI.Label(new Rect(16, 246, 610, 28), $"{toggleKey}: show/hide" + (showResetHint ? "  |  R: reset" : ""), label);
             GUI.matrix = previousMatrix;
         }
     }

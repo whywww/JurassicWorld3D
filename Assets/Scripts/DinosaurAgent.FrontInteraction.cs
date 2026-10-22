@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 
 namespace JurassicWorld
 {
@@ -38,6 +39,15 @@ namespace JurassicWorld
         private const float FrontSteppingTurnAngle = 60f;
         private float frontReturnBlendUntil, frontReturnEntryPhase;
         private bool frontReturnAligning;
+        private float frontReturnFreeWalkUntil;
+        private const float FrontReturnNearCornerDistance = .45f;
+        private const float FrontReturnFreeWalkDuration = 2f;
+        private DinosaurInteractionProfile.Motion frontReturnTurnMotion;
+        private float frontReturnTurnEnd;
+        private Vector3 frontReturnTurnOrigin;
+        private Quaternion frontReturnTurnRotation;
+        private int frontReturnTurnIndex = -1;
+        internal bool ReturnFreeWalkActive => frontActive && frontStage == FrontStage.ReturnWalk && Time.time < frontReturnFreeWalkUntil;
         private DinosaurFootLock frontFeet;
         internal bool FinishingReturnFootsteps => !frontActive && InteractionPhase == PlayerInteractionPhase.Inactive && frontFeet != null && frontFeet.ReturnHandoffActive;
         internal bool ReturnFootHandoffMoving => !frontWaiting && !IsSteppingTurn && (frontActive && frontStage == FrontStage.ReturnWalk && Time.time >= frontReturnBlendUntil
@@ -45,13 +55,19 @@ namespace JurassicWorld
         internal bool UseReturnSoleHeading => frontActive && frontStage == FrontStage.TurnBack
             || frontFeet != null && frontFeet.ReturnHandoffActive;
         private readonly List<Vector3> frontTrail = new List<Vector3>();
-        public string FrontInteractionStage => !frontActive ? "Inactive" : frontStage + (frontPeerClearing
+        public string FrontInteractionStage => !frontActive ? "Inactive" : frontStage + (frontRecoveryActive
+            ? IsSteppingTurn ? " (RecoveryTurn)" : frontRecoveryWalking ? " (RecoveryWalk)" : " (RecoverySearch)" : frontPeerClearing
             ? frontPeerYielding ? " (YieldingToPeer)" : " (PassingPeer)"
             : frontWaiting ? frontWaitReason == "Peer" ? " (WaitingForPeerClearance)" : " (WaitingForClearance)" : "");
         public float FrontActionPlaybackTime => frontWaiting && frontWaitPlaying ? frontWaitTime : frontAction != null ? frontActionTime
             : frontStage == FrontStage.Follow && frontFollowMotion != null && legacyAnimation != null
                 ? legacyAnimation[frontFollowMotion.StateName].time : frontStage == FrontStage.ReturnWalk && moveState != null ? moveState.time : 0f;
-        public bool FrontActionWaitingForSpace => frontActive && (frontWaiting || frontPeerClearing || frontBlocked > 0f);
+        public float CurrentAnimationPlaybackTime => frontWaiting && frontWaitPlaying ? frontWaitTime
+            : frontAction != null ? frontActionTime : IsSteppingTurn ? stepTurnTime
+            : legacyAnimation != null && !string.IsNullOrEmpty(activeClip) && legacyAnimation[activeClip] != null
+                ? legacyAnimation[activeClip].time : 0f;
+        public bool FrontActionWaitingForSpace => frontActive && (frontWaiting || frontPeerClearing || frontBlocked > 0f
+            || frontRecoveryActive && !frontRecoveryWalking);
         private bool frontTestControlled, frontTestWaiting;
         public bool IsFrontTestControlled => frontTestControlled;
         public int FrontTestInteractionCount { get; private set; }
@@ -98,6 +114,7 @@ namespace JurassicWorld
 
         private void BeginInteractionSequence(bool fromSide, bool fromLeft)
         {
+            ClearFrontRecovery();
             sideTestSequence = fromSide;
             sideFromLeft = fromSide && fromLeft;
             ClearSideRoarHandoff();
@@ -120,7 +137,8 @@ namespace JurassicWorld
             frontFollowBlockedAt = frontReturnBlockedAt = -1f;
             CancelFrontWait();
             CancelFrontPeerClearance();
-            frontReturnAligning = false; frontReturnBlendUntil = 0f;
+            frontReturnAligning = false; frontReturnBlendUntil = 0f; frontReturnFreeWalkUntil = 0f;
+            ClearFrontReturnTurnPlan();
             frontTrail.Clear(); frontBlocked = invisibleTime = visibleTime = 0f;
             frontTrail.Add(transform.position);
             lastSeenPlayer = viewCamera.transform.position;
@@ -263,10 +281,34 @@ namespace JurassicWorld
             Vector3 direction = curiosityCorners[curiosityCorner] - transform.position; direction.y = 0f;
             if (direction.sqrMagnitude < .00000001f) return false;
             float angle = Vector3.SignedAngle(GetVisualForward(), direction, Vector3.up);
-            if (Mathf.Abs(angle) >= FrontSteppingTurnAngle
+            bool freeWalk = returning && Time.time < frontReturnFreeWalkUntil;
+            if (returning && !freeWalk && Mathf.Abs(angle) >= FrontSteppingTurnAngle)
+            {
+                if (!FrontReturnSkipNearCorner())
+                {
+                    if (quiet) frontRetryAt = Time.time + Mathf.Max(.1f, interactionSettings.spaceSearchInterval);
+                    else BeginFrontSpaceWait();
+                    return false;
+                }
+                direction = curiosityCorners[curiosityCorner] - transform.position; direction.y = 0f;
+                if (direction.sqrMagnitude < .00000001f) return false;
+                angle = Vector3.SignedAngle(GetVisualForward(), direction, Vector3.up);
+            }
+            if (Mathf.Abs(angle) >= FrontSteppingTurnAngle && !freeWalk
                 && !(SideHandoffMoving && sideRoarHandoffTime < sideRoarHandoffDuration))
             {
-                if (TryBeginSteppingTurn(angle, returning ? TurnUse.FrontReturn : TurnUse.FrontFollow)) return false;
+                if (returning)
+                {
+                    if (!FrontReturnTurnPlanCurrent()) FrontReturnPrepareTurn(angle);
+                    if (frontReturnTurnMotion != null)
+                    {
+                        var motion = frontReturnTurnMotion; float end = frontReturnTurnEnd;
+                        ClearFrontReturnTurnPlan();
+                        BeginSteppingTurn(motion, end, TurnUse.FrontReturn);
+                        return false;
+                    }
+                }
+                else if (TryBeginSteppingTurn(angle, TurnUse.FrontFollow)) return false;
                 if (quiet) frontRetryAt = Time.time + Mathf.Max(.1f, interactionSettings.spaceSearchInterval);
                 else BeginFrontSpaceWait();
                 return false;
@@ -277,7 +319,12 @@ namespace JurassicWorld
             Vector3 heading = rotation * Quaternion.Euler(0f, VisualYaw, 0f) * Vector3.forward;
             Vector3 position = transform.position + heading * Mathf.Min(direction.magnitude, speed * Time.deltaTime);
             if (!returning) position = SideHandoffPivotPosition(position, rotation);
-            if (!FrontPoseSafe(transform.position, position, transform.rotation, rotation))
+            // The opening walk after a return turn is guaranteed: static clipping and NavMesh
+            // edges are ignored so the actor covers ground before normal collision resumes.
+            bool safe = freeWalk
+                ? FrontAnimationPoseSafe(transform.position, position, transform.rotation, rotation, interactionBody)
+                : FrontPoseSafe(transform.position, position, transform.rotation, rotation);
+            if (!safe)
             {
                 if (quiet) frontRetryAt = Time.time + Mathf.Max(.1f, interactionSettings.spaceSearchInterval);
                 else BeginFrontSpaceWait();
@@ -295,8 +342,89 @@ namespace JurassicWorld
             if (returning && frontReturnAligning && Mathf.Abs(angle) <= 2f) frontReturnAligning = false;
             return interactionMoved;
         }
+
+        private bool FrontReturnTurnPlanCurrent()
+            => frontReturnTurnMotion != null && frontReturnTurnIndex == frontReturnIndex
+                && FlatDistance(transform.position, frontReturnTurnOrigin) <= .03f
+                && Quaternion.Angle(transform.rotation, frontReturnTurnRotation) <= 1f;
+
+        private void ClearFrontReturnTurnPlan()
+        {
+            frontReturnTurnMotion = null;
+            frontReturnTurnEnd = 0f;
+            frontReturnTurnOrigin = default;
+            frontReturnTurnRotation = default;
+            frontReturnTurnIndex = -1;
+        }
+
+        // A near corner can be the projected path origin or a sample we have just passed.
+        // Skipping it is only allowed when the next corner is reachable in a straight,
+        // checked line; otherwise the wait keeps its pose instead of turning to it.
+        private bool FrontReturnSkipNearCorner()
+        {
+            if (!hasCuriosityPath || curiosityCorner >= curiosityCorners.Length) return true;
+            if (FlatDistance(transform.position, curiosityCorners[curiosityCorner]) > FrontReturnNearCornerDistance) return true;
+            if (curiosityCorner + 1 >= curiosityCorners.Length) return true;
+            Vector3 near = curiosityCorners[curiosityCorner] - transform.position; near.y = 0f;
+            float nearAngle = Vector3.SignedAngle(GetVisualForward(), near, Vector3.up);
+            if (Mathf.Abs(nearAngle) < FrontSteppingTurnAngle) return true;
+            Vector3 beyond = curiosityCorners[curiosityCorner + 1] - transform.position; beyond.y = 0f;
+            if (Mathf.Abs(Vector3.SignedAngle(GetVisualForward(), beyond, Vector3.up)) >= FrontSteppingTurnAngle) return true;
+            if (!FrontReturnConnectorSafe(curiosityCorner + 1))
+            {
+                frontBlockReason = "Near path corner requires a safe connector";
+                return false;
+            }
+            curiosityCorner++;
+            return true;
+        }
+
+        private bool FrontReturnConnectorSafe(int next)
+        {
+            if (next < 0 || next >= curiosityCorners.Length) return false;
+            Vector3 target = curiosityCorners[next];
+            Vector2 from = new Vector2(transform.position.x, transform.position.z);
+            Vector2 to = new Vector2(target.x, target.z);
+            Vector2 heading = to - from;
+            if (heading.sqrMagnitude < .000001f) return true;
+            heading.Normalize();
+            if (!NavigationStepFits(transform.position, target)) return false;
+            if (interactionSettings.StepBlocked(from, to, CoreForward, heading, interactionBody)) return false;
+            if (!SafetySegmentAllowed(from, to, IsAvoidingTyrannosaurus)) return false;
+            Vector2 previous = from;
+            int samples = Mathf.Max(1, Mathf.CeilToInt(Vector2.Distance(from, to) / .1f));
+            for (int i = 1; i <= samples; i++)
+            {
+                Vector2 point = Vector2.Lerp(from, to, (float)i / samples);
+                if (FindBlockingStep(previous, point) != null) return false;
+                previous = point;
+            }
+            return true;
+        }
+
+        // Search must not start the turn itself. Simulate the authored pose, then prove
+        // only that the accepted pose can reach the return target through the NavMesh.
+        private bool FrontReturnPrepareTurn(float angle)
+        {
+            ClearFrontReturnTurnPlan();
+            if (!SelectSteppingTurn(angle, true, out var motion, out float end)) return false;
+            var finish = SampleFootFrame(motion, end);
+            TurnPoseAt(transform.position, transform.rotation, finish, out var position, out _);
+            var filter = NavigationFilter;
+            if (!NavMesh.SamplePosition(position, out var turned, 1f, filter)) { frontBlockReason = "NavMesh"; return false; }
+            if (frontReturnIndex < 0 || frontReturnIndex >= frontTrail.Count) { frontBlockReason = "NavMesh"; return false; }
+            if (!NavMesh.SamplePosition(frontTrail[frontReturnIndex], out var target, .75f, filter)) { frontBlockReason = "NavMesh"; return false; }
+            var path = new NavMeshPath();
+            if (!NavMesh.CalculatePath(turned.position, target.position, filter, path)
+                || path.status != NavMeshPathStatus.PathComplete) { frontBlockReason = "NavMesh"; return false; }
+            frontReturnTurnMotion = motion; frontReturnTurnEnd = end;
+            frontReturnTurnOrigin = transform.position; frontReturnTurnRotation = transform.rotation;
+            frontReturnTurnIndex = frontReturnIndex;
+            return true;
+        }
         private void BeginFrontEnding()
         {
+            ClearFrontRecovery();
             if (frontStage == FrontStage.Ending || frontStage == FrontStage.TurnBack || frontStage == FrontStage.ReturnWalk) return;
             frontStopPending = true;
             // A blocked stepping turn cannot finish, so ending starts at its last accepted pose.
@@ -337,7 +465,8 @@ namespace JurassicWorld
             frontStopPending = false;
             frontTimingFollow = false;
             frontReturnHasHistory = false; frontReturnWalked = 0f; frontReturnIndex = -1;
-            frontReturnBlockedAt = -1f;
+            frontReturnBlockedAt = -1f; frontReturnFreeWalkUntil = 0f;
+            ClearFrontReturnTurnPlan();
             hasCuriosityPath = false;
             frontStage = FrontStage.TurnBack; frontActionIndex = 0; frontAction = null; frontBlocked = 0f;
         }
@@ -349,7 +478,9 @@ namespace JurassicWorld
             frontReturnHasHistory = frontTrail.Count > 1;
             frontReturnIndex = frontTrail.Count - 1;
             while (frontReturnIndex >= 0 && FlatDistance(transform.position, frontTrail[frontReturnIndex]) < 1.2f) frontReturnIndex--;
+            ClearFrontReturnTurnPlan();
             BeginFrontReturnWalkBlend();
+            frontReturnFreeWalkUntil = Mathf.Max(frontReturnBlendUntil, Time.time) + FrontReturnFreeWalkDuration;
         }
         private void AdvanceFrontReturnTarget()
         {
@@ -441,13 +572,15 @@ namespace JurassicWorld
         }
         private void FinishFrontInteraction()
         {
+            ClearFrontRecovery();
             ClearSideRoarHandoff();
             CancelFrontWait();
             CancelFrontPeerClearance();
             frontActive = frontStopPending = false; frontAction = frontFollowMotion = null;
             frontNearPending = frontExitPending = false; frontTimingFollow = false;
             frontFollowBlockedAt = -1f; frontReturnBlockedAt = -1f;
-            frontReturnAligning = false; frontReturnBlendUntil = 0f;
+            frontReturnAligning = false; frontReturnBlendUntil = 0f; frontReturnFreeWalkUntil = 0f;
+            ClearFrontReturnTurnPlan();
             frontReturnHasHistory = false; frontReturnWalked = 0f; frontReturnIndex = -1;
             // A short trail may end mid-stride. Preserve this return's first-two-step handoff
             // through the following walk; it clears itself at the second landing.
@@ -492,6 +625,14 @@ namespace JurassicWorld
             UpdateFrontVisibility(Time.deltaTime);
             // Follow time includes Near, waiting, blocking and turns; resuming does not reset it.
             TickFrontFollowClock(Time.deltaTime);
+            if (frontRecoveryActive)
+            {
+                // Finish an accepted turn before honouring a pending interaction exit.
+                if (frontExitPending && !IsSteppingTurn && frontStage == FrontStage.Follow)
+                { BeginFrontEnding(); return true; }
+                TickFrontRecovery();
+                return true;
+            }
             // A blocked action cannot finish its blend. Leave the wait at its last accepted pose
             // before selecting a checked ending, rather than waiting forever after sight loss.
             if (frontExitPending && (frontWaiting || frontPeerClearing)
@@ -615,7 +756,12 @@ namespace JurassicWorld
             {
                 actualInteractionSpeed = 0f;
                 if (moveState != null) moveState.speed = 0f;
-                if (!FrontPoseSafe(transform.position, transform.position, transform.rotation, transform.rotation)) BeginFrontSpaceWait();
+                // The guaranteed opening walk also covers the entry blend, so static scenery
+                // cannot turn it back into a wait before the actor has covered ground.
+                bool safe = Time.time < frontReturnFreeWalkUntil
+                    ? FrontAnimationPoseSafe(transform.position, transform.position, transform.rotation, transform.rotation, interactionBody)
+                    : FrontPoseSafe(transform.position, transform.position, transform.rotation, transform.rotation);
+                if (!safe) BeginFrontSpaceWait();
                 return true;
             }
             if (frontReturnWalked >= frontReturnWalkTime) { FinishFrontInteraction(); return true; }

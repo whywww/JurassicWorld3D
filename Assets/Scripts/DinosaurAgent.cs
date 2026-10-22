@@ -39,6 +39,11 @@ namespace JurassicWorld
         [SerializeField] private float walkSpeed = 1.15f;
         [SerializeField] private float approachSpeed = 2.8f;
         [SerializeField] private float moveAnimationGroundSpeed = 1.15f;
+        [SerializeField] private DinosaurGaitProfile gaitProfile;
+        public DinosaurGaitProfile GaitProfile => gaitProfile;
+        public bool GaitMotionActive => gaitMoving;
+        public bool GaitHoldsStoppedPose => freezePoseWhenStopped;
+        private bool gaitMoving;
         // 循环窗口（烘焙期由 JurassicWorldSceneBuilder 从脚轨迹搜索写入；<0 = 禁用，整段循环）：
         // move clip 总长与内部步态周期不整除时，clip 接缝处有相位跳变（脚位瞬移，表现为每循环一次的
         // 小弹跳）；运行期把播放时间卷在窗口内（跳过节拍外的起手/收尾段）即可把缝压到最小。
@@ -156,11 +161,6 @@ namespace JurassicWorld
         // 现在按确定性全序分派：同一时刻只有一只「先行」、另一只「让路」，杜绝「都不让」与「都让」。
         /// <summary>先行者被挡多久仍无进展才改走绕行落点（给让路者腾挪的宽限，秒）。</summary>
         private const float RightOfWayGraceSeconds = 1.2f;
-        /// <summary>先行者绕行时沿通道推进的弧长（米）。</summary>
-        private const float PassAroundStep = 5f;
-        /// <summary>迎面会车时让路者沿通道后退的弧长范围（米）：把会车点让到更宽的路段。</summary>
-        private const float YieldBackOffMin = 6f;
-        private const float YieldBackOffMax = 12f;
         /// <summary>同类受阻升级阈值（秒）：RandomWalk 超过则 Idle 退让（与 HandleBlockedEscalation 共用）。</summary>
         private const float BlockedEscalationSeconds = 1.5f;
         /// <summary>召唤态同类受阻放弃阈值（秒）。</summary>
@@ -191,11 +191,6 @@ namespace JurassicWorld
         /// </summary>
         private const float PeerHeightTolerance = 2f;
 
-        /// <summary>
-        /// 方向性互斥判定的「没在靠近」容差（米/步）：本步使到同伴的距离缩短不足该值 ⇒ 视为横移/平移，
-        /// 放行。配合 <see cref="FindBlockingStep"/> 保证让路后撤、绕行侧移不被自己的预检拒掉。
-        /// </summary>
-        private const float PeerStepApproachEpsilon = 0.01f;
 
         // 【缺陷修复】原实现所有 Agent 共用 `new Random(314159)`：各恐龙第一轮 Idle 计时、第一段步长、
         // 首次转向、首次横向抖动逐位相同，叠加「目标都投影回同一条中心线」⇒ 两只恐龙走完全一样的轨迹
@@ -227,6 +222,7 @@ namespace JurassicWorld
         // move state 缓存（循环窗口卷绕用；Animation 索引器是字典查找，避免每帧调用）。
         private AnimationState moveState;
         private string activeClip;
+        [SerializeField] private bool freezePoseWhenStopped;
         private string idleClip;
         private string moveClip;
         private static int lastSummonInputFrame = -1;
@@ -249,10 +245,6 @@ namespace JurassicWorld
         /// 出生即贴线，消除开局横切上车道的「偏离」段；采样即校验最终落点，相机/树/同伴检查因此精确）。
         /// </summary>
         public float LaneBias => laneBias;
-        /// <summary>当前 target 是否是「让路/绕行」落点。true 时不得被 RerollWanderTarget 覆盖回走廊目标。</summary>
-        private bool targetIsYieldTarget;
-        /// <summary>持有先行权者被同伴挡住的累计秒数：超过 RightOfWayGraceSeconds 仍未让开才改绕行。</summary>
-        private float priorityBlockedTime;
 
         /// <summary>
         /// 运行时推导的树干避让半径（非序列化，不需要重新 Bake）：
@@ -266,6 +258,7 @@ namespace JurassicWorld
 
         private void Awake()
         {
+            if (species == DinosaurSpecies.Other) species = GroundSpeciesForName(name);
             startupRoamingMode = roamingMode;
             spawnPoint = transform.position;
             coreBody = GetComponent<DinosaurCoreBody>();
@@ -369,6 +362,26 @@ namespace JurassicWorld
 
         private void Update()
         {
+            if (gaitProfile == null) { UpdateBehaviour(); return; }
+            Vector3 before = transform.position;
+            Quaternion beforeRotation = transform.rotation;
+            gaitMoving = false;
+            UpdateBehaviour();
+            if (gaitMoving && moveState != null && activeClip == moveClip)
+            {
+                Vector3 delta = transform.position - before; delta.y = 0f;
+                float direction = trafficMoving && trafficReverse ? -1f : 1f;
+                float measuredSpeed = delta.magnitude / Mathf.Max(.00001f, Time.deltaTime);
+                // In-place turning needs alternating steps even when translation is zero.
+                if (Quaternion.Angle(beforeRotation, transform.rotation) > .0001f)
+                    measuredSpeed = Mathf.Max(measuredSpeed, MoveAnimationGroundSpeed);
+                moveState.speed = direction * measuredSpeed / Mathf.Max(.01f, MoveAnimationGroundSpeed);
+            }
+            ApplyMoveLoopWindow();
+        }
+
+        private void UpdateBehaviour()
+        {
             RestoreSideHeadPose();
             if (frontTestWaiting)
             {
@@ -380,7 +393,9 @@ namespace JurassicWorld
 
             // 循环窗口卷绕（见 moveClipLoopStart 字段注释）：把 move 播放时间钳在窗口内。
             // 放在 Update：动画采样在本帧 Update 之后发生，此帧修正即时生效。
-            ApplyMoveLoopWindow();
+            if (gaitProfile == null) ApplyMoveLoopWindow();
+
+            if (UpdateGroundTraffic()) return;
 
             if (UpdateRouteStepping()) return;
             if (IsSteppingTurn && stepTurnUse == TurnUse.Wander) { TickSteppingTurn(); return; }
@@ -428,6 +443,30 @@ namespace JurassicWorld
                 return;
 
             float window = moveClipLoopEnd - moveClipLoopStart;
+            if (gaitProfile != null)
+            {
+                float advance = Time.deltaTime * moveState.speed;
+                moveState.time = moveClipLoopStart + Mathf.Repeat(moveState.time + advance - moveClipLoopStart, window) - advance;
+                return;
+            }
+            if (trafficMoving && trafficReverse && moveState.speed < 0f)
+            {
+                float advance = Time.deltaTime * moveState.speed;
+                if (moveState.time + advance < moveClipLoopStart || moveState.time >= moveClipLoopEnd)
+                {
+                    float wrapped = moveClipLoopStart + Mathf.Repeat(moveState.time + advance - moveClipLoopStart, window);
+                    if (HasFootPhaseData)
+                    {
+                        var motion = interactionProfile.Find(InteractionMotionRole.Walk);
+                        var start = SampleFootFrame(motion, moveClipLoopStart);
+                        var end = SampleFootFrame(motion, moveClipLoopEnd);
+                        GetComponentInChildren<DinosaurFootLock>()?.BlendWalkSeam(
+                            start.leftSole - end.leftSole, start.rightSole - end.rightSole);
+                    }
+                    moveState.time = wrapped - advance;
+                }
+                return;
+            }
             if (moveState.time < moveClipLoopStart)
                 moveState.time = moveClipLoopStart;   // 跳过窗口前的起手段（含 CrossFade 入场：time 从 0 起步）
             else if (HasFootPhaseData && moveState.time + Time.deltaTime * moveState.speed >= moveClipLoopEnd)
@@ -488,8 +527,8 @@ namespace JurassicWorld
             Debug.LogWarning(
                 $"[DinosaurAgent] 卡死看门狗「{displayName}」{stuckWatchdogTime:F0}s 未移动：state={CurrentState} " +
                 $"route={routeIndex} arc={arc:F1} lateral={lateral:F1} travelSign={travelSign} " +
-                $"target=({target.x:F1},{target.z:F1}) yieldTarget={targetIsYieldTarget} " +
-                $"blockedTime={blockedTime:F1} priorityBlockedTime={priorityBlockedTime:F1} timer={stateTimer:F1} " +
+                $"target=({target.x:F1},{target.z:F1}) " +
+                $"blockedTime={blockedTime:F1} timer={stateTimer:F1} " +
                 $"同伴:{peerInfo}", this);
         }
 
@@ -575,8 +614,6 @@ namespace JurassicWorld
             CurrentState = DinosaurState.Approaching;
             stateTimer = 30f;
             blockedTime = 0f;
-            priorityBlockedTime = 0f;
-            targetIsYieldTarget = false;
             PlayMovementClip(ApproachSpeed);
             HudController.ShowStatus(DisplayName + "正在穿越视角…");
             return true;
@@ -665,10 +702,8 @@ namespace JurassicWorld
         {
             waitingAtCrossing = false;
             CurrentState = DinosaurState.Idle;
-            stateTimer = Range(3f, 7f);
+            stateTimer = IsContinuousWalker ? 0f : species == DinosaurSpecies.Pachycephalosaurus ? Range(2f, 4f) : Range(3f, 7f);
             blockedTime = 0f;
-            priorityBlockedTime = 0f;
-            targetIsYieldTarget = false;   // 退让结束：下次漫步重新取走廊/车道目标
             PlayClip(idleClip);
         }
 
@@ -678,8 +713,7 @@ namespace JurassicWorld
             CurrentState = DinosaurState.RandomWalk;
             stateTimer = Range(8f, 16f);
             blockedTime = 0f;
-            priorityBlockedTime = 0f;
-            target = ComputeWanderTarget();   // 内部会清 targetIsYieldTarget
+            target = ComputeWanderTarget();
             PlayMovementClip(WalkSpeed);
         }
 
@@ -717,7 +751,6 @@ namespace JurassicWorld
         /// </summary>
         private Vector3 ComputeWanderTarget()
         {
-            targetIsYieldTarget = false;
             float step = Range(WanderStepDistanceMin, WanderStepDistance);
             walkRemaining = step;
             targetArc = MovementCorridor.TravelDistance(routeIndex, routeArc + travelSign * step);
@@ -924,7 +957,6 @@ namespace JurassicWorld
 
             // 正常前进：清零受阻累计时间（含先行权宽限计时，下一次被挡重新起算）。
             blockedTime = 0f;
-            priorityBlockedTime = 0f;
             return false;
         }
 
@@ -1030,147 +1062,21 @@ namespace JurassicWorld
             return false;
         }
 
-        /// <summary>
-        /// 同类会车调度（修复「两只恐龙相撞后卡住不动」）：
-        /// 旧实现两条同类阻塞分支都做「每帧 RerollWanderTarget + blockedTime 累计 1.5s→Idle 3~7s」，
-        /// 迎面时双方每帧都把目标重掷到对方身上，形成「顶住→双双 Idle→再顶住」的死循环。
-        ///
-        /// 现按确定性全序（HasRightOfWay：召唤态 &gt; 体型 &gt; 车道序号）分派，同一时刻只有一方先行：
-        /// - **先行者**：保持原目标继续走（对方负责让路）；被挡超过 RightOfWayGraceSeconds 仍未让开
-        ///   （对方可能被树夹住）才改绕到远离对方的一侧，并按 EscalateAfterLongBlock 兜底退让。
-        /// - **让路者**：把目标换成「车道外缘 + 沿通道后撤」的让路落点（±backOff 双候选取到阻塞者
-        ///   更远者，Phase 1.1c 起**无条件后撤**），把中带让出来并拉开距离；没处可让（后撤候选都被
-        ///   端点钳住）才原地站定等（播 idle，避免原地跑）。让路期间【不累计 blockedTime】——
-        ///   主动让行不是受阻，累计了就会走回旧的「1.5s→Idle→再撞」循环。
-        /// 【不死锁的两半保证（Phase 1.1c）】每帧预检/复检是**方向性**的 <see cref="FindBlockingStep"/>
-        /// （只拦靠近步），加上让路者后撤的每一步都是远离步 ⇒ 后撤永远走得出去、距离总能拉回 6.5m 以上、
-        /// 先行者随即解禁。旧实现落点在半径内即整帧拒动，两恐龙进入 6.5m 半径后双方任何步都被拒 ⇒ 永久互锁。
-        /// 两个分支都先执行 Minor 7 的仅去穿透滑移（desired==current 时只做入口去穿透，不产生位移）。
-        /// 返回 true 表示本帧发生了状态切换（调用方跳过 timer 递减与到达判定）。
-        /// </summary>
+        /// <summary>Route movement hands peer conflicts to the common ground scheduler.</summary>
         private bool HandlePeerBlocked(Vector2 currentXZ, DinosaurAgent blocker)
         {
-            // Minor 7：停步帧也执行仅去穿透滑移，防止恐龙陷在树干内时因 peer 早退而永不触发 LimitPushOut。
-            // MovementHeight 依赖 Terrain 核心活动区 heightmap=0（world Y=0），引入地形起伏时需改为高度采样 + eyeOffset。
-            Vector2 depenXZ = coreBody != null ? currentXZ : TerrainTreeObstacleRegistry.SlideMove(
-                currentXZ, currentXZ, treeAvoidRadius, Time.deltaTime);
-            transform.position = new Vector3(depenXZ.x, MovementHeight, depenXZ.y);
-
-            if (HasRightOfWay(blocker))
+            if (IsGroundTrafficPeer(blocker))
             {
-                // ── 我先行 ──
-                priorityBlockedTime += Time.deltaTime;
-                if (priorityBlockedTime >= RightOfWayGraceSeconds)
-                {
-                    // 给了让路宽限仍被挡住 ⇒ 对方让不开，我改绕行（绕行点被占则继续等，不反复重掷）。
-                    Vector2 around = ComputePassAroundTarget(depenXZ, blocker);
-                    if (!IsPeerBlocked(around))
-                    {
-                        target = new Vector3(around.x, MovementHeight, around.y);
-                        targetIsYieldTarget = true;
-                        priorityBlockedTime = 0f;
-                    }
-                }
-                blockedTime += Time.deltaTime;
-                return EscalateAfterLongBlock();
+                RegisterGroundConflict(blocker);
+                PlayClip(idleClip);
+                return false;
             }
-
-            // ── 我让路 ──
-            if (!targetIsYieldTarget)
-            {
-                Vector2 yieldPoint = ComputeYieldTarget(depenXZ, blocker);
-                Vector3 yieldWorld = new Vector3(yieldPoint.x, MovementHeight, yieldPoint.y);
-                if (!IsPeerBlocked(yieldPoint) && FlatDistance(transform.position, yieldWorld) > 0.75f)
-                {
-                    target = yieldWorld;
-                    targetIsYieldTarget = true;
-                    PlayMovementClip(WalkSpeed);   // 下一帧朝让路点走：保持移动动画
-                    return false;
-                }
-            }
-
-            // 让路等待：原地站定。播 idle 免得出现「原地跑」；不累计 blockedTime（见方法注释）。
             PlayClip(idleClip);
             return false;
         }
 
-        /// <summary>
-        /// 同类先行权判定：返回 true 表示「我先走、对方让路」。霸王龙与伶盗龙相遇时固定由霸王龙先行。
-        /// 三级全序保证任何一对恐龙都有唯一结论（杜绝「都不让」与「都让」）：
-        /// 1) 召唤中的恐龙优先（玩家主动行为优先，且不该被闲逛者截停）；
-        /// 2) 体型大者优先（小个子让路：霸王龙 r=5 先行、伶盗龙 r=1.5 让路）；
-        /// 3) 同体型比车道序号（AssignLane 的稳定序号，跨运行一致）。
-        /// </summary>
-        private bool HasRightOfWay(DinosaurAgent peer)
-        {
-            if (species == DinosaurSpecies.Tyrannosaurus && peer.species == DinosaurSpecies.Velociraptor) return true;
-            if (species == DinosaurSpecies.Velociraptor && peer.species == DinosaurSpecies.Tyrannosaurus) return false;
-            bool meSummoning = CurrentState == DinosaurState.Approaching;
-            bool peerSummoning = peer.CurrentState == DinosaurState.Approaching;
-            if (meSummoning != peerSummoning)
-                return meSummoning;
-
-            if (!Mathf.Approximately(collisionRadius, peer.collisionRadius))
-                return collisionRadius > peer.collisionRadius;
-
-            return laneIndex < peer.laneIndex;
-        }
-
-        /// <summary>
-        /// 让路落点：横向挤到自己车道的外缘（把通道中带让给先行者），并**沿通道后撤**一段
-        /// （YieldBackOffMin~Max）拉开与阻塞者的距离 —— 后撤方向按「到阻塞者更远」在 ±backOff
-        /// 两个候选间实测选取，正反向都试、取更远的那个（端点钳住一侧时另一侧仍可用）。
-        /// 【Phase 1.1c 起后撤无条件执行】旧版仅「迎面」后退、同向只侧移 + 站定。但让路者的每一步
-        /// 都要过 <see cref="FindBlockingStep"/> 的方向性预检：纯侧移常带迎头分量会被拒，「原地站定」
-        /// 更不会拉开距离；唯一保证有效的是**朝远离阻塞者的方向后撤**（该方向的每一步都在放行）。
-        /// 这是「两恐龙进入互斥半径后总能解开」的另一半保证（前一半是方向性预检本身）。
-        /// </summary>
-        private Vector2 ComputeYieldTarget(Vector2 currentXZ, DinosaurAgent blocker)
-        {
-            MovementCorridor.ProjectToCorridor(routeIndex, currentXZ, out float arc, out float lateral);
-            Vector2 blockerXZ = new Vector2(blocker.transform.position.x, blocker.transform.position.z);
-            MovementCorridor.GetSampleAt(routeIndex, arc, out _, out Vector2 tangent, out float halfLeft, out float halfRight);
-
-            // 我在哪一侧就往哪一侧的外缘挤：已有明显横向位置时以实际所在侧为准（召唤后可能偏离车道）。
-            float side = Mathf.Abs(lateral) > 0.25f ? Mathf.Sign(lateral) : (laneBias >= 0f ? 1f : -1f);
-            float edge = side > 0f ? halfLeft - LaneEdgeMargin : -(halfRight - LaneEdgeMargin);
-
-            float backOff = Range(YieldBackOffMin, YieldBackOffMax);
-            // 主选方向：对方在 +tangent 侧则往 -tangent 退（反之亦然）；另一方向作备选一并比较。
-            float awaySign = Vector2.Dot(blockerXZ - currentXZ, tangent) >= 0f ? -1f : 1f;
-            float routeLength = MovementCorridor.Length(routeIndex);
-            Vector2 candA = MovementCorridor.ClampLateral(
-                routeIndex, Mathf.Clamp(arc + awaySign * backOff, 0f, routeLength), edge, LaneEdgeMargin);
-            Vector2 candB = MovementCorridor.ClampLateral(
-                routeIndex, Mathf.Clamp(arc - awaySign * backOff, 0f, routeLength), edge, LaneEdgeMargin);
-
-            return (candA - blockerXZ).sqrMagnitude >= (candB - blockerXZ).sqrMagnitude ? candA : candB;
-        }
-
-        /// <summary>
-        /// 先行者绕行落点：沿自己的行进方向推进 PassAroundStep，横向切到「远离对方」的那一侧外缘。
-        /// 侧向选择与车道一致（我在它左侧就继续往左），避免双方同时绕向同一侧再度对撞。
-        /// </summary>
-        private Vector2 ComputePassAroundTarget(Vector2 currentXZ, DinosaurAgent blocker)
-        {
-            MovementCorridor.ProjectToCorridor(routeIndex, currentXZ, out float arc, out float lateral);
-            MovementCorridor.ProjectToCorridor(routeIndex,
-                new Vector2(blocker.transform.position.x, blocker.transform.position.z),
-                out _, out float peerLateral);
-
-            MovementCorridor.GetSampleAt(routeIndex, arc, out _, out Vector2 tangent, out _, out _);
-            Vector3 forward = GetVisualForward();
-            float forwardSign = Vector2.Dot(new Vector2(forward.x, forward.z), tangent) >= 0f ? 1f : -1f;
-            float aheadArc = Mathf.Clamp(arc + forwardSign * PassAroundStep, 0f, MovementCorridor.Length(routeIndex));
-
-            float side = Mathf.Abs(lateral - peerLateral) > 0.25f
-                ? Mathf.Sign(lateral - peerLateral)
-                : (laneBias >= 0f ? 1f : -1f);
-
-            MovementCorridor.GetSampleAt(routeIndex, aheadArc, out _, out _, out float halfLeft, out float halfRight);
-            float edge = side > 0f ? halfLeft - LaneEdgeMargin : -(halfRight - LaneEdgeMargin);
-            return MovementCorridor.ClampLateral(routeIndex, aheadArc, edge, LaneEdgeMargin);
-        }
+        /// <summary>Frozen interaction tier, explicit species rank, then stable lane order.</summary>
+        private bool HasRightOfWay(DinosaurAgent peer) => GroundRightOfWay(peer);
 
         /// <summary>
         /// 恐龙互斥检查（**落点型 / 无方向**）：落点与同场景其它恐龙的平面距离 &lt; 双方
@@ -1187,73 +1093,42 @@ namespace JurassicWorld
         }
 
         /// <summary>返回侵入 nextXZ 互斥圆的那个同伴（无则 null）：让 HandlePeerBlocked 能对阻塞者做先行权裁决。</summary>
+        private bool IsCollisionPeer(DinosaurAgent peer) => peer != null && peer != this && peer.gameObject.activeInHierarchy
+            && Mathf.Abs(movementHeight - peer.MovementHeight) <= PeerHeightTolerance
+            && groundObstacleAware == peer.groundObstacleAware;
+
         private DinosaurAgent FindBlockingPeer(Vector2 nextXZ)
         {
-            for (int i = 0; i < peers.Length; i++)
+            DinosaurAgent blocker = null;
+            foreach (var peer in peers)
             {
-                DinosaurAgent peer = peers[i];
-                if (peer == null || peer == this)
-                    continue;
-
-                // Minor 6：高度差超过容忍值时跳过（飞行 vs 地面不互阻）。
-                if (Mathf.Abs(movementHeight - peer.MovementHeight) > PeerHeightTolerance)
-                    continue;
-
-                Vector3 peerPosition = peer.transform.position;
-                float minimumDistance = collisionRadius + peer.CollisionRadius;
-                float deltaX = nextXZ.x - peerPosition.x;
-                float deltaZ = nextXZ.y - peerPosition.z;
-                if (deltaX * deltaX + deltaZ * deltaZ < minimumDistance * minimumDistance)
-                    return peer;
+                if (!IsCollisionPeer(peer)) continue;
+                Vector2 center = new Vector2(peer.transform.position.x, peer.transform.position.z);
+                float radius = collisionRadius + peer.CollisionRadius;
+                if ((nextXZ - center).sqrMagnitude < radius * radius
+                    && (blocker == null || peer.HasRightOfWay(blocker))) blocker = peer;
             }
-
-            return null;
+            return blocker;
         }
 
-        /// <summary>
-        /// 【运动步】方向性互斥检查：参照帧起点 fromXZ 判断本步 fromXZ→nextXZ 是否为「靠近」步。
-        /// 返回阻塞者的条件 = 落点仍在互斥半径内 **且** 本步确实在靠近对方（距离缩短超过
-        /// <see cref="PeerStepApproachEpsilon"/>）。落点安全、或本步是后撤/横移 ⇒ 返回 null 放行。
-        ///
-        /// 【为什么必须方向性 —— 死锁修复（Phase 1.1c）】
-        /// 旧实现只看落点是否在半径内：两恐龙一旦相距 &lt; 6.5m，双方的**任何**步（包括让路者的
-        /// 后撤步、先行者的绕行步）落点都仍在半径内 ⇒ 每帧都被自己的预检拒之门外 ⇒ 永久互锁、
-        /// 双双卡死（用户连续两轮报告的「都走不动」）。方向性保证「至少让路者总能朝远离对方的
-        /// 方向走」⇒ 让路者后撤拉开距离 ⇒ 先行者解禁通过 ⇒ 死锁在结构上不可能。
-        /// 同时互斥语义不降级：任何「会把距离压进 6.5m」的步仍被拒，双方不会互相穿越。
-        /// （落点型校验 —— 让路点/绕行点是否可走 —— 仍用无方向的 <see cref="FindBlockingPeer"/>。）
-        /// </summary>
+        /// <summary>Check the whole segment. Existing overlaps may only shrink, never deepen.</summary>
         private DinosaurAgent FindBlockingStep(Vector2 fromXZ, Vector2 nextXZ)
         {
-            for (int i = 0; i < peers.Length; i++)
+            DinosaurAgent blocker = null;
+            Vector2 step = nextXZ - fromXZ;
+            foreach (var peer in peers)
             {
-                DinosaurAgent peer = peers[i];
-                if (peer == null || peer == this)
-                    continue;
-
-                if (Mathf.Abs(movementHeight - peer.MovementHeight) > PeerHeightTolerance)
-                    continue;
-
-                Vector3 peerPosition = peer.transform.position;
-                float minimumDistance = collisionRadius + peer.CollisionRadius;
-
-                float dx = nextXZ.x - peerPosition.x;
-                float dz = nextXZ.y - peerPosition.z;
-                float nextSqr = dx * dx + dz * dz;
-                if (nextSqr >= minimumDistance * minimumDistance)
-                    continue;   // 落点安全
-
-                float fx = fromXZ.x - peerPosition.x;
-                float fz = fromXZ.y - peerPosition.z;
-                float fromDist = Mathf.Sqrt(fx * fx + fz * fz);
-                float nextDist = Mathf.Sqrt(nextSqr);
-                if (nextDist >= fromDist - PeerStepApproachEpsilon)
-                    continue;   // 本步不靠近（后撤/横移）⇒ 放行，让让路与绕行总能执行
-
-                return peer;
+                if (!IsCollisionPeer(peer)) continue;
+                Vector2 center = new Vector2(peer.transform.position.x, peer.transform.position.z);
+                float radius = collisionRadius + peer.CollisionRadius;
+                float start = (fromXZ - center).sqrMagnitude;
+                float t = step.sqrMagnitude > 1e-10f ? Mathf.Clamp01(Vector2.Dot(center - fromXZ, step) / step.sqrMagnitude) : 0f;
+                float minimum = (fromXZ + t * step - center).sqrMagnitude;
+                // No per-frame approach allowance: thousands of tiny steps must not creep through a peer.
+                float limit = Mathf.Min(start, radius * radius);
+                if (minimum + .000001f < limit && (blocker == null || peer.HasRightOfWay(blocker))) blocker = peer;
             }
-
-            return null;
+            return blocker;
         }
 
         private Vector3 GetVisualForward()
@@ -1264,10 +1139,10 @@ namespace JurassicWorld
         private void PlayMovementClip(float groundSpeed)
         {
             float referenceSpeed = Mathf.Max(0.01f, MoveAnimationGroundSpeed);
-            PlayClip(moveClip, groundSpeed / referenceSpeed);
+            PlayClip(moveClip, groundSpeed / referenceSpeed, true);
         }
 
-        private void PlayClip(string clipName, float playbackSpeed = 1f)
+        private void PlayClip(string clipName, float playbackSpeed = 1f, bool moving = false)
         {
             if (legacyAnimation == null || string.IsNullOrEmpty(clipName))
                 return;
@@ -1280,8 +1155,10 @@ namespace JurassicWorld
                 return;
             }
 
+            gaitMoving = moving;
             state.wrapMode = WrapMode.Loop;
-            state.speed = Mathf.Max(0.01f, playbackSpeed);
+            state.speed = freezePoseWhenStopped && !moving && clipName == moveClip
+                ? 0f : trafficMoving && trafficReverse && moving ? -Mathf.Max(.01f, Mathf.Abs(playbackSpeed)) : Mathf.Max(0.01f, playbackSpeed);
             if (activeClip == clipName)
                 return;
 

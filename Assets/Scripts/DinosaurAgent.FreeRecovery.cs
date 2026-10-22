@@ -31,6 +31,7 @@ namespace JurassicWorld
                 CurrentState = DinosaurState.RandomWalk;
             }
             else if (!PlanCuriosityPath(freeGoal, true)) FreeIdle(2f);
+            TraceFreeRoamTurn(freeRecoveryActive ? "Recovery after turn" : "Replanned after turn");
         }
 
         private bool FreeRecoveryRestPose(Vector3 position, Quaternion rotation)
@@ -151,7 +152,7 @@ namespace JurassicWorld
             }
             Vector3 delta = freeRecoveryTarget - transform.position; delta.y = 0f;
             float angle = Vector3.SignedAngle(GetVisualForward(), delta, Vector3.up);
-            if (Mathf.Abs(angle) >= 40f)
+            if (HasFootPhaseData && Mathf.Abs(angle) >= 40f)
             {
                 // Authored turns remain performances even during recovery. Their new
                 // endpoint starts a fresh recovery snapshot, just like any wander turn.
@@ -159,16 +160,18 @@ namespace JurassicWorld
                 return;
             }
             Quaternion desired = Quaternion.LookRotation(delta) * Quaternion.Euler(0f, -VisualYaw, 0f);
-            Quaternion rotation = Quaternion.RotateTowards(transform.rotation, desired, 65f * Time.deltaTime);
+            Quaternion rotation = Quaternion.RotateTowards(transform.rotation, desired,
+                (gaitProfile != null ? gaitProfile.turnSpeed : 65f) * Time.deltaTime);
             // Align before translating, keeping the executed connector on its checked line.
             bool aligned = Quaternion.Angle(rotation, desired) < .01f;
             Vector3 position = aligned ? Vector3.MoveTowards(transform.position, freeRecoveryTarget, WalkSpeed * Time.deltaTime) : transform.position;
             if (!FreeRecoveryStep(transform.position, position, transform.rotation, rotation, true)) { WaitForFreeRecovery(); return; }
             float distance = FlatDistance(transform.position, position);
+            bool turned = Quaternion.Angle(transform.rotation, rotation) > .0001f;
             transform.SetPositionAndRotation(position, rotation);
             interactionMoved |= distance > .00001f;
             actualInteractionSpeed = distance / Mathf.Max(.00001f, Time.deltaTime);
-            if (distance > .00001f) PlayMovementClip(WalkSpeed); else PlayClip(idleClip);
+            if (distance > .00001f || gaitProfile != null && turned) PlayMovementClip(WalkSpeed); else PlayClip(idleClip);
             if (FlatDistance(position, freeRecoveryTarget) < .001f) freeRecoveryHasTarget = false;
         }
 

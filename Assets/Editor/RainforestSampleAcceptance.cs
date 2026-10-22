@@ -48,6 +48,10 @@ namespace JurassicWorld.Editor
         private static bool footFailure;
         private static int originalVSync, originalFrameRate;
         private static bool performanceOnly;
+        private static GameObject performanceRoot;
+        private static bool expansionPerformance;
+        private static string ArtifactOutput => SessionState.GetBool(Key + ".TreeHeights", false) ? TreeHeightAdjustment.Output
+            : expansionPerformance ? RainforestExpansion.Output : RainforestSample.Output;
         private static bool recordingOnly;
         private static MediaEncoder encoder;
         private static Texture2D videoFrame;
@@ -81,7 +85,17 @@ namespace JurassicWorld.Editor
             SessionState.SetBool(Key, true); SessionState.SetBool(Key + ".Restore", true); EditorApplication.isPlaying = true;
         }
         public static void RunMovementOnly() { SessionState.SetBool(Key + ".MovementOnly", true); Run(); }
+        public static void RunTreeHeightMovement() { SessionState.SetBool(Key + ".TreeHeights", true); RunMovementOnly(); }
         public static void RunPerformanceOnly() { SessionState.SetBool(Key + ".PerformanceOnly", true); Run(); }
+        [MenuItem("Jurassic World/Diagnostics/Rainforest Expansion/Compare Performance")]
+        public static void RunExpansionPerformance()
+        {
+            SessionState.SetBool(Key + ".ExpansionPerformance", true); RunPerformanceOnly();
+        }
+        public static void RunExpansionMovement()
+        {
+            SessionState.SetBool(Key + ".ExpansionPerformance", true); RunMovementOnly();
+        }
         public static void RunRecordingOnly()
         {
             SessionState.SetBool(Key + ".RecordingOnly", true);
@@ -92,6 +106,11 @@ namespace JurassicWorld.Editor
             try
             {
                 layout = Object.FindObjectOfType<RainforestSampleLayout>(); camera = Camera.main;
+                expansionPerformance = SessionState.GetBool(Key + ".ExpansionPerformance", false);
+                SessionState.SetBool(Key + ".ExpansionPerformance", false);
+                performanceRoot = expansionPerformance ? GameObject.Find(RainforestExpansion.RootName) : layout.gameObject;
+                Require(performanceRoot != null, "Build the comparison vegetation first.");
+                Directory.CreateDirectory(ArtifactOutput);
                 originalVSync = QualitySettings.vSyncCount; originalFrameRate = Application.targetFrameRate;
                 QualitySettings.vSyncCount = 0; Application.targetFrameRate = -1;
                 performanceOnly = SessionState.GetBool(Key + ".PerformanceOnly", false);
@@ -126,7 +145,7 @@ namespace JurassicWorld.Editor
         }
         private static void NextView()
         {
-            view++; frames = 0; layout.gameObject.SetActive(view % 2 == 1);
+            view++; frames = 0; performanceRoot.SetActive(view % 2 == 1);
             TerrainTreeObstacleRegistry.Invalidate();
             Vector3[] eyes = { new Vector3(0f, 1.7f, -13f), new Vector3(-6f, 1.7f, 14f), new Vector3(29f, 1.7f, 22f) };
             Vector3[] aims = { new Vector3(-5f, 4f, 18f), new Vector3(9f, 4f, 30f), new Vector3(0f, 4f, 20f) };
@@ -183,7 +202,7 @@ namespace JurassicWorld.Editor
         }
         private static void BeginMovement()
         {
-            view = 6; layout.gameObject.SetActive(true);
+            view = 6; layout.gameObject.SetActive(true); performanceRoot.SetActive(true);
             camera.enabled = false;
             QualitySettings.vSyncCount = 0; Application.targetFrameRate = -1;
             rex.GetComponentInChildren<Animation>().cullingType = AnimationCullingType.AlwaysAnimate;
@@ -206,7 +225,8 @@ namespace JurassicWorld.Editor
             }
             else report.AppendLine("CPU主线程帧计时不可用，15%整帧目标未验证；不以渲染提交计时代替。\n");
             report.AppendLine(Gpu.Any(v => v.Count > 0) ? $"GPU基线/样板中位：{Median(Gpu.Take(3).SelectMany(v => v)):F3}/{Median(Gpu.Skip(3).SelectMany(v => v)):F3}ms。" : "GPU计时不可用，未推算GPU性能。");
-            File.WriteAllText(RainforestSample.Output + "/Performance.md", report.ToString());
+            if (expansionPerformance) report.Insert(0, "# 相邻圈扩展性能对照\n\n基线保留已认可样板及所有原植被；只切换本轮扩展根对象。下方“样板”指本轮扩展。\n\n");
+            File.WriteAllText(ArtifactOutput + "/Performance.md", report.ToString());
         }
         private static void PrepareScenario()
         {
@@ -228,7 +248,7 @@ namespace JurassicWorld.Editor
                 Vector3 direction = Quaternion.Euler(0f, scenario == 1 ? -35f : scenario == 2 ? 35f : 0f, 0f) * forward;
                 camera.transform.position = rex.transform.position + direction * 24f + Vector3.up * 1.7f;
                 camera.transform.LookAt(rex.transform.position + Vector3.up * 2.5f);
-                encoder = new MediaEncoder(RainforestSample.Output + "/interaction-" + new[] { "front", "left", "right" }[scenario] + ".mp4",
+                encoder = new MediaEncoder(ArtifactOutput + "/interaction-" + new[] { "front", "left", "right" }[scenario] + ".mp4",
                     new VideoTrackAttributes { width = 640, height = 360, frameRate = new MediaRational(30), includeAlpha = false, bitRateMode = VideoBitrateMode.High });
             }
             Time.captureDeltaTime = 1f / Rates[scenario / 8];
@@ -356,7 +376,7 @@ namespace JurassicWorld.Editor
                 footFailure |= maxFootError > .25f;
                 Report.AppendLine($"- {(maxFootError <= .25f ? "PASS" : "FAIL foot support")} {Rates[scenario/8]} FPS case {test}: {elapsed:F2}s, maximum interaction support error {maxFootError:F4}m ({maxFootContext}); no teleport, walking collision checked, performances may clip static props.");
                 if (encoder != null) { encoder.Dispose(); encoder = null; }
-                File.WriteAllText(RainforestSample.Output + (recordingOnly ? "/Recording.md" : "/Acceptance.md"), "RUNNING\n\n" + Report);
+                File.WriteAllText(ArtifactOutput + (recordingOnly ? "/Recording.md" : "/Acceptance.md"), "RUNNING\n\n" + Report);
                 if (++scenario < (recordingOnly ? 3 : 24)) { PrepareScenario(); return; }
                 Finish(footFailure ? new InvalidOperationException("Support-foot errors exceeded 0.25m; see individual cases.") : null); return;
             }
@@ -373,7 +393,7 @@ namespace JurassicWorld.Editor
             {
                 camera.Render(); RenderTexture.active = target;
                 image.ReadPixels(new Rect(0, 0, 1280, 720), 0, 0); image.Apply();
-                File.WriteAllBytes(RainforestSample.Output + "/" + name + ".png", image.EncodeToPNG());
+                File.WriteAllBytes(ArtifactOutput + "/" + name + ".png", image.EncodeToPNG());
             }
             finally { RenderTexture.active = previous; Object.DestroyImmediate(image); }
         }
@@ -389,7 +409,7 @@ namespace JurassicWorld.Editor
             if (peerObject != null) Object.DestroyImmediate(peerObject);
             if (target != null) { if (camera != null) camera.targetTexture = null; target.Release(); Object.DestroyImmediate(target); }
             string result = error == null ? "PASS RAINFOREST_NATURAL_INTERACTION_OK" : "FAILED " + error;
-            if (!performanceOnly) File.WriteAllText(RainforestSample.Output + (recordingOnly ? "/Recording.md" : "/Acceptance.md"), result + "\n\n" + Report);
+            if (!performanceOnly) File.WriteAllText(ArtifactOutput + (recordingOnly ? "/Recording.md" : "/Acceptance.md"), result + "\n\n" + Report);
             File.WriteAllText("Logs/rainforest-status.txt", result);
             if (error == null) Debug.Log(result); else Debug.LogException(error);
             if (Application.isBatchMode) EditorApplication.Exit(error == null ? 0 : 1);

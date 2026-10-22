@@ -16,14 +16,13 @@ namespace JurassicWorld.Editor
     // 关键约定：
     //  - 恐龙模型用 PrefabUtility.InstantiatePrefab 实例化为子物体，DinosaurModelFitter.Fit 只在烘焙时
     //    计算一次并写入 transform（运行期绑定器不再调用 Fit）。
-    //  - 材质烘焙为 Assets/Materials/Dinosaurs/*.mat 资产并赋给 Renderer（替代运行时 new Material）。
+    //  - 材质烘焙为 Assets/Dinosaurs/<species>/Prepared/*.mat 资产并赋给 Renderer（替代运行时 new Material）。
     //  - 各组件的可配置参数通过 [SerializeField] 私有字段写入，字段名与运行期脚本严格一致（见 SetField）。
     public static class JurassicWorldSceneBuilder
     {
         private const int GroundRandomSeed = MovementCorridor.LayoutSeed;
         private const string MaterialFolder = "Assets/Materials";
         private const string SkyPanoramaPath = "Assets/Materials/NatureSkyPanorama.tga";
-        private const string DinosaurMaterialFolder = "Assets/Materials/Dinosaurs";
         private const string TerrainFolder = "Assets/Terrain";
         private const string TerrainDataPath = "Assets/Terrain/JurassicTerrainData.asset";
         private const string TerrainLayerFolder = "Assets/Terrain/Layers";
@@ -67,13 +66,16 @@ namespace JurassicWorld.Editor
             // The reviewed Phase 2 biome pass is regenerated after a full scene Bake.
             Phase2VegetationSeeder.Seed();
             GroundEcologyPass.SeedSurface(UnityEngine.Object.FindObjectOfType<Terrain>());
+            RainforestExpansion.RestoreConfiguredOriginals();
             CentralForestDensification.SeedConfiguredStage();
             LocalForestRepair.SeedConfigured();
             // Dense Jungle Phase 1：可开关的通道 debug 标注（纯场景线段，不动 TerrainData / 植被 Pass）。
             BuildMovementCorridorDebug();
             TRexInteractionBake.BakeCurrentScene(false);
             RainforestSample.SeedConfigured();
+            RainforestExpansion.SeedConfigured();
             FoliageInteractionPreparation.SeedConfigured();
+            PteradactalSceneIntegration.AddToCurrentScene();
         }
 
         // ---------------------------------------------------------------- 通道 debug 标注（Phase 1）
@@ -1064,22 +1066,12 @@ namespace JurassicWorld.Editor
 
         private static void BuildHud(Font font)
         {
-            int expectedCount = EnabledDinosaurCount;
             var root = new GameObject("HUD", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler));
             Canvas canvas = root.GetComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
             CanvasScaler scaler = root.GetComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(1920f, 1080f);
-
-            Text help = MakeText(root.transform, "Help", TextAnchor.LowerLeft, 24, font);
-            RectTransform helpRect = help.rectTransform;
-            helpRect.anchorMin = new Vector2(0f, 0f);
-            helpRect.anchorMax = new Vector2(0f, 0f);
-            helpRect.pivot = new Vector2(0f, 0f);
-            helpRect.anchoredPosition = new Vector2(34f, 30f);
-            helpRect.sizeDelta = new Vector2(820f, 100f);
-            help.text = "W/S：前进/后退    A/D：转向并前进    按住鼠标右键：自由观察";
 
             Text status = MakeText(root.transform, "Status", TextAnchor.UpperRight, 24, font);
             RectTransform statusRect = status.rectTransform;
@@ -1088,7 +1080,7 @@ namespace JurassicWorld.Editor
             statusRect.pivot = new Vector2(1f, 1f);
             statusRect.anchoredPosition = new Vector2(-268f, -30f);
             statusRect.sizeDelta = new Vector2(980f, 90f);
-            status.text = $"正在加载 {expectedCount} 种恐龙模型…";
+            status.text = string.Empty;
 
             Text error = MakeText(root.transform, "Error", TextAnchor.UpperCenter, 27, font);
             error.color = new Color(1f, 0.45f, 0.35f);
@@ -1102,8 +1094,6 @@ namespace JurassicWorld.Editor
             HudController hud = root.AddComponent<HudController>();
             SetField(hud, "errorText", error);
             SetField(hud, "statusText", status);
-            SetField(hud, "helpText", help);
-            SetField(hud, "expectedDinosaurCount", expectedCount);
             root.AddComponent<WorldNavigationHud>().BuildUi(font);
             BuildInfoPanel(root.transform, font);
             EditorUtility.SetDirty(hud);
@@ -1138,6 +1128,9 @@ namespace JurassicWorld.Editor
         private static void BuildDinosaurs(Camera camera, Font font)
         {
             StegosaurusSceneIntegration.EnsureAssets();
+            PachycephalosaurusSceneIntegration.EnsureAssets();
+            SauropeltaSceneIntegration.EnsureAssets();
+            BaurusuchusSceneIntegration.EnsureAssets();
             foreach (DinosaurTemplate template in CreateTemplates())
             {
                 if (!template.enabled)
@@ -1158,11 +1151,12 @@ namespace JurassicWorld.Editor
             DinosaurAgent agent = root.AddComponent<DinosaurAgent>();
             SetField(agent, "viewCamera", camera);
             SetField(agent, "displayName", t.displayName);
-            SetField(agent, "minimapPortrait", AssetDatabase.LoadAssetAtPath<Sprite>("Assets/UI/DinosaurPortraits/" + t.objectName + ".png"));
+            SetField(agent, "minimapPortrait", AssetDatabase.LoadAssetAtPath<Sprite>(GetDinosaurPreparedFolder(t.objectName) + "/" + t.objectName + ".png"));
             SetField(agent, "movementHeight", t.position.y);
             SetField(agent, "viewFocusHeight", t.focusHeight);
             SetField(agent, "visualYaw", t.yaw);
             SetField(agent, "walkSpeed", t.walkSpeed);
+            SetField(agent, "freezePoseWhenStopped", t.freezePoseWhenStopped);
             SetField(agent, "moveAnimationGroundSpeed", t.walkSpeed);
             SetField(agent, "approachSpeed", Mathf.Max(t.walkSpeed * 1.35f, t.walkSpeed + 0.5f));
             SetField(agent, "description", t.description);
@@ -1174,9 +1168,8 @@ namespace JurassicWorld.Editor
             // 行为级碰撞契约：另一代理在 DinosaurAgent.cs 中添加同名 [SerializeField] private bool groundObstacleAware = true;
             // 字段名必须逐字符一致（反射写入，编译期无依赖）；飞行单位写 false，不被地面树干阻挡。
             SetField(agent, "groundObstacleAware", t.groundObstacleAware);
-            SetField(agent, "playerInteractionEnabled", t.resourcePath == "Dinosaurs/TRex/source/T-Rex");
-            SetField(agent, "species", t.objectName == "Velociraptor" ? DinosaurAgent.DinosaurSpecies.Velociraptor
-                : t.objectName == "Tyrannosaurus Rex" ? DinosaurAgent.DinosaurSpecies.Tyrannosaurus : DinosaurAgent.DinosaurSpecies.Other);
+            SetField(agent, "playerInteractionEnabled", t.objectName == "Tyrannosaurus Rex");
+            SetField(agent, "species", DinosaurAgent.GroundSpeciesForName(t.objectName));
             EditorUtility.SetDirty(agent);
 
             var visualRoot = new GameObject(t.displayName + " Visual Root");
@@ -1195,7 +1188,7 @@ namespace JurassicWorld.Editor
 
             // 动画姿势感知接地 + 步幅校准：Fit 用绑定姿势 AABB 对齐地面，运行期播放动画后脚会悬空；
             // 这里在烘焙时按「脚部接触几何」把 visualRoot 绝对对齐到地面 y，并顺带用 move clip 估算动画原生地速。
-            if (model != null && t.alignBottom && t.enableFootLock)
+            if (model != null && t.alignBottom && (t.enableFootLock || t.freezePoseWhenStopped || t.syncMoveAnimationSpeed))
                 GroundFeetByAnimation(visualRoot, model, root.transform, agent, t);
 
             DinosaurFbxLoader loader = root.AddComponent<DinosaurFbxLoader>();
@@ -1211,6 +1204,10 @@ namespace JurassicWorld.Editor
             SetField(loader, "footRiseThreshold", t.footRiseThreshold);
             SetField(loader, "footLockDistanceLimit", t.footLockDistanceLimit);
             EditorUtility.SetDirty(loader);
+            if (t.objectName == "Pachycephalosaurus") PachycephalosaurusSceneIntegration.Configure(agent);
+            if (t.objectName == "Sauropelta") SauropeltaSceneIntegration.Configure(agent);
+            if (t.objectName == "Baurusuchus") BaurusuchusSceneIntegration.Configure(agent);
+            if (DinosaurGaitCalibration.Species.Contains(t.objectName)) DinosaurGaitCalibration.Apply(agent);
             return agent;
         }
 
@@ -1247,7 +1244,7 @@ namespace JurassicWorld.Editor
             // 组装待采样片段：idleClip 为基准，moveClip 若与 idleClip 不同则加入（去重）。
             var probes = new List<ClipFootProbe>();
             if (idleClip != null)
-                probes.Add(new ClipFootProbe { clip = idleClip, role = "idle" });
+                probes.Add(new ClipFootProbe { clip = idleClip, role = moveClip == idleClip ? "idle+move" : "idle" });
             if (moveClip != null && moveClip != idleClip)
                 probes.Add(new ClipFootProbe { clip = moveClip, role = "move" });
             if (probes.Count == 0)
@@ -1306,7 +1303,7 @@ namespace JurassicWorld.Editor
                             $"footVertexLowest={FormatMeasured(probe.footVertexLowest)} footBoneLowest={FormatMeasured(probe.footBoneLowest)} " +
                             $"stepLength={probe.stepLength:F3} clipLength={probe.clip.length:F2}s cycleSpeed={FormatMeasured(probe.nativeGroundSpeed)}");
                         // 步态测速可信度告警（仅 move clip）：跨脚速度离散度过大时给出显式线索（CSV 同目录取证）。
-                        if (probe.role == "move" && probe.stanceGroundSpeed > 0f)
+                        if (probe.role.Contains("move") && probe.stanceGroundSpeed > 0f)
                         {
                             if (probe.stanceSpeedSpread > 0.25f)
                                 Debug.LogWarning($"[GroundFeet] {t.displayName} clip '{probe.clip.name}': 各脚支撑速度离散度 {(probe.stanceSpeedSpread * 100f):F0}%（左右不对称或支撑识别不稳），" +
@@ -1327,7 +1324,7 @@ namespace JurassicWorld.Editor
 
             // 7) 接地对齐：基准 = idle clip 的脚部接触最低点，绝对对齐到 groundY（只加位移）。
             ClipFootProbe idleProbe = probes[0];
-            ClipFootProbe moveProbe = probes.Count > 1 ? probes[1] : null;
+            ClipFootProbe moveProbe = probes.Count > 1 ? probes[1] : (t.freezePoseWhenStopped || t.syncMoveAnimationSpeed) ? idleProbe : null;
             float idleLowest = idleProbe.ContactLowest;
             if (idleLowest == float.MaxValue)
             {
@@ -1569,7 +1566,7 @@ namespace JurassicWorld.Editor
             {
                 if (region.Renderer == null)
                     continue;
-                region.Renderer.BakeMesh(tempMesh, false);
+                SauropeltaMeshSampling.Bake(region.Renderer, tempMesh);
                 vertexBuffer.Clear();
                 tempMesh.GetVertices(vertexBuffer); // GetVertices(List) 复用缓存，避免逐帧分配大数组
                 Matrix4x4 m = region.Renderer.transform.localToWorldMatrix;
@@ -1820,7 +1817,7 @@ namespace JurassicWorld.Editor
         // 循环播放时接缝最小。背景：clip 含约 2 个步态周期但总长与周期不整除时（如 5.5s vs 2×2.76s），
         // 全 clip 循环每圈都会「快进/急刹」几十毫秒的相位 → 脚位瞬移（实测 0.2~0.5m）→ 观感小弹跳；
         // 在窗口内循环可把接缝差压到 0.01~0.1m。仅当最优窗口显著优于整段循环（改善 ≥ 40%）时才启用。
-        private static void FindBestLoopWindow(List<Vector2>[] tracks, float clipLength, int steps,
+        internal static void FindBestLoopWindow(List<Vector2>[] tracks, float clipLength, int steps,
             out float windowStart, out float windowEnd, out float seamBefore, out float seamAfter)
         {
             windowStart = -1f;
@@ -2113,7 +2110,7 @@ namespace JurassicWorld.Editor
                 if (smr == null || smr.sharedMesh == null)
                     continue;
                 // useScale=false：缩放仅由下方 localToWorldMatrix 施加一次，避免 S² 双重缩放。
-                smr.BakeMesh(tempMesh, false);
+                SauropeltaMeshSampling.Bake(smr, tempMesh);
                 Bounds mb = tempMesh.bounds;
                 Vector3 c = mb.center;
                 Vector3 e = mb.extents;
@@ -2133,12 +2130,10 @@ namespace JurassicWorld.Editor
 
         private static GameObject InstantiateModel(DinosaurTemplate t, Transform parent)
         {
-            GameObject prefab = string.IsNullOrEmpty(t.assetPath)
-                ? Resources.Load<GameObject>(t.resourcePath)
-                : AssetDatabase.LoadAssetAtPath<GameObject>(t.assetPath);
+            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(t.assetPath);
             if (prefab == null)
             {
-                Debug.LogError("[SceneBuilder] 未找到恐龙模型资源：" + (string.IsNullOrEmpty(t.assetPath) ? "Resources/" + t.resourcePath : t.assetPath) +
+                Debug.LogError("[SceneBuilder] 未找到恐龙模型资源：" + t.assetPath +
                     "（若为并行导入任务尚未完成，请先导入素材再烘焙）。");
                 return null;
             }
@@ -2149,6 +2144,25 @@ namespace JurassicWorld.Editor
             model.transform.localRotation = Quaternion.Euler(0f, t.yaw, 0f);
             model.transform.localScale = Vector3.one;
             return model;
+        }
+
+        internal static DinosaurAgent AddPachycephalosaurusToCurrentScene()
+        {
+            Camera camera = Camera.main;
+            if (camera == null) throw new InvalidOperationException("Main camera required to add Pachycephalosaurus.");
+            return BuildDinosaur(CreateTemplates().Single(t => t.objectName == "Pachycephalosaurus"), camera, LoadBuiltinFont());
+        }
+
+        internal static DinosaurAgent AddSauropeltaToCurrentScene()
+        {
+            if (Camera.main == null) throw new InvalidOperationException("Main camera required to add Sauropelta.");
+            return BuildDinosaur(CreateTemplates().Single(t => t.objectName == "Sauropelta"), Camera.main, LoadBuiltinFont());
+        }
+
+        internal static DinosaurAgent AddBaurusuchusToCurrentScene()
+        {
+            if (Camera.main == null) throw new InvalidOperationException("Main camera required to add Baurusuchus.");
+            return BuildDinosaur(CreateTemplates().Single(t => t.objectName == "Baurusuchus"), Camera.main, LoadBuiltinFont());
         }
 
         internal static DinosaurAgent AddStegosaurusToCurrentScene()
@@ -2170,10 +2184,10 @@ namespace JurassicWorld.Editor
             Texture2D secondaryNormal = LoadTexture(t.secondaryNormal);
             Texture2D occlusion = LoadTexture(t.occlusion);
 
-            Material primaryMaterial = EnsureDinosaurMaterial(t.displayName + " Primary",
+            Material primaryMaterial = EnsureDinosaurMaterial(t.objectName, t.displayName + " Primary",
                 primaryAlbedo, primaryNormal, occlusion);
             Material secondaryMaterial = secondaryAlbedo != null
-                ? EnsureDinosaurMaterial(t.displayName + " Secondary",
+                ? EnsureDinosaurMaterial(t.objectName, t.displayName + " Secondary",
                     secondaryAlbedo, secondaryNormal != null ? secondaryNormal : primaryNormal, occlusion)
                 : null;
 
@@ -2196,10 +2210,11 @@ namespace JurassicWorld.Editor
             }
         }
 
-        private static Material EnsureDinosaurMaterial(string assetName, Texture albedo, Texture normal, Texture occlusion)
+        private static Material EnsureDinosaurMaterial(string objectName, string assetName, Texture albedo, Texture normal, Texture occlusion)
         {
-            EnsureFolder(DinosaurMaterialFolder);
-            Material material = LoadOrCreateStandardMaterial(DinosaurMaterialFolder + "/" + assetName + ".mat");
+            string folder = GetDinosaurPreparedFolder(objectName);
+            EnsureFolder(folder);
+            Material material = LoadOrCreateStandardMaterial(folder + "/" + assetName + ".mat");
             material.color = Color.white;
             material.SetFloat("_Metallic", 0f);
             material.SetFloat("_Glossiness", 0.28f);
@@ -2247,9 +2262,15 @@ namespace JurassicWorld.Editor
             return material;
         }
 
+        internal static string GetDinosaurPreparedFolder(string objectName)
+        {
+            string species = objectName == "Tyrannosaurus Rex" ? "TRex" : objectName;
+            return "Assets/Dinosaurs/" + species + "/Prepared";
+        }
+
         private static Texture2D LoadTexture(string resourcePath)
         {
-            return string.IsNullOrEmpty(resourcePath) ? null : Resources.Load<Texture2D>(resourcePath);
+            return string.IsNullOrEmpty(resourcePath) ? null : AssetDatabase.LoadAssetAtPath<Texture2D>(resourcePath);
         }
 
         // ---------------------------------------------------------------- 信息卡（屏幕空间 UI 面板）
@@ -2407,9 +2428,9 @@ namespace JurassicWorld.Editor
         {
             public string objectName;
             public string displayName;
-            public string resourcePath;
             public string assetPath;
             public bool preserveSourceMaterials;
+            public bool freezePoseWhenStopped;
             public Vector3 position;
             public float targetLength;
             public float yaw;
@@ -2460,7 +2481,7 @@ namespace JurassicWorld.Editor
                 {
                     objectName = "Tyrannosaurus Rex",
                     displayName = "霸王龙",
-                    resourcePath = "Dinosaurs/TRex/source/T-Rex",
+                    assetPath = "Assets/Dinosaurs/TRex/Source/source/T-Rex.fbx",
                     position = new Vector3(0f, 0f, 11f),
                     targetLength = 15f,
                     yaw = 0f,
@@ -2473,8 +2494,8 @@ namespace JurassicWorld.Editor
                     moveHint = "run",
                     alignBottom = true,
                     enableFootLock = true,
-                    primaryAlbedo = "Dinosaurs/TRex/textures/trexDiff",
-                    primaryNormal = "Dinosaurs/TRex/textures/trexNormal",
+                    primaryAlbedo = "Assets/Dinosaurs/TRex/Source/textures/trexDiff.jpeg",
+                    primaryNormal = "Assets/Dinosaurs/TRex/Source/textures/trexNormal.jpeg",
                     // 脚骨显式配置（T-Rex.fbx 骨骼名，腿部层级 Hip→Thigh→Knee→Ankle→Foot→Toe*→Claw*）：
                     // 只写 jt_Foot_L/R 不够——跖/踝关节原点离地还有数十厘米，运行期 FootLock 的
                     // clearance = 脚骨Y - 地面Y 会永远大于 releaseHeight(≈4% 体高) → 永不落脚 → 滑步。
@@ -2513,7 +2534,7 @@ namespace JurassicWorld.Editor
                     enabled = false,   // 用户要求暂时禁用（不显示）
                     objectName = "Rajasaurus",
                     displayName = "胜王龙",
-                    resourcePath = "Dinosaurs/Rajasaurus/source/Rajasaurus",
+                    assetPath = "Assets/Dinosaurs/Rajasaurus/Source/source/Rajasaurus.fbx",
                     position = new Vector3(-10f, 0f, 19f),
                     targetLength = 9f,
                     yaw = 180f,
@@ -2522,8 +2543,8 @@ namespace JurassicWorld.Editor
                     description = "胜王龙  Rajasaurus\n\n生存年代：晚白垩世\n食性：肉食性\n分布：印度\n\n头骨短而厚，是印度次大陆特有的阿贝力龙类。",
                     idleHint = "idle",
                     moveHint = "walk",
-                    primaryAlbedo = "Dinosaurs/Rajasaurus/textures/AlbedoMap",
-                    occlusion = "Dinosaurs/Rajasaurus/textures/AmbientOcclusionMap",
+                    primaryAlbedo = "Assets/Dinosaurs/Rajasaurus/Source/textures/AlbedoMap.jpg",
+                    occlusion = "Assets/Dinosaurs/Rajasaurus/Source/textures/AmbientOcclusionMap.png",
                     footBoneNames = new[] { "Bone.L.007", "Bone.R.007" },
                     footLockJointDepth = 3,
                     collisionRadius = 3f,   // 体长 9m 中型兽脚类
@@ -2534,7 +2555,7 @@ namespace JurassicWorld.Editor
                 {
                     objectName = "Velociraptor",
                     displayName = "伶盗龙",
-                    resourcePath = "Dinosaurs/Velociraptor/Raptor/Raptor_Animated_FBX",
+                    assetPath = "Assets/Dinosaurs/Velociraptor/Source/Sketchfab/Raptor/Raptor_Animated_FBX.fbx",
                     position = new Vector3(8f, 0f, 15f),
                     targetLength = 2.7f,
                     yaw = 180f,
@@ -2548,11 +2569,11 @@ namespace JurassicWorld.Editor
                     description = "伶盗龙  Velociraptor\n\n生存年代：晚白垩世\n食性：肉食性\n体型：约 2.7 米\n\n敏捷的小型猎手，后足具有醒目的镰刀状趾爪。",
                     idleHint = "idle",
                     moveHint = "run",
-                    primaryAlbedo = "Dinosaurs/Velociraptor/Raptor/Textures/Raptor_PatternA_Albedo",
-                    secondaryAlbedo = "Dinosaurs/Velociraptor/Raptor/Textures/Other_Albedo2 1K",
-                    primaryNormal = "Dinosaurs/Velociraptor/Raptor/Textures/Raptor_Normal",
-                    secondaryNormal = "Dinosaurs/Velociraptor/Raptor/Textures/Other_Normal 1K",
-                    occlusion = "Dinosaurs/Velociraptor/Raptor/Textures/Raptor_AO",
+                    primaryAlbedo = "Assets/Dinosaurs/Velociraptor/Source/Sketchfab/Raptor/Textures/Raptor_PatternA_Albedo.png",
+                    secondaryAlbedo = "Assets/Dinosaurs/Velociraptor/Source/Sketchfab/Raptor/Textures/Other_Albedo2 1K.png",
+                    primaryNormal = "Assets/Dinosaurs/Velociraptor/Source/Sketchfab/Raptor/Textures/Raptor_Normal.png",
+                    secondaryNormal = "Assets/Dinosaurs/Velociraptor/Source/Sketchfab/Raptor/Textures/Other_Normal 1K.png",
+                    occlusion = "Assets/Dinosaurs/Velociraptor/Source/Sketchfab/Raptor/Textures/Raptor_AO.png",
                     // 烘焙期实测 move clip（Raptor_Run1_Anim，'run' hint 匹配）原生地速并写入 agent.moveAnimationGroundSpeed，
                     // 同时搜索「最优循环窗口」（修多周期 clip 接缝相位跳的小弹跳，同霸王龙链路）。
                     // 实测证据（CSV 复算）：左脚 ≈1.249 / 右脚 ≈1.634 m/s（每脚 22 个贴地帧对，离散度 ≈12%＜25% 阈值）。
@@ -2570,6 +2591,73 @@ namespace JurassicWorld.Editor
                     footContactHeight = 0.12f,
                     footRiseThreshold = 0.001f,
                     collisionRadius = 1.5f,   // 体长 2.7m 小型猎手：与 DinosaurTemplate 默认值一致
+                },
+
+                new DinosaurTemplate
+                {
+                    objectName = "Pachycephalosaurus",
+                    displayName = "厚头龙",
+                    assetPath = PachycephalosaurusSceneIntegration.PrefabPath,
+                    preserveSourceMaterials = true,
+                    position = new Vector3(-18f, 0f, 24f),
+                    targetLength = 4.5f,
+                    yaw = 0f,
+                    focusHeight = 1.5f,
+                    walkSpeed = 1.15f,
+                    description = "厚头龙  Pachycephalosaurus\n\n场景体长：约 4.5 米。",
+                    idleHint = "Idle",
+                    moveHint = "Walk",
+                    footBoneNames = new[] { "Foot.L", "Foot.R" },
+                    syncMoveAnimationSpeed = true,
+                    syncWalkSpeedToNative = true,
+                    releaseFootLockOnRise = true,
+                    footContactHeight = .19f,
+                    footRiseThreshold = .001f,
+                    collisionRadius = 2f,
+                },
+
+                new DinosaurTemplate
+                {
+                    objectName = "Sauropelta",
+                    displayName = "蜥结龙",
+                    assetPath = SauropeltaSceneIntegration.PrefabPath,
+                    preserveSourceMaterials = true,
+                    position = new Vector3(20f, 0f, 12f),
+                    targetLength = 5f,
+                    yaw = 0f,
+                    focusHeight = 1.2f,
+                    walkSpeed = .65f,
+                    description = "蜥结龙  Sauropelta\n\n场景体长：约 5 米。\n使用资源自带行走动画，停步时保持姿态。",
+                    idleHint = "Walk",
+                    moveHint = "Walk",
+                    freezePoseWhenStopped = true,
+                    enableFootLock = true,
+                    footBoneNames = new[] { "Bone.L.002", "Bone.R.002", "Bone.L.005", "Bone.R.005" },
+                    syncMoveAnimationSpeed = true,
+                    syncWalkSpeedToNative = true,
+                    collisionRadius = 2f,
+                },
+
+                new DinosaurTemplate
+                {
+                    objectName = "Baurusuchus",
+                    displayName = "包鲁鳄",
+                    assetPath = BaurusuchusSceneIntegration.PrefabPath,
+                    preserveSourceMaterials = true,
+                    position = new Vector3(18f, 0f, 24f),
+                    targetLength = 5f,
+                    yaw = 0f,
+                    focusHeight = 1f,
+                    walkSpeed = 0.8f,
+                    description = "包鲁鳄  Baurusuchus\n\n生存年代：晚白垩世\n食性：肉食性\n场景体长：约 5 米。\n使用纯走路循环持续漫游，转弯保持前进；受阻时安全等待。",
+                    idleHint = "idle",
+                    moveHint = "run",
+                    enableFootLock = true,
+                    footBoneNames = new[] { "Bone.L.006", "Bone.R.006", "Bone.L.019", "Bone.R.019" },
+                    footLockJointDepth = 2,
+                    syncMoveAnimationSpeed = true,
+                    syncWalkSpeedToNative = true,
+                    collisionRadius = 1.5f,
                 },
 
                 new DinosaurTemplate
@@ -2602,7 +2690,7 @@ namespace JurassicWorld.Editor
                     enabled = false,   // 用户要求暂时禁用（不显示）
                     objectName = "Argentinosaurus",
                     displayName = "阿根廷龙",
-                    resourcePath = "Dinosaurs/Argentinosaurus/source/Argentinosaurus",
+                    assetPath = "Assets/Dinosaurs/Argentinosaurus/Source/source/Argentinosaurus.fbx",
                     position = new Vector3(-13f, 0f, 35f),
                     targetLength = 27f,
                     yaw = 180f,
@@ -2611,8 +2699,8 @@ namespace JurassicWorld.Editor
                     description = "阿根廷龙  Argentinosaurus\n\n生存年代：晚白垩世\n食性：植食性\n体型：约 30–35 米\n\n已知最大的陆生动物之一，拥有极长的颈部和尾部。",
                     idleHint = "idle",
                     moveHint = "walk",
-                    primaryAlbedo = "Dinosaurs/Argentinosaurus/textures/AlbedoMap",
-                    occlusion = "Dinosaurs/Argentinosaurus/textures/AmbientOcclutionMap",
+                    primaryAlbedo = "Assets/Dinosaurs/Argentinosaurus/Source/textures/AlbedoMap.png",
+                    occlusion = "Assets/Dinosaurs/Argentinosaurus/Source/textures/AmbientOcclutionMap.png",
                     footBoneNames = new[] { "Bone.l.002", "Bone.r.002", "Bone.l.006", "Bone.r.006" },
                     footLockJointDepth = 2,
                     releaseFootLockOnRise = true,

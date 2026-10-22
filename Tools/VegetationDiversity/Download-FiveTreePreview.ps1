@@ -31,6 +31,4 @@ foreach ($id in $assets.Keys) {
         }
         Write-Output "$id $relative $($entry.size) bytes verified"
     }
-    $record = [ordered]@{ asset = $id; source = "https://polyhaven.com/a/$id"; license = 'CC0'; resolution = '1k'; files = $entries }
-    $record | ConvertTo-Json -Depth 15 | Set-Content -Encoding utf8 (Join-Path $root 'download-manifest.json')
 }

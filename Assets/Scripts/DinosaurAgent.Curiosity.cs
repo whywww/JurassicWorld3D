@@ -99,13 +99,43 @@ namespace JurassicWorld
                 || curiosityPath.status == NavMeshPathStatus.PathInvalid
                 || (completeOnly && curiosityPath.status != NavMeshPathStatus.PathComplete)) return false;
             curiosityCorners = InsetNavigationCorners(curiosityPath.corners);
-            // Interaction follow/return connectors check every accepted step instead of
-            // rejecting the whole route here; ordinary roaming keeps the full preflight.
-            if (!skipRoamingPathFits && IsFreeRoaming && !RoamingPathFits(transform.position, transform.rotation, curiosityCorners)) return false;
-            if (!SafetyPathAllowed(curiosityCorners, IsAvoidingTyrannosaurus)) return false;
             curiosityCorner = 0;
             hasCuriosityPath = curiosityCorners.Length != 0;
+            NormalizeCuriosityStart(start.position);
+            // Interaction follow/return connectors check every accepted step instead of
+            // rejecting the whole route here; ordinary roaming keeps the full preflight.
+            if (!skipRoamingPathFits && IsFreeRoaming && !RoamingPathFits(transform.position, transform.rotation, curiosityCorners, curiosityCorner))
+            { hasCuriosityPath = false; return false; }
+            if (!SafetyPathAllowed(curiosityCorners, IsAvoidingTyrannosaurus))
+            { hasCuriosityPath = false; return false; }
             return hasCuriosityPath;
+        }
+
+        private void NormalizeCuriosityStart(Vector3 navigationStart)
+        {
+            // Only the projected origin gets the navigation tolerance. Real bends retain
+            // the tighter arrival tolerance and must never be cut through an obstacle.
+            if (curiosityCorners.Length < 2 || FlatDistance(curiosityCorners[0], navigationStart) > .001f
+                || FlatDistance(transform.position, navigationStart) > .12f) return;
+            TraceFreeRoamTurn("Projected start before normalization");
+            Vector3 next = curiosityCorners[1], delta = next - transform.position; delta.y = 0f;
+            if (delta.sqrMagnitude < .00000001f) return;
+            Vector2 from = new Vector2(transform.position.x, transform.position.z);
+            Vector2 to = new Vector2(next.x, next.z);
+            Vector2 heading = new Vector2(delta.x, delta.z).normalized;
+            if (!NavigationStepFits(transform.position, next)
+                || interactionSettings.StepBlocked(from, to, CoreForward, heading, interactionBody)
+                || !SafetySegmentAllowed(from, to, IsAvoidingTyrannosaurus)) return;
+            Vector2 previous = from;
+            int samples = Mathf.Max(1, Mathf.CeilToInt(Vector2.Distance(from, to) / .1f));
+            for (int i = 1; i <= samples; i++)
+            {
+                Vector2 point = Vector2.Lerp(from, to, (float)i / samples);
+                if (FindBlockingStep(previous, point) != null) return;
+                previous = point;
+            }
+            curiosityCorner = 1;
+            TraceFreeRoamTurn("Projected start skipped");
         }
 
         private bool PlanReturn()
@@ -163,6 +193,15 @@ namespace JurassicWorld
             float turnAngle = Vector3.SignedAngle(GetVisualForward(), direction, Vector3.up);
             if (Mathf.Abs(turnAngle) >= 40f && !FinishingReturnFootsteps)
             {
+                // A nearby point which could not be safely skipped is a blocked
+                // connector, not a useful direction for a large turn performance.
+                if (IsOrdinaryFreeRoam && direction.magnitude <= .12f)
+                {
+                    if (curiosityBlockedTime == 0f) TraceFreeRoamTurn("Near corner blocked");
+                    RoamingBlockReason = "Near path corner requires a safe connector";
+                    curiosityBlockedTime += Time.deltaTime;
+                    return false;
+                }
                 bool wander = IsFreeRoaming && InteractionPhase == PlayerInteractionPhase.Inactive;
                 if (!TryBeginSteppingTurn(turnAngle, wander ? TurnUse.Wander : TurnUse.Return))
                 {
@@ -187,6 +226,7 @@ namespace JurassicWorld
             if (blocked) { curiosityBlockedTime += Time.deltaTime; return false; }
             transform.SetPositionAndRotation(new Vector3(to.x, MovementHeight, to.y), rotation);
             bool moved = Vector2.Distance(from, to) > .00001f;
+            if (moved) RecordFreeRoamWalk(Vector2.Distance(from, to));
             if (moved) actualInteractionSpeed = Vector2.Distance(from, to) / Mathf.Max(.00001f, Time.deltaTime);
             interactionMoved |= moved;
             if (moved || Quaternion.Angle(rotation, desired) > 1f) curiosityBlockedTime = 0f;

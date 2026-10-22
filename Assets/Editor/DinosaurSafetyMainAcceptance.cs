@@ -79,7 +79,7 @@ namespace JurassicWorld.Editor
                 Call(raptor, "FreeIdle", 100f);
                 travelled = 0f; previous = raptor.transform.position; coupled = sawPeerWait = false;
                 Time.captureDeltaTime = 1f / 60f; began = Time.time; frame = -1;
-                Call(raptor, "UpdateFreeRoaming");
+                if (!(bool)Call(raptor, "UpdateGroundTraffic")) Call(raptor, "UpdateFreeRoaming");
                 Diagnose();
                 EditorApplication.update += Tick;
             }
@@ -124,6 +124,9 @@ namespace JurassicWorld.Editor
         }
         private static void PlaceEncounter()
         {
+            // A fixture relocation starts a fresh encounter, after the prior scenario
+            // has reached its release distance but before its next behaviour tick.
+            Call(raptor, "FinishGroundTraffic"); Call(rex, "FinishGroundTraffic");
             Vector3 oldRex = new Vector3(22.518f, 0f, 1.4223f), oldRaptor = new Vector3(30.571f, 0f, 8.6561f);
             Quaternion oldRotation = Quaternion.Euler(0f, -82.47f, 0f), oldPeerRotation = Quaternion.Euler(0f, -101.2f, 0f);
             rex.transform.SetPositionAndRotation(oldRex, oldRotation);
@@ -165,11 +168,12 @@ namespace JurassicWorld.Editor
             frame = Time.frameCount;
             try
             {
-                Call(raptor, "UpdateFreeRoaming");
+                if (!(bool)Call(raptor, "UpdateGroundTraffic")) Call(raptor, "UpdateFreeRoaming");
                 travelled += Vector3.Distance(previous, raptor.transform.position); previous = raptor.transform.position;
                 if (coupled)
                 {
-                    if (rex.IsOffRouteInteraction) Call(rex, "TickFrontInteraction");
+                    if (rex.IsOffRouteInteraction)
+                    { if (!(bool)Call(rex, "UpdateGroundTraffic")) Call(rex, "TickFrontInteraction"); }
                     else Call(rex, "Update");
                     sawPeerWait |= rex.FrontActionWaitingForSpace && rex.FrontBlockingReason == "Peer";
                     if (!StaticPoseClear(rex) || !StaticPoseClear(raptor))
@@ -191,7 +195,7 @@ namespace JurassicWorld.Editor
                     began = Time.time; previous = raptor.transform.position;
                     return;
                 }
-                if (elapsed >= 15f) throw new InvalidOperationException($"Main encounter still blocked: travelled={travelled:F3}m distance={distance:F3}m status={raptor.AvoidanceStatus} hasPath={Get(raptor, "hasCuriosityPath")} rotation={raptor.transform.eulerAngles} blocked={Get(raptor, "curiosityBlockedTime")} corner={Get(raptor, "curiosityCorner")} corners={string.Join(";", ((Vector3[])Get(raptor, "curiosityCorners")).Select(p => p.ToString("F4")))}.");
+                if (elapsed >= 30f) throw new InvalidOperationException($"Main encounter still blocked: travelled={travelled:F3}m distance={distance:F3}m status={raptor.AvoidanceStatus} rex={rex.FrontInteractionStage}/{rex.GroundTrafficStatus} hasPath={Get(raptor, "hasCuriosityPath")} rotation={raptor.transform.eulerAngles} blocked={Get(raptor, "curiosityBlockedTime")} corner={Get(raptor, "curiosityCorner")} corners={string.Join(";", ((Vector3[])Get(raptor, "curiosityCorners")).Select(p => p.ToString("F4")))}.");
             }
             catch (Exception error) { Finish(error); }
         }

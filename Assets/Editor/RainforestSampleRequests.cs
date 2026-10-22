@@ -28,6 +28,13 @@ namespace JurassicWorld.Editor
                 File.WriteAllText(statusPath, "RUNNING " + command);
                 switch (command)
                 {
+                    case "tree-heights": TreeHeightAdjustment.ApplyAndVerify(); break;
+                    case "tree-height-audit": TreeHeightAdjustment.AuditCurrent(); break;
+                    case "tree-height-undo": TreeHeightAdjustment.Undo(); break;
+                    case "expansion-build": RainforestExpansion.BuildAndVerify(); break;
+                    case "expansion-performance": RainforestSampleAcceptance.RunExpansionPerformance(); break;
+                    case "expansion-movement": RainforestSampleAcceptance.RunExpansionMovement(); break;
+                    case "expansion-play": ForestPlayAcceptance.RunExpansion(); break;
                     case "exit-left-only": TRexExitPlannerAcceptance.RunLeftOnly(); break;
                     case "exit-planner": TRexExitPlannerAcceptance.Run(); break;
                     case "exit-cost": TRexExitPlannerPerformance.Run(); break;
