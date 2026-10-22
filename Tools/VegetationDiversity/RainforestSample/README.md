@@ -1,5 +1,7 @@
 # 中心雨林样板
 
+> 验收截图、视频与场景副本已清理，文中指向这些文件的链接仅作历史引用。
+
 路线转身已统一为仅检查同伴身体的表演，允许静态穿插和越过路线边界；转完后以受检查的步行接回路线。此前第三组路线转身卡住的问题已修复，全部三组回归通过，见 [RouteTurnRepair.md](RouteTurnRepair.md)。
 
 本轮尺寸调整、三机位对照及通过／未通过的检查见 [TreeSizingVerification.md](TreeSizingVerification.md)。历史 PlayRepair.md 的通过记录不代表当前全场景回归已通过。
@@ -15,7 +17,7 @@ Main 中的 `Central Rainforest Sample` 拥有 X[-25,25]、Z[-10,45] 内本次�
 - 保存场景并退出 Play，执行 `Jurassic World > Environment > Rainforest Sample > Build and Verify`。流程恢复枝叶转换、移除上次样板、补植、重建树干截面和导航，再准备枝叶交互并保存 Main。
 - 执行同组的 `Remove Sample` 只移除本组新增对象，重建导航，并清除启用配置。现有场景对象及 Terrain 树不移位。
 - 启用配置为 `Assets/Editor/RainforestSampleEnabled.json`。完整场景 Bake 在中心植被、恐龙身体和导航准备后调用样板播种；旧中心加密播种器让出样板区，后续 Bake 不再启用大范围挪树。
-- 首次执行前的场景副本为 `Main_BeforeSample.unity`，仅作人工比对；正常撤销使用上述菜单，不回滚整个场景。
+- 首次执行前的场景副本由流程在本地生成（`Main_BeforeSample.unity`），仅作人工比对，不纳入版本库；正常撤销使用上述菜单，不回滚整个场景。
 
 ## 动作规则
 

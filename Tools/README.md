@@ -21,4 +21,4 @@ run_crossing_regression.ps1 检查路线交叉逻辑，可用 -CorridorSource <�
 
 针对个人缓存截图的 skyline 和 seam 分析脚本已删除。
 
-`Tools/VegetationDiversity/TreeHeights/` 等目录中的报告与 CSV 是环境资产整理前的历史记录，其中出现的资源路径可能仍指向旧目录，不作为当前路径依据。
+`Reports/` 与验收截图、视频、场景检查点在本地生成，不纳入版本库；保留的 Markdown、CSV、JSON 记录当时结论与配置，其中旧路径可能不再有效。恐龙模型转换见 `Tools/Protoceratops/` 和 `Tools/Pteradactal/` 的 README。

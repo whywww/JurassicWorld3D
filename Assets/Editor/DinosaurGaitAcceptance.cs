@@ -16,6 +16,7 @@ namespace JurassicWorld.Editor
     {
         private const BindingFlags Flags = BindingFlags.Instance | BindingFlags.NonPublic;
         internal const string Output = "Reports/ThreeAnimalGaits";
+        internal const string BaselinePath = "Assets/Editor/DinosaurGaitBaseline.json";
         [Serializable] private sealed class BaselineAnimal
         {
             public string species; public float walkSpeed, groundSpeed, visualY, loopStart, loopEnd; public bool footLock;
@@ -36,7 +37,7 @@ namespace JurassicWorld.Editor
                 DinosaurGaitCalibration.Require(!EditorApplication.isPlayingOrWillChangePlaymode
                     && !EditorSceneManager.GetActiveScene().isDirty, "Stop Play and save scene edits first.");
                 EditorSceneManager.OpenScene("Assets/Scenes/Main.unity");
-                string baselinePath = Output + "/Baseline.json";
+                string baselinePath = BaselinePath;
                 if (File.Exists(baselinePath)) baseline = JsonUtility.FromJson<BaselineData>(File.ReadAllText(baselinePath));
                 else
                 {

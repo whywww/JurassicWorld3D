@@ -20,7 +20,7 @@ namespace JurassicWorld.Editor
                 DinosaurGaitCalibration.Require(!EditorApplication.isPlayingOrWillChangePlaymode
                     && !EditorSceneManager.GetActiveScene().isDirty, "Stop Play and save scene edits first.");
                 EditorSceneManager.OpenScene("Assets/Scenes/Main.unity");
-                baseline = JsonUtility.FromJson<BaselineData>(File.ReadAllText(Output + "/Baseline.json"));
+                baseline = JsonUtility.FromJson<BaselineData>(File.ReadAllText(BaselinePath));
                 var agent = Object.FindObjectsOfType<DinosaurAgent>().Single(a => a.name == "Sauropelta");
                 var others = Object.FindObjectsOfType<DinosaurAgent>().Where(a => a != agent).ToArray();
                 var preserved = others.Select(a => EditorJsonUtility.ToJson(a)).ToArray();

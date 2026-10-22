@@ -27,6 +27,8 @@ namespace JurassicWorld.Editor
         public static void RunTreeHeights() { SessionState.SetBool(Key + ".TreeHeights", true); Run(); }
         public static void RunExpansionBaseline()
         {
+            DinosaurGaitCalibration.Require(File.Exists(RainforestExpansion.Output + "/Checkpoint/Main.unity"),
+                "Build the Rainforest Expansion ring first; the checkpoint scene is missing.");
             File.Copy(RainforestExpansion.Output + "/Checkpoint/Main.unity", BaselineScene, true);
             AssetDatabase.ImportAsset(BaselineScene);
             SessionState.SetBool(Key + ".Baseline", true); RunExpansion();
