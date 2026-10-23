@@ -1,0 +1,86 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c18235aa05ec2da439022ddc50833e33, type: 3}
+  m_Name: AfterRain
+  m_EditorClassIdentifier: 
+  skyMaterial: {fileID: 2100000, guid: a4234355d1db899479583fcacc54a9f7, type: 2}
+  cloudMaterial: {fileID: 2100000, guid: 96fc8c12fbdfe4b4198441b8ef235e6e, type: 2}
+  finishingShader: {fileID: 4800000, guid: c5e6191991260d44ea290ee34e574a22, type: 3}
+  skyRotation: 0
+  skyExposure: 0.8
+  sunColor: {r: 1, g: 0.96, b: 0.89, a: 1}
+  sunIntensity: 1.15
+  sunEuler: {x: 48.097874, y: 305.07376, z: -0.0000025567438}
+  ambientIntensity: 0.8
+  skyFillStrength: 0.03
+  skyFillCoefficients:
+  - 0.22986819
+  - 0.17050126
+  - -0.054728
+  - 0.08694105
+  - 0.048250433
+  - -0.030454071
+  - -0.0015367186
+  - -0.039991096
+  - -0.0031134277
+  - 0.28279033
+  - 0.19442779
+  - -0.07096288
+  - 0.11557801
+  - 0.060300265
+  - -0.035983257
+  - -0.002082887
+  - -0.05002004
+  - 0.0011339647
+  - 0.3896661
+  - 0.31476897
+  - -0.09233342
+  - 0.15796156
+  - 0.10236175
+  - -0.05779364
+  - -0.0051917136
+  - -0.06504808
+  - 0.0019732032
+  skyFillBaseProbe:
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  vegetationLightingEnabled: 1
+  shadowStrength: 0.8
+  exposure: 1.05
+  bloom: 0.045
+  cloudOpacity: 0.12
+  cloudVelocity: {x: 0.0006, y: 0.0002}

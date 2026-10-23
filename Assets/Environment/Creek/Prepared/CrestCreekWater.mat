@@ -18,6 +18,7 @@ Material:
   - _DEBUGVISUALISE_NONE
   - _FLOW_ON
   - _FOAM3DLIGHTING_ON
+  - _OVERRIDEREFLECTIONCUBEMAP_ON
   - _PLANARREFLECTIONS_ON
   - _TRANSPARENCY_ON
   m_InvalidKeywords:
@@ -52,7 +53,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _ReflectionCubemapOverride:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 8900000, guid: 4ff6560f029ba9d4285a9ebfe61312b2, type: 2}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _Skybox:
@@ -138,7 +139,7 @@ Material:
     - _NormalsStrength: 0.27
     - _NormalsStrengthOverall: 0.7
     - _Offset: 0.00008
-    - _OverrideReflectionCubemap: 0
+    - _OverrideReflectionCubemap: 1
     - _PlanarReflectionDistanceFactor: 0
     - _PlanarReflectionIntensity: 1.5
     - _PlanarReflectionNormalsStrength: 1

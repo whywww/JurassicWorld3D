@@ -17,6 +17,13 @@ namespace JurassicWorld.Editor
         {
             const string request = "Logs/rainforest-request.txt", statusPath = "Logs/rainforest-status.txt";
             if (!File.Exists(request)) return;
+            // This repair was explicitly requested while inspecting Play; stop simulation only,
+            // then retain the normal dirty-scene guard before touching the authored scene.
+            if (EditorApplication.isPlaying && (File.ReadAllText(request).Trim().StartsWith("target-vegetation-") || File.ReadAllText(request).Trim() == "vegetation-lighting-diagnose" || File.ReadAllText(request).Trim() == "vegetation-material-only"))
+            {
+                EditorApplication.isPlaying = false;
+                return;
+            }
             string state = EditorApplication.isCompiling || EditorApplication.isUpdating ? "WAITING_FOR_IMPORT"
                 : EditorApplication.isPlayingOrWillChangePlaymode ? "WAITING_FOR_PLAY_TO_STOP"
                 : EditorSceneManager.GetActiveScene().isDirty ? "WAITING_FOR_SCENE_SAVE" : "STARTING";
@@ -28,6 +35,11 @@ namespace JurassicWorld.Editor
                 File.WriteAllText(statusPath, "RUNNING " + command);
                 switch (command)
                 {
+                    case "target-vegetation-audit": TargetVegetationLighting.Audit(); File.WriteAllText(statusPath, "DONE " + command); break;
+                    case "target-vegetation-repair": TargetVegetationLighting.Run(); File.WriteAllText(statusPath, "DONE " + command); break;
+                    case "vegetation-lighting-diagnose": VegetationLightingRepair.Diagnose(); File.WriteAllText(statusPath, "DONE " + command); break;
+                    case "vegetation-lighting-repair": VegetationLightingRepair.Repair(); File.WriteAllText(statusPath, "DONE " + command); break;
+                    case "vegetation-material-only": VegetationLightingRepair.RestoreMaterialOnly(); File.WriteAllText(statusPath, "DONE " + command); break;
                     case "water-cleanup": WaterPlantCleanup.CleanAndVerify(); break;
                     case "water-cleanup-undo": WaterPlantCleanup.Undo(); break;
                     case "gap-fill": CenterForestGapFill.BuildAndVerify(); break;

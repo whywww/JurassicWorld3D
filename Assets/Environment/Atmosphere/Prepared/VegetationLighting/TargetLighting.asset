@@ -1,0 +1,246 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 31ad4213f439821498f27bb09ca85cf6, type: 3}
+  m_Name: TargetLighting
+  m_EditorClassIdentifier: 
+  entries:
+  - category: Bush
+    material: {fileID: 2100000, guid: e5f45a169e7216e478eaf5bc854d72f7, type: 2}
+    shader: {fileID: 4800000, guid: d86461868e37f7f468d80ee45f71dc28, type: 3}
+    packedNormal: {fileID: 2800000, guid: 4ac7b8337242fe545ab32443539fef95, type: 3}
+    occlusionStrength: 0.35
+    albedoGain: 2
+    instanceTintStrength: 1
+  - category: Bush
+    material: {fileID: 2100000, guid: ba988dec45de6de458a62195044c7447, type: 2}
+    shader: {fileID: 4800000, guid: c19aac9b32361274ab5cba6434eb8b7d, type: 3}
+    packedNormal: {fileID: 2800000, guid: 4ac7b8337242fe545ab32443539fef95, type: 3}
+    occlusionStrength: 0.35
+    albedoGain: 1.6
+    instanceTintStrength: 1
+  - category: Bush
+    material: {fileID: 2100000, guid: 25f459997435dcc4facdc02af0018e46, type: 2}
+    shader: {fileID: 4800000, guid: d86461868e37f7f468d80ee45f71dc28, type: 3}
+    packedNormal: {fileID: 2800000, guid: 0c37055595f8314439a03d85168834f8, type: 3}
+    occlusionStrength: 0.35
+    albedoGain: 2
+    instanceTintStrength: 1
+  - category: Bush
+    material: {fileID: 2100000, guid: 9d69f984dc2424a47aa51d0c9e0731ea, type: 2}
+    shader: {fileID: 4800000, guid: c19aac9b32361274ab5cba6434eb8b7d, type: 3}
+    packedNormal: {fileID: 2800000, guid: 0c37055595f8314439a03d85168834f8, type: 3}
+    occlusionStrength: 0.35
+    albedoGain: 1.6
+    instanceTintStrength: 1
+  - category: Bush
+    material: {fileID: 2100000, guid: 1d59a987428f77d48b8ef85156263d6d, type: 2}
+    shader: {fileID: 4800000, guid: d86461868e37f7f468d80ee45f71dc28, type: 3}
+    packedNormal: {fileID: 2800000, guid: abdcc85cc747f4a439dfae282f99de1e, type: 3}
+    occlusionStrength: 0.35
+    albedoGain: 2
+    instanceTintStrength: 1
+  - category: Bush
+    material: {fileID: 2100000, guid: b2beed0033c611f4bb52ccff3ebc60b8, type: 2}
+    shader: {fileID: 4800000, guid: c19aac9b32361274ab5cba6434eb8b7d, type: 3}
+    packedNormal: {fileID: 2800000, guid: abdcc85cc747f4a439dfae282f99de1e, type: 3}
+    occlusionStrength: 0.35
+    albedoGain: 1.6
+    instanceTintStrength: 1
+  - category: Bush
+    material: {fileID: 2100000, guid: 73917c05dfb9b304ba86e0975230db6a, type: 2}
+    shader: {fileID: 4800000, guid: d86461868e37f7f468d80ee45f71dc28, type: 3}
+    packedNormal: {fileID: 2800000, guid: 1c8818894cfc9e843bda47e0756b4026, type: 3}
+    occlusionStrength: 0.35
+    albedoGain: 2
+    instanceTintStrength: 1
+  - category: Bush
+    material: {fileID: 2100000, guid: 785c74b481938d045bf0169162b9afdd, type: 2}
+    shader: {fileID: 4800000, guid: c19aac9b32361274ab5cba6434eb8b7d, type: 3}
+    packedNormal: {fileID: 2800000, guid: 1c8818894cfc9e843bda47e0756b4026, type: 3}
+    occlusionStrength: 0.35
+    albedoGain: 1.6
+    instanceTintStrength: 1
+  - category: NSK trunk
+    material: {fileID: 2100000, guid: ba69474df5970f54a991c88f226b2cd0, type: 2}
+    shader: {fileID: 4800000, guid: d86461868e37f7f468d80ee45f71dc28, type: 3}
+    packedNormal: {fileID: 2800000, guid: d960800306dc232428ca7d82b3ce9069, type: 3}
+    occlusionStrength: 0.15
+    albedoGain: 2
+    instanceTintStrength: 1
+  - category: NSK trunk
+    material: {fileID: 2100000, guid: 44ea768773c26134e84caf75c22df59f, type: 2}
+    shader: {fileID: 4800000, guid: d86461868e37f7f468d80ee45f71dc28, type: 3}
+    packedNormal: {fileID: 2800000, guid: e3ae6279869b4804592ba58597db3dc1, type: 3}
+    occlusionStrength: 0.15
+    albedoGain: 2
+    instanceTintStrength: 1
+  - category: Bush
+    material: {fileID: 2100000, guid: 1f93dbaec85442a409d80339108c2a45, type: 2}
+    shader: {fileID: 4800000, guid: d86461868e37f7f468d80ee45f71dc28, type: 3}
+    packedNormal: {fileID: 2800000, guid: f1dcfdf49228aeb40826987f63642bd4, type: 3}
+    occlusionStrength: 0.35
+    albedoGain: 2
+    instanceTintStrength: 1
+  - category: Bush
+    material: {fileID: 2100000, guid: b96d3ffa44194a046b9ae546b6befa36, type: 2}
+    shader: {fileID: 4800000, guid: c19aac9b32361274ab5cba6434eb8b7d, type: 3}
+    packedNormal: {fileID: 2800000, guid: f1dcfdf49228aeb40826987f63642bd4, type: 3}
+    occlusionStrength: 0.35
+    albedoGain: 1.6
+    instanceTintStrength: 1
+  - category: Bush
+    material: {fileID: 2100000, guid: 5bf93f32fca0d1d4896642cb26e0fe97, type: 2}
+    shader: {fileID: 4800000, guid: d86461868e37f7f468d80ee45f71dc28, type: 3}
+    packedNormal: {fileID: 2800000, guid: 5b8c806bf3a8b384281eea761ec5946c, type: 3}
+    occlusionStrength: 0.35
+    albedoGain: 2
+    instanceTintStrength: 1
+  - category: Bush
+    material: {fileID: 2100000, guid: 956b34d56abbe634c9cef61aff1f7be2, type: 2}
+    shader: {fileID: 4800000, guid: c19aac9b32361274ab5cba6434eb8b7d, type: 3}
+    packedNormal: {fileID: 2800000, guid: 5b8c806bf3a8b384281eea761ec5946c, type: 3}
+    occlusionStrength: 0.35
+    albedoGain: 1.6
+    instanceTintStrength: 1
+  - category: NSK trunk
+    material: {fileID: 2100000, guid: 26d3273b828469d479d1fb20b65dcbc0, type: 2}
+    shader: {fileID: 4800000, guid: d86461868e37f7f468d80ee45f71dc28, type: 3}
+    packedNormal: {fileID: 2800000, guid: bffb0ac85ea363249aedbe541dcc70a0, type: 3}
+    occlusionStrength: 0.15
+    albedoGain: 2
+    instanceTintStrength: 1
+  - category: Banana trunk
+    material: {fileID: 2100000, guid: 5c9b9ae29f30fe74283bee0931fdd413, type: 2}
+    shader: {fileID: 4800000, guid: 3183b023527f665409fa02d4b66d6497, type: 3}
+    packedNormal: {fileID: 0}
+    occlusionStrength: 0.3
+    albedoGain: 1.6
+    instanceTintStrength: 1
+  - category: NSK trunk
+    material: {fileID: 2100000, guid: 797abdc2860224f4096a40f4141c2508, type: 2}
+    shader: {fileID: 4800000, guid: d86461868e37f7f468d80ee45f71dc28, type: 3}
+    packedNormal: {fileID: 2800000, guid: 0894e618d9e66824b927f80ea72f3e74, type: 3}
+    occlusionStrength: 0.15
+    albedoGain: 2
+    instanceTintStrength: 1
+  - category: NSK trunk
+    material: {fileID: 2100000, guid: e41652508b3cc8b4b9814c80b08ac193, type: 2}
+    shader: {fileID: 4800000, guid: d86461868e37f7f468d80ee45f71dc28, type: 3}
+    packedNormal: {fileID: 2800000, guid: 0894e618d9e66824b927f80ea72f3e74, type: 3}
+    occlusionStrength: 0.15
+    albedoGain: 2
+    instanceTintStrength: 1
+  - category: NSK trunk
+    material: {fileID: 2100000, guid: 5bca08fab65b20b4abace880c865d5b4, type: 2}
+    shader: {fileID: 4800000, guid: d86461868e37f7f468d80ee45f71dc28, type: 3}
+    packedNormal: {fileID: 2800000, guid: e3ae6279869b4804592ba58597db3dc1, type: 3}
+    occlusionStrength: 0.15
+    albedoGain: 2
+    instanceTintStrength: 1
+  - category: NSK trunk
+    material: {fileID: 2100000, guid: ce6c26e78ee4801478cbf49eb46099d4, type: 2}
+    shader: {fileID: 4800000, guid: d86461868e37f7f468d80ee45f71dc28, type: 3}
+    packedNormal: {fileID: 2800000, guid: bffb0ac85ea363249aedbe541dcc70a0, type: 3}
+    occlusionStrength: 0.15
+    albedoGain: 2
+    instanceTintStrength: 1
+  - category: NSK trunk
+    material: {fileID: 2100000, guid: 785009dbbeb0c1f4cb4984957a88bb36, type: 2}
+    shader: {fileID: 4800000, guid: d86461868e37f7f468d80ee45f71dc28, type: 3}
+    packedNormal: {fileID: 2800000, guid: d960800306dc232428ca7d82b3ce9069, type: 3}
+    occlusionStrength: 0.15
+    albedoGain: 2
+    instanceTintStrength: 1
+  - category: Bush
+    material: {fileID: 2100000, guid: 3f24b8b82ae7e1241b756fadb49f3ed0, type: 2}
+    shader: {fileID: 4800000, guid: d86461868e37f7f468d80ee45f71dc28, type: 3}
+    packedNormal: {fileID: 2800000, guid: 5b8c806bf3a8b384281eea761ec5946c, type: 3}
+    occlusionStrength: 0.35
+    albedoGain: 2
+    instanceTintStrength: 1
+  - category: Bush
+    material: {fileID: 2100000, guid: 1b2d6fee57c8d40489d62331bf0d69f6, type: 2}
+    shader: {fileID: 4800000, guid: c19aac9b32361274ab5cba6434eb8b7d, type: 3}
+    packedNormal: {fileID: 2800000, guid: 5b8c806bf3a8b384281eea761ec5946c, type: 3}
+    occlusionStrength: 0.35
+    albedoGain: 1.6
+    instanceTintStrength: 1
+  - category: Bush
+    material: {fileID: 2100000, guid: 4fb8339b60810464a97ba927b9b30262, type: 2}
+    shader: {fileID: 4800000, guid: d86461868e37f7f468d80ee45f71dc28, type: 3}
+    packedNormal: {fileID: 2800000, guid: f1dcfdf49228aeb40826987f63642bd4, type: 3}
+    occlusionStrength: 0.35
+    albedoGain: 2
+    instanceTintStrength: 1
+  - category: Bush
+    material: {fileID: 2100000, guid: 05ba7dcaa66862543b8143dde8130436, type: 2}
+    shader: {fileID: 4800000, guid: c19aac9b32361274ab5cba6434eb8b7d, type: 3}
+    packedNormal: {fileID: 2800000, guid: f1dcfdf49228aeb40826987f63642bd4, type: 3}
+    occlusionStrength: 0.35
+    albedoGain: 1.6
+    instanceTintStrength: 1
+  - category: Bush
+    material: {fileID: 2100000, guid: 7961664436681f94287ebc424216be88, type: 2}
+    shader: {fileID: 4800000, guid: d86461868e37f7f468d80ee45f71dc28, type: 3}
+    packedNormal: {fileID: 2800000, guid: 4ac7b8337242fe545ab32443539fef95, type: 3}
+    occlusionStrength: 0.35
+    albedoGain: 2
+    instanceTintStrength: 1
+  - category: Bush
+    material: {fileID: 2100000, guid: 35a680734c6d3ab409906112d82a6b8d, type: 2}
+    shader: {fileID: 4800000, guid: c19aac9b32361274ab5cba6434eb8b7d, type: 3}
+    packedNormal: {fileID: 2800000, guid: 4ac7b8337242fe545ab32443539fef95, type: 3}
+    occlusionStrength: 0.35
+    albedoGain: 1.6
+    instanceTintStrength: 1
+  - category: Bush
+    material: {fileID: 2100000, guid: 0d5a6032a91e9704bb0a9a3896154073, type: 2}
+    shader: {fileID: 4800000, guid: d86461868e37f7f468d80ee45f71dc28, type: 3}
+    packedNormal: {fileID: 2800000, guid: 1c8818894cfc9e843bda47e0756b4026, type: 3}
+    occlusionStrength: 0.35
+    albedoGain: 2
+    instanceTintStrength: 1
+  - category: Bush
+    material: {fileID: 2100000, guid: 0bb16b990ce1a35449ce88f97cfed6b8, type: 2}
+    shader: {fileID: 4800000, guid: c19aac9b32361274ab5cba6434eb8b7d, type: 3}
+    packedNormal: {fileID: 2800000, guid: 1c8818894cfc9e843bda47e0756b4026, type: 3}
+    occlusionStrength: 0.35
+    albedoGain: 1.6
+    instanceTintStrength: 1
+  - category: Bush
+    material: {fileID: 2100000, guid: d2a3e6fd8b7a12f468fd0e062e02fb83, type: 2}
+    shader: {fileID: 4800000, guid: d86461868e37f7f468d80ee45f71dc28, type: 3}
+    packedNormal: {fileID: 2800000, guid: 0c37055595f8314439a03d85168834f8, type: 3}
+    occlusionStrength: 0.35
+    albedoGain: 2
+    instanceTintStrength: 1
+  - category: Bush
+    material: {fileID: 2100000, guid: 96f2dfad919fb2a4ca3618b0f26156c5, type: 2}
+    shader: {fileID: 4800000, guid: c19aac9b32361274ab5cba6434eb8b7d, type: 3}
+    packedNormal: {fileID: 2800000, guid: 0c37055595f8314439a03d85168834f8, type: 3}
+    occlusionStrength: 0.35
+    albedoGain: 1.6
+    instanceTintStrength: 1
+  - category: Bush
+    material: {fileID: 2100000, guid: 2a5364eb5da02e44e9457b7fdae38818, type: 2}
+    shader: {fileID: 4800000, guid: d86461868e37f7f468d80ee45f71dc28, type: 3}
+    packedNormal: {fileID: 2800000, guid: abdcc85cc747f4a439dfae282f99de1e, type: 3}
+    occlusionStrength: 0.35
+    albedoGain: 2
+    instanceTintStrength: 1
+  - category: Bush
+    material: {fileID: 2100000, guid: c1a4eac7680c8784cb09a84153211f92, type: 2}
+    shader: {fileID: 4800000, guid: c19aac9b32361274ab5cba6434eb8b7d, type: 3}
+    packedNormal: {fileID: 2800000, guid: abdcc85cc747f4a439dfae282f99de1e, type: 3}
+    occlusionStrength: 0.35
+    albedoGain: 1.6
+    instanceTintStrength: 1

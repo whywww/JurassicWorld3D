@@ -256,17 +256,19 @@ namespace JurassicWorld
         internal static Vector2 ResolveCommand(string command, double commandPower, float minimumPower,
             double age, float timeout)
         {
+            // ReadMovement gates this fallback on a ready Cortex connection.
+            var fallback = new Vector2(0f, 0.5f);
             if (double.IsNaN(commandPower) || double.IsInfinity(commandPower)
-                || age >= timeout) return Vector2.zero;
+                || age >= timeout) return fallback;
             float strength = Mathf.Clamp01((float)commandPower);
-            if (strength < minimumPower) return Vector2.zero;
+            if (strength < minimumPower) return fallback;
             switch (command)
             {
                 case "push": return new Vector2(0f, strength);
                 case "pull": return new Vector2(0f, -strength);
                 case "left": return new Vector2(-strength, strength);
                 case "right": return new Vector2(strength, strength);
-                default: return Vector2.zero;
+                default: return fallback;
             }
         }
 

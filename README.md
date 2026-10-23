@@ -120,7 +120,7 @@ git lfs pull
 3. 断开 EmotivBCI 的设备连接并完全退出 EmotivBCI，保留 Launcher。检查其他 Cortex 示例、BCI 工具或独立游戏实例也没有占用该设备的 profile。
 4. 在 `emotiv.local.json` 中设置 `"profileName": "SimGuest"`，确认对应 Cortex 凭据已填写，再重新进入 Play。
 5. 等待 `Profile loaded: SimGuest` 及 `Mental Command stream subscribed; control ready`。在 Launcher 的模拟控制中选择 push/pull/left/right，将 power 设置为高于 Threshold，并让模拟器持续输出；返回 Unity Game 窗口，不按任何方向键，观察相机前进。
-6. 用 `com data: push, power: ...` 日志确认收到的实际指令。改为 neutral 或 power 低于 0.3 后应平滑停止；同方向按键优先，不会与脑控叠加加速。
+6. 用 `com data: push, power: ...` 日志确认收到的实际指令。改为 neutral 或 power 低于 0.3 后应平滑切换为正常速度的 50% 自动前进；同方向按键优先，不会与脑控叠加加速。
 
 ### 6. 方向控制规则
 
@@ -132,6 +132,8 @@ git lfs pull
 | `right` | D / → | 右转并前进 |
 
 power **达到** Threshold 才接受方向，移动和转向速度按限制在 `[0,1]` 的 power 缩放。主场景满速为 4 m/s、转向 60°/s，例如 power=0.5 的转弯目标为前进 2 m/s、转向 30°/s，移动仍经过原有平滑加减速。
+
+连接、授权、session、profile 和 `com` 订阅均正常时，若没有有效方向指令（未训练、Push 被禁用、neutral、低于阈值、空指令、未知指令、无效 power 或指令超时），自动沿当前行进方向以正常速度的 **50%** 前进。该目标速度随场景 `Move Speed` 缩放，保留平滑加减速；收到有效方向指令后恢复上述映射。未连接、断连、流停止或组件禁用时输出零。此行为仅适用于 Emotiv，MindWave 保持原有逻辑。
 
 按住任意 WASD 或方向键时，**键盘完全优先**，即使同时按相反键使输入抵消也不会退回脑控；松开后恢复当前有效脑控输入。鼠标右键视角操作保留。
 

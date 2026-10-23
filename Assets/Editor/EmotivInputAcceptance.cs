@@ -141,6 +141,7 @@ namespace JurassicWorld.Editor
                     Require(legacyAcknowledged == !buffering, "Legacy acknowledgement suppressed only in buffered mode");
                     Require((bool)typeof(EmotivPlayerInput).GetField("subscribed", BindingFlags.NonPublic | BindingFlags.Instance)
                         .GetValue(input), "Real Cortex acknowledgement must mark control ready in both modes");
+                    Equal(input.ReadMovement(), new Vector2(0, 0.5f), "Ready stream without samples uses half-speed fallback");
                     var commandEvent = (Delegate)typeof(DataStreamProcess).GetField("MentalCommandReceived",
                         BindingFlags.NonPublic | BindingFlags.Instance).GetValue(process);
                     commandEvent.DynamicInvoke(process, new ArrayList { 1.0, "push", 0.9 });
@@ -149,14 +150,23 @@ namespace JurassicWorld.Editor
                     Equal(input.ReadMovement(), Vector2.zero, "Session loss blocks received commands");
                     Set(manager, "_isSessActivated", true);
                     Set(input, "receivedAt", System.Diagnostics.Stopwatch.GetTimestamp() - 2L * System.Diagnostics.Stopwatch.Frequency);
-                    Equal(input.ReadMovement(), Vector2.zero, "Stale received sample blocks movement");
+                    Equal(input.ReadMovement(), new Vector2(0, 0.5f), "Stale sample uses half-speed fallback");
                     commandEvent.DynamicInvoke(process, new ArrayList { 2.0, "push", 0.9 });
                     Equal(input.ReadMovement(), new Vector2(0, 0.9f), "Identical fresh SDK push resumes movement");
                     commandEvent.DynamicInvoke(process, new ArrayList { 3.0, "neutral", 0.9 });
-                    Equal(input.ReadMovement(), Vector2.zero, "SDK neutral stops movement");
+                    Equal(input.ReadMovement(), new Vector2(0, 0.5f), "SDK neutral uses half-speed fallback");
                     commandEvent.DynamicInvoke(process, new ArrayList { 4.0, "push", 0.9 });
                     Invoke(manager, "OnStreamStopNotify", null, new List<string> { "com" });
                     Equal(input.ReadMovement(), Vector2.zero, "SDK stream stop clears readiness");
+                    Invoke(input, "OnSubscribed", null, new Dictionary<string, JArray> { ["com"] = new JArray() });
+                    Equal(input.ReadMovement(), new Vector2(0, 0.5f), "Resubscribed stream resumes fallback");
+                    Set(emotiv, "_isAuthorizedOK", false);
+                    Equal(input.ReadMovement(), Vector2.zero, "Authorization loss blocks fallback");
+                    Set(emotiv, "_isAuthorizedOK", true);
+                    Set(input, "running", false);
+                    input.enabled = false;
+                    Set(input, "running", true);
+                    Equal(input.ReadMovement(), Vector2.zero, "Disabled component cannot auto-advance");
                     Invoke(input, "UnregisterStreamEvents");
                     var callbacks = (Delegate)typeof(DataStreamProcess).GetField("SubscribedOK",
                         BindingFlags.NonPublic | BindingFlags.Instance).GetValue(process);
@@ -243,19 +253,19 @@ namespace JurassicWorld.Editor
             Equal(Command("right", 0.5), new Vector2(0.5f, 0.5f), "Right turns AND advances at half speed");
             Equal(Command("right", 1), Vector2.one, "Full power");
             Equal(Command("push", 0.3), new Vector2(0, 0.3f), "Threshold inclusive");
-            Equal(Command("push", 0.299), Vector2.zero, "Below threshold");
-            Equal(Command("push", -1), Vector2.zero, "Negative power");
+            Equal(Command("push", 0.299), new Vector2(0, 0.5f), "Below threshold");
+            Equal(Command("push", -1), new Vector2(0, 0.5f), "Negative power");
             Equal(Command("push", 5), Vector2.up, "Power capped at one");
-            Equal(Command("push", double.NaN), Vector2.zero, "NaN ignored");
-            Equal(Command("push", double.PositiveInfinity), Vector2.zero, "Infinity ignored");
-            Equal(Command("neutral", 1), Vector2.zero, "Neutral stops input");
-            Equal(Command("unknown", 1), Vector2.zero, "Unknown action ignored");
-            Equal(Command(null, 1), Vector2.zero, "No action ignored");
+            Equal(Command("push", double.NaN), new Vector2(0, 0.5f), "NaN ignored");
+            Equal(Command("push", double.PositiveInfinity), new Vector2(0, 0.5f), "Infinity ignored");
+            Equal(Command("neutral", 1), new Vector2(0, 0.5f), "Neutral uses half-speed fallback");
+            Equal(Command("unknown", 1), new Vector2(0, 0.5f), "Unknown action ignored");
+            Equal(Command(null, 1), new Vector2(0, 0.5f), "No action ignored");
             Equal(Command("push", 1, 0.999), Vector2.up, "Fresh sample usable");
-            Equal(Command("push", 1, 1), Vector2.zero, "Timeout inclusive");
-            Equal(Command("push", 1, double.PositiveInfinity), Vector2.zero, "No sample stops input");
-            Equal(Command("push", 0.5, 0, 0.6f), Vector2.zero, "Configured threshold respected");
-            Equal(Command("push", 1, 2), Vector2.zero, "Same action cannot survive a stale timestamp");
+            Equal(Command("push", 1, 1), new Vector2(0, 0.5f), "Timeout inclusive");
+            Equal(Command("push", 1, double.PositiveInfinity), new Vector2(0, 0.5f), "No sample uses half-speed fallback");
+            Equal(Command("push", 0.5, 0, 0.6f), new Vector2(0, 0.5f), "Configured threshold respected");
+            Equal(Command("push", 1, 2), new Vector2(0, 0.5f), "Same action cannot survive a stale timestamp");
             Equal(Command("push", 1, 0), Vector2.up, "Same action with refreshed timestamp resumes");
         }
 

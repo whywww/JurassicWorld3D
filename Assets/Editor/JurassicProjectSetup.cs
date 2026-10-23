@@ -89,6 +89,8 @@ namespace JurassicWorld.Editor
 
             EditorSceneManager.OpenScene(MainScenePath, OpenSceneMode.Single);
 
+            RainforestAtmosphereStageOne.ValidateCurrentSceneIfConfigured();
+
             if (Object.FindObjectOfType<Camera>() == null)
                 throw new InvalidDataException("场景缺少相机（Main Camera）。");
 

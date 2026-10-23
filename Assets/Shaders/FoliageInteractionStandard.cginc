@@ -2,11 +2,14 @@
 sampler2D _MainTex, _AlphaTex, _BumpMap, _MetallicGlossMap, _EmissionMap;
 fixed4 _Color, _EmissionColor, _TreeInstanceColor;
 half _Glossiness, _Metallic, _BumpScale, _HasMetallicGlossMap;
+half _AlbedoGain, _InstanceTintStrength;
 struct Input { float2 uv_MainTex; float2 uv_AlphaTex; float2 uv_BumpMap; float2 uv_EmissionMap; };
 void vert(inout appdata_full v) { ApplyFoliageInteraction(v); }
 void surf(Input IN, inout SurfaceOutputStandard o)
 {
-    fixed4 albedo = tex2D(_MainTex, IN.uv_MainTex) * _Color * _TreeInstanceColor;
+    fixed4 albedo = tex2D(_MainTex, IN.uv_MainTex) * _Color;
+    albedo.rgb *= lerp(half3(1,1,1), _TreeInstanceColor.rgb, _InstanceTintStrength) * _AlbedoGain;
+    albedo.a *= _TreeInstanceColor.a;
     o.Albedo = albedo.rgb;
     o.Alpha = albedo.a * tex2D(_AlphaTex, IN.uv_AlphaTex).r;
     fixed4 metallic = tex2D(_MetallicGlossMap, IN.uv_MainTex);

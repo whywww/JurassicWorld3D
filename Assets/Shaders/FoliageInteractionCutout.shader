@@ -3,6 +3,8 @@ Shader "Jurassic World/Interactive Cutout"
     Properties
     {
         _Color ("Color", Color) = (1,1,1,1)
+        _AlbedoGain ("Albedo Gain", Range(1,4)) = 1
+        _InstanceTintStrength ("Instance Tint Strength", Range(0,1)) = 1
         [HideInInspector] _TreeInstanceColor ("Tree Color", Color) = (1,1,1,1)
         _MainTex ("Albedo", 2D) = "white" {}
         _AlphaTex ("Separate Opacity", 2D) = "white" {}

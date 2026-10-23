@@ -362,6 +362,8 @@ namespace JurassicWorld
                 mapCamera.nearClipPlane = 0.1f;
                 mapCamera.farClipPlane = altitude + bounds.size.y + 100f;
                 mapCamera.cullingMask = landscapeLayers.value & ~(1 << LayerMask.NameToLayer("UI"));
+                int atmosphereLayer = LayerMask.NameToLayer("Atmosphere");
+                if (atmosphereLayer >= 0) mapCamera.cullingMask &= ~(1 << atmosphereLayer);
                 mapCamera.targetTexture = mapTexture;
                 bool fog = RenderSettings.fog;
                 Terrain[] terrains = Terrain.activeTerrains;

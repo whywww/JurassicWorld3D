@@ -87,6 +87,9 @@ namespace JurassicWorld
 
         private void ApplyTerrainTier()
         {
+            foreach (RainforestAtmosphereController atmosphere in FindObjectsOfType<RainforestAtmosphereController>())
+                atmosphere.ApplyQuality(selectedTier);
+
             float detailDistanceScale = selectedTier == High ? 1f : selectedTier == Medium ? 0.75f : 0.5f;
             float detailDensityScale = selectedTier == High ? 1f : selectedTier == Medium ? 0.75f : 0.4f;
             float treeDistanceScale = selectedTier == High ? 1f : selectedTier == Medium ? 0.8f : 0.55f;

@@ -414,7 +414,7 @@ namespace JurassicWorld.Editor
             if (source == null) return null;
             if (Materials.TryGetValue(source, out var material)) return material;
             AssetDatabase.TryGetGUIDAndLocalFileIdentifier(source, out string guid, out long fileId);
-            bool treeCreator = source.shader.name.Contains("Tree Creator"), leaf = IsLeaf(source);
+            bool treeCreator = source.shader.name.Contains("Tree Creator") || source.shader.name.StartsWith("Jurassic World/Interactive Tree "), leaf = IsLeaf(source);
             string shaderName = treeCreator ? "Jurassic World/Interactive Tree " + (leaf ? "Leaves" : "Bark") :
                 "Jurassic World/Interactive " + (leaf ? "Cutout" : "Opaque");
             Shader shader = Shader.Find(shaderName);
