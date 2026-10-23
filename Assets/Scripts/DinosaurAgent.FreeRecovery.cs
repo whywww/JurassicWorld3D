@@ -115,7 +115,7 @@ namespace JurassicWorld
             // Validate the rotation and translation together so an obstacle exited by the
             // rotation cannot be entered again during translation.
             var saved = new HashSet<int>(freeRecoveryAllowed);
-            bool fits = FreeRecoveryStep(transform.position, transform.position, transform.rotation, rotation, true)
+            bool fits = UsesWalkingSteering || FreeRecoveryStep(transform.position, transform.position, transform.rotation, rotation, true)
                 && FreeRecoveryStep(transform.position, target, rotation, rotation, false);
             freeRecoveryAllowed.Clear(); freeRecoveryAllowed.UnionWith(saved);
             if (!fits) return false;
@@ -149,6 +149,12 @@ namespace JurassicWorld
             {
                 if (Time.time < freeRecoveryRetryAt) { PlayClip(idleClip); return; }
                 if (!PlanFreeRecovery()) { WaitForFreeRecovery(); return; }
+            }
+            if (UsesWalkingSteering)
+            {
+                if (MovePredictedTowards(freeRecoveryTarget, WalkSpeed, true)) PlayMovementClip(WalkSpeed);
+                else WaitForFreeRecovery();
+                return;
             }
             Vector3 delta = freeRecoveryTarget - transform.position; delta.y = 0f;
             float angle = Vector3.SignedAngle(GetVisualForward(), delta, Vector3.up);

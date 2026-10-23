@@ -276,6 +276,12 @@ namespace JurassicWorld
         }
         private bool MoveFrontPath(float speed, bool returning, bool quiet = false)
         {
+            if (UsesWalkingSteering)
+            {
+                bool moved = MovePredictedPath(Time.deltaTime, speed);
+                if (moved && !returning) RecordFrontTrail();
+                return moved;
+            }
             actualInteractionSpeed = 0f;
             if (!hasCuriosityPath || PathFinished()) return false;
             Vector3 direction = curiosityCorners[curiosityCorner] - transform.position; direction.y = 0f;

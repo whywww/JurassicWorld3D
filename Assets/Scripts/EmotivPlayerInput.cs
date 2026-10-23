@@ -34,6 +34,7 @@ namespace JurassicWorld
 
         private void OnEnable()
         {
+            if (JurassicWorld.PlayerInputs.PlayerMovementInput.HasProvider) return;
 #if USE_EMBEDDED_LIB || (!UNITY_EDITOR_WIN && !UNITY_STANDALONE_WIN)
             Debug.LogWarning("[EMOTIV] 此组件需要 Windows Cortex Service / Option 1，且不能定义 USE_EMBEDDED_LIB。键盘仍可用。", this);
             return;

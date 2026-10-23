@@ -509,6 +509,10 @@ namespace JurassicWorld.Editor
 
         private static IEnumerable<Transform> SolidProps()
         {
+            var understory = GameObject.Find(UnderstoryDetailSample.RootName + "/Hard Props");
+            if (understory != null)
+                foreach (Transform child in understory.transform)
+                    if (child.gameObject.activeInHierarchy) yield return child;
             foreach (string path in new[] { "Environment Props", "Understory Pass/Rocks" })
             {
                 GameObject root = GameObject.Find(path); if (root == null) continue;

@@ -58,6 +58,7 @@ namespace JurassicWorld.Editor
         }
         internal static void SeedConfigured()
         {
+            UnderstoryDetailSample.SeedConfigured();
             TreeOverlapCleanup.SeedConfigured();
             LocalTreeThinning.SeedConfigured();
             TreeHeightAdjustment.SeedConfigured();

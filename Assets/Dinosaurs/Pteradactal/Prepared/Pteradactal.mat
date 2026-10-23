@@ -42,8 +42,9 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _Glossiness: 1
-    - _Metallic: 0.0506
+    - _BumpScale: 0.65
+    - _Glossiness: 0.16
+    - _Metallic: 0
     m_Colors:
-    - _Color: {r: 0.9963, g: 0.8945, b: 0.6672, a: 1}
+    - _Color: {r: 0.88, g: 0.81, b: 0.66, a: 1}
   m_BuildTextureStacks: []

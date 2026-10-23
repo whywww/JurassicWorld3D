@@ -89,6 +89,7 @@ namespace JurassicWorld
 
         private bool PlanCuriosityPath(Vector3 target, bool completeOnly, bool skipRoamingPathFits = false)
         {
+            continuousProbeRemaining = 0f;
             RoamingBlockReason = "";
             target.y = MovementHeight;
             var filter = NavigationFilter;
@@ -169,9 +170,9 @@ namespace JurassicWorld
 
         private bool PathFinished()
         {
-            if (IsContinuousWalker) AdvanceContinuousCorners();
+            if (UsesWalkingSteering || IsContinuousWalker) AdvanceContinuousCorners();
             while (hasCuriosityPath && curiosityCorner < curiosityCorners.Length
-                && FlatDistance(transform.position, curiosityCorners[curiosityCorner]) <= .08f)
+                && FlatDistance(transform.position, curiosityCorners[curiosityCorner]) <= (UsesWalkingSteering && curiosityCorner == curiosityCorners.Length - 1 ? .2f : .08f))
             {
                 // Arrival tolerance cannot cut a tight navigation corner. Replanning
                 // used to discard that same near corner repeatedly, leaving the
@@ -186,6 +187,7 @@ namespace JurassicWorld
 
         private bool MoveCuriosity(float speed)
         {
+            if (UsesWalkingSteering) return MovePredictedPath(Time.deltaTime, speed);
             actualInteractionSpeed = 0f;
             if (!hasCuriosityPath || PathFinished()) return false;
             Vector3 direction = curiosityCorners[curiosityCorner] - transform.position;
@@ -276,6 +278,7 @@ namespace JurassicWorld
                     if (!hasCuriosityPath) { PlayClip(idleClip); break; }
                     if (PathFinished())
                     {
+                        if (UsesWalkingSteering) { CompleteReturn(); break; }
                         MovementCorridor.GetSampleAt(routeIndex, returnArc, out _, out Vector2 tangent);
                         Quaternion desired = Quaternion.LookRotation(new Vector3(tangent.x, 0f, tangent.y)) * Quaternion.Euler(0f, -VisualYaw, 0f);
                         if (Quaternion.Angle(transform.rotation, desired) < .1f) { CompleteReturn(); break; }

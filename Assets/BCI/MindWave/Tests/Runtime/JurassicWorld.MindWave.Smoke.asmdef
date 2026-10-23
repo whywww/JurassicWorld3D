@@ -1,0 +1,4 @@
+{
+  "name": "JurassicWorld.MindWave.Smoke",
+  "references": ["JurassicWorld.MindWave", "JurassicWorld.PlayerInput"]
+}

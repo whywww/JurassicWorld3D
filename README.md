@@ -2,7 +2,7 @@
 
 基于 Unity Built-in Render Pipeline 的恐龙森林探索项目。Unity 版本为 **`2022.3.62f3c1`**（以 `ProjectSettings/ProjectVersion.txt` 为准）。
 
-场景包含森林、香蕉林、草地与蕨类、苔藓岩石、枯木，以及从东侧延伸至北侧的 Crest 小溪。霸王龙、伶盗龙与红色厚头龙在可通行林地自由漫游；伶盗龙和厚头龙主动与霸王龙保持安全距离，厚头龙轮换 Walk/Idle 动画，玩家可步行观察。
+玩家以步行视角探索一座侏罗纪森林，观察多种恐龙在林间、溪流与植被中自由漫游和飞行。
 
 ## 安装与启动
 
@@ -37,9 +37,9 @@ git lfs pull
 
 ### 在 Unity 中打开
 
-1. 安装 Unity Hub，并安装项目指定的 Unity **2022.3.62f3c1**。本机已有编辑器时，可在 Unity Hub 中定位对应版本的编辑器。请先匹配版本，避免直接升级项目。
+1. 安装 Unity Hub，并安装项目指定的 Unity **2022.3.62f3c1**（中国版）。本机已有编辑器时，可在 Unity Hub 中定位对应版本的编辑器。请先匹配版本，避免直接升级项目。
 2. 在 Unity Hub 中选择 **Add / 添加项目**，选择仓库根目录（包含 `Assets`、`Packages` 和 `ProjectSettings`）。
-3. 打开项目，等待 Package Manager 恢复 `Packages/manifest.json` 中的依赖、Unity 导入资源并完成脚本编译。首次恢复 Unity 包需要访问对应包源。
+3. 打开项目，等待 Package Manager 恢复 `Packages/manifest.json` 中的依赖、Unity 导入资源并完成脚本编译。首次恢复需要联网访问项目配置的 Unity 中国版包源。
 4. 打开 `Assets/Scenes/Main.unity`，或选择 **Jurassic World > Open Main Scene**。
 5. 确认 Console 没有编译错误和丢失资源错误，点击 **Play**，在 Game 窗口中操作。
 
@@ -47,8 +47,8 @@ git lfs pull
 
 ### 构建与启动 Windows 程序
 
-1. 在 Unity Hub 中为该编辑器安装 Windows 构建支持；使用 IL2CPP 时还需对应的 **Windows Build Support (IL2CPP)** 及工具链。
-2. 在编辑模式下选择 **Jurassic World > Scene > Build Windows Player**，构建保存的 `Assets/Scenes/Main.unity`。
+1. 在 Unity Hub 中为该编辑器安装 **Windows Build Support**。项目使用 Mono 脚本后端，无需 IL2CPP 工具链。
+2. 退出 Play Mode 并保存场景改动，然后选择 **Jurassic World > Scene > Build Windows Player**，构建 `Assets/Scenes/Main.unity`。
 3. 构建成功后运行 `Builds/JurassicWorld/JurassicWorld.exe`。
 
 分发或移动程序时保留整个 `Builds/JurassicWorld/` 目录，包括生成的数据目录、DLL 和其他运行文件，不能只复制 EXE。独立程序需要单独验证画面、输入和性能。
@@ -173,8 +173,6 @@ power **达到** Threshold 才接受方向，移动和转向速度按限制在 `
 
 环境资产统一位于 `Assets/Environment/`，按 `<类别>/<资产集>/{Source,Prepared}` 组织：`Source/` 保留厂商原始包，`Prepared/` 放项目使用的 prefab、材质、网格与贴图。完整索引见 [Assets/Environment/README.md](Assets/Environment/README.md)。
 
-下表 Poly Haven 资源使用 [CC0](https://polyhaven.com/license)。准备后的树木 Prefab 位于 `Assets/Environment/Vegetation/Trees/Prepared/Prefabs/`，原始来源位于 `Assets/Environment/Vegetation/Trees/Source/`。
-
 | 中文名 | 英文原名 | 来源 | 许可 | 项目路径 | 状态 |
 |---|---|---|---|---|---|
 | 自然入门套件：树木、草地、灌木与天空盒 | Nature Starter Kit 2 | [Unity Asset Store](https://assetstore.unity.com/packages/3d/environments/nature-starter-kit-2-52977) | Standard Unity Asset Store EULA | `Assets/ThirdParty/NatureStarterKit2/` | 使用中，基础森林和地表资源 |
@@ -230,7 +228,7 @@ power **达到** Threshold 才接受方向，移动和转向速度按限制在 `
 
 ## 避让规则
 
-- 地面通行顺序：**霸王龙＞阿根廷龙＞剑龙＞胜王龙＞蜥结龙＞厚头龙＞包鲁鳄＞伶盗龙＞原角龙**。召唤和玩家交互优先，双方均在交互时按物种排序；返程恢复普通顺序，会车期间锁定先行权。
+- 地面通行顺序：**霸王龙＞(阿根廷龙＞剑龙＞胜王龙)＞蜥结龙＞厚头龙＞包鲁鳄＞伶盗龙＞原角龙**。召唤和玩家交互优先，双方均在交互时按物种排序；返程恢复普通顺序，会车期间锁定先行权。
 - 低优先级者主动侧移或后撤，窄路先退到宽处；先行者等待 **1.2 秒**后可绕行。解围后恢复原目标，受阻时持续重试，保留导航与防穿透检查。
 - 小恐龙与持有先行权的霸王龙水平距离小于 **15 米**时撤离，达到 **20 米**解除避让，闲站时同样生效。飞行单位不参与地面会车。
 - `F4` 调试窗可查看排名、交互优先状态、阻挡者和会车持续时间。

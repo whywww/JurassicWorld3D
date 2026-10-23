@@ -117,6 +117,7 @@ namespace JurassicWorld.Editor
                 forward = model.transform.InverseTransformDirection(forward);
                 model.transform.localRotation *= Quaternion.Euler(0f, -Mathf.Atan2(forward.x, forward.z) * Mathf.Rad2Deg, 0f);
                 animation.AddClip(walk, "WalkCycle"); animation.clip = walk;
+                DinosaurForestMaterials.Apply(holder, "Protoceratops");
                 PrefabUtility.SaveAsPrefabAsset(holder, PrefabPath);
                 string portrait = Root + "/Protoceratops.png";
                 DinosaurPortraitBuilder.CaptureModel(holder, "Protoceratops", portrait);

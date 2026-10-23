@@ -94,5 +94,6 @@ __pycache__/
 /Tools/**/*.unity
 /Tools/**/*.bin
 /Tools/**/*.txt
+/Tools/**/*.log
 /Tools/**/Checkpoint/
 /Tools/VegetationDiversity/TreeHeights/

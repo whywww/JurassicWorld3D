@@ -48,6 +48,7 @@ namespace JurassicWorld.Editor
                 float yaw = -Mathf.Atan2(forward.x, forward.z) * Mathf.Rad2Deg;
                 model.transform.localRotation *= Quaternion.Euler(0f, yaw, 0f);
                 foreach (SkinnedMeshRenderer skin in model.GetComponentsInChildren<SkinnedMeshRenderer>(true)) skin.updateWhenOffscreen = true;
+                DinosaurForestMaterials.Apply(holder, "Stegosaurus");
                 PrefabUtility.SaveAsPrefabAsset(holder, PrefabPath);
                 Debug.Log($"STEGOSAURUS_ASSETS_READY: forwardCorrection={yaw:F1}; legacy idle/walk; six LODs.");
             }

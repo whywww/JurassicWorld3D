@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -77,7 +77,9 @@ namespace JurassicWorld.Editor
             RainforestSample.SeedConfigured();
             RainforestExpansion.SeedConfigured();
             CenterForestGapFill.SeedConfigured();
+            UnderstoryDetailSample.SeedConfigured();
             FoliageInteractionPreparation.SeedConfigured();
+            ForestFloorNaturalization.Apply(UnityEngine.Object.FindObjectOfType<Terrain>());
             PteradactalSceneIntegration.AddToCurrentScene();
         }
 
@@ -1173,6 +1175,7 @@ namespace JurassicWorld.Editor
             // 字段名必须逐字符一致（反射写入，编译期无依赖）；飞行单位写 false，不被地面树干阻挡。
             SetField(agent, "groundObstacleAware", t.groundObstacleAware);
             SetField(agent, "playerInteractionEnabled", t.objectName == "Tyrannosaurus Rex");
+            // Species selects authored rex turns versus shared predictive walking, independently of roaming cadence.
             SetField(agent, "species", DinosaurAgent.GroundSpeciesForName(t.objectName));
             EditorUtility.SetDirty(agent);
 
@@ -1182,6 +1185,8 @@ namespace JurassicWorld.Editor
             GameObject model = InstantiateModel(t, visualRoot.transform);
             if (model != null && !t.preserveSourceMaterials)
                 ApplyBakedMaterials(model, t);
+            if (model != null)
+                DinosaurForestMaterials.Apply(model, t.objectName);
 
             // Fit 只在烘焙时算一次并把缩放/位置写入 transform（非幂等，运行期绑定器不再调用）。
             if (model != null && t.targetLength > 0f &&

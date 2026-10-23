@@ -183,7 +183,31 @@ namespace JurassicWorld.Editor
                 }
                 return true;
             }
+            internal bool SolidWoodClear(Bounds bounds)
+            {
+                EnsureExistingWood(bounds);
+                var a=Cell(new Vector2(bounds.min.x,bounds.min.z));var b=Cell(new Vector2(bounds.max.x,bounds.max.z));
+                var seen=new HashSet<TreeTrunkSection>();
+                for(int xCell=a.x;xCell<=b.x;xCell++)for(int zCell=a.y;zCell<=b.y;zCell++)
+                {
+                    if(!wood.TryGetValue(new Vector2Int(xCell,zCell),out var sections))continue;
+                    foreach(var section in sections)
+                    {
+                        if(!seen.Add(section)||section.top<=bounds.min.y || section.bottom>=bounds.max.y)continue;
+                        float x=Mathf.Clamp(section.center.x,bounds.min.x,bounds.max.x),z=Mathf.Clamp(section.center.y,bounds.min.z,bounds.max.z);
+                        if(Vector2.Distance(section.center,new Vector2(x,z))<section.radius+.04f)return false;
+                    }
+                }
+                return true;
+            }
             public void Dispose() {Object.DestroyImmediate(helpers);}
+        }
+        internal sealed class UnderstoryWoodClearance : IDisposable
+        {
+            private readonly Context context;
+            internal UnderstoryWoodClearance(Transform ignore) { context=new Context(ignore); }
+            internal bool Clear(Bounds bounds)=>context.SolidWoodClear(bounds);
+            public void Dispose()=>context.Dispose();
         }
         private static Vector2 XZ(Vector3 p)=>new Vector2(p.x,p.z);
         private static Vector2Int Cell(Vector2 p)=>new Vector2Int(Mathf.FloorToInt(p.x/4),Mathf.FloorToInt(p.y/4));

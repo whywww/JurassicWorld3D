@@ -1,0 +1,18 @@
+kind,guid,height_min_m,height_max_m,instances,colliders,material_names
+Log,0d49006cb57948e439a9456df3f3d334,0.5270141,0.7972184,2,0,DeadTreeTrunk02
+Log,3b09501d36139ab4cb90b15533ba9a7a,0.485877961,0.485877961,1,0,DeadTreeTrunk02
+Stump,da8aca8b8878e62439a0abcfa92ee600,0.1451385,0.150940567,2,0,TreeStump01
+Rock,03273004b445b954c8e83bb193763596,0.242244855,0.255963027,2,0,RockMossSet01
+Rock,c2a2912ecb550aa45a560f04210c0c28,0.3189125,0.485404134,2,0,RockMossSet01
+Rock,450c2322b726a2f4fbffa98e1a507bd2,0.2861657,0.3058682,2,0,RockMossSet01
+Rock,8aad5125e4ebcff46b4596527db49aa1,0.258066058,0.2591519,2,0,RockMossSet01
+Fern,7b9630af48f30ac4088e4d4fe53d707d,0.212917686,0.6954289,66,0,Fern02_Cutout
+Fern,4695cc0c26945e64da95218a444fa199,0.204931945,0.684480548,66,0,Fern02_Cutout
+Bush,d15b44addf30da74f946086ec0aa993c,0.405057728,0.6761082,7,0,Optimized Bark Material;Optimized Leaf Material
+Fern,35ffb4073a316ce41bf271d8da86badd,0.216775417,0.689536631,51,0,Fern02_Cutout
+Fern,bc9afede6f621534d9b549aa489b56d4,0.20720987,0.6726757,68,0,Fern02_Cutout
+Bush,d638ef2ca2fe20c4c9c08e125692d3f4,0.424698442,0.862158239,7,0,Optimized Bark Material;Optimized Leaf Material
+Bush,ec78ebca7517fb745a45a931cb06d2bd,0.4376584,0.8714964,8,0,Optimized Bark Material;Optimized Leaf Material
+Bush,bb660abd3b29d9f44866fd79795dbca4,0.4389293,0.8891483,12,0,Optimized Bark Material;Optimized Leaf Material
+Bush,9c74caa742791864f9c678287121e6c9,0.4817007,0.6364132,5,0,Optimized Bark Material;Optimized Leaf Material
+Bush,f62058cb710fd1745a24102fff0edd46,0.7962981,0.8866118,2,0,Optimized Bark Material;Optimized Leaf Material

@@ -327,6 +327,7 @@ namespace JurassicWorld
         }
         private bool GroundTrafficPathFits()
         {
+            if (UsesWalkingSteering && !trafficReverse) return RoamingPathFits(transform.position, transform.rotation, curiosityCorners, curiosityCorner);
             Vector3 previous = transform.position;
             Quaternion rotation = transform.rotation;
             for (int i = curiosityCorner; i < curiosityCorners.Length; i++)
@@ -343,11 +344,11 @@ namespace JurassicWorld
         }
         private bool MoveGroundTraffic()
         {
-            if (IsContinuousWalker && !trafficReverse) return MoveContinuousPath(Time.deltaTime);
+            if ((UsesWalkingSteering || IsContinuousWalker) && !trafficReverse) return MovePredictedPath(Time.deltaTime, WalkSpeed);
             Vector3 delta = curiosityCorners[curiosityCorner] - transform.position; delta.y = 0f;
             if (delta.sqrMagnitude < .000001f) { curiosityCorner++; return false; }
             float angle = Vector3.SignedAngle(GetVisualForward(), delta, Vector3.up);
-            if (!trafficReverse && HasFootPhaseData && Mathf.Abs(angle) >= 40f)
+            if (!trafficReverse && !UsesWalkingSteering && HasFootPhaseData && Mathf.Abs(angle) >= 40f)
             { TryBeginSteppingTurn(angle, TurnUse.Traffic); return false; }
             Quaternion desired = trafficReverse ? transform.rotation : Quaternion.LookRotation(delta) * Quaternion.Euler(0f, -VisualYaw, 0f);
             Quaternion rotation = Quaternion.RotateTowards(transform.rotation, desired,
@@ -357,12 +358,11 @@ namespace JurassicWorld
             Vector3 position = aligned ? Vector3.MoveTowards(transform.position, endpoint, WalkSpeed * Time.deltaTime) : transform.position;
             if (!StepPoseSafe(transform.position, position, transform.rotation, rotation, false)) return false;
             float distance = FlatDistance(transform.position, position);
-            bool turned = Quaternion.Angle(transform.rotation, rotation) > .0001f;
             transform.SetPositionAndRotation(position, rotation);
             actualInteractionSpeed = distance / Mathf.Max(.00001f, Time.deltaTime);
             interactionMoved |= distance > .00001f;
             if (frontActive && frontStage != FrontStage.ReturnWalk) RecordFrontTrail();
-            return distance > .00001f || gaitProfile != null && turned;
+            return distance > .00001f;
         }
         private void FinishGroundTraffic()
         {

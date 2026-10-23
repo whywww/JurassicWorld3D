@@ -175,14 +175,21 @@ namespace JurassicWorld
             if (delta.sqrMagnitude > .000001f)
             {
                 Quaternion desired = Quaternion.LookRotation(delta) * Quaternion.Euler(0f, -VisualYaw, 0f);
-                transform.rotation = Quaternion.RotateTowards(transform.rotation, desired, 120f * deltaTime);
-                // The exception also bypasses NavMesh walls and traffic priority. Walk
-                // continuously toward the checked endpoint; do not teleport or wait to turn.
+                // This is the existing emergency exception: only the destination is
+                // collision-checked. Never send the connector back through ordinary
+                // prediction/navigation, which would reject the same blocking obstacle.
                 Vector3 before = transform.position;
-                transform.position = Vector3.MoveTowards(before, emergencyGoal, Mathf.Max(.1f, WalkSpeed) * deltaTime);
-                actualInteractionSpeed = FlatDistance(before, transform.position) / deltaTime;
-                interactionMoved = true;
-                PlayMovementClip(WalkSpeed);
+                Vector3 next = Vector3.MoveTowards(before, emergencyGoal, Mathf.Max(.1f, WalkSpeed) * deltaTime);
+                float distance = FlatDistance(before, next);
+                if (distance > .00001f)
+                {
+                    Quaternion rotation = Quaternion.RotateTowards(transform.rotation, desired, 120f * deltaTime);
+                    transform.SetPositionAndRotation(next, rotation);
+                    actualInteractionSpeed = distance / deltaTime;
+                    interactionMoved = true;
+                    PlayMovementClip(actualInteractionSpeed);
+                }
+                else { actualInteractionSpeed = 0f; interactionMoved = false; PlayClip(idleClip); }
             }
             RoamingBlockReason = EmergencyEscapeStatus;
             if (FlatDistance(transform.position, emergencyGoal) > .05f

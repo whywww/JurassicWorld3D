@@ -114,7 +114,7 @@ namespace JurassicWorld
         private bool NavigationRestPoint(Vector3 point)
         {
             if (!NavMesh.FindClosestEdge(point, out var edge, NavigationFilter) || edge.distance < .05f) return false;
-            if (IsContinuousWalker) return true;
+            if (UsesWalkingSteering || IsContinuousWalker) return true;
             if (species != DinosaurSpecies.Pachycephalosaurus && species != DinosaurSpecies.Sauropelta
                 && species != DinosaurSpecies.Baurusuchus && species != DinosaurSpecies.Protoceratops) return true;
             // The longer animal must be able to turn after resting, rather than
@@ -143,7 +143,7 @@ namespace JurassicWorld
                 Vector2 next = new Vector2(corner.x, corner.z), delta = next - previous;
                 if (delta.sqrMagnitude < .0064f) continue;
                 Vector2 direction = delta.normalized;
-                string reason = UsesSimpleFreeRoam && !IsContinuousWalker
+                string reason = UsesSimpleFreeRoam && !UsesWalkingSteering && !IsContinuousWalker
                     ? interactionSettings.StepBlockReason(previous, previous, heading, direction, interactionBody) : null;
                 reason = reason ?? interactionSettings.StepBlockReason(previous, next, direction, direction, interactionBody);
                 if (reason != null) { RoamingBlockReason = reason + " / path clearance"; return false; }
@@ -173,7 +173,7 @@ namespace JurassicWorld
             if (interactionSettings == null) interactionSettings = FindObjectOfType<DinosaurInteractionSettings>();
             if (curiosityPath == null) curiosityPath = new NavMeshPath();
             return interactionSettings != null && interactionSettings.NavigationReady && interactionBody != null
-                && (IsContinuousWalker || UsesSimpleFreeRoam || HasFootPhaseData);
+                && (UsesWalkingSteering || IsContinuousWalker || UsesSimpleFreeRoam || HasFootPhaseData);
         }
 
         internal bool TryFreeSpawn(bool hasCamera, Vector2 camera, List<Vector2> occupied, List<float> radii,
@@ -229,6 +229,7 @@ namespace JurassicWorld
             freeRetryGoal = false;
             curiosityBlockedTime = 0f;
             actualInteractionSpeed = 0f;
+            ResetContinuousSteering();
             BeginIdle();
             stateTimer = delay;
         }
@@ -259,6 +260,7 @@ namespace JurassicWorld
                 freeWalkSinceTurn = 0f;
                 freeReplanFailures = 0;
                 curiosityBlockedTime = 0f;
+                continuousProbeRemaining = 0f;
                 CurrentState = DinosaurState.RandomWalk;
                 MovementCorridorCrossings.Release(this);
                 return true;
@@ -306,7 +308,7 @@ namespace JurassicWorld
                 FreeIdle(species == DinosaurSpecies.Pachycephalosaurus ? Range(1f, 2f) : Range(3f, 7f));
                 return true;
             }
-            bool moved = UsesSimpleFreeRoam ? MoveRaptorFree() : MoveCuriosity(WalkSpeed);
+            bool moved = UsesWalkingSteering ? MovePredictedPath(Time.deltaTime, WalkSpeed) : MoveCuriosity(WalkSpeed);
             if (IsSteppingTurn) return true;
             if (moved) PlayMovementClip(WalkSpeed); else PlayClip(idleClip);
             if (curiosityBlockedTime >= 2f)

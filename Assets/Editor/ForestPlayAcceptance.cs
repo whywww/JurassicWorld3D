@@ -20,13 +20,15 @@ namespace JurassicWorld.Editor
     {
         private const string Key = "JurassicWorld.ForestPlayAcceptance";
         private const string BaselineScene = "Assets/Scenes/RainforestExpansionBaseline.unity";
-        private static string ArtifactOutput => SessionState.GetBool(Key + ".GapFill", false) ? CenterForestGapFill.Output+(SessionState.GetBool(Key+".GapBaseline",false)?"/Baseline":"")
+        private static string ArtifactOutput => SessionState.GetBool(Key+".Understory",false) ? UnderstoryDetailSample.Output
+            : SessionState.GetBool(Key + ".GapFill", false) ? CenterForestGapFill.Output+(SessionState.GetBool(Key+".GapBaseline",false)?"/Baseline":"")
             : SessionState.GetBool(Key + ".TreeHeights", false) ? TreeHeightAdjustment.Output
             : SessionState.GetBool(Key + ".Baseline", false) ? RainforestExpansion.Output + "/Baseline"
             : SessionState.GetBool(Key + ".Expansion", false) ? RainforestExpansion.Output : RainforestSample.Output;
         public static void RunExpansion() { SessionState.SetBool(Key + ".Expansion", true); Run(); }
         public static void RunTreeHeights() { SessionState.SetBool(Key + ".TreeHeights", true); Run(); }
         public static void RunGapFill() { SessionState.SetBool(Key + ".GapFill", true); Run(); }
+        public static void RunUnderstory() { SessionState.SetBool(Key+".Understory",true); Run(); }
         public static void RunGapFillBaseline() { CenterGapFillPerformance.PrepareBaseline();SessionState.SetBool(Key + ".GapFill", true);SessionState.SetBool(Key+".GapBaseline",true);Run(); }
         public static void RunExpansionBaseline()
         {
@@ -119,6 +121,7 @@ namespace JurassicWorld.Editor
                 Bind();
                 originalVSync = QualitySettings.vSyncCount; originalFrameRate = Application.targetFrameRate;
                 Report.Clear(); Report.AppendLine("# Normal Play regression — runtime collision policy\n");
+                if(SessionState.GetBool(Key+".Understory",false))Report.AppendLine("Understory sample regression: 32 spawn seeds, 30/60/144 FPS each up to 60 seconds. Failed cases stop early and remain failures; this is not the previous ten-minute acceptance.\n");
                 meshSamples = meshOverlapSamples = meshOverlapVertices = 0;
                 RecoveryDistances.Clear();
                 totalFootFailures = caseFailures = 0;
@@ -359,7 +362,7 @@ namespace JurassicWorld.Editor
                     Require(Time.time - stoppedAt[i] < 30f || agent.IsOffRouteInteraction || agent.IsAvoidingTyrannosaurus,
                         $"No roaming progress for 30s: lastMoveBlock={agent.LastMovementBlock}, travelled={travelled[i]:F2}, " + Diagnostic(agent));
                 }
-                float duration = rate == 0 ? 600f : 60f;
+                float duration = SessionState.GetBool(Key+".Understory",false) ? 60f : rate == 0 ? 600f : 60f;
                 if (Time.time - lastCheckpoint >= 30f)
                 {
                     lastCheckpoint = Time.time;
@@ -404,6 +407,7 @@ namespace JurassicWorld.Editor
             Report.AppendLine($"\nVisible-mesh diagnostics: {meshSamples} animal samples; {meshOverlapSamples} samples contained overlaps; {meshOverlapVertices} overlapping vertices total (vertices may recur across samples). These counts do not determine collision-contract success.");
             Report.AppendLine(error == null ? "\nRuntime collision contract: PASS" : "\nRuntime collision contract: FAIL\n\n" + error);
             File.WriteAllText(ArtifactOutput + "/NormalPlay.md", Report.ToString());
+            SessionState.SetBool(Key+".Understory",false);
             SessionState.SetBool(Key+".GapBaseline",false);SessionState.SetBool(Key+".GapFill",false);
             SessionState.SetBool(Key + ".Expansion", false);
             SessionState.SetBool(Key + ".Baseline", false);

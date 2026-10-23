@@ -116,6 +116,7 @@ namespace JurassicWorld.Editor
                 serialized.FindProperty("visualPivot").objectReferenceValue = pivot.transform;
                 serialized.FindProperty("flightAnimation").objectReferenceValue = animation;
                 serialized.ApplyModifiedPropertiesWithoutUndo();
+                DinosaurForestMaterials.Apply(holder, "Pteradactal");
                 PrefabUtility.SaveAsPrefabAsset(holder, PrefabPath);
                 File.WriteAllText("Tools/Pteradactal/model-metrics.json", JsonUtility.ToJson(new Metrics {
                     clipLength = clip.length, wingspan = bounds.size.x, radius = radius,

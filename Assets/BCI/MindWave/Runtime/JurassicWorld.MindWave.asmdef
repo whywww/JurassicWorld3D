@@ -1,0 +1,6 @@
+{
+  "name": "JurassicWorld.MindWave",
+  "rootNamespace": "JurassicWorld.BCI.MindWave",
+  "references": ["JurassicWorld.PlayerInput"],
+  "autoReferenced": true
+}

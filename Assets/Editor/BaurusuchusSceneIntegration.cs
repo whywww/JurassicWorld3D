@@ -90,6 +90,7 @@ namespace JurassicWorld.Editor
                 }
                 animation.AddClip(run, "Run");
                 animation.clip = run;
+                DinosaurForestMaterials.Apply(holder, "Baurusuchus");
                 PrefabUtility.SaveAsPrefabAsset(holder, PrefabPath);
             }
             finally { Object.DestroyImmediate(holder); }

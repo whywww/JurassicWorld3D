@@ -116,6 +116,7 @@ namespace JurassicWorld.Editor
                 forward = model.transform.InverseTransformDirection(forward);
                 model.transform.localRotation *= Quaternion.Euler(0f, -Mathf.Atan2(forward.x, forward.z) * Mathf.Rad2Deg, 0f);
                 animation.AddClip(walk, "Walk"); animation.clip = walk;
+                DinosaurForestMaterials.Apply(holder, "Sauropelta");
                 PrefabUtility.SaveAsPrefabAsset(holder, PrefabPath);
                 DinosaurPortraitBuilder.EnsureHeadshotIfMissing(holder, "Sauropelta", PortraitPath, PortraitSettings);
             }

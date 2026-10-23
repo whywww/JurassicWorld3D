@@ -145,6 +145,7 @@ namespace JurassicWorld
 
         private bool TryBeginSteppingTurn(float angle, TurnUse use)
         {
+            if (UsesWalkingSteering) return false;
             bool frontTurn = frontActive && (use == TurnUse.FrontFollow || use == TurnUse.FrontReturn);
             if (IsSteppingTurn || !HasFootPhaseData || Mathf.Abs(angle) < 25f) return false;
             if (!SelectSteppingTurn(angle, frontTurn, out var motion, out float end)) return false;
@@ -428,6 +429,12 @@ namespace JurassicWorld
             if (direction.magnitude <= .03f)
             {
                 routeArc = routeJoinArc; routeRejoining = false;
+                return true;
+            }
+            if (UsesWalkingSteering)
+            {
+                bool moved = MovePredictedTowards(routeJoinPoint, WalkSpeed, routeJoinRecovering);
+                if (moved) PlayMovementClip(WalkSpeed); else PlayClip(idleClip);
                 return true;
             }
             float angle = Vector3.SignedAngle(GetVisualForward(), direction, Vector3.up);

@@ -77,6 +77,7 @@ namespace JurassicWorld.Editor
                 Vector3 forward = model.transform.InverseTransformDirection(head.position - tail.position);
                 model.transform.localRotation *= Quaternion.Euler(0f, -Mathf.Atan2(forward.x, forward.z) * Mathf.Rad2Deg, 0f);
                 foreach (var skin in model.GetComponentsInChildren<SkinnedMeshRenderer>(true)) skin.updateWhenOffscreen = true;
+                DinosaurForestMaterials.Apply(holder, "Pachycephalosaurus");
                 PrefabUtility.SaveAsPrefabAsset(holder, PrefabPath);
                 DinosaurPortraitBuilder.EnsureHeadshotIfMissing(holder, "Pachycephalosaurus", PortraitPath, PortraitSettings);
             }

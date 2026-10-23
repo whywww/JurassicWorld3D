@@ -1,0 +1,5 @@
+{
+  "name": "JurassicWorld.MindWave.Tests.Editor",
+  "references": ["JurassicWorld.MindWave", "JurassicWorld.PlayerInput"],
+  "includePlatforms": ["Editor"]
+}

@@ -363,7 +363,7 @@ namespace JurassicWorld
         private void Update()
         {
             ObserveContinuousPeerMotion(Time.deltaTime);
-            if (gaitProfile == null) { UpdateBehaviour(); return; }
+            if (gaitProfile == null && !UsesWalkingSteering) { UpdateBehaviour(); return; }
             Vector3 before = transform.position;
             Quaternion beforeRotation = transform.rotation;
             gaitMoving = false;
@@ -374,11 +374,12 @@ namespace JurassicWorld
                 float direction = trafficMoving && trafficReverse ? -1f : 1f;
                 float measuredSpeed = delta.magnitude / Mathf.Max(.00001f, Time.deltaTime);
                 // In-place turning needs alternating steps even when translation is zero.
-                if (Quaternion.Angle(beforeRotation, transform.rotation) > .0001f)
+                if (!UsesWalkingSteering && Quaternion.Angle(beforeRotation, transform.rotation) > .0001f)
                     measuredSpeed = Mathf.Max(measuredSpeed, MoveAnimationGroundSpeed);
+                if (UsesWalkingSteering && measuredSpeed <= .00001f) PlayClip(idleClip);
                 moveState.speed = direction * measuredSpeed / Mathf.Max(.01f, MoveAnimationGroundSpeed);
             }
-            ApplyMoveLoopWindow();
+            if (gaitProfile != null) ApplyMoveLoopWindow();
         }
 
         private void UpdateBehaviour()
@@ -843,6 +844,13 @@ namespace JurassicWorld
         /// </summary>
         private bool MoveTowards(Vector3 destination, float speed)
         {
+            if (UsesWalkingSteering && CurrentState != DinosaurState.RandomWalk)
+            {
+                bool moved = MovePredictedTowards(destination, speed);
+                if (moved) { PlayMovementClip(speed); blockedTime = 0f; }
+                else { PlayClip(idleClip); blockedTime += Time.deltaTime; return HandleBlockedEscalation(); }
+                return false;
+            }
             if (CurrentState == DinosaurState.RandomWalk)
                 return MoveAlongCorridor(speed);
 
@@ -967,6 +975,7 @@ namespace JurassicWorld
         // 持续沿闭合中心线推进；没有端点掉头或原地转向。
         private bool MoveAlongCorridor(float speed)
         {
+            if (UsesWalkingSteering) return MovePredictedCorridor(speed);
             if (TryRouteTurn()) return true;
             Vector2 currentXZ = new Vector2(transform.position.x, transform.position.z);
             waitingAtCrossing = false;
@@ -1161,7 +1170,7 @@ namespace JurassicWorld
 
             gaitMoving = moving;
             state.wrapMode = WrapMode.Loop;
-            state.speed = freezePoseWhenStopped && !moving && clipName == moveClip
+            state.speed = (freezePoseWhenStopped || UsesWalkingSteering) && !moving && clipName == moveClip
                 ? 0f : trafficMoving && trafficReverse && moving ? -Mathf.Max(.01f, Mathf.Abs(playbackSpeed)) : Mathf.Max(0.01f, playbackSpeed);
             if (activeClip == clipName)
                 return;

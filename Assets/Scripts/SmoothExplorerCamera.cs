@@ -48,7 +48,7 @@ namespace JurassicWorld
                 || Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.DownArrow)
                 || Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.RightArrow);
             Vector2 movement = ResolveMovementInput(keyboardActive, turn, forward,
-                !keyboardActive && emotivInput != null ? emotivInput.ReadMovement() : Vector2.zero);
+                keyboardActive ? Vector2.zero : ReadBrainMovement());
             turn = movement.x;
             forward = movement.y;
             travelYaw += turn * turnSpeed * Time.deltaTime;
@@ -80,6 +80,13 @@ namespace JurassicWorld
             }
 
             transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.Euler(pitch, yaw, 0f), 1f - Mathf.Exp(-10f * Time.deltaTime));
+        }
+
+        private Vector2 ReadBrainMovement()
+        {
+            if (JurassicWorld.PlayerInputs.PlayerMovementInput.HasProvider)
+                return JurassicWorld.PlayerInputs.PlayerMovementInput.ReadMovement();
+            return emotivInput != null ? emotivInput.ReadMovement() : Vector2.zero;
         }
 
         private void MoveTo(Vector2 desiredXZ)

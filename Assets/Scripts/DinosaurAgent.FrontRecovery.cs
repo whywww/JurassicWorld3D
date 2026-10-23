@@ -254,6 +254,13 @@ namespace JurassicWorld
                 else { PlayMovementClip(WalkSpeed); frontReturnBlendUntil = 0f; }
                 return;
             }
+            if (UsesWalkingSteering)
+            {
+                if (MovePredictedTowards(frontRecoveryTarget, WalkSpeed, true))
+                { PlayMovementClip(WalkSpeed); if (frontStage == FrontStage.Follow) RecordFrontTrail(); }
+                else WaitFrontRecovery();
+                return;
+            }
             Quaternion desired = Quaternion.LookRotation(delta) * Quaternion.Euler(0f, -VisualYaw, 0f);
             Quaternion rotation = Quaternion.RotateTowards(transform.rotation, desired, 65f * Time.deltaTime);
             Vector3 next = Quaternion.Angle(rotation, desired) < .01f

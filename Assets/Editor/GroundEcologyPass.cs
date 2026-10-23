@@ -51,6 +51,7 @@ namespace JurassicWorld.Editor
             TerrainEnvironmentSeeder.PaintGroundLayers(data);
             PaintAlphamap(data, anchors);
             if (priorPaint != null) RestoreExtraLayers(data, priorLayers, priorPaint);
+            ForestFloorNaturalization.Apply(terrain);
             EditorUtility.SetDirty(terrain.terrainData);
         }
 
@@ -122,6 +123,7 @@ namespace JurassicWorld.Editor
             TerrainEnvironmentSeeder.PopulateGround(terrain.terrainData, terrain.transform);
             UnderstorySeeder.Seed(terrain.terrainData, terrain.transform);
             SeedSurface(terrain);
+            ForestFloorNaturalization.Apply(terrain);
             EditorUtility.SetDirty(terrain.terrainData);
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene);
@@ -186,7 +188,7 @@ namespace JurassicWorld.Editor
             return 1f - Smooth((closest + wobble - .8f) / 3.1f);
         }
 
-        private static float[,] BuildTrailMask(int width, int height)
+        internal static float[,] BuildTrailMask(int width, int height)
         {
             var mask = new float[width, height];
             const float reach = 4.7f;
