@@ -82,6 +82,7 @@ namespace JurassicWorld.Editor
             ForestFloorNaturalization.Apply(UnityEngine.Object.FindObjectOfType<Terrain>());
             PteradactalSceneIntegration.AddToCurrentScene();
             RainforestAtmosphereStageOne.ApplyConfigured();
+            RainforestBackdropStageThree.ApplyConfigured();
         }
 
         // ---------------------------------------------------------------- 通道 debug 标注（Phase 1）

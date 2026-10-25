@@ -364,6 +364,8 @@ namespace JurassicWorld
                 mapCamera.cullingMask = landscapeLayers.value & ~(1 << LayerMask.NameToLayer("UI"));
                 int atmosphereLayer = LayerMask.NameToLayer("Atmosphere");
                 if (atmosphereLayer >= 0) mapCamera.cullingMask &= ~(1 << atmosphereLayer);
+                int backdropLayer = LayerMask.NameToLayer("Backdrop");
+                if (backdropLayer >= 0) mapCamera.cullingMask &= ~(1 << backdropLayer);
                 mapCamera.targetTexture = mapTexture;
                 bool fog = RenderSettings.fog;
                 Terrain[] terrains = Terrain.activeTerrains;

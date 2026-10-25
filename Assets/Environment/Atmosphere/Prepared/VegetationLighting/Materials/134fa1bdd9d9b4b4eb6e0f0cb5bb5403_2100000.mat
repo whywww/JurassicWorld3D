@@ -40,11 +40,13 @@ Material:
     - _AlbedoGain: 2
     - _BranchDisplacement: 0.2
     - _Cutoff: 0.3
+    - _DirectLightScale: 0.88
     - _FoliageActive: 0
     - _InstanceTintStrength: 1
     - _LeafDisplacement: 0.45
     - _NormalStrength: 1
     - _OcclusionStrength: 0.15
+    - _ShadowLift: 0.06
     - _ShadowStrength: 0.8
     - _Smoothness: 0.18
     - _SquashAmount: 1

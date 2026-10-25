@@ -61,6 +61,7 @@ namespace JurassicWorld.Editor
             UnderstoryDetailSample.SeedConfigured();
             TreeOverlapCleanup.SeedConfigured();
             LocalTreeThinning.SeedConfigured();
+            NskTreeDensity.SeedConfigured();
             TreeHeightAdjustment.SeedConfigured();
             if (File.Exists(EnabledPath)) PrepareCurrent();
             else WaterPlantCleanup.SeedConfigured();
@@ -414,7 +415,8 @@ namespace JurassicWorld.Editor
             if (source == null) return null;
             if (Materials.TryGetValue(source, out var material)) return material;
             AssetDatabase.TryGetGUIDAndLocalFileIdentifier(source, out string guid, out long fileId);
-            bool treeCreator = source.shader.name.Contains("Tree Creator") || source.shader.name.StartsWith("Jurassic World/Interactive Tree "), leaf = IsLeaf(source);
+            bool barkSample = source.shader.name == "Jurassic World/Interactive Bark Sample";
+            bool treeCreator = barkSample || source.shader.name.Contains("Tree Creator") || source.shader.name.StartsWith("Jurassic World/Interactive Tree "), leaf = IsLeaf(source);
             string shaderName = treeCreator ? "Jurassic World/Interactive Tree " + (leaf ? "Leaves" : "Bark") :
                 "Jurassic World/Interactive " + (leaf ? "Cutout" : "Opaque");
             Shader shader = Shader.Find(shaderName);
@@ -423,7 +425,7 @@ namespace JurassicWorld.Editor
             material = AssetDatabase.LoadAssetAtPath<Material>(path);
             bool created = material == null;
             if (created) material = new Material(source); else EditorUtility.CopySerialized(source, material);
-            material.name = source.name + " Interactive"; material.shader = shader;
+            material.name = source.name + " Interactive"; material.shader = barkSample ? source.shader : shader;
             // Additional vertex streams are not supported by Unity GPU instancing. Idle trees use original materials.
             material.shaderKeywords = Array.Empty<string>(); material.enableInstancing = false;
             if (!treeCreator)

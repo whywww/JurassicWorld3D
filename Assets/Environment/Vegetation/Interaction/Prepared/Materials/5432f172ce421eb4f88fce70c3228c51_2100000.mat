@@ -45,12 +45,14 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - _AlbedoGain: 1
     - _BranchDisplacement: 0.2
     - _BumpScale: 1
     - _Cutoff: 0.35
     - _FoliageActive: 0
     - _Glossiness: 1
     - _HasMetallicGlossMap: 1
+    - _InstanceTintStrength: 1
     - _LeafDisplacement: 0.45
     - _Metallic: 0
     - _SwayAmplitude: 0.025

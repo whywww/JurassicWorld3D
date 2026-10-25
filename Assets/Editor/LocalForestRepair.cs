@@ -96,6 +96,7 @@ namespace JurassicWorld.Editor
             try { CentralForestDensification.PlantLocalRepair(root.transform); }
             catch { UnityEngine.Object.DestroyImmediate(root); throw; }
             LocalTreeThinning.SeedConfigured();
+            NskTreeDensity.SeedConfigured();
         }
 
         private static int GrassIndex(TerrainData data)

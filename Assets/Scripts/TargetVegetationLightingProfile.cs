@@ -16,6 +16,8 @@ namespace JurassicWorld
             [Range(0f, 1f)] public float occlusionStrength;
             [Range(1f, 4f)] public float albedoGain = 1f;
             [Range(0f, 1f)] public float instanceTintStrength = 1f;
+            [Range(0f, 1f)] public float directLightScale = 1f;
+            [Range(0f, 0.2f)] public float shadowLift;
         }
         public Entry[] entries = new Entry[0];
     }

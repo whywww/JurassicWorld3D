@@ -84,3 +84,9 @@ MonoBehaviour:
   bloom: 0.045
   cloudOpacity: 0.12
   cloudVelocity: {x: 0.0006, y: 0.0002}
+  localAtmosphereEnabled: 1
+  distanceFogColor: {r: 0.64, g: 0.73, b: 0.76, a: 1}
+  distanceFogStart: 42
+  distanceFogEnd: 155
+  mistOpacity: 0.065
+  shaftOpacity: 0.018

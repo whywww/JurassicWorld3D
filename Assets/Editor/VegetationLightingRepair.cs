@@ -79,9 +79,11 @@ namespace JurassicWorld.Editor
             Directory.CreateDirectory(prepared + "/Prefabs");
             AssetDatabase.Refresh();
             var materials = new Dictionary<Material, Material>();
+            Material globalPineBark = AssetDatabase.LoadAssetAtPath<Material>(PineBarkAll.MaterialPath);
             Material Variant(Material source)
             {
                 if (source == null || source.shader == null) return source;
+                if (globalPineBark != null && PineBarkAll.IsNskBark(source)) return globalPineBark;
                 string shaderName = source.shader.name;
                 if (!shaderName.Contains("Tree Creator") && !shaderName.StartsWith("Jurassic World/Interactive Tree ")) return source;
                 string sourcePath = AssetDatabase.GetAssetPath(source);
@@ -233,7 +235,7 @@ namespace JurassicWorld.Editor
                         if (idle == null || !idle.HasProperty("_AlbedoGain")) continue;
                         if (idle.shader != contact.shader || idle.GetTexture("_MainTex") != contact.GetTexture("_MainTex"))
                             throw new InvalidOperationException("Idle/contact foliage texture or shader mismatch: " + f.name + " " + idle.shader.name + " / " + contact.shader.name);
-                        foreach (string property in new[] { "_OcclusionStrength", "_AlbedoGain", "_Cutoff", "_ShadowStrength", "_InstanceTintStrength", "_NormalStrength" })
+                        foreach (string property in new[] { "_OcclusionStrength", "_AlbedoGain", "_Cutoff", "_ShadowStrength", "_InstanceTintStrength", "_NormalStrength", "_DirectLightScale", "_ShadowLift" })
                             if (idle.HasProperty(property) && !Mathf.Approximately(idle.GetFloat(property), contact.GetFloat(property)))
                                 throw new InvalidOperationException("Idle/contact foliage lighting mismatch: " + property);
                     }

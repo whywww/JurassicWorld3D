@@ -35,6 +35,10 @@ namespace JurassicWorld.Editor
                 File.WriteAllText(statusPath, "RUNNING " + command);
                 switch (command)
                 {
+                    case "green-wall-fix": RainforestGreenWallFix.ApplyOpenEditor(); File.WriteAllText(statusPath, "RUNNING green-wall runtime check"); break;
+                    case "boundary-transition": RainforestBoundaryTransition.ApplyOpenEditor(); File.WriteAllText(statusPath, "DONE " + command); break;
+                    case "target-vegetation-pine-all": PineBarkAll.Apply(); File.WriteAllText(statusPath, "DONE " + command); break;
+                    case "target-vegetation-pine-three": BarkTextureSample.ApplyThreeNearSpawn(); File.WriteAllText(statusPath, "DONE " + command); break;
                     case "target-vegetation-audit": TargetVegetationLighting.Audit(); File.WriteAllText(statusPath, "DONE " + command); break;
                     case "target-vegetation-repair": TargetVegetationLighting.Run(); File.WriteAllText(statusPath, "DONE " + command); break;
                     case "vegetation-lighting-diagnose": VegetationLightingRepair.Diagnose(); File.WriteAllText(statusPath, "DONE " + command); break;

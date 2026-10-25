@@ -11,6 +11,7 @@ namespace JurassicWorld
         public Camera viewCamera;
         public Renderer cloudRenderer;
         public RainforestImageFinish imageFinish;
+        public RainforestAtmosphereEffects localEffects;
         private Material skyInstance, cloudInstance, previousSky;
         private Material previousCloud;
 
@@ -45,6 +46,7 @@ namespace JurassicWorld
         public void ApplyQuality(int tier)
         {
             if (profile == null) return;
+            if (localEffects != null && localEffects.isActiveAndEnabled) localEffects.ApplyQuality(tier);
             if (cloudInstance != null)
             {
                 cloudInstance.SetFloat("_Opacity", profile.cloudOpacity * (tier == 0 ? 0.5f : 1f));

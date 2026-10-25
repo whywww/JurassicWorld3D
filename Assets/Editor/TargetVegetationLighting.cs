@@ -94,7 +94,7 @@ namespace JurassicWorld.Editor
                 {
                     report.AppendLine("material=" + AssetDatabase.GetAssetPath(m) + " shader=" + m.shader.name);
                     foreach (string p in new[] { "_Color", "_TreeInstanceColor" }) if (m.HasProperty(p)) report.AppendLine(p + "=" + m.GetColor(p));
-                    foreach (string p in new[] { "_OcclusionStrength", "_AlbedoGain", "_BumpScale" }) if (m.HasProperty(p)) report.AppendLine(p + "=" + m.GetFloat(p));
+                    foreach (string p in new[] { "_OcclusionStrength", "_AlbedoGain", "_DirectLightScale", "_ShadowLift", "_BumpScale" }) if (m.HasProperty(p)) report.AppendLine(p + "=" + m.GetFloat(p));
                     foreach (string p in new[] { "_MainTex", "_BumpSpecMap", "_BumpMap" }) if (m.HasProperty(p))
                     {
                         string path = AssetDatabase.GetAssetPath(m.GetTexture(p));
@@ -121,6 +121,11 @@ namespace JurassicWorld.Editor
                 m.SetFloat("_InstanceTintStrength", entry.instanceTintStrength);
                 if (m.HasProperty("_OcclusionStrength")) m.SetFloat("_OcclusionStrength", entry.occlusionStrength);
                 if (entry.packedNormal != null) m.SetTexture("_BumpSpecMap", entry.packedNormal);
+                bool nsk = entry.category == "NSK trunk";
+                if (m.HasProperty("_DirectLightScale"))
+                    m.SetFloat("_DirectLightScale", nsk && entry.directLightScale > 0f ? entry.directLightScale : 1f);
+                if (m.HasProperty("_ShadowLift"))
+                    m.SetFloat("_ShadowLift", nsk ? Mathf.Max(0f, entry.shadowLift) : 0f);
                 EditorUtility.SetDirty(m);
             }
         }
@@ -162,7 +167,7 @@ namespace JurassicWorld.Editor
                         if (!affected.Contains(idle)) continue;
                         Material contact = active[r][n];
                         if (idle.shader != contact.shader) throw new InvalidOperationException("Target rest/contact shader differs: " + f.name);
-                        foreach (string prop in new[] { "_AlbedoGain", "_OcclusionStrength", "_InstanceTintStrength", "_NormalStrength", "_Cutoff" })
+                        foreach (string prop in new[] { "_AlbedoGain", "_OcclusionStrength", "_InstanceTintStrength", "_NormalStrength", "_Cutoff", "_DirectLightScale", "_ShadowLift" })
                             if (idle.HasProperty(prop) && idle.GetFloat(prop) != contact.GetFloat(prop)) throw new InvalidOperationException("Target rest/contact parameter differs: " + prop);
                         foreach (string prop in new[] { "_MainTex", "_BumpSpecMap", "_BumpMap", "_AlphaTex" })
                             if (idle.HasProperty(prop) && idle.GetTexture(prop) != contact.GetTexture(prop)) throw new InvalidOperationException("Target rest/contact texture differs: " + prop);
@@ -294,6 +299,8 @@ namespace JurassicWorld.Editor
                     if (m.shader.name.Contains("Physical Bark")) m.shader = Shader.Find("Jurassic World/Interactive Tree Bark");
                     m.SetFloat("_OcclusionStrength", m.shader.name.EndsWith("Leaves") ? .7f : .65f);
                     m.SetTexture("_BumpSpecMap", AssetDatabase.LoadAssetAtPath<Texture>(Path.GetDirectoryName(texturePath).Replace('\\', '/') + "/normal_specular.png"));
+                    if (m.HasProperty("_DirectLightScale")) m.SetFloat("_DirectLightScale", 1f);
+                    if (m.HasProperty("_ShadowLift")) m.SetFloat("_ShadowLift", 0f);
                 }
             }
             var saved = affected.ToDictionary(m => m, m => new Material(m));
@@ -315,7 +322,16 @@ namespace JurassicWorld.Editor
                 // Material application must preserve the saved category values.
                 VegetationLightingRepair.ApplyConfiguredToCurrentScene(atmosphere.profile);
                 foreach (var entry in AssetDatabase.LoadAssetAtPath<TargetVegetationLightingProfile>(ProfilePath).entries)
+                {
                     if (!Mathf.Approximately(entry.material.GetFloat("_AlbedoGain"), entry.albedoGain)) throw new InvalidOperationException("Category gain overwritten.");
+                    bool nsk = entry.category == "NSK trunk";
+                    if (entry.material.HasProperty("_DirectLightScale") &&
+                        !Mathf.Approximately(entry.material.GetFloat("_DirectLightScale"), nsk && entry.directLightScale > 0f ? entry.directLightScale : 1f))
+                        throw new InvalidOperationException("Category direct light scale overwritten.");
+                    if (entry.material.HasProperty("_ShadowLift") &&
+                        !Mathf.Approximately(entry.material.GetFloat("_ShadowLift"), nsk ? Mathf.Max(0f, entry.shadowLift) : 0f))
+                        throw new InvalidOperationException("Category shadow lift overwritten.");
+                }
                 if (EditorJsonUtility.ToJson(atmosphere.profile) != environmentBefore ||
                     FoliageInteractionPreparation.TreeSignature(Terrain.activeTerrain.terrainData.treeInstances, Terrain.activeTerrain.terrainData.treePrototypes) != layoutBefore)
                     throw new InvalidOperationException("Environment or tree layout changed.");
@@ -376,7 +392,10 @@ namespace JurassicWorld.Editor
                 var entry = existing ?? new TargetVegetationLightingProfile.Entry { category = banana ? "Banana trunk" : bush ? "Bush" : "NSK trunk", material = m,
                     packedNormal = packedNormal, occlusionStrength = bush ? .35f : .30f,
                     albedoGain = banana ? 1.25f : bush && m.shader.name.EndsWith("Leaves") ? 1.6f : 2f,
-                    instanceTintStrength = 1f };
+                    instanceTintStrength = 1f, directLightScale = 1f, shadowLift = 0f };
+                bool nskTrunk = !banana && !bush;
+                if (!nskTrunk || entry.directLightScale <= 0f) entry.directLightScale = 1f;
+                if (!nskTrunk || entry.shadowLift < 0f) entry.shadowLift = 0f;
                 entry.shader = banana ? Shader.Find("Jurassic World/Interactive Opaque") :
                     m.shader.name.EndsWith("Leaves") ? m.shader : Shader.Find("Jurassic World/Interactive Tree Physical Bark");
                 entries.Add(entry);

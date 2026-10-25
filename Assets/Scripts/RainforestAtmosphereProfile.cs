@@ -24,5 +24,13 @@ namespace JurassicWorld
         [Range(0f, 1f)] public float cloudOpacity = 0.12f;
         public Vector2 cloudVelocity = new Vector2(0.0006f, 0.0002f);
 
+        [Header("Stage 2 - local atmosphere")]
+        public bool localAtmosphereEnabled;
+        public Color distanceFogColor = new Color(0.64f, 0.73f, 0.76f);
+        public float distanceFogStart = 42f;
+        public float distanceFogEnd = 155f;
+        [Range(0f, 0.3f)] public float mistOpacity = 0.065f;
+        [Range(0f, 0.15f)] public float shaftOpacity = 0.018f;
+
     }
 }

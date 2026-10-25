@@ -164,7 +164,10 @@ namespace JurassicWorld.Editor
         public static void ApplyConfigured()
         {
             if (AssetDatabase.LoadAssetAtPath<RainforestAtmosphereProfile>(ProfilePath) != null)
+            {
                 ApplyCurrent(false);
+                RainforestAtmosphereStageTwo.ApplyConfigured();
+            }
         }
 
         private static void ApplyCurrent(bool capture)
