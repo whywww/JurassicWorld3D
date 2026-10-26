@@ -28,6 +28,9 @@ namespace JurassicWorld.Editor
         private static Vector3[] starts, previous;
         private static float[] travelled;
         private static float[,] previousPenetration;
+        private static ulong[] previousEscapeMoves;
+        private static bool usedEmergencyEscape;
+        private static int exceptionSamples, completedScenarios, normalScenarios, fallbackScenarios, failedScenarios;
         private static Vector3[] goals;
         private static bool[] goalReached;
         private static int scenario, frame;
@@ -76,6 +79,7 @@ namespace JurassicWorld.Editor
             {
                 Time.captureDeltaTime = 1f / 30f;
                 Report.Clear(); scenario = 0;
+                completedScenarios = normalScenarios = fallbackScenarios = failedScenarios = 0;
                 VerifyOrder();
                 Prepare();
                 EditorApplication.update += Tick;
@@ -174,9 +178,12 @@ namespace JurassicWorld.Editor
             starts = new Vector3[Agents.Count]; previous = new Vector3[Agents.Count]; travelled = new float[Agents.Count];
             previousPenetration = new float[Agents.Count, Agents.Count];
             goals = new Vector3[Agents.Count]; goalReached = new bool[Agents.Count];
+            previousEscapeMoves = new ulong[Agents.Count];
+            usedEmergencyEscape = false; exceptionSamples = 0;
             for (int i = 0; i < Agents.Count; i++)
             {
                 var agent = Agents[i]; starts[i] = previous[i] = agent.transform.position;
+                previousEscapeMoves[i] = agent.EmergencyEscapeMoveCount;
                 Vector3 goal = i == 0 ? aGoal : i == 1 ? bGoal : new Vector3(-12f, 0f, 0f);
                 goals[i] = goal;
                 Set(agent, "freeGoal", goal);
@@ -202,6 +209,9 @@ namespace JurassicWorld.Editor
             try
             {
                 float elapsed = Time.time - began;
+                usedEmergencyEscape |= Agents.Any(a => a.IsEmergencyEscaping || a.EmergencyEscapeMoveCount != 0);
+                Require(scenario < 12 || !usedEmergencyEscape,
+                    "Emergency escape abandoned the original goals; goal restoration was not demonstrated.");
                 if (scenario == 12 && (int)elapsed / 5 != traceSecond)
                 {
                     traceSecond = (int)elapsed / 5;
@@ -216,10 +226,21 @@ namespace JurassicWorld.Editor
                     {
                         float depth = (float)Call(Agents[i], "PeerPenetration", Agents[i].transform.position,
                             Agents[i].transform.rotation, Agents[i].GetComponent<DinosaurCoreBody>(), Agents[j]);
-                        Require(depth <= previousPenetration[i, j] + .0001f, "New or deepening body intersection in " + Cases[scenario]);
+                        bool exception = ValidateBodySample(previousPenetration[i, j], depth,
+                            previousEscapeMoves[i], Agents[i].EmergencyEscapeMoveCount,
+                            previousEscapeMoves[j], Agents[j].EmergencyEscapeMoveCount);
+                        if (exception)
+                        {
+                            exceptionSamples++;
+                            if (exceptionSamples == 1)
+                                Report.AppendLine($"EXCEPTION {Cases[scenario]}: committed emergency move, {Agents[i].name}/{Agents[j].name}, depth {previousPenetration[i, j]:F5}->{depth:F5}m.");
+                        }
                         previousPenetration[i, j] = depth;
                     }
                 }
+                // Advance all counters only after checking every pair. This also
+                // refreshes overlap baselines after an exceptional interval.
+                for (int i = 0; i < Agents.Count; i++) previousEscapeMoves[i] = Agents[i].EmergencyEscapeMoveCount;
                 if (scenario == 9 && !obstacleRemoved && elapsed >= 4f)
                 {
                     Require(travelled[0] < .1f && travelled[1] < .1f, "No-exit fixture moved through a solid.");
@@ -231,22 +252,55 @@ namespace JurassicWorld.Editor
                     : travelled[0] >= 3f && (scenario == 3 || travelled[1] >= 3f)
                         && (Agents.Count < 3 || travelled[2] >= 2f)
                         && Vector3.Distance(Agents[0].transform.position, Agents[1].transform.position) > 2.5f;
+                if (usedEmergencyEscape)
+                    cleared &= Agents.All(a => !a.IsEmergencyEscaping)
+                        && previousPenetration.Cast<float>().All(depth => depth <= .0001f);
                 if (scenario == 9 && elapsed > 7f) Require(cleared, "Did not resume within 3s of obstacle removal.");
                 if (!cleared && elapsed < 30f) return;
                 Require(cleared, "30s traffic timeout: " + Cases[scenario] + " / " + Agents[0].GroundTrafficStatus + " / " + Agents[1].GroundTrafficStatus);
-                Report.AppendLine($"PASS {Cases[scenario]} in {elapsed:F2}s; travel {travelled[0]:F2}/{travelled[1]:F2}m.");
-                if (++scenario < Cases.Length) Prepare(); else Finish(null);
+                CompleteScenario(null);
             }
-            catch (Exception error) { Finish(error); }
+            catch (Exception error) { CompleteScenario(error); }
+        }
+        // Returns whether an otherwise failing interval used the emergency exception.
+        // Current mode alone is deliberately insufficient, and old moves never carry
+        // permission into a later sample (including after the final escape step).
+        internal static bool ValidateBodySample(float previousDepth, float depth,
+            ulong previousA, ulong currentA, ulong previousB, ulong currentB)
+        {
+            if (depth <= previousDepth + .0001f) return false;
+            Require(currentA != previousA || currentB != previousB, "New or deepening body intersection without a committed emergency move.");
+            return true;
+        }
+        private static void CompleteScenario(Exception error)
+        {
+            completedScenarios++;
+            if (error != null)
+            {
+                failedScenarios++;
+                Report.AppendLine($"FAILED {Cases[scenario]}: {error}");
+            }
+            else
+            {
+                if (usedEmergencyEscape) fallbackScenarios++; else normalScenarios++;
+                string outcome = usedEmergencyEscape ? "EMERGENCY_FALLBACK (normal clearance not established)" : "NORMAL_CLEARANCE";
+                Report.AppendLine($"PASS {outcome}: {Cases[scenario]} in {Time.time - began:F2}s; travel {travelled[0]:F2}/{travelled[1]:F2}m; exceptional intersections={exceptionSamples}.");
+            }
+            // A failure in one fixture must not hide the remaining traffic cases.
+            if (++scenario >= Cases.Length) { Finish(null); return; }
+            try { Prepare(); }
+            catch (Exception setupError) { Finish(setupError); }
         }
         private static void Finish(Exception error)
         {
             EditorApplication.update -= Tick;
             Time.captureDeltaTime = 0f;
-            SessionState.SetBool(Key + ".Failed", error != null);
-            Report.AppendLine(error == null ? "ALL PASS" : "FAILED " + error);
+            bool failed = error != null || failedScenarios != 0;
+            SessionState.SetBool(Key + ".Failed", failed);
+            Report.AppendLine($"COMPLETED {completedScenarios}/{Cases.Length}; normal={normalScenarios}; emergency fallback={fallbackScenarios}; failed={failedScenarios}.");
+            Report.AppendLine(error != null ? "FAILED " + error : failed ? "COMPLETED WITH FAILURES" : "ALL PASS (normal clearance and emergency fallback reported separately)");
             Directory.CreateDirectory("Logs"); File.WriteAllText(ReportPath, Report.ToString());
-            if (error != null) Debug.LogException(error); else Debug.Log(Report.ToString());
+            if (failed) Debug.LogError(Report.ToString()); else Debug.Log(Report.ToString());
             EditorApplication.isPlaying = false;
         }
     }

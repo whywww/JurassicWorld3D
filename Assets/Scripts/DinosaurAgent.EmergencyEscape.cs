@@ -11,6 +11,9 @@ namespace JurassicWorld
         private Vector3 emergencyAnchor, emergencyOrigin, emergencyGoal;
         private float emergencyStuckTime, emergencyRetry;
         public bool IsEmergencyEscaping => emergencyEscapeActive;
+        // Counts committed escape moves, including the move that restores normal
+        // collision checks. Merely entering/searching in escape mode grants no move.
+        public ulong EmergencyEscapeMoveCount { get; private set; }
         public float NoMovementDuration => emergencyStuckTime;
         public string EmergencyEscapeStatus { get; private set; } = "Inactive";
 
@@ -185,6 +188,7 @@ namespace JurassicWorld
                 {
                     Quaternion rotation = Quaternion.RotateTowards(transform.rotation, desired, 120f * deltaTime);
                     transform.SetPositionAndRotation(next, rotation);
+                    unchecked { EmergencyEscapeMoveCount++; }
                     actualInteractionSpeed = distance / deltaTime;
                     interactionMoved = true;
                     PlayMovementClip(actualInteractionSpeed);

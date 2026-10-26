@@ -73,9 +73,11 @@
 |完整植被接触/恢复与图形检查|功能通过；专项开销预算未通过|[记录](E:/Unity/JurassicWorld/Logs/RuntimePerformance/regressions/foliage-verification.txt)|
 |当前完整工作区快照（包含同期脑控改动）|Unity 编译、16,274 项输入检查、Play 启动及真实相机绘制通过|[输入日志](E:/Unity/JurassicWorld/Logs/runtime-performance-current-input.log)、[短时启动检查](E:/Unity/JurassicWorld/Logs/RuntimePerformance/current-workspace-smoke/results.md)|
 |当前完整工作区 Windows Development 构建及启动|构建与短时真实相机绘制通过；正式性能数据仍采用冻结快照|[构建日志](E:/Unity/JurassicWorld/Logs/runtime-performance-current-build.log)、[启动检查](E:/Unity/JurassicWorld/Logs/RuntimePerformance/current-player-smoke/results.md)|
-|恐龙交通互斥|未全通过，原始 Agent 同样失败|[优化版结果](E:/Unity/JurassicWorld/Logs/runtime-performance-traffic-optimized-result.txt)、[原始 Agent 对照](E:/Unity/JurassicWorld/Logs/runtime-performance-traffic-baseline-result.txt)|
+|恐龙交通互斥|未全通过；后续修正紧急脱困例外识别，14 项完整执行，3 项独立失败|[后续验收](../TrafficAcceptance.md)、[原优化版结果](E:/Unity/JurassicWorld/Logs/runtime-performance-traffic-optimized-result.txt)、[原始 Agent 对照](E:/Unity/JurassicWorld/Logs/runtime-performance-traffic-baseline-result.txt)|
 
 交通测试的物种优先级、迎面、交叉、超车和站立阻挡通过；随后在 `initial circle overlap` 触发“新增或加深身体交叠”断言，后续案例未执行。移除本轮唯一的 Agent 计时包装后复测，结果文件逐字节一致，因此列为既有问题，未在本轮改写避让或碰撞规则。
+
+2026-10-26 后续复核确认，上述交叠发生在允许穿透的八秒紧急脱困期间。验收现以实际提交的脱困位移计数限定例外，不放宽正常移动阈值；原报告的“通过”未区分紧急脱困，不能据此断言正常解围。完整运行结果为正常解围 2 项、紧急脱困完成 9 项、独立失败 3 项，整体仍失败。具体案例及其他回归结果见 [交通验收记录](../TrafficAcceptance.md)。此修正不改变上述性能测量结果。
 
 植被专项在相同路径/相机下，关闭交互、准备后静止、接触三种状态的 CPU 渲染提交加交互平均耗时分别为 10.825、11.970、13.811 ms：额外开销约 10.6% / 27.6%，超过该旧专项的 5% / 10% 目标。这是 CPU 局部计时，不能替代完整帧时间或 GPU 验收。
 

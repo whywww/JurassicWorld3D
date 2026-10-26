@@ -53,12 +53,14 @@ namespace JurassicWorld.Editor
                         agent.transform.rotation *= Quaternion.Euler(0f, 2f, 0f);
                         Call(agent, "UpdateEmergencyEscape", 1f);
                         Require(!agent.IsEmergencyEscaping, species + " escaped before eight seconds.");
+                        Require(agent.EmergencyEscapeMoveCount == 0, "Waiting/rotation was counted as an escape move.");
                     }
                     Call(agent, "UpdateEmergencyEscape", 1f);
                     Require(agent.IsEmergencyEscaping, species + " failed to escape traffic after eight seconds.");
                     Require(!(bool)typeof(DinosaurAgent).GetField("trafficLocked", Private).GetValue(agent), "Traffic lock survived escape.");
                     Require(!agent.ApplyFootRootCorrection(Vector3.forward), "Foot IK moved escape root.");
                     Require(agent.transform.position.magnitude > .1f, "Escape did not translate through the enclosure.");
+                    Require(agent.EmergencyEscapeMoveCount == 1, "First committed escape move was not counted exactly once.");
                     for (int frame = 0; frame < 400 && agent.IsEmergencyEscaping; frame++) Call(agent, "UpdateEmergencyEscape", .1f);
                     Require(!agent.IsEmergencyEscaping, species + " did not resume normal roaming.");
                     Require((bool)Call(agent, "EmergencyOpenPoint", agent.transform.position, agent.transform.rotation), "Restored collisions inside an obstacle.");
@@ -83,6 +85,7 @@ namespace JurassicWorld.Editor
                 settings.solidObstacles = new[] { new Bounds(Vector3.zero, new Vector3(200f, 20f, 200f)) };
                 for (int i = 0; i < 9; i++) Call(trapped, "UpdateEmergencyEscape", 1f);
                 Require(trapped.IsEmergencyEscaping && trapped.transform.position == Vector3.zero, "No-open-ground fallback restored collisions prematurely.");
+                Require(trapped.EmergencyEscapeMoveCount == 0, "Searching without open ground granted a movement exception.");
                 settings.solidObstacles = Array.Empty<Bounds>();
                 Call(trapped, "UpdateEmergencyEscape", 1f);
                 Vector3 originalGoal = (Vector3)typeof(DinosaurAgent).GetField("emergencyGoal", Private).GetValue(trapped);
@@ -94,7 +97,10 @@ namespace JurassicWorld.Editor
                     "An occupied endpoint was not replaced.");
                 for (int i = 0; i < 400 && trapped.IsEmergencyEscaping; i++) Call(trapped, "UpdateEmergencyEscape", .1f);
                 Require(!trapped.IsEmergencyEscaping, "Escape did not recover after open ground became available.");
-                Debug.Log("EMERGENCY_ESCAPE_ALL_PASS: species, traffic retry, rotation-only stall, rest, walking, no-open-ground retry, moving peer endpoint, collision restoration.");
+                Object.DestroyImmediate(trapped.gameObject);
+                Object.DestroyImmediate(blocker.gameObject);
+                VerifyPeerException(fixture, settings);
+                Debug.Log("EMERGENCY_ESCAPE_ALL_PASS: species, traffic retry, rotation-only stall, rest, walking, no-open-ground retry, moving peer endpoint, committed-move exception, final-step sampling, collision restoration.");
             }
             catch (Exception error)
             {
@@ -109,6 +115,62 @@ namespace JurassicWorld.Editor
                 if (data != null) Object.DestroyImmediate(data);
             }
             if (Application.isBatchMode) EditorApplication.Exit(0);
+        }
+
+        private static void ExpectOrdinaryIntersectionFailure(ulong previousA, ulong currentA, ulong previousB, ulong currentB)
+        {
+            bool rejected = false;
+            try { DinosaurGroundTrafficAcceptance.ValidateBodySample(0f, .1f, previousA, currentA, previousB, currentB); }
+            catch (InvalidOperationException) { rejected = true; }
+            Require(rejected, "Ordinary intersection was exempted without a new emergency move.");
+        }
+
+        private static void VerifyPeerException(GameObject fixture, DinosaurInteractionSettings settings)
+        {
+            var agent = Make(fixture, settings, DinosaurAgent.DinosaurSpecies.Sauropelta);
+            var peer = Make(fixture, settings, DinosaurAgent.DinosaurSpecies.Velociraptor);
+            peer.transform.position = new Vector3(0f, 0f, 1.2f);
+            Set(agent, "peers", new[] { peer });
+            Call(agent, "BeginEmergencyEscape");
+            Require(agent.IsEmergencyEscaping && agent.EmergencyEscapeMoveCount == 0, "Starting escape should not grant a movement exception.");
+            ExpectOrdinaryIntersectionFailure(0, 0, 0, 0);
+            Require((bool)Call(agent, "TryEmergencyGoal", new Vector3(0f, 0f, 4f)), "Peer-crossing escape endpoint was not clear.");
+            var body = agent.GetComponent<DinosaurCoreBody>();
+            float previousDepth = (float)Call(agent, "PeerPenetration", agent.transform.position, agent.transform.rotation, body, peer);
+            bool sawException = false, sawFinalStep = false;
+            for (int i = 0; i < 100 && agent.IsEmergencyEscaping; i++)
+            {
+                ulong before = agent.EmergencyEscapeMoveCount;
+                Vector3 position = agent.transform.position;
+                Call(agent, "TickEmergencyEscape", .1f);
+                Require(agent.transform.position != position && agent.EmergencyEscapeMoveCount == before + 1,
+                    "Each committed escape move must increment the counter exactly once.");
+                float depth = (float)Call(agent, "PeerPenetration", agent.transform.position, agent.transform.rotation, body, peer);
+                sawException |= DinosaurGroundTrafficAcceptance.ValidateBodySample(previousDepth, depth, before, agent.EmergencyEscapeMoveCount, 0, 0);
+                // Pair order must not change which participant can grant the exception.
+                if (depth > previousDepth + .0001f)
+                    Require(DinosaurGroundTrafficAcceptance.ValidateBodySample(previousDepth, depth, 0, 0, before, agent.EmergencyEscapeMoveCount), "Second participant's escape move was ignored.");
+                previousDepth = depth;
+                if (!agent.IsEmergencyEscaping)
+                {
+                    sawFinalStep = true;
+                    Require(DinosaurGroundTrafficAcceptance.ValidateBodySample(0f, .1f, before, agent.EmergencyEscapeMoveCount, 0, 0),
+                        "Final escape step lost its sampling exception when escape mode ended.");
+                }
+            }
+            Require(sawException && sawFinalStep, "Peer-crossing/final-step escape fixture did not execute.");
+            Require((bool)Call(agent, "EmergencyOpenPoint", agent.transform.position, agent.transform.rotation), "Escape ended inside an occupied endpoint.");
+            Require(!(bool)Call(agent, "StepPoseSafe", agent.transform.position, peer.transform.position, agent.transform.rotation, agent.transform.rotation, false),
+                "Normal movement accepted a peer-body crossing after escape.");
+            ulong finished = agent.EmergencyEscapeMoveCount;
+            Call(agent, "UpdateEmergencyEscape", .1f);
+            Require(agent.EmergencyEscapeMoveCount == finished, "Normal idle was counted as an escape move.");
+            ExpectOrdinaryIntersectionFailure(finished, finished, 0, 0);
+            ExpectOrdinaryIntersectionFailure(0, 0, finished, finished);
+            Require(!DinosaurGroundTrafficAcceptance.ValidateBodySample(.1f, .05f, finished, finished, 0, 0), "Non-deepening overlap required an exception.");
+            Debug.Log("EMERGENCY_PEER_EXCEPTION_PASS: crossing, pair order, final committed step, no exception during search/idle, normal collision checks restored.");
+            Object.DestroyImmediate(agent.gameObject);
+            Object.DestroyImmediate(peer.gameObject);
         }
 
         private static DinosaurAgent Make(GameObject fixture, DinosaurInteractionSettings settings, DinosaurAgent.DinosaurSpecies species)
