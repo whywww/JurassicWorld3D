@@ -7104,6 +7104,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 828342395}
     m_Modifications:
+    - target: {fileID: 1669165520558553598, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1669165520558553598, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 56c4f2d70c02085498273a02535195c1, type: 2}
     - target: {fileID: 6723943390678405403, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
       propertyPath: m_Name
       value: Creek Fern
@@ -7168,6 +7176,11 @@ PrefabInstance:
 --- !u!4 &23450539 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8521667877435042770, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
+  m_PrefabInstance: {fileID: 23450538}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &23450540 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 1669165520558553598, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
   m_PrefabInstance: {fileID: 23450538}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &23922494
@@ -9256,6 +9269,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4187032064433359324, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4187032064433359324, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 23ce82c4b4dbafd49bc15f09f3c657bb, type: 2}
     - target: {fileID: 5785029673274844652, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
       propertyPath: m_Name
       value: Creek Mossy Rock
@@ -9268,6 +9289,11 @@ PrefabInstance:
 --- !u!4 &29854638 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 933705075812973358, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
+  m_PrefabInstance: {fileID: 29854637}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &29854639 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 4187032064433359324, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
   m_PrefabInstance: {fileID: 29854637}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &29925285
@@ -16255,6 +16281,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5906907680490950937, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5906907680490950937, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 23ce82c4b4dbafd49bc15f09f3c657bb, type: 2}
     - target: {fileID: 7638870325823608143, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
       propertyPath: m_Name
       value: Creek Mossy Rock
@@ -16267,6 +16301,11 @@ PrefabInstance:
 --- !u!4 &58878637 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2465615525907986117, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
+  m_PrefabInstance: {fileID: 58878636}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &58878638 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 5906907680490950937, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
   m_PrefabInstance: {fileID: 58878636}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &59270094
@@ -23389,6 +23428,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5906907680490950937, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5906907680490950937, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 23ce82c4b4dbafd49bc15f09f3c657bb, type: 2}
     - target: {fileID: 7638870325823608143, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
       propertyPath: m_Name
       value: Creek Mossy Rock
@@ -23401,6 +23448,11 @@ PrefabInstance:
 --- !u!4 &85578746 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2465615525907986117, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
+  m_PrefabInstance: {fileID: 85578745}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &85578747 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 5906907680490950937, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
   m_PrefabInstance: {fileID: 85578745}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &85639042
@@ -32538,6 +32590,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3150052048970654528, guid: 03273004b445b954c8e83bb193763596, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3150052048970654528, guid: 03273004b445b954c8e83bb193763596, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 23ce82c4b4dbafd49bc15f09f3c657bb, type: 2}
     - target: {fileID: 5774769644171014195, guid: 03273004b445b954c8e83bb193763596, type: 3}
       propertyPath: m_Name
       value: Creek Mossy Rock
@@ -32550,6 +32610,11 @@ PrefabInstance:
 --- !u!4 &123058837 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3066116290791221368, guid: 03273004b445b954c8e83bb193763596, type: 3}
+  m_PrefabInstance: {fileID: 123058836}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &123058838 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 3150052048970654528, guid: 03273004b445b954c8e83bb193763596, type: 3}
   m_PrefabInstance: {fileID: 123058836}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &123103267
@@ -36595,6 +36660,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5906907680490950937, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5906907680490950937, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 23ce82c4b4dbafd49bc15f09f3c657bb, type: 2}
     - target: {fileID: 7638870325823608143, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
       propertyPath: m_Name
       value: Creek Mossy Rock
@@ -36607,6 +36680,11 @@ PrefabInstance:
 --- !u!4 &134776613 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2465615525907986117, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
+  m_PrefabInstance: {fileID: 134776612}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &134776614 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 5906907680490950937, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
   m_PrefabInstance: {fileID: 134776612}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &135165529
@@ -43672,6 +43750,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3150052048970654528, guid: 03273004b445b954c8e83bb193763596, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3150052048970654528, guid: 03273004b445b954c8e83bb193763596, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 23ce82c4b4dbafd49bc15f09f3c657bb, type: 2}
     - target: {fileID: 5774769644171014195, guid: 03273004b445b954c8e83bb193763596, type: 3}
       propertyPath: m_Name
       value: Creek Mossy Rock
@@ -43684,6 +43770,11 @@ PrefabInstance:
 --- !u!4 &161015032 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3066116290791221368, guid: 03273004b445b954c8e83bb193763596, type: 3}
+  m_PrefabInstance: {fileID: 161015031}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &161015033 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 3150052048970654528, guid: 03273004b445b954c8e83bb193763596, type: 3}
   m_PrefabInstance: {fileID: 161015031}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &162111442
@@ -57396,6 +57487,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 828342395}
     m_Modifications:
+    - target: {fileID: 1669165520558553598, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1669165520558553598, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 56c4f2d70c02085498273a02535195c1, type: 2}
     - target: {fileID: 6723943390678405403, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
       propertyPath: m_Name
       value: Creek Fern
@@ -57464,6 +57563,11 @@ PrefabInstance:
 --- !u!4 &192980129 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8521667877435042770, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
+  m_PrefabInstance: {fileID: 192980128}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &192980130 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 1669165520558553598, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
   m_PrefabInstance: {fileID: 192980128}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &193795649
@@ -79362,6 +79466,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4187032064433359324, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4187032064433359324, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 23ce82c4b4dbafd49bc15f09f3c657bb, type: 2}
     - target: {fileID: 5785029673274844652, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
       propertyPath: m_Name
       value: Creek Mossy Rock
@@ -79374,6 +79486,11 @@ PrefabInstance:
 --- !u!4 &288905180 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 933705075812973358, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
+  m_PrefabInstance: {fileID: 288905179}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &288905181 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 4187032064433359324, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
   m_PrefabInstance: {fileID: 288905179}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &290075408
@@ -86133,6 +86250,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 828342395}
     m_Modifications:
+    - target: {fileID: 1669165520558553598, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1669165520558553598, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 56c4f2d70c02085498273a02535195c1, type: 2}
     - target: {fileID: 6723943390678405403, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
       propertyPath: m_Name
       value: Creek Fern
@@ -86197,6 +86322,11 @@ PrefabInstance:
 --- !u!4 &317622832 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8521667877435042770, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
+  m_PrefabInstance: {fileID: 317622831}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &317622833 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 1669165520558553598, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
   m_PrefabInstance: {fileID: 317622831}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &318331165
@@ -86502,6 +86632,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5906907680490950937, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5906907680490950937, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 23ce82c4b4dbafd49bc15f09f3c657bb, type: 2}
     - target: {fileID: 7638870325823608143, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
       propertyPath: m_Name
       value: Creek Mossy Rock
@@ -86514,6 +86652,11 @@ PrefabInstance:
 --- !u!4 &318616071 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2465615525907986117, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
+  m_PrefabInstance: {fileID: 318616070}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &318616072 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 5906907680490950937, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
   m_PrefabInstance: {fileID: 318616070}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &318827561
@@ -86576,6 +86719,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4187032064433359324, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4187032064433359324, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 23ce82c4b4dbafd49bc15f09f3c657bb, type: 2}
     - target: {fileID: 5785029673274844652, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
       propertyPath: m_Name
       value: Creek Mossy Rock
@@ -86588,6 +86739,11 @@ PrefabInstance:
 --- !u!4 &318827562 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 933705075812973358, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
+  m_PrefabInstance: {fileID: 318827561}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &318827563 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 4187032064433359324, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
   m_PrefabInstance: {fileID: 318827561}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &319805493
@@ -91147,6 +91303,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5906907680490950937, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5906907680490950937, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 23ce82c4b4dbafd49bc15f09f3c657bb, type: 2}
     - target: {fileID: 7638870325823608143, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
       propertyPath: m_Name
       value: Creek Mossy Rock
@@ -91159,6 +91323,11 @@ PrefabInstance:
 --- !u!4 &335930528 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2465615525907986117, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
+  m_PrefabInstance: {fileID: 335930527}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &335930529 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 5906907680490950937, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
   m_PrefabInstance: {fileID: 335930527}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &336137382
@@ -92218,6 +92387,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4187032064433359324, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4187032064433359324, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 23ce82c4b4dbafd49bc15f09f3c657bb, type: 2}
     - target: {fileID: 5785029673274844652, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
       propertyPath: m_Name
       value: Creek Mossy Rock
@@ -92230,6 +92407,11 @@ PrefabInstance:
 --- !u!4 &341562090 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 933705075812973358, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
+  m_PrefabInstance: {fileID: 341562089}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &341562091 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 4187032064433359324, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
   m_PrefabInstance: {fileID: 341562089}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &341804606
@@ -102045,6 +102227,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 828342395}
     m_Modifications:
+    - target: {fileID: 1669165520558553598, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1669165520558553598, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 56c4f2d70c02085498273a02535195c1, type: 2}
     - target: {fileID: 6723943390678405403, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
       propertyPath: m_Name
       value: Creek Fern
@@ -102113,6 +102303,11 @@ PrefabInstance:
 --- !u!4 &384089050 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8521667877435042770, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
+  m_PrefabInstance: {fileID: 384089049}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &384089051 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 1669165520558553598, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
   m_PrefabInstance: {fileID: 384089049}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &384290484
@@ -104313,6 +104508,354 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 2465615525907986117, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
   m_PrefabInstance: {fileID: 393587508}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &394114498
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 394114499}
+  - component: {fileID: 394114500}
+  m_Layer: 0
+  m_Name: Stage 4 - Creek Wet Surfaces
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &394114499
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 394114498}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 851696530}
+  - {fileID: 414535191}
+  m_Father: {fileID: 828342395}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &394114500
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 394114498}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3884a19622c6020419368b92b525b290, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  settings: {fileID: 11400000, guid: 84826824f2c5033488d244489fcc6dbe, type: 2}
+  terrain: {fileID: 1207232913}
+  originalBank: {fileID: 8574412962073106934, guid: eb96a74435365c540b28cf3af555a724, type: 2}
+  wetBank: {fileID: 8574412962073106934, guid: 367a879f1545cfa43865f4336d384aa4, type: 2}
+  originalWeightsBackup: Reports/Creek/StageFour/OriginalControls-89cc1a61017149e48095131f325e07f7.bin
+  bindings:
+  - renderer: {fileID: 533850155}
+    originals:
+    - {fileID: 2100000, guid: 41832995c5bc77649b5565641dac58bc, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 733377594}
+    originals:
+    - {fileID: 2100000, guid: 41832995c5bc77649b5565641dac58bc, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 420533404}
+    originals:
+    - {fileID: 2100000, guid: 41832995c5bc77649b5565641dac58bc, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 1350552564}
+    originals:
+    - {fileID: 2100000, guid: 5432f172ce421eb4f88fce70c3228c51, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 633479727}
+    originals:
+    - {fileID: 2100000, guid: 41832995c5bc77649b5565641dac58bc, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 2129235897}
+    originals:
+    - {fileID: 2100000, guid: 41832995c5bc77649b5565641dac58bc, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 767333206}
+    originals:
+    - {fileID: 2100000, guid: 41832995c5bc77649b5565641dac58bc, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 1147545044}
+    originals:
+    - {fileID: 2100000, guid: 5432f172ce421eb4f88fce70c3228c51, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 1545665047}
+    originals:
+    - {fileID: 2100000, guid: 41832995c5bc77649b5565641dac58bc, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 288905181}
+    originals:
+    - {fileID: 2100000, guid: 41832995c5bc77649b5565641dac58bc, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 882615577}
+    originals:
+    - {fileID: 2100000, guid: 41832995c5bc77649b5565641dac58bc, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 1523077851}
+    originals:
+    - {fileID: 2100000, guid: 5432f172ce421eb4f88fce70c3228c51, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 1120002709}
+    originals:
+    - {fileID: 2100000, guid: 41832995c5bc77649b5565641dac58bc, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 1028852415}
+    originals:
+    - {fileID: 2100000, guid: 41832995c5bc77649b5565641dac58bc, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 1899229656}
+    originals:
+    - {fileID: 2100000, guid: 41832995c5bc77649b5565641dac58bc, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 1536713005}
+    originals:
+    - {fileID: 2100000, guid: 5432f172ce421eb4f88fce70c3228c51, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 318616072}
+    originals:
+    - {fileID: 2100000, guid: 41832995c5bc77649b5565641dac58bc, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 1340111254}
+    originals:
+    - {fileID: 2100000, guid: 41832995c5bc77649b5565641dac58bc, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 123058838}
+    originals:
+    - {fileID: 2100000, guid: 41832995c5bc77649b5565641dac58bc, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 1291879825}
+    originals:
+    - {fileID: 2100000, guid: 5432f172ce421eb4f88fce70c3228c51, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 1649926894}
+    originals:
+    - {fileID: 2100000, guid: 41832995c5bc77649b5565641dac58bc, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 873434694}
+    originals:
+    - {fileID: 2100000, guid: 41832995c5bc77649b5565641dac58bc, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 1935096084}
+    originals:
+    - {fileID: 2100000, guid: 41832995c5bc77649b5565641dac58bc, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 23450540}
+    originals:
+    - {fileID: 2100000, guid: 5432f172ce421eb4f88fce70c3228c51, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 854367327}
+    originals:
+    - {fileID: 2100000, guid: 41832995c5bc77649b5565641dac58bc, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 942667292}
+    originals:
+    - {fileID: 2100000, guid: 41832995c5bc77649b5565641dac58bc, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 1486178992}
+    originals:
+    - {fileID: 2100000, guid: 41832995c5bc77649b5565641dac58bc, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 384089051}
+    originals:
+    - {fileID: 2100000, guid: 5432f172ce421eb4f88fce70c3228c51, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 1584039032}
+    originals:
+    - {fileID: 2100000, guid: 41832995c5bc77649b5565641dac58bc, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 1710273869}
+    originals:
+    - {fileID: 2100000, guid: 41832995c5bc77649b5565641dac58bc, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 161015033}
+    originals:
+    - {fileID: 2100000, guid: 41832995c5bc77649b5565641dac58bc, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 1607656066}
+    originals:
+    - {fileID: 2100000, guid: 5432f172ce421eb4f88fce70c3228c51, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 335930529}
+    originals:
+    - {fileID: 2100000, guid: 41832995c5bc77649b5565641dac58bc, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 2019724509}
+    originals:
+    - {fileID: 2100000, guid: 41832995c5bc77649b5565641dac58bc, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 1905582350}
+    originals:
+    - {fileID: 2100000, guid: 41832995c5bc77649b5565641dac58bc, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 706490393}
+    originals:
+    - {fileID: 2100000, guid: 5432f172ce421eb4f88fce70c3228c51, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 451857574}
+    originals:
+    - {fileID: 2100000, guid: 41832995c5bc77649b5565641dac58bc, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 1801213051}
+    originals:
+    - {fileID: 2100000, guid: 41832995c5bc77649b5565641dac58bc, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 875425745}
+    originals:
+    - {fileID: 2100000, guid: 41832995c5bc77649b5565641dac58bc, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 1366046149}
+    originals:
+    - {fileID: 2100000, guid: 5432f172ce421eb4f88fce70c3228c51, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 1475659506}
+    originals:
+    - {fileID: 2100000, guid: 41832995c5bc77649b5565641dac58bc, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 1194525618}
+    originals:
+    - {fileID: 2100000, guid: 41832995c5bc77649b5565641dac58bc, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 1397152855}
+    originals:
+    - {fileID: 2100000, guid: 41832995c5bc77649b5565641dac58bc, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 1059530556}
+    originals:
+    - {fileID: 2100000, guid: 5432f172ce421eb4f88fce70c3228c51, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 58878638}
+    originals:
+    - {fileID: 2100000, guid: 41832995c5bc77649b5565641dac58bc, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 318827563}
+    originals:
+    - {fileID: 2100000, guid: 41832995c5bc77649b5565641dac58bc, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 1501999468}
+    originals:
+    - {fileID: 2100000, guid: 41832995c5bc77649b5565641dac58bc, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 1513931956}
+    originals:
+    - {fileID: 2100000, guid: 5432f172ce421eb4f88fce70c3228c51, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 1021677301}
+    originals:
+    - {fileID: 2100000, guid: 41832995c5bc77649b5565641dac58bc, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 341562091}
+    originals:
+    - {fileID: 2100000, guid: 41832995c5bc77649b5565641dac58bc, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 461571930}
+    originals:
+    - {fileID: 2100000, guid: 41832995c5bc77649b5565641dac58bc, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 317622833}
+    originals:
+    - {fileID: 2100000, guid: 5432f172ce421eb4f88fce70c3228c51, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 680530123}
+    originals:
+    - {fileID: 2100000, guid: 41832995c5bc77649b5565641dac58bc, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 1667072322}
+    originals:
+    - {fileID: 2100000, guid: 41832995c5bc77649b5565641dac58bc, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 1585112003}
+    originals:
+    - {fileID: 2100000, guid: 41832995c5bc77649b5565641dac58bc, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 1465754417}
+    originals:
+    - {fileID: 2100000, guid: 5432f172ce421eb4f88fce70c3228c51, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 85578747}
+    originals:
+    - {fileID: 2100000, guid: 41832995c5bc77649b5565641dac58bc, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 29854639}
+    originals:
+    - {fileID: 2100000, guid: 41832995c5bc77649b5565641dac58bc, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 1724775539}
+    originals:
+    - {fileID: 2100000, guid: 41832995c5bc77649b5565641dac58bc, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 1634102789}
+    originals:
+    - {fileID: 2100000, guid: 5432f172ce421eb4f88fce70c3228c51, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 1875731200}
+    originals:
+    - {fileID: 2100000, guid: 41832995c5bc77649b5565641dac58bc, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 798559893}
+    originals:
+    - {fileID: 2100000, guid: 41832995c5bc77649b5565641dac58bc, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 2101301870}
+    originals:
+    - {fileID: 2100000, guid: 41832995c5bc77649b5565641dac58bc, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 192980130}
+    originals:
+    - {fileID: 2100000, guid: 5432f172ce421eb4f88fce70c3228c51, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 456877541}
+    originals:
+    - {fileID: 2100000, guid: 41832995c5bc77649b5565641dac58bc, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 672092017}
+    originals:
+    - {fileID: 2100000, guid: 41832995c5bc77649b5565641dac58bc, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 993635844}
+    originals:
+    - {fileID: 2100000, guid: 41832995c5bc77649b5565641dac58bc, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 950342111}
+    originals:
+    - {fileID: 2100000, guid: 5432f172ce421eb4f88fce70c3228c51, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 662868151}
+    originals:
+    - {fileID: 2100000, guid: 41832995c5bc77649b5565641dac58bc, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 1811876683}
+    originals:
+    - {fileID: 2100000, guid: 41832995c5bc77649b5565641dac58bc, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 564418430}
+    originals:
+    - {fileID: 2100000, guid: 41832995c5bc77649b5565641dac58bc, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 924128679}
+    originals:
+    - {fileID: 2100000, guid: 5432f172ce421eb4f88fce70c3228c51, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 134776614}
+    originals:
+    - {fileID: 2100000, guid: 41832995c5bc77649b5565641dac58bc, type: 2}
+    originalReflection: 1
+  - renderer: {fileID: 845093338}
+    originals:
+    - {fileID: 2100000, guid: 41832995c5bc77649b5565641dac58bc, type: 2}
+    originalReflection: 1
 --- !u!1001 &394685592
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -109211,6 +109754,71 @@ MonoBehaviour:
     top: 8.5
     radius: 0.7
   includeHardBranches: 0
+--- !u!1 &414535190
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 414535191}
+  - component: {fileID: 414535192}
+  m_Layer: 0
+  m_Name: Baked Creek Reflection 2
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &414535191
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 414535190}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 65.33601, y: 2.44, z: 54.285717}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 394114499}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!215 &414535192
+ReflectionProbe:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 414535190}
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Type: 0
+  m_Mode: 2
+  m_RefreshMode: 0
+  m_TimeSlicingMode: 0
+  m_Resolution: 128
+  m_UpdateFrequency: 0
+  m_BoxSize: {x: 25, y: 12, z: 68}
+  m_BoxOffset: {x: 0, y: 0, z: 0}
+  m_NearClip: 0.3
+  m_FarClip: 1000
+  m_ShadowDistance: 100
+  m_ClearFlags: 1
+  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_CullingMask:
+    serializedVersion: 2
+    m_Bits: 1
+  m_IntensityMultiplier: 0.9
+  m_BlendDistance: 7
+  m_HDR: 1
+  m_BoxProjection: 1
+  m_RenderDynamicObjects: 0
+  m_UseOcclusionCulling: 1
+  m_Importance: 2
+  m_CustomBakedTexture: {fileID: 8900000, guid: 638ba8f8b6300184699f56e09cdf3664, type: 2}
 --- !u!1001 &414616903
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -111572,6 +112180,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3150052048970654528, guid: 03273004b445b954c8e83bb193763596, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3150052048970654528, guid: 03273004b445b954c8e83bb193763596, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 23ce82c4b4dbafd49bc15f09f3c657bb, type: 2}
     - target: {fileID: 5774769644171014195, guid: 03273004b445b954c8e83bb193763596, type: 3}
       propertyPath: m_Name
       value: Creek Mossy Rock
@@ -111584,6 +112200,11 @@ PrefabInstance:
 --- !u!4 &420533403 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3066116290791221368, guid: 03273004b445b954c8e83bb193763596, type: 3}
+  m_PrefabInstance: {fileID: 420533402}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &420533404 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 3150052048970654528, guid: 03273004b445b954c8e83bb193763596, type: 3}
   m_PrefabInstance: {fileID: 420533402}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &421317806
@@ -118918,6 +119539,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5906907680490950937, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5906907680490950937, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 23ce82c4b4dbafd49bc15f09f3c657bb, type: 2}
     - target: {fileID: 7638870325823608143, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
       propertyPath: m_Name
       value: Creek Mossy Rock
@@ -118930,6 +119559,11 @@ PrefabInstance:
 --- !u!4 &451857573 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2465615525907986117, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
+  m_PrefabInstance: {fileID: 451857572}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &451857574 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 5906907680490950937, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
   m_PrefabInstance: {fileID: 451857572}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &452814902
@@ -121545,6 +122179,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5906907680490950937, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5906907680490950937, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 23ce82c4b4dbafd49bc15f09f3c657bb, type: 2}
     - target: {fileID: 7638870325823608143, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
       propertyPath: m_Name
       value: Creek Mossy Rock
@@ -121557,6 +122199,11 @@ PrefabInstance:
 --- !u!4 &456877540 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2465615525907986117, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
+  m_PrefabInstance: {fileID: 456877539}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &456877541 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 5906907680490950937, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
   m_PrefabInstance: {fileID: 456877539}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &457536731
@@ -122204,6 +122851,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3150052048970654528, guid: 03273004b445b954c8e83bb193763596, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3150052048970654528, guid: 03273004b445b954c8e83bb193763596, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 23ce82c4b4dbafd49bc15f09f3c657bb, type: 2}
     - target: {fileID: 5774769644171014195, guid: 03273004b445b954c8e83bb193763596, type: 3}
       propertyPath: m_Name
       value: Creek Mossy Rock
@@ -122216,6 +122871,11 @@ PrefabInstance:
 --- !u!4 &461571929 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3066116290791221368, guid: 03273004b445b954c8e83bb193763596, type: 3}
+  m_PrefabInstance: {fileID: 461571928}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &461571930 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 3150052048970654528, guid: 03273004b445b954c8e83bb193763596, type: 3}
   m_PrefabInstance: {fileID: 461571928}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &461718084
@@ -140206,6 +140866,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5906907680490950937, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5906907680490950937, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 23ce82c4b4dbafd49bc15f09f3c657bb, type: 2}
     - target: {fileID: 7638870325823608143, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
       propertyPath: m_Name
       value: Creek Mossy Rock
@@ -140218,6 +140886,11 @@ PrefabInstance:
 --- !u!4 &533850154 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2465615525907986117, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
+  m_PrefabInstance: {fileID: 533850153}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &533850155 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 5906907680490950937, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
   m_PrefabInstance: {fileID: 533850153}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &534331610
@@ -147290,6 +147963,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3150052048970654528, guid: 03273004b445b954c8e83bb193763596, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3150052048970654528, guid: 03273004b445b954c8e83bb193763596, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 23ce82c4b4dbafd49bc15f09f3c657bb, type: 2}
     - target: {fileID: 5774769644171014195, guid: 03273004b445b954c8e83bb193763596, type: 3}
       propertyPath: m_Name
       value: Creek Mossy Rock
@@ -147302,6 +147983,11 @@ PrefabInstance:
 --- !u!4 &564418429 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3066116290791221368, guid: 03273004b445b954c8e83bb193763596, type: 3}
+  m_PrefabInstance: {fileID: 564418428}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &564418430 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 3150052048970654528, guid: 03273004b445b954c8e83bb193763596, type: 3}
   m_PrefabInstance: {fileID: 564418428}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &564674027
@@ -165696,6 +166382,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5906907680490950937, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5906907680490950937, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 23ce82c4b4dbafd49bc15f09f3c657bb, type: 2}
     - target: {fileID: 7638870325823608143, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
       propertyPath: m_Name
       value: Creek Mossy Rock
@@ -165708,6 +166402,11 @@ PrefabInstance:
 --- !u!4 &633479726 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2465615525907986117, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
+  m_PrefabInstance: {fileID: 633479725}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &633479727 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 5906907680490950937, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
   m_PrefabInstance: {fileID: 633479725}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &634354500
@@ -174289,6 +174988,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5906907680490950937, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5906907680490950937, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 23ce82c4b4dbafd49bc15f09f3c657bb, type: 2}
     - target: {fileID: 7638870325823608143, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
       propertyPath: m_Name
       value: Creek Mossy Rock
@@ -174301,6 +175008,11 @@ PrefabInstance:
 --- !u!4 &662868150 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2465615525907986117, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
+  m_PrefabInstance: {fileID: 662868149}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &662868151 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 5906907680490950937, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
   m_PrefabInstance: {fileID: 662868149}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &663463452
@@ -176252,6 +176964,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4187032064433359324, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4187032064433359324, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 23ce82c4b4dbafd49bc15f09f3c657bb, type: 2}
     - target: {fileID: 5785029673274844652, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
       propertyPath: m_Name
       value: Creek Mossy Rock
@@ -176264,6 +176984,11 @@ PrefabInstance:
 --- !u!4 &672092016 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 933705075812973358, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
+  m_PrefabInstance: {fileID: 672092015}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &672092017 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 4187032064433359324, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
   m_PrefabInstance: {fileID: 672092015}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &672134703
@@ -178961,6 +179686,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5906907680490950937, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5906907680490950937, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 23ce82c4b4dbafd49bc15f09f3c657bb, type: 2}
     - target: {fileID: 7638870325823608143, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
       propertyPath: m_Name
       value: Creek Mossy Rock
@@ -178973,6 +179706,11 @@ PrefabInstance:
 --- !u!4 &680530122 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2465615525907986117, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
+  m_PrefabInstance: {fileID: 680530121}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &680530123 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 5906907680490950937, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
   m_PrefabInstance: {fileID: 680530121}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &680937222
@@ -185032,6 +185770,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 828342395}
     m_Modifications:
+    - target: {fileID: 1669165520558553598, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1669165520558553598, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 56c4f2d70c02085498273a02535195c1, type: 2}
     - target: {fileID: 6723943390678405403, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
       propertyPath: m_Name
       value: Creek Fern
@@ -185100,6 +185846,11 @@ PrefabInstance:
 --- !u!4 &706490392 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8521667877435042770, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
+  m_PrefabInstance: {fileID: 706490391}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &706490393 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 1669165520558553598, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
   m_PrefabInstance: {fileID: 706490391}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &706688103
@@ -192087,6 +192838,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4187032064433359324, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4187032064433359324, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 23ce82c4b4dbafd49bc15f09f3c657bb, type: 2}
     - target: {fileID: 5785029673274844652, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
       propertyPath: m_Name
       value: Creek Mossy Rock
@@ -192099,6 +192858,11 @@ PrefabInstance:
 --- !u!4 &733377593 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 933705075812973358, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
+  m_PrefabInstance: {fileID: 733377592}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &733377594 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 4187032064433359324, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
   m_PrefabInstance: {fileID: 733377592}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &733845386
@@ -199559,6 +200323,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3150052048970654528, guid: 03273004b445b954c8e83bb193763596, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3150052048970654528, guid: 03273004b445b954c8e83bb193763596, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 23ce82c4b4dbafd49bc15f09f3c657bb, type: 2}
     - target: {fileID: 5774769644171014195, guid: 03273004b445b954c8e83bb193763596, type: 3}
       propertyPath: m_Name
       value: Creek Mossy Rock
@@ -199571,6 +200343,11 @@ PrefabInstance:
 --- !u!4 &767333205 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3066116290791221368, guid: 03273004b445b954c8e83bb193763596, type: 3}
+  m_PrefabInstance: {fileID: 767333204}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &767333206 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 3150052048970654528, guid: 03273004b445b954c8e83bb193763596, type: 3}
   m_PrefabInstance: {fileID: 767333204}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &768116500
@@ -211038,6 +211815,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4187032064433359324, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4187032064433359324, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 23ce82c4b4dbafd49bc15f09f3c657bb, type: 2}
     - target: {fileID: 5785029673274844652, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
       propertyPath: m_Name
       value: Creek Mossy Rock
@@ -211050,6 +211835,11 @@ PrefabInstance:
 --- !u!4 &798559892 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 933705075812973358, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
+  m_PrefabInstance: {fileID: 798559891}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &798559893 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 4187032064433359324, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
   m_PrefabInstance: {fileID: 798559891}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &799433402
@@ -217400,6 +218190,7 @@ Transform:
   - {fileID: 645641948}
   - {fileID: 922452110}
   - {fileID: 779368144}
+  - {fileID: 394114499}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &828679922
@@ -226791,6 +227582,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4187032064433359324, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4187032064433359324, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 23ce82c4b4dbafd49bc15f09f3c657bb, type: 2}
     - target: {fileID: 5785029673274844652, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
       propertyPath: m_Name
       value: Creek Mossy Rock
@@ -226803,6 +227602,11 @@ PrefabInstance:
 --- !u!4 &845093337 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 933705075812973358, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
+  m_PrefabInstance: {fileID: 845093336}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &845093338 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 4187032064433359324, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
   m_PrefabInstance: {fileID: 845093336}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &845205831
@@ -227959,6 +228763,71 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 3066116290791221368, guid: 03273004b445b954c8e83bb193763596, type: 3}
   m_PrefabInstance: {fileID: 850106042}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &851696529
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 851696530}
+  - component: {fileID: 851696531}
+  m_Layer: 0
+  m_Name: Baked Creek Reflection 1
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &851696530
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 851696529}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 57.553024, y: 2.44, z: -1.2142855}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 394114499}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!215 &851696531
+ReflectionProbe:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 851696529}
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Type: 0
+  m_Mode: 2
+  m_RefreshMode: 0
+  m_TimeSlicingMode: 0
+  m_Resolution: 128
+  m_UpdateFrequency: 0
+  m_BoxSize: {x: 25, y: 12, z: 68}
+  m_BoxOffset: {x: 0, y: 0, z: 0}
+  m_NearClip: 0.3
+  m_FarClip: 1000
+  m_ShadowDistance: 100
+  m_ClearFlags: 1
+  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_CullingMask:
+    serializedVersion: 2
+    m_Bits: 1
+  m_IntensityMultiplier: 0.9
+  m_BlendDistance: 7
+  m_HDR: 1
+  m_BoxProjection: 1
+  m_RenderDynamicObjects: 0
+  m_UseOcclusionCulling: 1
+  m_Importance: 2
+  m_CustomBakedTexture: {fileID: 8900000, guid: 372fa0b71d1ab584490fe1ce5e008384, type: 2}
 --- !u!1001 &853813311
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -228105,6 +228974,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5906907680490950937, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5906907680490950937, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 23ce82c4b4dbafd49bc15f09f3c657bb, type: 2}
     - target: {fileID: 7638870325823608143, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
       propertyPath: m_Name
       value: Creek Mossy Rock
@@ -228117,6 +228994,11 @@ PrefabInstance:
 --- !u!4 &854367326 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2465615525907986117, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
+  m_PrefabInstance: {fileID: 854367325}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &854367327 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 5906907680490950937, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
   m_PrefabInstance: {fileID: 854367325}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &855758787
@@ -234400,6 +235282,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4187032064433359324, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4187032064433359324, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 23ce82c4b4dbafd49bc15f09f3c657bb, type: 2}
     - target: {fileID: 5785029673274844652, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
       propertyPath: m_Name
       value: Creek Mossy Rock
@@ -234412,6 +235302,11 @@ PrefabInstance:
 --- !u!4 &873434693 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 933705075812973358, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
+  m_PrefabInstance: {fileID: 873434692}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &873434694 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 4187032064433359324, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
   m_PrefabInstance: {fileID: 873434692}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &873576505
@@ -234662,6 +235557,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3150052048970654528, guid: 03273004b445b954c8e83bb193763596, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3150052048970654528, guid: 03273004b445b954c8e83bb193763596, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 23ce82c4b4dbafd49bc15f09f3c657bb, type: 2}
     - target: {fileID: 5774769644171014195, guid: 03273004b445b954c8e83bb193763596, type: 3}
       propertyPath: m_Name
       value: Creek Mossy Rock
@@ -234674,6 +235577,11 @@ PrefabInstance:
 --- !u!4 &875425744 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3066116290791221368, guid: 03273004b445b954c8e83bb193763596, type: 3}
+  m_PrefabInstance: {fileID: 875425743}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &875425745 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 3150052048970654528, guid: 03273004b445b954c8e83bb193763596, type: 3}
   m_PrefabInstance: {fileID: 875425743}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &877585069
@@ -236685,6 +237593,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3150052048970654528, guid: 03273004b445b954c8e83bb193763596, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3150052048970654528, guid: 03273004b445b954c8e83bb193763596, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 23ce82c4b4dbafd49bc15f09f3c657bb, type: 2}
     - target: {fileID: 5774769644171014195, guid: 03273004b445b954c8e83bb193763596, type: 3}
       propertyPath: m_Name
       value: Creek Mossy Rock
@@ -236697,6 +237613,11 @@ PrefabInstance:
 --- !u!4 &882615576 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3066116290791221368, guid: 03273004b445b954c8e83bb193763596, type: 3}
+  m_PrefabInstance: {fileID: 882615575}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &882615577 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 3150052048970654528, guid: 03273004b445b954c8e83bb193763596, type: 3}
   m_PrefabInstance: {fileID: 882615575}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &882682813
@@ -248180,6 +249101,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 828342395}
     m_Modifications:
+    - target: {fileID: 1669165520558553598, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1669165520558553598, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 56c4f2d70c02085498273a02535195c1, type: 2}
     - target: {fileID: 6723943390678405403, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
       propertyPath: m_Name
       value: Creek Fern
@@ -248248,6 +249177,11 @@ PrefabInstance:
 --- !u!4 &924128678 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8521667877435042770, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
+  m_PrefabInstance: {fileID: 924128677}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &924128679 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 1669165520558553598, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
   m_PrefabInstance: {fileID: 924128677}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &924282769
@@ -251953,6 +252887,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4187032064433359324, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4187032064433359324, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 23ce82c4b4dbafd49bc15f09f3c657bb, type: 2}
     - target: {fileID: 5785029673274844652, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
       propertyPath: m_Name
       value: Creek Mossy Rock
@@ -251965,6 +252907,11 @@ PrefabInstance:
 --- !u!4 &942667291 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 933705075812973358, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
+  m_PrefabInstance: {fileID: 942667290}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &942667292 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 4187032064433359324, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
   m_PrefabInstance: {fileID: 942667290}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &943612849
@@ -253456,6 +254403,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 828342395}
     m_Modifications:
+    - target: {fileID: 1669165520558553598, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1669165520558553598, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 56c4f2d70c02085498273a02535195c1, type: 2}
     - target: {fileID: 6723943390678405403, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
       propertyPath: m_Name
       value: Creek Fern
@@ -253524,6 +254479,11 @@ PrefabInstance:
 --- !u!4 &950342110 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8521667877435042770, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
+  m_PrefabInstance: {fileID: 950342109}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &950342111 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 1669165520558553598, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
   m_PrefabInstance: {fileID: 950342109}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &950634718
@@ -265954,6 +266914,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3150052048970654528, guid: 03273004b445b954c8e83bb193763596, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3150052048970654528, guid: 03273004b445b954c8e83bb193763596, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 23ce82c4b4dbafd49bc15f09f3c657bb, type: 2}
     - target: {fileID: 5774769644171014195, guid: 03273004b445b954c8e83bb193763596, type: 3}
       propertyPath: m_Name
       value: Creek Mossy Rock
@@ -265966,6 +266934,11 @@ PrefabInstance:
 --- !u!4 &993635843 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3066116290791221368, guid: 03273004b445b954c8e83bb193763596, type: 3}
+  m_PrefabInstance: {fileID: 993635842}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &993635844 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 3150052048970654528, guid: 03273004b445b954c8e83bb193763596, type: 3}
   m_PrefabInstance: {fileID: 993635842}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &993793842
@@ -275373,6 +276346,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5906907680490950937, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5906907680490950937, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 23ce82c4b4dbafd49bc15f09f3c657bb, type: 2}
     - target: {fileID: 7638870325823608143, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
       propertyPath: m_Name
       value: Creek Mossy Rock
@@ -275385,6 +276366,11 @@ PrefabInstance:
 --- !u!4 &1021677300 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2465615525907986117, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
+  m_PrefabInstance: {fileID: 1021677299}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &1021677301 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 5906907680490950937, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
   m_PrefabInstance: {fileID: 1021677299}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1022921549
@@ -277414,6 +278400,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4187032064433359324, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4187032064433359324, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 23ce82c4b4dbafd49bc15f09f3c657bb, type: 2}
     - target: {fileID: 5785029673274844652, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
       propertyPath: m_Name
       value: Creek Mossy Rock
@@ -277426,6 +278420,11 @@ PrefabInstance:
 --- !u!4 &1028852414 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 933705075812973358, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
+  m_PrefabInstance: {fileID: 1028852413}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &1028852415 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 4187032064433359324, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
   m_PrefabInstance: {fileID: 1028852413}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1028954899
@@ -285444,6 +286443,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 828342395}
     m_Modifications:
+    - target: {fileID: 1669165520558553598, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1669165520558553598, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 56c4f2d70c02085498273a02535195c1, type: 2}
     - target: {fileID: 6723943390678405403, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
       propertyPath: m_Name
       value: Creek Fern
@@ -285512,6 +286519,11 @@ PrefabInstance:
 --- !u!4 &1059530555 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8521667877435042770, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
+  m_PrefabInstance: {fileID: 1059530554}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &1059530556 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 1669165520558553598, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
   m_PrefabInstance: {fileID: 1059530554}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1059844271
@@ -301957,6 +302969,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5906907680490950937, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5906907680490950937, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 23ce82c4b4dbafd49bc15f09f3c657bb, type: 2}
     - target: {fileID: 7638870325823608143, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
       propertyPath: m_Name
       value: Creek Mossy Rock
@@ -301969,6 +302989,11 @@ PrefabInstance:
 --- !u!4 &1120002708 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2465615525907986117, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
+  m_PrefabInstance: {fileID: 1120002707}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &1120002709 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 5906907680490950937, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
   m_PrefabInstance: {fileID: 1120002707}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1120226514
@@ -309595,6 +310620,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 828342395}
     m_Modifications:
+    - target: {fileID: 1669165520558553598, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1669165520558553598, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 56c4f2d70c02085498273a02535195c1, type: 2}
     - target: {fileID: 6723943390678405403, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
       propertyPath: m_Name
       value: Creek Fern
@@ -309663,6 +310696,11 @@ PrefabInstance:
 --- !u!4 &1147545043 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8521667877435042770, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
+  m_PrefabInstance: {fileID: 1147545042}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &1147545044 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 1669165520558553598, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
   m_PrefabInstance: {fileID: 1147545042}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1148743681
@@ -322261,6 +323299,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4187032064433359324, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4187032064433359324, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 23ce82c4b4dbafd49bc15f09f3c657bb, type: 2}
     - target: {fileID: 5785029673274844652, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
       propertyPath: m_Name
       value: Creek Mossy Rock
@@ -322273,6 +323319,11 @@ PrefabInstance:
 --- !u!4 &1194525617 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 933705075812973358, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
+  m_PrefabInstance: {fileID: 1194525616}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &1194525618 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 4187032064433359324, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
   m_PrefabInstance: {fileID: 1194525616}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1196964822
@@ -353520,6 +354571,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 828342395}
     m_Modifications:
+    - target: {fileID: 1669165520558553598, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1669165520558553598, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 56c4f2d70c02085498273a02535195c1, type: 2}
     - target: {fileID: 6723943390678405403, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
       propertyPath: m_Name
       value: Creek Fern
@@ -353584,6 +354643,11 @@ PrefabInstance:
 --- !u!4 &1291879824 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8521667877435042770, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
+  m_PrefabInstance: {fileID: 1291879823}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &1291879825 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 1669165520558553598, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
   m_PrefabInstance: {fileID: 1291879823}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1292193087
@@ -365480,6 +366544,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4187032064433359324, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4187032064433359324, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 23ce82c4b4dbafd49bc15f09f3c657bb, type: 2}
     - target: {fileID: 5785029673274844652, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
       propertyPath: m_Name
       value: Creek Mossy Rock
@@ -365492,6 +366564,11 @@ PrefabInstance:
 --- !u!4 &1340111253 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 933705075812973358, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
+  m_PrefabInstance: {fileID: 1340111252}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &1340111254 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 4187032064433359324, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
   m_PrefabInstance: {fileID: 1340111252}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1340614882
@@ -368596,6 +369673,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 828342395}
     m_Modifications:
+    - target: {fileID: 1669165520558553598, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1669165520558553598, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 56c4f2d70c02085498273a02535195c1, type: 2}
     - target: {fileID: 6723943390678405403, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
       propertyPath: m_Name
       value: Creek Fern
@@ -368664,6 +369749,11 @@ PrefabInstance:
 --- !u!4 &1350552563 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8521667877435042770, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
+  m_PrefabInstance: {fileID: 1350552562}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &1350552564 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 1669165520558553598, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
   m_PrefabInstance: {fileID: 1350552562}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1350644714
@@ -378149,6 +379239,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 828342395}
     m_Modifications:
+    - target: {fileID: 1669165520558553598, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1669165520558553598, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 56c4f2d70c02085498273a02535195c1, type: 2}
     - target: {fileID: 6723943390678405403, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
       propertyPath: m_Name
       value: Creek Fern
@@ -378217,6 +379315,11 @@ PrefabInstance:
 --- !u!4 &1366046148 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8521667877435042770, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
+  m_PrefabInstance: {fileID: 1366046147}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &1366046149 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 1669165520558553598, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
   m_PrefabInstance: {fileID: 1366046147}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1366487940
@@ -389523,6 +390626,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3150052048970654528, guid: 03273004b445b954c8e83bb193763596, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3150052048970654528, guid: 03273004b445b954c8e83bb193763596, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 23ce82c4b4dbafd49bc15f09f3c657bb, type: 2}
     - target: {fileID: 5774769644171014195, guid: 03273004b445b954c8e83bb193763596, type: 3}
       propertyPath: m_Name
       value: Creek Mossy Rock
@@ -389535,6 +390646,11 @@ PrefabInstance:
 --- !u!4 &1397152854 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3066116290791221368, guid: 03273004b445b954c8e83bb193763596, type: 3}
+  m_PrefabInstance: {fileID: 1397152853}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &1397152855 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 3150052048970654528, guid: 03273004b445b954c8e83bb193763596, type: 3}
   m_PrefabInstance: {fileID: 1397152853}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1397241386
@@ -408408,6 +409524,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 828342395}
     m_Modifications:
+    - target: {fileID: 1669165520558553598, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1669165520558553598, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 56c4f2d70c02085498273a02535195c1, type: 2}
     - target: {fileID: 6723943390678405403, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
       propertyPath: m_Name
       value: Creek Fern
@@ -408472,6 +409596,11 @@ PrefabInstance:
 --- !u!4 &1465754416 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8521667877435042770, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
+  m_PrefabInstance: {fileID: 1465754415}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &1465754417 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 1669165520558553598, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
   m_PrefabInstance: {fileID: 1465754415}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1465805590
@@ -412299,6 +413428,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5906907680490950937, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5906907680490950937, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 23ce82c4b4dbafd49bc15f09f3c657bb, type: 2}
     - target: {fileID: 7638870325823608143, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
       propertyPath: m_Name
       value: Creek Mossy Rock
@@ -412311,6 +413448,11 @@ PrefabInstance:
 --- !u!4 &1475659505 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2465615525907986117, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
+  m_PrefabInstance: {fileID: 1475659504}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &1475659506 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 5906907680490950937, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
   m_PrefabInstance: {fileID: 1475659504}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1477079848
@@ -414758,6 +415900,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3150052048970654528, guid: 03273004b445b954c8e83bb193763596, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3150052048970654528, guid: 03273004b445b954c8e83bb193763596, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 23ce82c4b4dbafd49bc15f09f3c657bb, type: 2}
     - target: {fileID: 5774769644171014195, guid: 03273004b445b954c8e83bb193763596, type: 3}
       propertyPath: m_Name
       value: Creek Mossy Rock
@@ -414770,6 +415920,11 @@ PrefabInstance:
 --- !u!4 &1486178991 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3066116290791221368, guid: 03273004b445b954c8e83bb193763596, type: 3}
+  m_PrefabInstance: {fileID: 1486178990}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &1486178992 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 3150052048970654528, guid: 03273004b445b954c8e83bb193763596, type: 3}
   m_PrefabInstance: {fileID: 1486178990}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1486396811
@@ -419115,6 +420270,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3150052048970654528, guid: 03273004b445b954c8e83bb193763596, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3150052048970654528, guid: 03273004b445b954c8e83bb193763596, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 23ce82c4b4dbafd49bc15f09f3c657bb, type: 2}
     - target: {fileID: 5774769644171014195, guid: 03273004b445b954c8e83bb193763596, type: 3}
       propertyPath: m_Name
       value: Creek Mossy Rock
@@ -419127,6 +420290,11 @@ PrefabInstance:
 --- !u!4 &1501999467 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3066116290791221368, guid: 03273004b445b954c8e83bb193763596, type: 3}
+  m_PrefabInstance: {fileID: 1501999466}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &1501999468 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 3150052048970654528, guid: 03273004b445b954c8e83bb193763596, type: 3}
   m_PrefabInstance: {fileID: 1501999466}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1503475439
@@ -421768,6 +422936,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 828342395}
     m_Modifications:
+    - target: {fileID: 1669165520558553598, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1669165520558553598, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 56c4f2d70c02085498273a02535195c1, type: 2}
     - target: {fileID: 6723943390678405403, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
       propertyPath: m_Name
       value: Creek Fern
@@ -421832,6 +423008,11 @@ PrefabInstance:
 --- !u!4 &1513931955 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8521667877435042770, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
+  m_PrefabInstance: {fileID: 1513931954}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &1513931956 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 1669165520558553598, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
   m_PrefabInstance: {fileID: 1513931954}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1514086238
@@ -424234,6 +425415,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 828342395}
     m_Modifications:
+    - target: {fileID: 1669165520558553598, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1669165520558553598, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 56c4f2d70c02085498273a02535195c1, type: 2}
     - target: {fileID: 6723943390678405403, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
       propertyPath: m_Name
       value: Creek Fern
@@ -424302,6 +425491,11 @@ PrefabInstance:
 --- !u!4 &1523077850 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8521667877435042770, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
+  m_PrefabInstance: {fileID: 1523077849}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &1523077851 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 1669165520558553598, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
   m_PrefabInstance: {fileID: 1523077849}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1523122063
@@ -426586,6 +427780,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 828342395}
     m_Modifications:
+    - target: {fileID: 1669165520558553598, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1669165520558553598, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 56c4f2d70c02085498273a02535195c1, type: 2}
     - target: {fileID: 6723943390678405403, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
       propertyPath: m_Name
       value: Creek Fern
@@ -426654,6 +427856,11 @@ PrefabInstance:
 --- !u!4 &1536713004 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8521667877435042770, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
+  m_PrefabInstance: {fileID: 1536713003}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &1536713005 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 1669165520558553598, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
   m_PrefabInstance: {fileID: 1536713003}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1538727466
@@ -429387,6 +430594,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5906907680490950937, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5906907680490950937, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 23ce82c4b4dbafd49bc15f09f3c657bb, type: 2}
     - target: {fileID: 7638870325823608143, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
       propertyPath: m_Name
       value: Creek Mossy Rock
@@ -429399,6 +430614,11 @@ PrefabInstance:
 --- !u!4 &1545665046 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2465615525907986117, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
+  m_PrefabInstance: {fileID: 1545665045}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &1545665047 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 5906907680490950937, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
   m_PrefabInstance: {fileID: 1545665045}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1545993666
@@ -439551,6 +440771,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5906907680490950937, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5906907680490950937, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 23ce82c4b4dbafd49bc15f09f3c657bb, type: 2}
     - target: {fileID: 7638870325823608143, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
       propertyPath: m_Name
       value: Creek Mossy Rock
@@ -439563,6 +440791,11 @@ PrefabInstance:
 --- !u!4 &1584039031 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2465615525907986117, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
+  m_PrefabInstance: {fileID: 1584039030}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &1584039032 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 5906907680490950937, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
   m_PrefabInstance: {fileID: 1584039030}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1585112001
@@ -439625,6 +440858,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3150052048970654528, guid: 03273004b445b954c8e83bb193763596, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3150052048970654528, guid: 03273004b445b954c8e83bb193763596, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 23ce82c4b4dbafd49bc15f09f3c657bb, type: 2}
     - target: {fileID: 5774769644171014195, guid: 03273004b445b954c8e83bb193763596, type: 3}
       propertyPath: m_Name
       value: Creek Mossy Rock
@@ -439637,6 +440878,11 @@ PrefabInstance:
 --- !u!4 &1585112002 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3066116290791221368, guid: 03273004b445b954c8e83bb193763596, type: 3}
+  m_PrefabInstance: {fileID: 1585112001}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &1585112003 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 3150052048970654528, guid: 03273004b445b954c8e83bb193763596, type: 3}
   m_PrefabInstance: {fileID: 1585112001}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1585526850
@@ -445965,6 +447211,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 828342395}
     m_Modifications:
+    - target: {fileID: 1669165520558553598, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1669165520558553598, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 56c4f2d70c02085498273a02535195c1, type: 2}
     - target: {fileID: 6723943390678405403, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
       propertyPath: m_Name
       value: Creek Fern
@@ -446033,6 +447287,11 @@ PrefabInstance:
 --- !u!4 &1607656065 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8521667877435042770, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
+  m_PrefabInstance: {fileID: 1607656064}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &1607656066 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 1669165520558553598, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
   m_PrefabInstance: {fileID: 1607656064}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1608095139
@@ -451715,6 +452974,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 828342395}
     m_Modifications:
+    - target: {fileID: 1669165520558553598, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1669165520558553598, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 56c4f2d70c02085498273a02535195c1, type: 2}
     - target: {fileID: 6723943390678405403, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
       propertyPath: m_Name
       value: Creek Fern
@@ -451783,6 +453050,11 @@ PrefabInstance:
 --- !u!4 &1634102788 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8521667877435042770, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
+  m_PrefabInstance: {fileID: 1634102787}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &1634102789 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 1669165520558553598, guid: 7b9630af48f30ac4088e4d4fe53d707d, type: 3}
   m_PrefabInstance: {fileID: 1634102787}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1634527133
@@ -455000,6 +456272,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5906907680490950937, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5906907680490950937, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 23ce82c4b4dbafd49bc15f09f3c657bb, type: 2}
     - target: {fileID: 7638870325823608143, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
       propertyPath: m_Name
       value: Creek Mossy Rock
@@ -455012,6 +456292,11 @@ PrefabInstance:
 --- !u!4 &1649926893 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2465615525907986117, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
+  m_PrefabInstance: {fileID: 1649926892}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &1649926894 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 5906907680490950937, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
   m_PrefabInstance: {fileID: 1649926892}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1650666124
@@ -458859,6 +460144,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4187032064433359324, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4187032064433359324, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 23ce82c4b4dbafd49bc15f09f3c657bb, type: 2}
     - target: {fileID: 5785029673274844652, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
       propertyPath: m_Name
       value: Creek Mossy Rock
@@ -458871,6 +460164,11 @@ PrefabInstance:
 --- !u!4 &1667072321 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 933705075812973358, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
+  m_PrefabInstance: {fileID: 1667072320}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &1667072322 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 4187032064433359324, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
   m_PrefabInstance: {fileID: 1667072320}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1667765852
@@ -469553,6 +470851,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4187032064433359324, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4187032064433359324, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 23ce82c4b4dbafd49bc15f09f3c657bb, type: 2}
     - target: {fileID: 5785029673274844652, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
       propertyPath: m_Name
       value: Creek Mossy Rock
@@ -469565,6 +470871,11 @@ PrefabInstance:
 --- !u!4 &1710273868 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 933705075812973358, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
+  m_PrefabInstance: {fileID: 1710273867}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &1710273869 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 4187032064433359324, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
   m_PrefabInstance: {fileID: 1710273867}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1710634039
@@ -475244,6 +476555,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3150052048970654528, guid: 03273004b445b954c8e83bb193763596, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3150052048970654528, guid: 03273004b445b954c8e83bb193763596, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 23ce82c4b4dbafd49bc15f09f3c657bb, type: 2}
     - target: {fileID: 5774769644171014195, guid: 03273004b445b954c8e83bb193763596, type: 3}
       propertyPath: m_Name
       value: Creek Mossy Rock
@@ -475256,6 +476575,11 @@ PrefabInstance:
 --- !u!4 &1724775538 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3066116290791221368, guid: 03273004b445b954c8e83bb193763596, type: 3}
+  m_PrefabInstance: {fileID: 1724775537}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &1724775539 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 3150052048970654528, guid: 03273004b445b954c8e83bb193763596, type: 3}
   m_PrefabInstance: {fileID: 1724775537}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1724936272
@@ -493534,6 +494858,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4187032064433359324, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4187032064433359324, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 23ce82c4b4dbafd49bc15f09f3c657bb, type: 2}
     - target: {fileID: 5785029673274844652, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
       propertyPath: m_Name
       value: Creek Mossy Rock
@@ -493546,6 +494878,11 @@ PrefabInstance:
 --- !u!4 &1801213050 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 933705075812973358, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
+  m_PrefabInstance: {fileID: 1801213049}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &1801213051 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 4187032064433359324, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
   m_PrefabInstance: {fileID: 1801213049}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1801289490
@@ -496904,6 +498241,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4187032064433359324, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4187032064433359324, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 23ce82c4b4dbafd49bc15f09f3c657bb, type: 2}
     - target: {fileID: 5785029673274844652, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
       propertyPath: m_Name
       value: Creek Mossy Rock
@@ -496916,6 +498261,11 @@ PrefabInstance:
 --- !u!4 &1811876682 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 933705075812973358, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
+  m_PrefabInstance: {fileID: 1811876681}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &1811876683 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 4187032064433359324, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
   m_PrefabInstance: {fileID: 1811876681}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1812561571
@@ -515107,6 +516457,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5906907680490950937, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5906907680490950937, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 23ce82c4b4dbafd49bc15f09f3c657bb, type: 2}
     - target: {fileID: 7638870325823608143, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
       propertyPath: m_Name
       value: Creek Mossy Rock
@@ -515119,6 +516477,11 @@ PrefabInstance:
 --- !u!4 &1875731199 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2465615525907986117, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
+  m_PrefabInstance: {fileID: 1875731198}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &1875731200 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 5906907680490950937, guid: 8aad5125e4ebcff46b4596527db49aa1, type: 3}
   m_PrefabInstance: {fileID: 1875731198}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &1876047497
@@ -526609,6 +527972,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3150052048970654528, guid: 03273004b445b954c8e83bb193763596, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3150052048970654528, guid: 03273004b445b954c8e83bb193763596, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 23ce82c4b4dbafd49bc15f09f3c657bb, type: 2}
     - target: {fileID: 5774769644171014195, guid: 03273004b445b954c8e83bb193763596, type: 3}
       propertyPath: m_Name
       value: Creek Mossy Rock
@@ -526621,6 +527992,11 @@ PrefabInstance:
 --- !u!4 &1899229655 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3066116290791221368, guid: 03273004b445b954c8e83bb193763596, type: 3}
+  m_PrefabInstance: {fileID: 1899229654}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &1899229656 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 3150052048970654528, guid: 03273004b445b954c8e83bb193763596, type: 3}
   m_PrefabInstance: {fileID: 1899229654}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1899234527
@@ -529574,6 +530950,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3150052048970654528, guid: 03273004b445b954c8e83bb193763596, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3150052048970654528, guid: 03273004b445b954c8e83bb193763596, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 23ce82c4b4dbafd49bc15f09f3c657bb, type: 2}
     - target: {fileID: 5774769644171014195, guid: 03273004b445b954c8e83bb193763596, type: 3}
       propertyPath: m_Name
       value: Creek Mossy Rock
@@ -529586,6 +530970,11 @@ PrefabInstance:
 --- !u!4 &1905582349 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3066116290791221368, guid: 03273004b445b954c8e83bb193763596, type: 3}
+  m_PrefabInstance: {fileID: 1905582348}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &1905582350 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 3150052048970654528, guid: 03273004b445b954c8e83bb193763596, type: 3}
   m_PrefabInstance: {fileID: 1905582348}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1905750500
@@ -537815,6 +539204,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3150052048970654528, guid: 03273004b445b954c8e83bb193763596, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3150052048970654528, guid: 03273004b445b954c8e83bb193763596, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 23ce82c4b4dbafd49bc15f09f3c657bb, type: 2}
     - target: {fileID: 5774769644171014195, guid: 03273004b445b954c8e83bb193763596, type: 3}
       propertyPath: m_Name
       value: Creek Mossy Rock
@@ -537827,6 +539224,11 @@ PrefabInstance:
 --- !u!4 &1935096083 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3066116290791221368, guid: 03273004b445b954c8e83bb193763596, type: 3}
+  m_PrefabInstance: {fileID: 1935096082}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &1935096084 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 3150052048970654528, guid: 03273004b445b954c8e83bb193763596, type: 3}
   m_PrefabInstance: {fileID: 1935096082}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1936306051
@@ -566639,6 +568041,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4187032064433359324, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4187032064433359324, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 23ce82c4b4dbafd49bc15f09f3c657bb, type: 2}
     - target: {fileID: 5785029673274844652, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
       propertyPath: m_Name
       value: Creek Mossy Rock
@@ -566651,6 +568061,11 @@ PrefabInstance:
 --- !u!4 &2019724508 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 933705075812973358, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
+  m_PrefabInstance: {fileID: 2019724507}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &2019724509 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 4187032064433359324, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
   m_PrefabInstance: {fileID: 2019724507}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &2020759029
@@ -592389,6 +593804,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3150052048970654528, guid: 03273004b445b954c8e83bb193763596, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3150052048970654528, guid: 03273004b445b954c8e83bb193763596, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 23ce82c4b4dbafd49bc15f09f3c657bb, type: 2}
     - target: {fileID: 5774769644171014195, guid: 03273004b445b954c8e83bb193763596, type: 3}
       propertyPath: m_Name
       value: Creek Mossy Rock
@@ -592401,6 +593824,11 @@ PrefabInstance:
 --- !u!4 &2101301869 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3066116290791221368, guid: 03273004b445b954c8e83bb193763596, type: 3}
+  m_PrefabInstance: {fileID: 2101301868}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &2101301870 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 3150052048970654528, guid: 03273004b445b954c8e83bb193763596, type: 3}
   m_PrefabInstance: {fileID: 2101301868}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &2101931566
@@ -599362,6 +600790,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4187032064433359324, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
+      propertyPath: m_ReflectionProbeUsage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4187032064433359324, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 23ce82c4b4dbafd49bc15f09f3c657bb, type: 2}
     - target: {fileID: 5785029673274844652, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
       propertyPath: m_Name
       value: Creek Mossy Rock
@@ -599374,6 +600810,11 @@ PrefabInstance:
 --- !u!4 &2129235896 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 933705075812973358, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
+  m_PrefabInstance: {fileID: 2129235895}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &2129235897 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 4187032064433359324, guid: 450c2322b726a2f4fbffa98e1a507bd2, type: 3}
   m_PrefabInstance: {fileID: 2129235895}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &2129665281

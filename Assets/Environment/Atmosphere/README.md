@@ -1,6 +1,6 @@
 # 雨后初晴环境 — 阶段二
 
-已实施天空、光照、轻微云动、固定曝光，以及阶段二的空气透视、溪边薄雾和少量柔和光束。阶段三远景由 Assets/Environment/Backdrop 独立管理，等待手动查收；湿润材质和声音等待后续逐阶段批准。
+已实施天空、光照、轻微云动、固定曝光，以及阶段二的空气透视、溪边薄雾和少量柔和光束。阶段三远景由 Assets/Environment/Backdrop 独立管理；阶段四溪岸湿润材质已实施，等待手动查收，说明见 Assets/Environment/Creek/Prepared/Wetness/README.md。声音等待下一阶段批准。
 
 ## 使用与查收
 
@@ -45,7 +45,7 @@
 ## 下一阶段
 
 阶段二已实施，查收方法、参数与回退说明见 `Tools/AtmosphereStageTwo.md`。阶段三已经用户授权实施，资源与查收说明见 `Assets/Environment/Backdrop/README.md`。
-下一阶段为湿润材质升级，可复用已有素材，无需新下载；等待用户查收同意后再进行。
+阶段四湿润材质已实施。下一阶段为风动、滴水和环境声，下载清单见 Tools/AfterRainStageFiveDownloads.md；等待用户查收同意且素材准备完成后再进行。
 
 以下补光与树干修正段落保留阶段一期间的历史查收记录；阶段二保留这些已经完成的材质与补光配置。
 

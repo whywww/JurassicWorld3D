@@ -1,6 +1,6 @@
 # 雨林远景 — 阶段三
 
-状态：已实施，等待用户手动 Play 查收。阶段四尚未开始。
+状态：阶段三已实施。阶段四溪岸湿润材质现已实施并等待手动查收，说明见 Assets/Environment/Creek/Prepared/Wetness/README.md。
 
 远景在本目录独立管理，不归入 Atmosphere 的天空、雾和光束资源。
 

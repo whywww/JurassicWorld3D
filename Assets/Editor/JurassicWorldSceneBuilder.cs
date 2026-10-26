@@ -83,6 +83,7 @@ namespace JurassicWorld.Editor
             PteradactalSceneIntegration.AddToCurrentScene();
             RainforestAtmosphereStageOne.ApplyConfigured();
             RainforestBackdropStageThree.ApplyConfigured();
+            CreekWetnessStageFour.ApplyConfigured();
         }
 
         // ---------------------------------------------------------------- 通道 debug 标注（Phase 1）

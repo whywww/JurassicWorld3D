@@ -95,6 +95,8 @@ namespace JurassicWorld.Editor
                 RainforestAtmosphereStageTwo.Validate();
             if (Object.FindObjectOfType<RainforestBackdrop>() != null)
                 RainforestBackdropStageThree.Validate();
+            if (Object.FindObjectOfType<CreekWetSurfaceState>() != null)
+                CreekWetnessStageFour.Validate();
 
             if (Object.FindObjectOfType<Camera>() == null)
                 throw new InvalidDataException("场景缺少相机（Main Camera）。");
