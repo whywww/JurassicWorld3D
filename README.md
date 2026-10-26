@@ -87,7 +87,7 @@ git lfs pull
 
 ### 4. 本地 JSON 配置
 
-所有 Emotiv 设置统一从项目根目录的 `emotiv.local.json` 读取。首次配置时，将 `emotiv.example.json` 复制为 `emotiv.local.json`，按下面字段填写；已有本地配置时直接编辑即可。
+Emotiv 连接信息从项目根目录的 `emotiv.local.json` 读取；控制参数保存在项目配置资源中。首次配置时，将 `emotiv.example.json` 复制为 `emotiv.local.json`，按下面字段填写；已有本地配置时直接编辑即可。
 
 | JSON 字段 | 用途／示例默认值 |
 |---|---|
@@ -95,12 +95,35 @@ git lfs pull
 | `clientSecret` | 同一应用的 Client Secret |
 | `appName` | 应用名称；`JurassicWorld` |
 | `profileName` | 已训练 profile 的准确名称；示例为 `Guest001` |
-| `threshold` | power 接受阈值；`0.3`，范围 0–1 |
-| `commandTimeout` | command 超时秒数；`1.0`，最小 `0.1` |
 
-`emotiv.local.json` 已加入 `.gitignore`，不会被普通 `git add` / commit 收录；不要强制添加该文件。场景不保存上述字段。修改 JSON 后重新进入 Play，或重启 Windows Player，即可加载最新配置。文件缺失、JSON 无效、必填字符串为空或数值超出范围时，脑控不连接，WASD 仍可用。
+`emotiv.local.json` 已加入 `.gitignore`，不会被普通 `git add` / commit 收录；不要强制添加该文件。场景不保存上述字段。修改 JSON 后重新进入 Play，或重启 Windows Player，即可加载最新配置。文件缺失、JSON 无效或必填字符串为空时，脑控不连接，WASD 仍可用。旧 JSON 中的 `threshold` 和 `commandTimeout` 已停用，即使保留也不会读取或校验。
 
 `Smooth Explorer Camera` 的 **Emotiv Input** 引用已关联本相机的组件。若要关闭脑控，取消勾选 Unity Inspector 的 Emotiv Player Input 组件即可。
+
+### Inspector 控制配置（随项目共享）
+
+选中 Main 场景的玩家相机，在 **Emotiv Player Input** 中直接编辑内嵌参数。默认资源为 `Assets/Settings/EmotivControlSettings.asset`，也可通过 **Create > Jurassic World > Emotiv Control Settings** 创建独立资源并关联。未关联时运行会警告并使用默认值；点击“关联项目默认控制配置”可恢复引用。原有组件启用状态保持不变，使用脑控前需勾选该组件。
+
+| 参数 | 默认值与含义 |
+|---|---|
+| Push / Pull / Left / Right | 分别映射为前进、后退、前进并左转、前进并右转；每项均可改选任一动作或停止 |
+| 移动速度（米/秒） | 4；统一控制所有 Emotiv 动作的满强度目标速度 |
+| 转向速度（度/秒） | 60；持续转向，左右转同时前进 |
+| 接受阈值（Power） | 0.3，范围 0–1；达到阈值即接受 |
+| 指令超时（秒） | 1，最小 0.1 |
+| 无有效指令时前进比例 | 0.5，范围 0–1；设为 0 时停止 |
+
+转向角度 = Power × 转向速度 × 持续秒数。例如 60°/秒、Power=0.5 持续 1 秒，转向 30°。速度均为非负有限值；移动继续使用平滑加减速，键盘和 MindWave 仍使用相机自身速度。
+
+**先调参，再 Play**：在非 Play 模式中通过组件或配置资源 Inspector 修改参数，点击“保存控制配置”或保存项目，支持 Undo/Redo。点击 Play 后使用已配置的参数；Play 期间组件和配置资源 Inspector 全部只读，要调整时先停止 Play、修改并保存，再重新 Play。
+
+每个 command 新增独立的 **使用项目值** 敏感度选项，默认不勾选，表示沿用当前 Emotiv profile 的值。未连接时只显示“沿用 profile”，不会把示例值 5 当作实际 profile 值。勾选后可设置 1–10 的整数，越大越容易触发；这与 Unity 的 Power 接受阈值独立。敏感度作用于原始 command，例如 Push 重映射为左转后，仍由 Push 敏感度控制识别。
+
+加载 profile 后，程序读取当前 session 的激活动作顺序和四项敏感度，仅覆盖已勾选且已激活的 command，其余值保持原样。未激活的 command 不会自动激活。Inspector 在 Play 期间显示读取/应用状态和各 command 的当前值；查询或设置失败会提示，本次连接不自动重试，原有脑控和键盘仍可用。
+
+覆盖值保存在项目 `.asset`，每次连接或重连后重新应用到当前 session，**不保存到 Emotiv profile**。因此关闭 Editor 不会丢失项目配置，也不会改动其他 Emotiv 程序使用的长期 profile。官方接口：[mentalCommandActionSensitivity](https://emotiv.gitbook.io/cortex-api/advanced-bci/mentalcommandactionsensitivity)、[session 与 profile](https://emotiv.gitbook.io/cortex-api/advanced-bci)。
+
+同步项目时包含该 `.asset`、`.meta` 及场景引用，其他电脑即可使用相同参数，构建包也会携带配置。连接凭据仍由各电脑本地提供，并需安装 Cortex、登录 Launcher 和准备相应训练 profile。
 
 ### 5. 启动并确认连接
 
@@ -123,7 +146,7 @@ git lfs pull
 5. 等待 `Profile loaded: SimGuest` 及 `Mental Command stream subscribed; control ready`。在 Launcher 的模拟控制中选择 push/pull/left/right，将 power 设置为高于 Threshold，并让模拟器持续输出；返回 Unity Game 窗口，不按任何方向键，观察相机前进。
 6. 用 `com data: push, power: ...` 日志确认收到的实际指令。改为 neutral 或 power 低于 0.3 后应平滑切换为正常速度的 50% 自动前进；同方向按键优先，不会与脑控叠加加速。
 
-### 6. 方向控制规则
+### 6. 默认方向控制规则（可在 Inspector 重映射）
 
 | Mental Command | 对应键盘 | 行为 |
 |---|---|---|
@@ -132,9 +155,9 @@ git lfs pull
 | `left` | A / ← | 左转并前进 |
 | `right` | D / → | 右转并前进 |
 
-power **达到** Threshold 才接受方向，移动和转向速度按限制在 `[0,1]` 的 power 缩放。主场景满速为 4 m/s、转向 60°/s，例如 power=0.5 的转弯目标为前进 2 m/s、转向 30°/s，移动仍经过原有平滑加减速。
+power **达到** Threshold 才接受方向，移动和转向速度按限制在 `[0,1]` 的 power 缩放。默认 Emotiv 满速为 4 m/s、转向 60°/s，例如 power=0.5 的转弯目标为前进 2 m/s、转向 30°/s，移动仍经过原有平滑加减速。
 
-连接、授权、session、profile 和 `com` 订阅均正常时，若没有有效方向指令（未训练、Push 被禁用、neutral、低于阈值、空指令、未知指令、无效 power 或指令超时），自动沿当前行进方向以正常速度的 **50%** 前进。该目标速度随场景 `Move Speed` 缩放，保留平滑加减速；收到有效方向指令后恢复上述映射。未连接、断连、流停止或组件禁用时输出零。此行为仅适用于 Emotiv，MindWave 保持原有逻辑。
+连接、授权、session、profile 和 `com` 订阅均正常时，若没有有效方向指令（未训练、Push 被禁用、neutral、低于阈值、空指令、未知指令、无效 power 或指令超时），默认沿当前行进方向以正常速度的 **50%** 自动前进。该目标速度随 Emotiv 配置的移动速度及前进比例缩放，保留平滑加减速；收到有效方向指令后使用配置映射；有效信号映射为“停止”时输出零，不触发自动前进。未连接、断连、流停止或组件禁用时输出零。此行为仅适用于 Emotiv，MindWave 保持原有逻辑。
 
 按住任意 WASD 或方向键时，**键盘完全优先**，即使同时按相反键使输入抵消也不会退回脑控；松开后恢复当前有效脑控输入。鼠标右键视角操作保留。
 
@@ -152,7 +175,7 @@ power **达到** Threshold 才接受方向，移动和转向速度按限制在 `
 | 有 command 但不移动 | 查看插件 `com data` 日志中的 action 和 power；确认 power 达到 Threshold、没有按方向键、组件启用且引用正确 |
 | 断连后没有恢复 | 输入会自动清除；确认耳机和 Launcher 恢复在线，必要时停止 Play 后重新进入，重新完成授权／session 流程 |
 
-开发验证入口：**Jurassic World > Tests > Emotiv Input Acceptance**，检查四方向映射、阈值、速度缩放、键盘优先、超时和场景组件引用。该检查不代替真实耳机验证；完整验收需填写凭据后，用真实 Headset 或 Virtual Brainwear 走完上述连接日志并实际测试操作。
+开发验证入口：**Jurassic World > Tests > Emotiv Input Acceptance**，检查四方向映射、阈值、速度缩放、键盘优先、超时和场景组件引用。另可运行 **Jurassic World > Tests > Emotiv Control Play Isolation**，自动检查预先保存的参数在普通/快速 Play 中生效，以及 Play 期间 Inspector 只读、配置文件不变。**Jurassic World > Tests > Emotiv Sensitivity Acceptance** 检查动作顺序、敏感度继承/覆盖、session 请求、重连和错误处理，不需要真实设备。该检查不代替真实耳机验证；完整验收需填写凭据后，用真实 Headset 或 Virtual Brainwear 走完上述连接日志并实际测试操作。
 </details>
 
 ## 3D 资产资源清单
@@ -259,7 +282,7 @@ power **达到** Threshold 才接受方向，移动和转向速度按限制在 `
 项目以 **Windows 平台 + Unity Editor** 演示为主要验证目标，Windows 独立程序通过现有菜单构建并另行验收；未验证 macOS、Linux、移动端或主机。
 
 - **玩法**：发布入口为主场景 `Assets/Scenes/Main.unity`，单场景、单人森林观察演示。包含键鼠漫游、HUD／小地图／指南针、画质档位、恐龙自由漫游与避让、霸王龙互动。`TRexFrontInteractionTest` 仅为开发调试场景，不属于发布内容。
-- **输入**：使用标准单相机和键鼠。Emotiv 脑控为可选输入，仅在 Windows 下通过本机蓝牙 Cortex 服务连接，需要 Launcher、应用凭据和已训练的 Mental Command profile；不提供训练或程序内配置界面，配置失败时键鼠仍可用。
+- **输入**：使用标准单相机和键鼠。Emotiv 脑控为可选输入，仅在 Windows 下通过本机蓝牙 Cortex 服务连接，需要 Launcher、应用凭据和已训练的 Mental Command profile；控制参数可在 Inspector 中配置并随项目共享；不提供训练或独立程序内配置界面，连接配置失败时键鼠仍可用。
 - **导航与场景**：恐龙导航使用烘焙好的 NavMesh 数据加项目内避让／通行规则，不在运行期重新烘焙；场景内容由编辑态 Bake 菜单维护，不做运行期程序化生成。可探索范围为固定的 200m × 200m Terrain。
 - **恐龙**：主场景当前启用霸王龙、伶盗龙、厚头龙、蜥结龙、包鲁鳄、原角龙与翼龙。召唤关闭。
 - **资产**：运行模型使用已导入的 FBX／Prefab 和准备后的资源；模型缺失应检查 Console 和资源引用，不以占位模型替代。

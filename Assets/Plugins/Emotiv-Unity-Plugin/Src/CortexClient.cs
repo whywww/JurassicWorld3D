@@ -37,6 +37,12 @@ namespace EmotivUnityPlugin
     public abstract class CortexClient
     {
         protected Dictionary<int, string> _methodForRequestId = new Dictionary<int, string>();
+        // Annotations stay local: session configuration replies bypass legacy handlers that save profiles.
+        private sealed class SessionBciCallback
+        {
+            public Action<JToken, ErrorMsgEventArgs> Reply;
+        }
+        private readonly Dictionary<int, SessionBciCallback> _sessionBciCallbacks = new Dictionary<int, SessionBciCallback>();
 
         static readonly object _locker = new object();
 
@@ -132,20 +138,25 @@ namespace EmotivUnityPlugin
 
         // prepare json rpc request
         protected string PrepareRequest(string method, JObject param, bool hasParam = true) {
-            JObject request = new JObject(
-            new JProperty("jsonrpc", "2.0"),
-            new JProperty("id", _nextRequestId),
-            new JProperty("method", method));
+            lock (_locker)
+            {
+                JObject request = new JObject(
+                new JProperty("jsonrpc", "2.0"),
+                new JProperty("id", _nextRequestId),
+                new JProperty("method", method));
 
-            if (hasParam) {
-                request.Add("params", param);
+                if (hasParam) {
+                    request.Add("params", param);
+                }
+                // add to dictionary, replace if a key is existed
+                _methodForRequestId[_nextRequestId] = method;
+                var callback = param?.Annotation<SessionBciCallback>();
+                if (callback != null) _sessionBciCallbacks[_nextRequestId] = callback;
+
+                _nextRequestId++;
+
+                return request.ToString();
             }
-            // add to dictionary, replace if a key is existed
-            _methodForRequestId[_nextRequestId] = method;
-
-            _nextRequestId++;
-
-            return request.ToString();
         }
 
         public void OnWSConnected(bool isConnected)
@@ -165,15 +176,26 @@ namespace EmotivUnityPlugin
             if (response["id"] != null)
             {
                 string method = ""; // method name
+                SessionBciCallback sessionCallback;
                 lock (_locker)
                 {
                     int id = (int)response["id"];
                     method = _methodForRequestId[id];
                     bool remove_res = _methodForRequestId.Remove(id);
+                    _sessionBciCallbacks.TryGetValue(id, out sessionCallback);
+                    _sessionBciCallbacks.Remove(id);
                     if (!remove_res)
                     {
                         UnityEngine.Debug.Log("qCannot remove key " + id + " method:" + method);
                     }
+                }
+
+                if (sessionCallback != null)
+                {
+                    var error = response["error"] as JObject;
+                    sessionCallback.Reply(response["result"], error == null ? null
+                        : new ErrorMsgEventArgs((int)error["code"], (string)error["message"], method));
+                    return;
                 }
                 
                 
@@ -1043,6 +1065,31 @@ namespace EmotivUnityPlugin
             if (profileName != "")
                 param.Add("profile", profileName);
             SendTextMessage(param, "getTrainedSignatureActions", true);
+        }
+
+        public void GetSessionMentalCommandActiveActions(string cortexToken, string sessionId,
+            Action<JToken, ErrorMsgEventArgs> reply)
+            => SendSessionBciRequest(cortexToken, sessionId, "mentalCommandActiveAction", "get", null, reply);
+
+        public void GetSessionMentalCommandActionSensitivity(string cortexToken, string sessionId,
+            Action<JToken, ErrorMsgEventArgs> reply)
+            => SendSessionBciRequest(cortexToken, sessionId, "mentalCommandActionSensitivity", "get", null, reply);
+
+        public void SetSessionMentalCommandActionSensitivity(string cortexToken, string sessionId, List<int> values,
+            Action<JToken, ErrorMsgEventArgs> reply)
+            => SendSessionBciRequest(cortexToken, sessionId, "mentalCommandActionSensitivity", "set", values, reply);
+
+        private void SendSessionBciRequest(string cortexToken, string sessionId, string method, string status,
+            List<int> values, Action<JToken, ErrorMsgEventArgs> reply)
+        {
+            if (string.IsNullOrEmpty(sessionId)) throw new ArgumentException("A session is required.", nameof(sessionId));
+            if (reply == null) throw new ArgumentNullException(nameof(reply));
+            if (status == "set" && (values == null || values.Count != 4 || values.Exists(value => value < 1 || value > 10)))
+                throw new ArgumentException("Four sensitivity values between 1 and 10 are required.", nameof(values));
+            var param = new JObject { ["cortexToken"] = cortexToken, ["session"] = sessionId, ["status"] = status };
+            if (values != null) param["values"] = new JArray(values);
+            param.AddAnnotation(new SessionBciCallback { Reply = reply });
+            SendTextMessage(param, method, true);
         }
 
         public void MentalCommandActionSensitivity (string cortexToken, string status, string sessionId, string profileName, List<int> values = null)

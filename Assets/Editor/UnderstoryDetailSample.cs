@@ -158,6 +158,8 @@ namespace JurassicWorld.Editor
             if (prefab == null) throw new InvalidOperationException("Missing sample source GUID " + e.guid);
             var obj = (GameObject)PrefabUtility.InstantiatePrefab(prefab, parent); obj.name = e.kind + "_" + parent.childCount;
             obj.transform.SetPositionAndRotation(e.position, Quaternion.Euler(0, e.yaw, 0)); obj.transform.localScale = e.scale;
+            BushHeightAdjustment.Clamp(obj);
+            FernHeightAdjustment.Clamp(obj);
             if (e.kind == "Fern" || e.kind == "Bush")
             {
                 obj.AddComponent<CenterGapGroundPlant>();

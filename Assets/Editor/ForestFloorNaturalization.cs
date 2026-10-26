@@ -79,14 +79,14 @@ namespace JurassicWorld.Editor
                 fernLayer = prototypes.Length;
                 Array.Resize(ref prototypes, prototypes.Length + 1);
             }
-            prototypes[fernLayer] = new DetailPrototype
+            prototypes[fernLayer] = FernHeightAdjustment.LimitPrototype(new DetailPrototype
             {
                 prototype = EnsureLowFernPrefab(),
                 usePrototypeMesh = true, renderMode = DetailRenderMode.VertexLit,
                 minWidth = .45f, maxWidth = .85f, minHeight = .35f, maxHeight = .65f,
                 healthyColor = new Color(.26f, .40f, .16f), dryColor = new Color(.36f, .40f, .21f),
                 noiseSeed = 733109, noiseSpread = .53f, positionJitter = 1, density = 1
-            };
+            });
             if (prototypes[fernLayer].prototype == null) throw new InvalidOperationException("Existing Fern02_A asset missing.");
             var layers = new int[prototypes.Length][,];
             for (int i = 0; i < existingCount; i++) layers[i] = data.GetDetailLayer(0, 0, res, res, i);

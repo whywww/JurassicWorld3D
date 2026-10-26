@@ -636,6 +636,8 @@ namespace JurassicWorld.Editor
             root.transform.position = new Vector3(p.x, 0f, p.y);
             float ground = terrain.SampleHeight(root.transform.position) + terrain.transform.position.y;
             root.transform.position += Vector3.up * (ground - BoundsOf(root).min.y - .02f);
+            BushHeightAdjustment.Clamp(root);
+            FernHeightAdjustment.Clamp(root);
         }
         private static float Range(System.Random random, float min, float max) => Mathf.Lerp(min, max, (float)random.NextDouble());
         private static Vector2 XZ(Vector3 p) => new Vector2(p.x, p.z);

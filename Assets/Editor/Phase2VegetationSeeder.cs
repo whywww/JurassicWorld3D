@@ -270,6 +270,8 @@ namespace JurassicWorld.Editor
             float y = terrain.SampleHeight(new Vector3(spot.x, 0f, spot.y)) + terrain.transform.position.y;
             Bounds bounds = RenderBounds(instance);
             instance.transform.position += Vector3.up * (y - bounds.min.y - 0.03f);
+            BushHeightAdjustment.Clamp(instance);
+            FernHeightAdjustment.Clamp(instance);
         }
 
         private static Bounds RenderBounds(GameObject instance)

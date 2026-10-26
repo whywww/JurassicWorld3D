@@ -2,7 +2,5 @@
   "clientId": "",
   "clientSecret": "",
   "appName": "JurassicWorld",
-  "profileName": "Guest001",
-  "threshold": 0.3,
-  "commandTimeout": 1.0
+  "profileName": "Guest001"
 }

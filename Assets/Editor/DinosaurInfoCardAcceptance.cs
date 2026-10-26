@@ -66,7 +66,10 @@ namespace JurassicWorld.Editor
 
                 var item = Capture(ground);
                 Require(item.VisiblePixels >= 16 && item.VisibleRatio > .95f, "unoccluded silhouette");
+                CheckMainDepth(ground, "unoccluded silhouette");
                 var groundTarget = item.Target;
+                Set(detector, "nextRefresh", 0f);
+                Require(ReferenceEquals(Capture(ground).Target, groundTarget), "unchanged target refresh reuses renderer cache");
                 int originalPixels = item.VisiblePixels;
                 var unusedLod = Cube("Large inactive LOD", Vector3.zero, Vector3.one);
                 unusedLod.transform.SetParent(ground.transform, false);
@@ -79,6 +82,7 @@ namespace JurassicWorld.Editor
                 item = Capture(ground);
                 Require(item.VisibleRatio > .95f && Mathf.Abs(item.VisiblePixels - originalPixels) < 5,
                     "inactive LOD geometry is excluded from both masks");
+                CheckMainDepth(ground, "active LOD only");
                 Object.DestroyImmediate(lodGroup); Object.DestroyImmediate(unusedLod);
                 Set(detector, "nextRefresh", 0f);
                 float projectedWidth = 4f * 8f / 9.5f;
@@ -96,6 +100,7 @@ namespace JurassicWorld.Editor
                 Require(Current() == null, "mostly hidden ground card closes");
                 cover(1f); item = Capture(ground);
                 Require(item.VisiblePixels == 0, "complete occlusion without collider");
+                CheckMainDepth(ground, "opaque occlusion without collider");
                 wall.SetActive(false);
 
                 var leaves = GameObject.CreatePrimitive(PrimitiveType.Quad);
@@ -110,11 +115,14 @@ namespace JurassicWorld.Editor
                 leafMaterial.mainTexture = alpha; leaves.GetComponent<Renderer>().sharedMaterial = leafMaterial;
                 setAlpha(0); item = Capture(ground);
                 Require(item.VisibleRatio > .95f, "transparent leaf texels do not occlude");
+                CheckMainDepth(ground, "transparent leaves");
                 setAlpha(255); item = Capture(ground);
                 Require(item.VisiblePixels == 0, "opaque leaf texels occlude");
+                CheckMainDepth(ground, "opaque leaves");
                 for (int y = 0; y < 8; y++) for (int x = 0; x < 8; x++) colors[y * 8 + x] = new Color32(255, 255, 255, (byte)(x < 4 ? 0 : 255));
                 alpha.SetPixels32(colors); alpha.Apply(); item = Capture(ground);
                 Require(item.VisibleRatio > .45f && item.VisibleRatio < .55f, "leaf cutout holes preserve actual visibility: " + item.VisibleRatio);
+                CheckMainDepth(ground, "alpha cutout holes");
                 leaves.SetActive(false);
 
                 var terrainData = Own(new TerrainData { heightmapResolution = 33, size = new Vector3(20, 10, 4) });
@@ -126,12 +134,14 @@ namespace JurassicWorld.Editor
                 Object.DestroyImmediate(hill.GetComponent<TerrainCollider>());
                 item = Capture(ground);
                 Require(item.VisiblePixels == 0, "terrain hill occludes without collider");
+                CheckMainDepth(ground, "terrain occlusion");
                 hill.SetActive(false);
 
                 // Another dinosaur is part of scene depth, not an ignored collider layer.
                 other.transform.position = new Vector3(0, 0, 7); other.transform.localScale = new Vector3(5, 5, 1);
                 item = Capture(ground);
                 Require(item.VisiblePixels == 0, "near dinosaur occludes far dinosaur");
+                CheckMainDepth(ground, "dinosaur mutual occlusion");
                 other.transform.position = new Vector3(-3, 0, 10); other.transform.localScale = Vector3.one;
                 flyer.transform.position = new Vector3(3, 0, 10);
                 Capture(ground);
@@ -169,6 +179,7 @@ namespace JurassicWorld.Editor
                 item = Capture(realFlyer);
                 Require(item.VisiblePixels >= 16 && item.VisibleRatio > .85f,
                     "production skinned flyer visible: " + item.VisibleRatio + ", pixels " + item.VisiblePixels);
+                CheckMainDepth(realFlyer, "production skinned flyer");
                 SaveView("production-flyer");
                 Object.DestroyImmediate(realFlyer.gameObject);
                 detector.CaptureNow(camera);
@@ -189,6 +200,38 @@ namespace JurassicWorld.Editor
                 else { Debug.Log("INFO_CARD_ASYNC_UNAVAILABLE"); Finish(null); }
             }
             catch (Exception error) { Finish(error); }
+        }
+
+        private static void CheckMainDepth(MonoBehaviour owner, string label)
+        {
+            var previousTarget = camera.targetTexture;
+            var previousDepth = camera.depthTextureMode;
+            var target = new RenderTexture(360, 360, 24);
+            Camera.CameraCallback capture = rendered =>
+            {
+                if (rendered == camera) Invoke(detector, "CaptureSample", camera, true, true);
+            };
+            try
+            {
+                target.Create(); camera.targetTexture = target;
+                var reference = Capture(owner);
+                camera.depthTextureMode |= DepthTextureMode.Depth;
+                int probes = detector.ProbeCaptureCount;
+                Camera.onPostRender += capture;
+                camera.Render(); // Graphical parity fixture only; never used by the performance harness.
+                var result = detector.Observations.First(o => o.Target.Owner == owner);
+                Require(detector.ProbeCaptureCount == probes, "main depth avoids probe render: " + label);
+                Require(Mathf.Abs(reference.VisibleRatio - result.VisibleRatio) < .06f,
+                    $"main/probe depth visibility parity: {label}, {reference.VisibleRatio:F3}/{result.VisibleRatio:F3}");
+                Require(Mathf.Abs(reference.VisiblePixels - result.VisiblePixels) <= Mathf.Max(8, reference.VisiblePixels * .1f),
+                    "main/probe silhouette area parity: " + label);
+            }
+            finally
+            {
+                Camera.onPostRender -= capture;
+                camera.targetTexture = previousTarget; camera.depthTextureMode = previousDepth;
+                Object.DestroyImmediate(target);
+            }
         }
 
         private static void SelectionChecks(DinosaurVisibility.Target ground, DinosaurVisibility.Target other, DinosaurVisibility.Target flyer)

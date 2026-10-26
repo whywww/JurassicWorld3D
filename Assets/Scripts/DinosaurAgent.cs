@@ -1,10 +1,12 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using Unity.Profiling;
 
 namespace JurassicWorld
 {
     public sealed partial class DinosaurAgent : MonoBehaviour
     {
+        private static readonly ProfilerMarker UpdateMarker = new ProfilerMarker("JurassicWorld.DinosaurBehaviour");
         public enum DinosaurState
         {
             Idle,
@@ -361,6 +363,11 @@ namespace JurassicWorld
         private bool stuckWatchdogLogged;
 
         private void Update()
+        {
+            using (UpdateMarker.Auto()) UpdateAgent();
+        }
+
+        private void UpdateAgent()
         {
             ObserveContinuousPeerMotion(Time.deltaTime);
             if (gaitProfile == null && !UsesWalkingSteering) { UpdateBehaviour(); return; }

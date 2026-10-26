@@ -212,7 +212,44 @@ namespace JurassicWorld.Editor
         private static Vector2 XZ(Vector3 p)=>new Vector2(p.x,p.z);
         private static Vector2Int Cell(Vector2 p)=>new Vector2Int(Mathf.FloorToInt(p.x/4),Mathf.FloorToInt(p.y/4));
         private static Rect Horizontal(Bounds b)=>Rect.MinMaxRect(b.min.x,b.min.z,b.max.x,b.max.z);
-        private static State Load()=>File.Exists(Config)?JsonUtility.FromJson<State>(File.ReadAllText(Config)):new State();
+        private static State Load()
+        {
+            var state=File.Exists(Config)?JsonUtility.FromJson<State>(File.ReadAllText(Config)):new State();
+            // Older ledgers may contain shrubs above the new height limit. Normalize the
+            // replay pose in memory so replay and saved-scene verification use the same policy.
+            foreach(var p in state.zones.SelectMany(z=>z.plants).Where(p=>!p.tree && p.height>BushHeightAdjustment.MaximumHeight))
+            {
+                var prefab=AssetDatabase.LoadAssetAtPath<GameObject>(AssetDatabase.GUIDToAssetPath(p.guid));
+                if(!BushHeightAdjustment.IsBush(prefab))continue;
+                var preview=(GameObject)PrefabUtility.InstantiatePrefab(prefab);
+                preview.hideFlags=HideFlags.HideAndDontSave;
+                try
+                {
+                    preview.transform.SetPositionAndRotation(p.position,Quaternion.Euler(0,p.yaw,0));preview.transform.localScale=p.scale;
+                    BushHeightAdjustment.Clamp(preview);
+                    p.position=preview.transform.position;p.scale=preview.transform.localScale;p.height=BushHeightAdjustment.MeshBounds(preview).size.y;
+                }
+                finally {Object.DestroyImmediate(preview);}
+            }
+            return state;
+        }
+
+        internal static void ValidateBushReplay()
+        {
+            var state=Load();var root=GameObject.Find(RootName);
+            if(root==null)return;
+            foreach(var zone in state.zones.Where(z=>z.enabled))
+            {
+                var parent=root.transform.Find(zone.name);
+                for(int i=0;i<zone.plants.Length;i++)
+                {
+                    var p=zone.plants[i];var obj=parent.GetChild(i).gameObject;
+                    if(!BushHeightAdjustment.IsBush(obj))continue;
+                    if(Vector3.Distance(obj.transform.position,p.position)>.0002f || Vector3.Distance(obj.transform.localScale,p.scale)>.0002f)
+                        throw new InvalidOperationException("Bush replay pose differs: "+obj.name);
+                }
+            }
+        }
         private static void Persist(State s) {File.WriteAllText(Config,JsonUtility.ToJson(s,true)+"\n");AssetDatabase.ImportAsset(Config);}
         private static Transform Parent()=>(GameObject.Find(RootName)??new GameObject(RootName)).transform;
         private static void Delete(Zone z) {var root=GameObject.Find(RootName);if(root!=null){var child=root.transform.Find(z.name);if(child!=null)Object.DestroyImmediate(child.gameObject);}}
@@ -304,6 +341,8 @@ namespace JurassicWorld.Editor
             string path=AssetDatabase.GUIDToAssetPath(p.guid);if(string.IsNullOrEmpty(path))throw new InvalidOperationException("Missing plant GUID "+p.guid);
             var obj=CentralForestDensification.Instantiate(path,parent);obj.name=(p.tree?"GapTree_":"GapGround_")+parent.childCount;
             obj.transform.SetPositionAndRotation(p.position,Quaternion.Euler(0,p.yaw,0));obj.transform.localScale=p.scale;
+            BushHeightAdjustment.Clamp(obj);
+            FernHeightAdjustment.Clamp(obj);
             if(p.tree){var m=obj.GetComponent<SceneTreeObstacle>()??obj.AddComponent<SceneTreeObstacle>();m.SetRadius(.35f*p.height/6);m.includeHardBranches=true;}
             else obj.AddComponent<CenterGapGroundPlant>();
             if(p.waterExcluded && WaterPlantCleanup.Enabled)obj.SetActive(false);

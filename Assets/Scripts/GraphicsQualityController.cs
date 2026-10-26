@@ -16,6 +16,7 @@ namespace JurassicWorld
         private readonly Dictionary<Terrain, TerrainBaseline> terrainBaselines = new Dictionary<Terrain, TerrainBaseline>();
         private int selectedTier = Medium;
         private bool menuOpen;
+        internal int SelectedTier => selectedTier;
 
         private struct TerrainBaseline
         {
@@ -36,7 +37,7 @@ namespace JurassicWorld
 
         private void Awake()
         {
-            selectedTier = Mathf.Clamp(PlayerPrefs.GetInt(PreferenceKey, Medium), Low, High);
+            selectedTier = RuntimePerformanceBenchmark.Requested ? Medium : Mathf.Clamp(PlayerPrefs.GetInt(PreferenceKey, Medium), Low, High);
             QualitySettings.SetQualityLevel(selectedTier, true);
             SceneManager.sceneLoaded += OnSceneLoaded;
         }
@@ -77,16 +78,27 @@ namespace JurassicWorld
 
         private void SelectTier(int tier)
         {
-            selectedTier = tier;
-            QualitySettings.SetQualityLevel(tier, true);
-            ApplyTerrainTier();
-            PlayerPrefs.SetInt(PreferenceKey, tier);
+            ApplyTier(tier);
+            PlayerPrefs.SetInt(PreferenceKey, selectedTier);
             PlayerPrefs.Save();
             menuOpen = false;
         }
 
+        // Session-only application is also used by regression checks; only UI selection persists.
+        internal void ApplyTier(int tier)
+        {
+            selectedTier = Mathf.Clamp(tier, Low, High);
+            QualitySettings.SetQualityLevel(selectedTier, true);
+            ApplyTerrainTier();
+        }
+
         private void ApplyTerrainTier()
         {
+            Camera camera = Camera.main;
+            foreach (var plant in FindObjectsByType<CenterGapGroundPlant>(FindObjectsSortMode.None))
+                plant.ApplyQuality(selectedTier);
+            foreach (var system in FindObjectsByType<FoliageInteractionSystem>(FindObjectsSortMode.None))
+                system.ApplyQuality(selectedTier, camera);
             foreach (RainforestAtmosphereController atmosphere in FindObjectsOfType<RainforestAtmosphereController>())
                 atmosphere.ApplyQuality(selectedTier);
 

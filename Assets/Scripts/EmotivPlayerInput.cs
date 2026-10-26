@@ -13,8 +13,56 @@ namespace JurassicWorld
     {
         private string appName;
         private string profileName;
-        private float threshold = 0.3f;
-        private float commandTimeout = 1f;
+        [SerializeField] private EmotivControlSettings controlSettings;
+        [NonSerialized] private EmotivControlSettings runtimeSettings;
+        [NonSerialized] private EmotivControlSettings defaultSettings;
+        [NonSerialized] private int runtimeSession;
+        private static int playSession;
+        private readonly EmotivSensitivityController sensitivity = new EmotivSensitivityController();
+        public EmotivSensitivityController Sensitivity => sensitivity;
+
+        // Also runs when Enter Play Mode Options disables domain/scene reload.
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void BeginPlaySession() => playSession++;
+
+        // Never expose the saved asset for editing in Play mode, even before connection succeeds.
+        public EmotivControlSettings ControlSettings
+        {
+            get
+            {
+                if (Application.isPlaying)
+                {
+                    if (runtimeSettings == null || runtimeSession != playSession) CreateRuntimeSettings();
+                    return runtimeSettings;
+                }
+                return SavedSettings;
+            }
+        }
+
+        private EmotivControlSettings SavedSettings
+        {
+            get
+            {
+                if (controlSettings != null) return controlSettings;
+                if (defaultSettings == null)
+                {
+                    defaultSettings = ScriptableObject.CreateInstance<EmotivControlSettings>();
+                    defaultSettings.hideFlags = HideFlags.HideAndDontSave;
+                    Debug.LogWarning("[EMOTIV] 未关联控制配置，使用默认参数。请在 Inspector 关联配置资源以保存修改。", this);
+                }
+                return defaultSettings;
+            }
+        }
+
+        private void CreateRuntimeSettings()
+        {
+            if (runtimeSettings != null) DestroyImmediate(runtimeSettings);
+            runtimeSettings = Instantiate(SavedSettings);
+            runtimeSession = playSession;
+            runtimeSettings.name = "Emotiv Control Settings (运行配置)";
+            runtimeSettings.hideFlags = HideFlags.HideAndDontSave;
+            runtimeSettings.Validate();
+        }
 
         private static EmotivPlayerInput owner;
         private readonly object commandLock = new object();
@@ -26,6 +74,7 @@ namespace JurassicWorld
         private bool subscriptionRequested;
         private bool subscriptionLogged;
         private volatile bool subscribed;
+        private volatile bool sensitivityRefreshRequested;
         private float nextHeadsetQuery;
         private ConnectToCortexStates? lastConnectionState;
         private string action;
@@ -34,6 +83,7 @@ namespace JurassicWorld
 
         private void OnEnable()
         {
+            if (Application.isPlaying && (runtimeSettings == null || runtimeSession != playSession)) CreateRuntimeSettings();
             if (JurassicWorld.PlayerInputs.PlayerMovementInput.HasProvider) return;
 #if USE_EMBEDDED_LIB || (!UNITY_EDITOR_WIN && !UNITY_STANDALONE_WIN)
             Debug.LogWarning("[EMOTIV] 此组件需要 Windows Cortex Service / Option 1，且不能定义 USE_EMBEDDED_LIB。键盘仍可用。", this);
@@ -60,10 +110,9 @@ namespace JurassicWorld
             }
             appName = configuration.appName;
             profileName = configuration.profileName;
-            threshold = configuration.threshold;
-            commandTimeout = configuration.commandTimeout;
             owner = this;
             authorizationHandled = sessionRequested = profileRequested = subscriptionRequested = subscriptionLogged = false;
+            sensitivityRefreshRequested = false;
             lastConnectionState = null;
             ClearCommand();
             emotiv = EmotivUnityItf.Instance;
@@ -91,8 +140,6 @@ namespace JurassicWorld
             public string clientSecret;
             public string appName;
             public string profileName;
-            public float threshold;
-            public float commandTimeout;
         }
 
         private static LocalConfiguration ReadConfiguration(string path)
@@ -101,11 +148,7 @@ namespace JurassicWorld
             if (configuration == null || string.IsNullOrWhiteSpace(configuration.clientId)
                 || string.IsNullOrWhiteSpace(configuration.clientSecret)
                 || string.IsNullOrWhiteSpace(configuration.appName)
-                || string.IsNullOrWhiteSpace(configuration.profileName)
-                || float.IsNaN(configuration.threshold) || float.IsInfinity(configuration.threshold)
-                || configuration.threshold < 0f || configuration.threshold > 1f
-                || float.IsNaN(configuration.commandTimeout) || float.IsInfinity(configuration.commandTimeout)
-                || configuration.commandTimeout < 0.1f)
+                || string.IsNullOrWhiteSpace(configuration.profileName))
                 throw new InvalidDataException("Invalid EMOTIV local configuration.");
             return configuration;
         }
@@ -132,6 +175,7 @@ namespace JurassicWorld
             if (!emotiv.IsAuthorizedOK || state != ConnectToCortexStates.Authorized)
             {
                 ClearCommand();
+                sensitivity.Reset();
                 if (authorizationHandled)
                 {
                     authorizationHandled = sessionRequested = profileRequested = subscriptionRequested = subscriptionLogged = false;
@@ -166,6 +210,7 @@ namespace JurassicWorld
             if (!emotiv.IsSessionCreated)
             {
                 ClearCommand();
+                sensitivity.Reset();
                 if (profileRequested)
                 {
                     sessionRequested = profileRequested = subscriptionRequested = subscriptionLogged = false;
@@ -181,7 +226,21 @@ namespace JurassicWorld
                 emotiv.LoadProfile(profileName);
                 return;
             }
-            if (!emotiv.IsProfileLoaded || emotiv.LoadedProfileName != profileName) return;
+            if (!emotiv.IsProfileLoaded || emotiv.LoadedProfileName != profileName)
+            {
+                sensitivity.Reset();
+                return;
+            }
+            string sessionId = SessionHandler.Instance.SessionId;
+            if (sensitivityRefreshRequested)
+            {
+                sensitivityRefreshRequested = false;
+                sensitivity.Reset();
+            }
+            if (sensitivity.SessionId != sessionId)
+                sensitivity.Begin(CortexClient.Instance, Authorizer.Instance.CortexToken, sessionId,
+                    ControlSettings, Time.realtimeSinceStartupAsDouble);
+            sensitivity.Tick(Time.realtimeSinceStartupAsDouble);
             if (!subscriptionRequested)
             {
                 subscriptionRequested = true;
@@ -208,6 +267,8 @@ namespace JurassicWorld
 
         private void RegisterStreamEvents()
         {
+            sensitivity.Failed += OnSensitivityFailed;
+            BCITraining.Instance.InformLoadProfileDone += OnSensitivityProfileLoaded;
             DataStreamManager.Instance.MentalCommandReceived += OnCommand;
             // The manager's InformSuccessSubscribedData is suppressed when buffering is enabled.
             // The process-level acknowledgement reports Cortex success in both buffering modes.
@@ -217,6 +278,8 @@ namespace JurassicWorld
 
         private void UnregisterStreamEvents()
         {
+            sensitivity.Failed -= OnSensitivityFailed;
+            BCITraining.Instance.InformLoadProfileDone -= OnSensitivityProfileLoaded;
             DataStreamManager.Instance.MentalCommandReceived -= OnCommand;
             DataStreamProcess.Instance.SubscribedOK -= OnSubscribed;
             DataStreamManager.Instance.StreamStopNotify -= OnStreamsStopped;
@@ -225,6 +288,13 @@ namespace JurassicWorld
         private void OnSubscribed(object sender, Dictionary<string, JArray> headers)
         {
             if (headers.ContainsKey("com")) subscribed = true;
+        }
+
+        private void OnSensitivityFailed(string message) => Debug.LogWarning("[EMOTIV] " + message, this);
+
+        private void OnSensitivityProfileLoaded(object sender, string loadedProfile)
+        {
+            if (loadedProfile == profileName) sensitivityRefreshRequested = true;
         }
 
         private void OnStreamsStopped(object sender, List<string> streams)
@@ -248,35 +318,29 @@ namespace JurassicWorld
             {
                 double age = receivedAt == 0 ? double.PositiveInfinity
                     : (Stopwatch.GetTimestamp() - receivedAt) / (double)Stopwatch.Frequency;
-                return ResolveCommand(action, power, threshold, age, commandTimeout);
-            }
-        }
-
-        // X is turn, Y is forward. Left/right reproduce A/D's turning while moving forward.
-        internal static Vector2 ResolveCommand(string command, double commandPower, float minimumPower,
-            double age, float timeout)
-        {
-            // ReadMovement gates this fallback on a ready Cortex connection.
-            var fallback = new Vector2(0f, 0.5f);
-            if (double.IsNaN(commandPower) || double.IsInfinity(commandPower)
-                || age >= timeout) return fallback;
-            float strength = Mathf.Clamp01((float)commandPower);
-            if (strength < minimumPower) return fallback;
-            switch (command)
-            {
-                case "push": return new Vector2(0f, strength);
-                case "pull": return new Vector2(0f, -strength);
-                case "left": return new Vector2(-strength, strength);
-                case "right": return new Vector2(strength, strength);
-                default: return fallback;
+                return ControlSettings.ResolveCommand(action, power, age);
             }
         }
 
         private void OnDisable() => StopConnection();
-        private void OnApplicationQuit() => StopConnection();
+        private void OnApplicationQuit()
+        {
+            StopConnection();
+            ReleaseSettings();
+        }
+
+        private void OnDestroy() => ReleaseSettings();
+
+        private void ReleaseSettings()
+        {
+            if (runtimeSettings != null) DestroyImmediate(runtimeSettings);
+            if (defaultSettings != null) DestroyImmediate(defaultSettings);
+            runtimeSettings = defaultSettings = null;
+        }
 
         private void StopConnection()
         {
+            sensitivity.Reset();
             if (!running) return;
             running = false;
             UnregisterStreamEvents();

@@ -134,6 +134,21 @@ namespace JurassicWorld.Editor
                     Set(manager, "_isSessActivated", true);
                     Set(process, "_connectCortexState", ConnectToCortexStates.Authorized);
                     Invoke(input, "RegisterStreamEvents");
+                    var profileEvent = typeof(BCITraining).GetField("InformLoadProfileDone", BindingFlags.NonPublic | BindingFlags.Instance);
+                    var profileCallbacks = ((Delegate)profileEvent.GetValue(BCITraining.Instance)).GetInvocationList();
+                    int profileListeners = 0;
+                    foreach (var callback in profileCallbacks)
+                        if (callback.Target == input)
+                        {
+                            profileListeners++;
+                            callback.DynamicInvoke(BCITraining.Instance, "OtherProfile");
+                            Require(!(bool)typeof(EmotivPlayerInput).GetField("sensitivityRefreshRequested",
+                                BindingFlags.NonPublic | BindingFlags.Instance).GetValue(input), "Other profiles cannot refresh sensitivity");
+                            callback.DynamicInvoke(BCITraining.Instance, "Acceptance");
+                            Require((bool)typeof(EmotivPlayerInput).GetField("sensitivityRefreshRequested",
+                                BindingFlags.NonPublic | BindingFlags.Instance).GetValue(input), "Reloaded target profile refreshes sensitivity");
+                        }
+                    Require(profileListeners == 1, "Profile reload listener registered once");
                     Equal(input.ReadMovement(), Vector2.zero, "No input before subscription");
                     // Feed the SDK's real JSON acknowledgement parser, not the component's callback.
                     var success = new JArray(new JObject { ["streamName"] = "com", ["cols"] = new JArray("act", "pow") });
@@ -172,6 +187,8 @@ namespace JurassicWorld.Editor
                         BindingFlags.NonPublic | BindingFlags.Instance).GetValue(process);
                     foreach (var callback in callbacks.GetInvocationList())
                         Require(callback.Target != input, "Unregister detaches subscription callback");
+                    foreach (var callback in ((Delegate)profileEvent.GetValue(BCITraining.Instance)).GetInvocationList())
+                        Require(callback.Target != input, "Unregister detaches profile reload callback");
                 }
                 finally
                 {
@@ -190,8 +207,15 @@ namespace JurassicWorld.Editor
             => type.GetMethod(name, BindingFlags.NonPublic | BindingFlags.Static);
 
         private static Vector2 Command(string action, double power, double age = 0, float threshold = 0.3f)
-            => (Vector2)Method(typeof(EmotivPlayerInput), "ResolveCommand").Invoke(null,
-                new object[] { action, power, threshold, age, 1f });
+        {
+            var settings = ScriptableObject.CreateInstance<EmotivControlSettings>();
+            try
+            {
+                settings.threshold = threshold;
+                return settings.ResolveCommand(action, power, age);
+            }
+            finally { UnityEngine.Object.DestroyImmediate(settings); }
+        }
 
         private static void Require(bool condition, string message)
         {
@@ -216,15 +240,24 @@ namespace JurassicWorld.Editor
             {
                 System.IO.File.WriteAllText(path, json.ToString());
                 object config = read.Invoke(null, new object[] { path });
-                foreach (string field in new[] { "clientId", "clientSecret", "appName", "profileName", "threshold", "commandTimeout" })
+                foreach (string field in new[] { "clientId", "clientSecret", "appName", "profileName" })
                 {
                     object actual = config.GetType().GetField(field).GetValue(config);
                     Require(JToken.FromObject(actual).ToString() == json[field].ToString(), "JSON setting loaded: " + field);
                 }
-                foreach (string field in new[] { "clientId", "clientSecret", "appName", "profileName", "threshold", "commandTimeout" })
+                // Old control values must not override or invalidate the shared asset.
+                json["threshold"] = -1f;
+                json["commandTimeout"] = "obsolete-value";
+                System.IO.File.WriteAllText(path, json.ToString());
+                Require(read.Invoke(null, new object[] { path }) != null, "Legacy control fields ignored");
+                json.Remove("threshold");
+                json.Remove("commandTimeout");
+                System.IO.File.WriteAllText(path, json.ToString());
+                Require(read.Invoke(null, new object[] { path }) != null, "Connection-only JSON accepted");
+                foreach (string field in new[] { "clientId", "clientSecret", "appName", "profileName" })
                 {
                     var invalid = (JObject)json.DeepClone();
-                    invalid[field] = field == "threshold" || field == "commandTimeout" ? (JToken)(-1f) : "";
+                    invalid[field] = "";
                     System.IO.File.WriteAllText(path, invalid.ToString());
                     bool rejected = false;
                     try { read.Invoke(null, new object[] { path }); }
@@ -247,6 +280,8 @@ namespace JurassicWorld.Editor
 
         private static void VerifyCommands()
         {
+            checks += EmotivSensitivityAcceptance.Verify();
+            VerifyControlSettings();
             Equal(Command("push", 0.5), new Vector2(0, 0.5f), "Push forward at half speed");
             Equal(Command("pull", 0.5), new Vector2(0, -0.5f), "Pull backward at half speed");
             Equal(Command("left", 0.5), new Vector2(-0.5f, 0.5f), "Left turns AND advances at half speed");
@@ -267,6 +302,120 @@ namespace JurassicWorld.Editor
             Equal(Command("push", 0.5, 0, 0.6f), new Vector2(0, 0.5f), "Configured threshold respected");
             Equal(Command("push", 1, 2), new Vector2(0, 0.5f), "Same action cannot survive a stale timestamp");
             Equal(Command("push", 1, 0), Vector2.up, "Same action with refreshed timestamp resumes");
+        }
+
+        private static void VerifyControlSettings()
+        {
+            var settings = ScriptableObject.CreateInstance<EmotivControlSettings>();
+            var holder = new GameObject("Emotiv settings regression");
+            holder.SetActive(false);
+            var input = holder.AddComponent<EmotivPlayerInput>();
+            var explorer = holder.AddComponent<SmoothExplorerCamera>();
+            Set(input, "controlSettings", settings);
+            Set(explorer, "emotivInput", input);
+            string path = "Assets/Settings/EmotivAcceptance-" + Guid.NewGuid().ToString("N") + ".asset";
+            try
+            {
+                settings.push = EmotivMovementAction.ForwardLeft;
+                Equal(settings.ResolveCommand("push", 0.8, 0), new Vector2(-0.8f, 0.8f), "Push remaps to advancing left");
+                settings.push = EmotivMovementAction.Stop;
+                Equal(settings.ResolveCommand("push", 1, 0), Vector2.zero, "Explicit stop overrides fallback");
+                settings.fallbackForward = 0;
+                Equal(settings.ResolveCommand("neutral", 1, 0), Vector2.zero, "Fallback can stop");
+                settings.fallbackForward = 0.25f;
+                settings.threshold = 0.7f;
+                settings.commandTimeout = 2f;
+                Equal(settings.ResolveCommand("right", 0.6, 0), new Vector2(0, 0.25f), "Configured threshold and fallback");
+                Equal(settings.ResolveCommand("right", 0.8, 1.5), new Vector2(0.8f, 0.8f), "Configured longer timeout");
+                Equal(settings.ResolveCommand("right", 0.8, 2), new Vector2(0, 0.25f), "Configured timeout boundary");
+                settings.moveSpeed = float.NaN;
+                settings.turnSpeed = float.PositiveInfinity;
+                settings.threshold = -1;
+                settings.commandTimeout = -1;
+                settings.fallbackForward = 2;
+                settings.Validate();
+                Equal(new Vector2(settings.moveSpeed, settings.turnSpeed), new Vector2(4, 60), "Non-finite speeds reset safely");
+                Require(settings.threshold == 0 && settings.commandTimeout == 0.1f && settings.fallbackForward == 1,
+                    "Settings ranges validated");
+                settings.moveSpeed = -1;
+                settings.turnSpeed = -1;
+                settings.threshold = float.NaN;
+                settings.commandTimeout = float.PositiveInfinity;
+                settings.fallbackForward = float.NaN;
+                settings.Validate();
+                Require(settings.moveSpeed == 0 && settings.turnSpeed == 0 && settings.threshold == 0.3f
+                    && settings.commandTimeout == 1 && settings.fallbackForward == 0.5f, "Negative and non-finite values sanitized");
+                settings.moveSpeed = 8;
+                settings.turnSpeed = 90;
+                Invoke(input, "CreateRuntimeSettings");
+                var copy = (EmotivControlSettings)typeof(EmotivPlayerInput).GetField("runtimeSettings",
+                    BindingFlags.NonPublic | BindingFlags.Instance).GetValue(input);
+                Require(copy != settings && !EditorUtility.IsPersistent(copy), "Runtime copy is not a project asset");
+                copy.moveSpeed = 12;
+                copy.push = EmotivMovementAction.ForwardRight;
+                copy.pushSensitivity.value = 1;
+                Require(settings.moveSpeed == 8 && settings.push == EmotivMovementAction.Stop
+                    && settings.pushSensitivity.value == 5, "Runtime snapshot cannot modify saved source");
+                Invoke(input, "ReleaseSettings");
+                Require(input.ControlSettings == settings && settings.moveSpeed == 8, "Leaving runtime copy restores saved source");
+
+                AssetDatabase.CreateAsset(settings, path);
+                var serialized = new SerializedObject(settings);
+                serialized.FindProperty("moveSpeed").floatValue = 9;
+                serialized.FindProperty("pushSensitivity.useProjectValue").boolValue = true;
+                serialized.FindProperty("pushSensitivity.value").intValue = 8;
+                serialized.ApplyModifiedProperties();
+                Undo.FlushUndoRecordObjects();
+                Undo.PerformUndo();
+                Require(settings.moveSpeed == 8 && !settings.pushSensitivity.useProjectValue, "Inspector asset edit supports Undo");
+                Undo.PerformRedo();
+                Require(settings.moveSpeed == 9 && settings.pushSensitivity.value == 8
+                    && settings.pushSensitivity.useProjectValue, "Inspector asset edit supports Redo");
+                AssetDatabase.SaveAssetIfDirty(settings);
+                Set(input, "controlSettings", null);
+                Resources.UnloadAsset(settings);
+                settings = AssetDatabase.LoadAssetAtPath<EmotivControlSettings>(path);
+                Require(settings.moveSpeed == 9 && settings.turnSpeed == 90
+                    && settings.push == EmotivMovementAction.Stop && settings.pushSensitivity.useProjectValue
+                    && settings.pushSensitivity.value == 8, "Saved asset and sensitivity survive unload/reload");
+
+                // Source selection is exercised by the actual camera speed resolver.
+                Set(input, "controlSettings", settings);
+                Set(explorer, "moveSpeed", 3f);
+                Set(explorer, "turnSpeed", 40f);
+                var speedMethod = typeof(SmoothExplorerCamera).GetMethod("ResolveMovementSpeeds",
+                    BindingFlags.NonPublic | BindingFlags.Instance);
+                Func<bool, Vector2> speeds = keyboard => (Vector2)speedMethod.Invoke(explorer, new object[] { keyboard });
+                Equal(speeds(true), new Vector2(3, 40), "Keyboard keeps its original speeds");
+                // isActiveAndEnabled requires an active holder. Guard activation with a registered provider.
+                JurassicWorld.PlayerInputs.PlayerMovementInput.Register(holder, () => Vector2.up);
+                try
+                {
+                    holder.SetActive(true);
+                    Equal(speeds(false), new Vector2(3, 40), "Optional input provider keeps original speeds");
+                }
+                finally { JurassicWorld.PlayerInputs.PlayerMovementInput.Unregister(holder); }
+                Equal(speeds(false), new Vector2(9, 90), "Emotiv alone uses configured speeds");
+                settings.turnSpeed = 60;
+                settings.right = EmotivMovementAction.ForwardRight;
+                foreach (int fps in new[] { 30, 60, 144 })
+                    foreach (float power in new[] { 0.5f, 1f })
+                    {
+                        float angle = 0;
+                        for (int frame = 0; frame < fps; frame++)
+                            angle += settings.ResolveCommand("right", power, 0).x * speeds(false).y / fps;
+                        Require(Mathf.Abs(angle - power * 60) < 0.001f, "Continuous turn independent of FPS: " + fps);
+                    }
+                input.enabled = false;
+                Equal(speeds(false), new Vector2(3, 40), "Disabled Emotiv retains default speed selection");
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(holder);
+                Undo.ClearUndo(settings);
+                if (AssetDatabase.LoadAssetAtPath<EmotivControlSettings>(path) != null) AssetDatabase.DeleteAsset(path);
+                else if (settings != null) UnityEngine.Object.DestroyImmediate(settings);
+            }
         }
 
         private static void VerifyKeyboard()
@@ -358,13 +507,18 @@ namespace JurassicWorld.Editor
             var camera = Camera.main;
             Require(camera != null, "Main camera missing");
             var input = camera.GetComponent<EmotivPlayerInput>();
-            Require(input != null && input.enabled, "Emotiv component missing or disabled");
+            Require(input != null, "Emotiv component missing");
             Require(UnityEngine.Object.FindObjectsOfType<EmotivPlayerInput>().Length == 1, "Duplicate input component");
             var explorer = camera.GetComponent<SmoothExplorerCamera>();
             Require(explorer != null, "Movement controller missing");
             var serialized = new SerializedObject(explorer);
             Require(serialized.FindProperty("emotivInput").objectReferenceValue == input, "Input reference missing");
             var settings = new SerializedObject(input);
+            Require(settings.FindProperty("controlSettings").objectReferenceValue
+                == AssetDatabase.LoadAssetAtPath<EmotivControlSettings>(EmotivControlSettingsEditor.DefaultAssetPath),
+                "Main scene references shared control asset (also included in builds)");
+            Require(Array.Exists(AssetDatabase.GetDependencies("Assets/Scenes/Main.unity", true),
+                path => path == EmotivControlSettingsEditor.DefaultAssetPath), "Build dependency contains control settings");
             foreach (string field in new[] { "clientId", "clientSecret", "appName", "profileName", "threshold", "commandTimeout" })
                 Require(settings.FindProperty(field) == null, "Config must not be serialized in scene: " + field);
             Equal(input.ReadMovement(), Vector2.zero, "Unconnected component yields zero");

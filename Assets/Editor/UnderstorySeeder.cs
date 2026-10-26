@@ -363,7 +363,7 @@ namespace JurassicWorld.Editor
         internal static DetailRenderMode FernRenderModeTarget => DetailRenderMode.VertexLit;
 
         /// <summary>构造自有 fern 原型（唯一构造点：追加与规格修正共用，避免两处漂移）。</summary>
-        private static DetailPrototype BuildFernPrototype(GameObject fern) => new DetailPrototype
+        private static DetailPrototype BuildFernPrototype(GameObject fern) => FernHeightAdjustment.LimitPrototype(new DetailPrototype
         {
             usePrototypeMesh = true,
             prototype = fern,
@@ -376,7 +376,7 @@ namespace JurassicWorld.Editor
             maxHeight = 1.6f,
             noiseSpread = 0.2f,
             density = 1 // CoverageMode 下的实例数倍率基准（InstanceCountMode 下无副作用；整数字面量兼容 int/float 声明）
-        };
+        });
 
         /// <summary>现有自有原型是否已符合目标规格（含 renderMode —— 历史产物可能是 Grass，必须能自愈重写）。</summary>
         private static bool FernPrototypeMatchesSpec(DetailPrototype existing, GameObject fern)
@@ -1293,6 +1293,7 @@ namespace JurassicWorld.Editor
                     bush.transform.position = new Vector3(wx, groundY, wz);
                     bush.transform.rotation = Quaternion.Euler(0f, yaw, 0f);
                     bush.transform.localScale = Vector3.one * scale;
+                    BushHeightAdjustment.Clamp(bush);
 
                     foreach (Collider col in bush.GetComponentsInChildren<Collider>(true))
                         UnityEngine.Object.DestroyImmediate(col);
@@ -1448,6 +1449,8 @@ namespace JurassicWorld.Editor
                 Debug.Log($"[UnderstorySeeder] fern 原型块{(fernIdx.Count > 0 ? "重建（规格不符，已按目标 renderMode/密度重写）" : "追加")}于 " +
                           $"index={fernStart}（{fernPrefabs.Length} 个 prefab，renderMode={FernRenderModeTarget}）。");
             }
+
+            FernHeightAdjustment.ClampDetails(data);
 
             // fernField[x,z] = 该 cell 的 Fern【总密度】（不是每层密度）。把这个整数总量确定性拆分给各 variant 层：
             // 逐 unit 用 Hash01 + 独立固定 salt 选 variant，故每个 cell 严格满足
@@ -1767,6 +1770,7 @@ namespace JurassicWorld.Editor
             item.transform.position = new Vector3(center.x, groundY - sink, center.y);
             item.transform.rotation = Quaternion.Euler(tilt, yaw, tilt * 0.5f);
             item.transform.localScale = Vector3.one * scale;
+            FernHeightAdjustment.Clamp(item);
 
             if (!AddColliderForDeadwood)
             {

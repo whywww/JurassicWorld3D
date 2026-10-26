@@ -24,19 +24,30 @@ namespace JurassicWorld
         private readonly List<InteractiveFoliage> candidates = new List<InteractiveFoliage>();
         private readonly HashSet<InteractiveFoliage> queried = new HashSet<InteractiveFoliage>();
         private bool wasEnabled = true;
+        private Camera interactionCamera;
+        private float interactionDistanceSquared = float.PositiveInfinity, resetDistanceSquared = float.PositiveInfinity;
         internal int ActiveTreeCount => active.Count;
         private static readonly ProfilerMarker UpdateMarker = new ProfilerMarker("JurassicWorld.FoliageInteraction");
 
         private void Awake() { Instance = this; }
         private void Start()
         {
-            foreach (InteractiveFoliage tree in FindObjectsOfType<InteractiveFoliage>()) Register(tree);
+            var trees = FindObjectsByType<InteractiveFoliage>(FindObjectsSortMode.None);
+            foreach (InteractiveFoliage tree in trees) Register(tree);
             // Reserve once, so the first mass contact does not grow collections inside LateUpdate.
-            int count = FindObjectsOfType<InteractiveFoliage>().Length;
+            int count = trees.Length;
             active.EnsureCapacity(count); queried.EnsureCapacity(count);
             candidates.Capacity = count; settled.Capacity = count;
         }
         private void OnDestroy() { if (Instance == this) Instance = null; }
+
+        internal void ApplyQuality(int tier, Camera camera)
+        {
+            interactionCamera = camera;
+            float distance = tier >= 2 ? 85f : tier == 1 ? 55f : 35f;
+            interactionDistanceSquared = distance * distance;
+            resetDistanceSquared = (distance + 10f) * (distance + 10f);
+        }
 
         internal void Register(InteractiveFoliage tree)
         {
@@ -64,6 +75,8 @@ namespace JurassicWorld
                 foreach (var source in DinosaurFoliageInteractor.Sources) source.ResetHistory();
             wasEnabled = true;
             if (deltaTime <= 0f) return;
+            bool useDistanceBudget = interactionCamera != null;
+            Vector3 eye = useDistanceBudget ? interactionCamera.transform.position : Vector3.zero;
             foreach (InteractiveFoliage tree in active) tree.ClearForces();
             foreach (DinosaurFoliageInteractor source in DinosaurFoliageInteractor.Sources)
             {
@@ -76,6 +89,8 @@ namespace JurassicWorld
                     foreach (InteractiveFoliage tree in candidates)
                     {
                         if (tree == null || !tree.isActiveAndEnabled) continue;
+                        // Only visual leaf bending is budgeted. Trunk/navigation obstacles are independent.
+                        if (useDistanceBudget && tree.WorldBounds.SqrDistance(eye) > interactionDistanceSquared) continue;
                         if (tree.Accumulate(contact)) active.Add(tree);
                     }
                 }
@@ -83,6 +98,8 @@ namespace JurassicWorld
             settled.Clear();
             foreach (InteractiveFoliage tree in active)
             {
+                if (tree != null && useDistanceBudget && tree.WorldBounds.SqrDistance(eye) > resetDistanceSquared)
+                { tree.ResetField(); settled.Add(tree); continue; }
                 if (tree == null || !tree.isActiveAndEnabled || !tree.Simulate(deltaTime, this)) settled.Add(tree);
             }
             foreach (InteractiveFoliage tree in settled) active.Remove(tree);

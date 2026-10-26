@@ -86,19 +86,61 @@ namespace JurassicWorld
         // Distance to the swept capsule centre surface (a quad split into two triangles).
         // This includes endpoints and the swept middle, unlike four edge-only segment tests.
         internal Vector3 Push(Vector3 point, float padding)
+            => PreparePush().Push(point, padding);
+
+        internal PreparedPush PreparePush() => new PreparedPush(this);
+
+        internal readonly struct PreparedPush
         {
-            Vector3 p = ClosestOnTriangle(point, previousStart, previousEnd, end);
-            Vector3 q = ClosestOnTriangle(point, previousStart, end, start);
-            if ((point - q).sqrMagnitude < (point - p).sqrMagnitude) p = q;
-            Vector3 outward = point - p;
-            float distance = outward.magnitude, reach = radius + padding;
-            if (distance >= reach || reach <= 0f) return Vector3.zero;
-            Vector3 motion = (start + end - previousStart - previousEnd) * .5f;
-            Vector3 direction = outward.sqrMagnitude > 1e-8f ? outward.normalized : motion.normalized;
-            if (direction.sqrMagnitude < .1f) direction = Vector3.up;
-            if (motion.sqrMagnitude > 1e-8f) direction = (direction + motion.normalized * .35f).normalized;
-            float depth = Mathf.Clamp01((reach - distance) / Mathf.Max(reach, .05f));
-            return direction * depth * Mathf.Lerp(.6f, 1f, Mathf.Clamp01(speed / 2f));
+            private readonly FoliageContact contact;
+            private readonly Vector3 motionDirection;
+            private readonly bool moving;
+            private readonly float strength;
+            private readonly bool singleSegment;
+            private readonly Vector3 segmentStart, segmentEnd;
+            internal PreparedPush(FoliageContact contact)
+            {
+                this.contact = contact;
+                Vector3 motion = (contact.start + contact.end - contact.previousStart - contact.previousEnd) * .5f;
+                motionDirection = motion.normalized; moving = motion.sqrMagnitude > 1e-8f;
+                strength = Mathf.Lerp(.6f, 1f, Mathf.Clamp01(contact.speed / 2f));
+                bool stationary = (contact.start - contact.previousStart).sqrMagnitude == 0f &&
+                    (contact.end - contact.previousEnd).sqrMagnitude == 0f;
+                bool pointCapsule = (contact.start - contact.end).sqrMagnitude == 0f &&
+                    (contact.previousStart - contact.previousEnd).sqrMagnitude == 0f;
+                singleSegment = stationary || pointCapsule;
+                segmentStart = stationary ? contact.start : contact.previousStart;
+                segmentEnd = contact.end;
+            }
+            internal Vector3 Push(Vector3 point, float padding)
+            {
+                Vector3 p;
+                if (singleSegment)
+                {
+                    // Keep both segment orientations and exact endpoints: the original
+                    // degenerate-triangle path uses them to resolve float rounding near its axis.
+                    p = ClosestOnSegment(point, segmentStart, segmentEnd);
+                    Vector3 reverse = ClosestOnSegment(point, segmentEnd, segmentStart);
+                    if ((point - segmentEnd).sqrMagnitude < (point - p).sqrMagnitude) p = segmentEnd;
+                    if ((point - reverse).sqrMagnitude < (point - p).sqrMagnitude) p = reverse;
+                    if ((point - segmentStart).sqrMagnitude < (point - p).sqrMagnitude) p = segmentStart;
+                }
+                else
+                {
+                    p = ClosestOnTriangle(point, contact.previousStart, contact.previousEnd, contact.end);
+                    Vector3 q = ClosestOnTriangle(point, contact.previousStart, contact.end, contact.start);
+                    if ((point - q).sqrMagnitude < (point - p).sqrMagnitude) p = q;
+                }
+                Vector3 outward = point - p;
+                float distanceSquared = outward.sqrMagnitude, reach = contact.radius + padding;
+                if (reach <= 0f || distanceSquared >= reach * reach) return Vector3.zero;
+                float distance = Mathf.Sqrt(distanceSquared);
+                Vector3 direction = distanceSquared > 1e-8f ? outward / distance : motionDirection;
+                if (direction.sqrMagnitude < .1f) direction = Vector3.up;
+                if (moving) direction = (direction + motionDirection * .35f).normalized;
+                float depth = Mathf.Clamp01((reach - distance) / Mathf.Max(reach, .05f));
+                return direction * depth * strength;
+            }
         }
 
         private static Vector3 ClosestOnTriangle(Vector3 p, Vector3 a, Vector3 b, Vector3 c)

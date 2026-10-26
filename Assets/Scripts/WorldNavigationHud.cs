@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
+using Unity.Profiling;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -36,6 +37,11 @@ namespace JurassicWorld
         private int terrainSignature;
         private float lastHeading;
         private float nextDinosaurCheck;
+        private int displayedX = int.MinValue, displayedZ = int.MinValue, displayedDegrees = -1, displayedDirection = -1;
+        private bool coordinatesHavePlayer;
+        private readonly HashSet<DinosaurAgent> activeDinosaurs = new HashSet<DinosaurAgent>();
+        private readonly List<DinosaurAgent> removedDinosaurs = new List<DinosaurAgent>();
+        private static readonly ProfilerMarker UpdateMarker = new ProfilerMarker("JurassicWorld.NavigationHud");
         private readonly Dictionary<DinosaurAgent, RectTransform> dinosaurMarkers = new Dictionary<DinosaurAgent, RectTransform>();
         private static readonly string[] Directions = { "N", "NE", "E", "SE", "S", "SW", "W", "NW" };
 
@@ -205,6 +211,11 @@ namespace JurassicWorld
 
         private void LateUpdate()
         {
+            using (UpdateMarker.Auto()) UpdateHud();
+        }
+
+        private void UpdateHud()
+        {
             if (viewCamera == null) viewCamera = Camera.main;
             if (player == null && viewCamera != null)
             {
@@ -212,14 +223,29 @@ namespace JurassicWorld
                 player = explorer != null ? explorer.transform : viewCamera.transform;
             }
             if (player != null && explorer == null) explorer = player.GetComponent<SmoothExplorerCamera>();
-            coordinatesText.text = player != null
-                ? string.Format(CultureInfo.InvariantCulture, "X: {0:F1}   Z: {1:F1}", player.position.x, player.position.z)
-                : "X: --   Z: --";
+            if (player != null)
+            {
+                Vector3 position = player.position;
+                int x = Mathf.RoundToInt(position.x * 10f), z = Mathf.RoundToInt(position.z * 10f);
+                if (!coordinatesHavePlayer || x != displayedX || z != displayedZ)
+                {
+                    coordinatesText.text = string.Format(CultureInfo.InvariantCulture, "X: {0:F1}   Z: {1:F1}", position.x, position.z);
+                    displayedX = x; displayedZ = z;
+                }
+                coordinatesHavePlayer = true;
+            }
+            else if (coordinatesHavePlayer || coordinatesText.text != "X: --   Z: --")
+            { coordinatesText.text = "X: --   Z: --"; coordinatesHavePlayer = false; }
             if (viewCamera != null)
             {
                 lastHeading = HorizontalHeading(viewCamera.transform.forward, lastHeading);
                 int degrees = Mathf.RoundToInt(lastHeading) % 360;
-                compassText.text = Directions[Mathf.RoundToInt(lastHeading / 45f) % 8] + "   " + degrees.ToString("000") + "°";
+                int direction = Mathf.RoundToInt(lastHeading / 45f) % 8;
+                if (degrees != displayedDegrees || direction != displayedDirection)
+                {
+                    compassText.text = Directions[direction] + "   " + degrees.ToString("000") + "°";
+                    displayedDegrees = degrees; displayedDirection = direction;
+                }
             }
             if (Time.unscaledTime >= nextTerrainCheck)
             {
@@ -238,7 +264,8 @@ namespace JurassicWorld
                 }
             }
             UpdateDinosaurMarkers();
-            playerArrow.gameObject.SetActive(player != null && mapReady);
+            bool showPlayer = player != null && mapReady;
+            if (playerArrow.gameObject.activeSelf != showPlayer) playerArrow.gameObject.SetActive(showPlayer);
             if (player != null && mapReady)
             {
                 Vector3 viewport = mapCamera.WorldToViewportPoint(player.position);
@@ -254,8 +281,9 @@ namespace JurassicWorld
             if (Time.unscaledTime >= nextDinosaurCheck)
             {
                 nextDinosaurCheck = Time.unscaledTime + 1f;
-                var active = new HashSet<DinosaurAgent>(FindObjectsOfType<DinosaurAgent>());
-                var removed = new List<DinosaurAgent>();
+                var active = activeDinosaurs; active.Clear();
+                foreach (var agent in FindObjectsByType<DinosaurAgent>(FindObjectsSortMode.None)) active.Add(agent);
+                var removed = removedDinosaurs; removed.Clear();
                 foreach (var entry in dinosaurMarkers)
                     if (entry.Key == null || !active.Contains(entry.Key) || !entry.Key.isActiveAndEnabled) removed.Add(entry.Key);
                 foreach (var agent in removed)
@@ -293,7 +321,7 @@ namespace JurassicWorld
             foreach (var entry in dinosaurMarkers)
             {
                 bool visible = mapReady && entry.Key != null && entry.Key.isActiveAndEnabled;
-                entry.Value.gameObject.SetActive(visible);
+                if (entry.Value.gameObject.activeSelf != visible) entry.Value.gameObject.SetActive(visible);
                 if (visible) entry.Value.anchoredPosition = MapPosition(mapCamera.WorldToViewportPoint(entry.Key.transform.position), mapSize, 13f / mapSize);
             }
         }

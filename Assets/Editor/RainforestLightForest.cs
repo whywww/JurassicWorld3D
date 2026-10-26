@@ -185,6 +185,7 @@ namespace JurassicWorld.Editor
                 plant.transform.position = new Vector3(p.x,RainforestBoundaryTransition.SurfaceHeight(terrain,p)-0.05f,p.y);
                 plant.transform.rotation = Quaternion.Euler(0,(float)random.NextDouble()*360,0);
                 plant.transform.localScale = Vector3.one*scale;
+                FernHeightAdjustment.Clamp(plant);
             }
             var proxies = new GameObject(ProxiesName); proxies.transform.SetParent(root,false); proxies.layer = layer;
             Mesh quad = Quad();
@@ -212,6 +213,7 @@ namespace JurassicWorld.Editor
             Rect bounds = RainforestBoundaryTransition.ProtectedBounds;
             // Keep near-tree instancing and fine per-tree culling. Only batch the small understory meshes.
             Transform[] originals = root.Find(UnderstoryName).Cast<Transform>().ToArray();
+            foreach (Transform original in originals) FernHeightAdjustment.Clamp(original.gameObject);
             var usedPaths = new HashSet<string>();
             int batched = 0, packed = 0;
             for (int sector = 0; sector < 8; sector++)

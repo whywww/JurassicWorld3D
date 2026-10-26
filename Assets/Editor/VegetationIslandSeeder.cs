@@ -175,6 +175,8 @@ namespace JurassicWorld.Editor
             instance.transform.localScale *= scale;
             bounds = RenderBounds(instance);
             instance.transform.position += Vector3.up * (GroundY(terrain, xz) - bounds.min.y - 0.04f);
+            BushHeightAdjustment.Clamp(instance);
+            FernHeightAdjustment.Clamp(instance);
 
             foreach (Collider collider in instance.GetComponentsInChildren<Collider>(true))
                 UnityEngine.Object.DestroyImmediate(collider);

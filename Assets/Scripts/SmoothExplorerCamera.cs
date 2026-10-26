@@ -51,10 +51,11 @@ namespace JurassicWorld
                 keyboardActive ? Vector2.zero : ReadBrainMovement());
             turn = movement.x;
             forward = movement.y;
-            travelYaw += turn * turnSpeed * Time.deltaTime;
+            Vector2 speeds = ResolveMovementSpeeds(keyboardActive);
+            travelYaw += turn * speeds.y * Time.deltaTime;
 
             Vector3 travelDirection = Quaternion.Euler(0f, travelYaw, 0f) * Vector3.forward;
-            Vector3 desired = travelDirection * forward * moveSpeed;
+            Vector3 desired = travelDirection * forward * speeds.x;
             velocity = Vector3.Lerp(velocity, desired, 1f - Mathf.Exp(-acceleration * Time.deltaTime));
 
             // 玩家可穿过树木；仅限制探索边界，并保持地形采样眼高。
@@ -87,6 +88,17 @@ namespace JurassicWorld
             if (JurassicWorld.PlayerInputs.PlayerMovementInput.HasProvider)
                 return JurassicWorld.PlayerInputs.PlayerMovementInput.ReadMovement();
             return emotivInput != null ? emotivInput.ReadMovement() : Vector2.zero;
+        }
+
+        private Vector2 ResolveMovementSpeeds(bool keyboardActive)
+        {
+            if (!keyboardActive && !JurassicWorld.PlayerInputs.PlayerMovementInput.HasProvider
+                && emotivInput != null && emotivInput.isActiveAndEnabled)
+            {
+                var settings = emotivInput.ControlSettings;
+                return new Vector2(settings.moveSpeed, settings.turnSpeed);
+            }
+            return new Vector2(moveSpeed, turnSpeed);
         }
 
         private void MoveTo(Vector2 desiredXZ)

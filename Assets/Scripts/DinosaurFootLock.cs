@@ -111,6 +111,13 @@ namespace JurassicWorld
 
         private void LateUpdate()
         {
+            using (FootLockMarker.Auto()) UpdateFootLock();
+        }
+
+        private static readonly Unity.Profiling.ProfilerMarker FootLockMarker = new Unity.Profiling.ProfilerMarker("JurassicWorld.DinosaurFootLock");
+
+        private void UpdateFootLock()
+        {
             if (gaitFeet != null) { UpdateGaitFeet(Time.deltaTime); return; }
             if (agent != null && agent.HasFootPhaseData && leftSupport != null && rightSupport != null)
             { UpdateTRexFeet(); return; }

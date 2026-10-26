@@ -79,6 +79,8 @@ namespace JurassicWorld.Editor
             CenterForestGapFill.SeedConfigured();
             UnderstoryDetailSample.SeedConfigured();
             FoliageInteractionPreparation.SeedConfigured();
+            BushHeightAdjustment.ApplyCurrent();
+            FernHeightAdjustment.ApplyCurrent();
             ForestFloorNaturalization.Apply(UnityEngine.Object.FindObjectOfType<Terrain>());
             PteradactalSceneIntegration.AddToCurrentScene();
             RainforestAtmosphereStageOne.ApplyConfigured();
@@ -129,6 +131,8 @@ namespace JurassicWorld.Editor
             camera.clearFlags = CameraClearFlags.Skybox;
 
             EmotivPlayerInput emotivInput = cameraObject.AddComponent<EmotivPlayerInput>();
+            SetField(emotivInput, "controlSettings", AssetDatabase.LoadAssetAtPath<EmotivControlSettings>(
+                EmotivControlSettingsEditor.DefaultAssetPath));
             SmoothExplorerCamera explorer = cameraObject.AddComponent<SmoothExplorerCamera>();
             SetField(explorer, "emotivInput", emotivInput);
             // 视高由 3m 降到 1.7m 后近地视觉流速加快，同步降速以保持原有观感与人的尺度感。
@@ -837,6 +841,8 @@ namespace JurassicWorld.Editor
                 density = 1, // CoverageMode 下的实例数倍率基准（InstanceCountMode 下无副作用；写整数字面量以兼容 int/float 声明）
             });
 
+            BushHeightAdjustment.ClampDetails(data);
+
             // bush 基线算法与 spawn 点已抽为共享 helper（BuildBushBaselineDensity / DinosaurSpawnPoints）：
             // UnderstorySeeder 回滚时按同一 RNG 流重放该实现，保证逐格一致——禁止再内联复制。
             var random = CreateBushBaselineRandom();
@@ -889,6 +895,7 @@ namespace JurassicWorld.Editor
                         bush.transform.rotation = Quaternion.Euler(0f, (float)random.NextDouble() * 360f, 0f);
                         float scale = 1.2f + (float)random.NextDouble() * 0.8f;
                         bush.transform.localScale = Vector3.one * scale;
+                        BushHeightAdjustment.Clamp(bush);
 
                         foreach (Collider col in bush.GetComponentsInChildren<Collider>(true))
                             UnityEngine.Object.DestroyImmediate(col);
