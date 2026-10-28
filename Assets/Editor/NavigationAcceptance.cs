@@ -10,6 +10,8 @@ namespace JurassicWorld.Editor
     public static class NavigationAcceptance
     {
         private const string PendingKey = "JurassicWorld.NavigationAcceptance.Pending";
+        private const string LowKey = PendingKey + ".ExistingLow";
+        private static int lowTrunks, lowPlants, lowAnimals;
         private static int frames;
         private static double deadline;
         private static bool checkedMap;
@@ -53,6 +55,26 @@ namespace JurassicWorld.Editor
             try
             {
                 Install();
+                SessionState.SetBool(LowKey, false);
+                SessionState.SetBool(PendingKey, true);
+                EditorApplication.playModeStateChanged -= OnPlayModeChanged;
+                EditorApplication.playModeStateChanged += OnPlayModeChanged;
+                EditorApplication.isPlaying = true;
+            }
+            catch (Exception error) { Finish(error); }
+        }
+
+        // Performance regressions must not rebuild or save the authored scene.
+        public static void VerifyExistingLow()
+        {
+            try
+            {
+                if (EditorApplication.isPlayingOrWillChangePlaymode || EditorSceneManager.GetActiveScene().isDirty)
+                    throw new InvalidOperationException("Stop Play and save before verifying existing navigation.");
+                EditorSceneManager.OpenScene("Assets/Scenes/Main.unity");
+                if (UnityEngine.Object.FindObjectOfType<WorldNavigationHud>() == null)
+                    throw new InvalidOperationException("Main has no authored navigation HUD; verification will not install one.");
+                SessionState.SetBool(LowKey, true);
                 SessionState.SetBool(PendingKey, true);
                 EditorApplication.playModeStateChanged -= OnPlayModeChanged;
                 EditorApplication.playModeStateChanged += OnPlayModeChanged;
@@ -64,6 +86,8 @@ namespace JurassicWorld.Editor
         private static void OnPlayModeChanged(PlayModeStateChange state)
         {
             if (state != PlayModeStateChange.EnteredPlayMode) return;
+            if (SessionState.GetBool(LowKey, false))
+                UnityEngine.Object.FindObjectOfType<GraphicsQualityController>().ApplyTier(0);
             deadline = EditorApplication.timeSinceStartup + 90;
             EditorApplication.update += Verify;
         }
@@ -81,6 +105,21 @@ namespace JurassicWorld.Editor
                 frames++;
                 WorldNavigationHud nav = UnityEngine.Object.FindObjectOfType<WorldNavigationHud>();
                 if (nav == null || !nav.MapReady || frames < 20) return;
+                if (SessionState.GetBool(LowKey, false))
+                {
+                    Require(UnityEngine.Object.FindObjectsOfType<GraphicsQualityController>().Length == 1, "Duplicate graphics controller after scene load.");
+                    var graphics = UnityEngine.Object.FindObjectOfType<GraphicsQualityController>();
+                    Require(graphics.SelectedTier == 0, "Low selection did not survive scene reload.");
+                    var foliage = UnityEngine.Object.FindObjectOfType<FoliageInteractionSystem>();
+                    Require(foliage != null && !foliage.ContactSamplingEnabled && foliage.ActiveTreeCount == 0, "Low contact budget not applied after scene load.");
+                    var reflection = Camera.main.GetComponent<Crest.OceanPlanarReflection>();
+                    Require(reflection != null && !reflection.enabled, "Low reflection not disabled after scene load.");
+                    int trunks = UnityEngine.Object.FindObjectsOfType<SceneTreeObstacle>().Length;
+                    int plants = UnityEngine.Object.FindObjectsOfType<InteractiveFoliage>().Length;
+                    int animals = UnityEngine.Object.FindObjectsOfType<DinosaurAgent>().Length;
+                    if (!checkedMap) { lowTrunks = trunks; lowPlants = plants; lowAnimals = animals; }
+                    else Require(trunks == lowTrunks && plants == lowPlants && animals == lowAnimals, "Low population changed across scene reload.");
+                }
                 if (!checkedMap)
                 {
                     Require(UnityEngine.Object.FindObjectsOfType<WorldNavigationHud>().Length == 1, "Duplicate navigation HUD.");
@@ -282,6 +321,7 @@ namespace JurassicWorld.Editor
         private static void Finish(Exception error)
         {
             SessionState.SetBool(PendingKey, false);
+            SessionState.SetBool(LowKey, false);
             EditorApplication.update -= Verify;
             EditorApplication.playModeStateChanged -= OnPlayModeChanged;
             if (error != null) Debug.LogException(error);

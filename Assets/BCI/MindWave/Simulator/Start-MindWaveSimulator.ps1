@@ -24,8 +24,34 @@ public static class MindWaveSimulator
 {
     public static byte[] Packet(int attention, int signal)
     {
-        return new byte[] { 0xAA, 0xAA, 4, 2, (byte)signal, 4, (byte)attention,
-            (byte)(~(2 + signal + 4 + attention) & 255) };
+        // TGAM's 1Hz summary: signal, eSense and eight 24-bit band powers.
+        // All values here are synthetic; raw samples do not calculate the attention value.
+        byte[] payload = new byte[32];
+        payload[0] = 2; payload[1] = (byte)signal;
+        payload[2] = 4; payload[3] = (byte)attention;
+        payload[4] = 5; payload[5] = 50;
+        payload[6] = 0x83; payload[7] = 24;
+        for (int band = 0; band < 8; band++)
+        {
+            int power = 1000 + band * 100;
+            payload[8 + band * 3] = (byte)(power >> 16);
+            payload[9 + band * 3] = (byte)(power >> 8);
+            payload[10 + band * 3] = (byte)power;
+        }
+        return Frame(payload);
+    }
+
+    public static byte[] RawPacket(short sample)
+    { return Frame(new byte[] { 0x80, 2, (byte)(sample >> 8), (byte)sample }); }
+
+    private static byte[] Frame(byte[] payload)
+    {
+        byte[] packet = new byte[payload.Length + 4];
+        packet[0] = packet[1] = 0xAA; packet[2] = (byte)payload.Length;
+        int sum = 0;
+        for (int i = 0; i < payload.Length; i++) { packet[i + 3] = payload[i]; sum += payload[i]; }
+        packet[packet.Length - 1] = (byte)(~sum & 255);
+        return packet;
     }
 
     public static void Run(string mode, int port, string serialName, int attention, int signal,
@@ -40,6 +66,7 @@ public static class MindWaveSimulator
         bool paused = false, configured = false, rejected = false, quit = false;
         Stopwatch clock = Stopwatch.StartNew();
         double next = 0;
+        double nextRaw = 0;
         int previousStage = -1;
         try
         {
@@ -49,6 +76,7 @@ public static class MindWaveSimulator
                 serial.WriteTimeout = 1000;
                 serial.Open();
                 Console.WriteLine("Binary ThinkGear sender -> " + serialName + " @57600. Not a Bluetooth emulator.");
+                Console.WriteLine("Synthetic raw EEG: 512 packets/s; attention/signal/band powers: 1 packet/s. Allow about 20 seconds for legacy TGC identification.");
             }
             else
             {
@@ -115,6 +143,26 @@ public static class MindWaveSimulator
                         attention = values[stage]; signal = stage == 5 ? 200 : 0; paused = stage == 7;
                         if (stage == 8 && client != null) { client.Close(); client = null; configured = false; }
                         Console.WriteLine("Auto stage " + stage + ": attention=" + attention + " signal=" + signal + " paused=" + paused);
+                    }
+                }
+                // Legacy SDK 3.2 identifies TGAM after 768 packets. A 1Hz-only stream times out first.
+                // Batch writes preserve the 512Hz sample count without relying on 2ms OS timer precision.
+                if (serial != null)
+                {
+                    double now = clock.Elapsed.TotalSeconds;
+                    if (paused) nextRaw = now;
+                    else
+                    {
+                        int samples = Math.Min(256, Math.Max(0, (int)((now - nextRaw) * 512) + 1));
+                        if (samples > 0)
+                        {
+                            byte[] raw = RawPacket(0);
+                            byte[] batch = new byte[samples * raw.Length];
+                            for (int sample = 0; sample < samples; sample++)
+                                Buffer.BlockCopy(raw, 0, batch, sample * raw.Length, raw.Length);
+                            serial.Write(batch, 0, batch.Length);
+                            nextRaw += samples / 512.0;
+                        }
                     }
                 }
                 if (clock.Elapsed.TotalSeconds >= next)

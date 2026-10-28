@@ -26,11 +26,19 @@ namespace JurassicWorld.Editor
 
         [MenuItem("Jurassic World/Performance/Capture Frame Debugger")]
         public static void Run()
+        { Start(false); }
+
+        [MenuItem("Jurassic World/Performance/Low/Capture Creek Frame Debugger %&#F11")]
+        public static void RunLow()
+        { Start(true); }
+
+        private static void Start(bool low)
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode || EditorSceneManager.GetActiveScene().isDirty)
                 throw new InvalidOperationException("Stop Play and save before Frame Debugger capture.");
             EditorSceneManager.OpenScene("Assets/Scenes/Main.unity");
             phase = 0;
+            SessionState.SetBool(Key + ".Low", low);
             if (!Application.isBatchMode)
             {
                 // The native debugger needs a visible Game view to collect frame events.
@@ -63,16 +71,24 @@ namespace JurassicWorld.Editor
                 if (phase == 0)
                 {
                     foreach (var input in UnityEngine.Object.FindObjectsOfType<SmoothExplorerCamera>()) input.enabled = false;
-                    UnityEngine.Object.FindObjectOfType<GraphicsQualityController>().ApplyTier(1);
+                    bool low = SessionState.GetBool(Key + ".Low", false);
+                    UnityEngine.Object.FindObjectOfType<GraphicsQualityController>().ApplyTier(low ? 0 : 1);
                     var camera = Camera.main;
                     target = new RenderTexture(1920, 1080, 24); target.Create(); camera.targetTexture = target;
-                    camera.transform.SetPositionAndRotation(new Vector3(-14, 1.7f, 5), Quaternion.Euler(4.8321f, 0, 0));
+                    camera.transform.SetPositionAndRotation(low ? new Vector3(64.1548f, 1.699f, -18f) : new Vector3(-14, 1.7f, 5),
+                        low ? Quaternion.Euler(9.2015f, 325.9788f, 0) : Quaternion.Euler(4.8321f, 0, 0));
                     utility = typeof(EditorWindow).Assembly.GetType("UnityEditorInternal.FrameDebuggerInternal.FrameDebuggerUtility", true);
                     if (!(bool)Call("get_locallySupported")) throw new InvalidOperationException("Local Frame Debugger unsupported.");
                     ready = EditorApplication.timeSinceStartup + 5; phase = 1; return;
                 }
                 if (EditorApplication.timeSinceStartup < ready) return;
-                if (phase == 1) { Call("SetEnabled", true, 0); ready = EditorApplication.timeSinceStartup + 3; phase = 2; return; }
+                if (phase == 1)
+                {
+                    EditorApplication.isPaused = true;
+                    Call("SetEnabled", true, UnityEditorInternal.ProfilerDriver.connectedProfiler);
+                    UnityEditorInternal.InternalEditorUtility.RepaintAllViews();
+                    ready = EditorApplication.timeSinceStartup + 3; phase = 2; return;
+                }
                 var events = (Array)Call("GetFrameEvents");
                 if (events.Length == 0)
                 {
@@ -112,6 +128,7 @@ namespace JurassicWorld.Editor
         private static void Finish(int code)
         {
             if (utility != null) Call("SetEnabled", false, 0);
+            EditorApplication.isPaused = false;
             if (Camera.main != null) Camera.main.targetTexture = null;
             if (target != null) UnityEngine.Object.Destroy(target);
             SessionState.SetInt(Key + ".Code", code); SessionState.SetBool(Key + ".Exit", true);

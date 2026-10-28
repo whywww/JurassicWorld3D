@@ -7,7 +7,7 @@
 1. 在项目根目录打开 PowerShell，启动模拟器：
 
    ```powershell
-   .\Assets\BCI\MindWave\Simulator\Start-MindWaveSimulator.ps1 -Attention 70
+   powershell.exe -NoProfile -ExecutionPolicy Bypass -File ".\Assets\BCI\MindWave\Simulator\Start-MindWaveSimulator.ps1" -Attention 70
    ```
 
 2. Unity 菜单 **Jurassic World > BCI > MindWave Settings**：选择 `TcpSimulator`，保存，打开主场景后进入 Play。无需改场景或挂组件。
@@ -47,22 +47,24 @@
 
 ## 经过官方 Connector 的无设备模拟
 
-当前没有安装虚拟串口，以下完整链路尚待验证，不能据 TCP 测试宣称已通过：
+2026-10-28 已在本机用 HHD 的 COM2 ↔ COM3 和 SDK 自带官方 Connector 验证到 TCP/JSON 输出；具体证据见 `Validation.md`：
 
 `二进制模拟器 → 虚拟 COM 对 → 官方 Connector → TCP/JSON → Unity`
 
-1. 当前主机为 Windows 11 x64（build 26200）。从 [HHD Software 官方虚拟串口站点](https://freevirtualserialports.com/) 手动安装支持 Windows 11 的版本，创建一对空闲端口，例如 COM20 ↔ COM21。厂商声明支持 Windows 11 和签名驱动；此主机尚未实际安装验证。免费版有许可和功能限制，安装前查看官网条款。无需关闭驱动签名验证。
-2. 启动二进制模拟器，独占 COM20：
+1. 当前主机为 Windows 11 x64（build 26200）。从 [HHD Software 官方虚拟串口站点](https://freevirtualserialports.com/) 安装工具后，创建一对空闲端口，例如本机已验证的 COM2 ↔ COM3。免费版有许可和功能限制，安装前查看官网条款。无需关闭驱动签名验证。
+2. 启动二进制模拟器，独占 COM2：
 
    ```powershell
-   .\Assets\BCI\MindWave\Simulator\Start-MindWaveSimulator.ps1 -Mode Serial -SerialPort COM20 -Attention 70
+   powershell.exe -NoProfile -ExecutionPolicy Bypass -File ".\Assets\BCI\MindWave\Simulator\Start-MindWaveSimulator.ps1" -Mode Serial -SerialPort COM2 -Attention 70
    ```
 
-3. 打开官方 Connector，将 **Starting port** 指向 COM21，观察是否识别与接收。模拟器为 57600 baud、8N1，每秒发包，payload 为 `02 <poorSignal> 04 <attention>`，包带 `AA AA` 同步头、长度和反码校验和。
+3. 打开官方 Connector，将 **Starting port** 指向 COM3，必要时点击“重试耳机连接”。模拟器为 57600 baud、8N1，发送 512 Hz 的合成 raw EEG 包和 1 Hz 的汇总包（信号质量、attention、meditation、八个频段功率），均带 `AA AA` 同步头、长度和反码校验和。初次识别可等待约 20 秒。
 4. Unity 选择 `Connector`，观察 attention=70 和 forward target=0.50，再测试信号差、暂停与恢复。
 5. 若 Connector 不识别该虚拟端口，保存 Connector 日志、COM 号和 Unity 诊断信息，将结果记为未通过，不添加猜测性的私有握手。可继续用 TCP 模拟器验证 Unity。
 
 模拟器没有复现蓝牙配对和设备发现；即使该链路通过，也不代表真实蓝牙和佩戴质量通过。真实设备只能被一个设备/应用直接占用；使用 Connector 时关闭直接占用耳机 COM 的官方 Tutorial 等工具。
+
+SDK 3.2 的 .NET 接收器需先累计 768 个包识别 TGAM。旧模拟器仅以 1 Hz 发送 attention 包，会在完成识别前被 Connector 判为超时；更新脚本后必须退出旧模拟器进程，再重新启动。raw 数据和频段功率均为合成测试值，不代表真人 EEG，也不用于计算这里手动设置的 attention。此要求属于该版本官方 Connector 的设备识别流程，Unity 仍只使用 1 Hz 的 attention 和信号质量。
 
 ## 输入和有效性规则
 
@@ -91,6 +93,7 @@
 - 连续 Play 生命周期：隔离工程 Batch 入口 `JurassicWorld.BCI.MindWave.Tests.MindWaveAcceptance.RunPlayLifecycle`，加 `-mindwaveSource TcpSimulator`；检查关闭 Domain Reload 后两次 Play 的注册与 TCP 线程释放。
 - 删除验收：从项目根运行 `Assets/BCI/MindWave/Tests/Test-Removal.ps1`。脚本创建不含模块的完整隔离副本，运行原输入回归并构建 Windows；不会删除或移动原项目。副本与构建位于忽略的 Builds 目录，可能占用数 GB。
 - SDK 文件模式探测：64 位 Python 运行 `Tests/Probe-Sdk.py`。测试结果：官方 DLL 成功从二进制文件读取 attention=70；文本 hex 和原 streamLog 格式不能直接作为同样的二进制输入。此功能不作为 Unity 运行后端。
+- 官方 .NET 串口帧回归：`powershell.exe -NoProfile -ExecutionPolicy Bypass -File "Assets/BCI/MindWave/Tests/Test-SerialFrames.ps1" -ConnectorDirectory "官方 Connector 所在目录"`。自动使用 32 位 PowerShell，验证生产数据帧及校验和、768 包识别和 attention/信号质量解析，不打开 COM 端口。
 
 验收结果见 `Validation.md`。软件模拟不能验证真实 attention 控制体验、蓝牙可靠性或佩戴信号质量。
 

@@ -38,6 +38,11 @@ namespace JurassicWorld
 
         internal void SamplePose(float deltaTime)
         {
+            if (FoliageInteractionSystem.Instance != null && !FoliageInteractionSystem.Instance.ContactSamplingEnabled)
+            {
+                ResetHistory();
+                return;
+            }
             if (contacts == null || contacts.Length != capsules.Length) contacts = new FoliageContact[capsules.Length];
             bool reset = !hasPrevious || deltaTime <= 0f ||
                 (transform.position - previousRoot).sqrMagnitude > teleportDistance * teleportDistance;

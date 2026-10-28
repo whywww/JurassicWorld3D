@@ -37,7 +37,7 @@ namespace JurassicWorld
 
         private void Awake()
         {
-            selectedTier = RuntimePerformanceBenchmark.Requested ? Medium : Mathf.Clamp(PlayerPrefs.GetInt(PreferenceKey, Medium), Low, High);
+            selectedTier = RuntimePerformanceBenchmark.Requested ? RuntimePerformanceBenchmark.RequestedQuality : Mathf.Clamp(PlayerPrefs.GetInt(PreferenceKey, Medium), Low, High);
             QualitySettings.SetQualityLevel(selectedTier, true);
             SceneManager.sceneLoaded += OnSceneLoaded;
         }
@@ -101,6 +101,9 @@ namespace JurassicWorld
                 system.ApplyQuality(selectedTier, camera);
             foreach (RainforestAtmosphereController atmosphere in FindObjectsOfType<RainforestAtmosphereController>())
                 atmosphere.ApplyQuality(selectedTier);
+            var rendering = GetComponent<LowQualityRendering>();
+            if (rendering == null) rendering = gameObject.AddComponent<LowQualityRendering>();
+            rendering.ApplyQuality(selectedTier);
 
             float detailDistanceScale = selectedTier == High ? 1f : selectedTier == Medium ? 0.75f : 0.5f;
             float detailDensityScale = selectedTier == High ? 1f : selectedTier == Medium ? 0.75f : 0.4f;

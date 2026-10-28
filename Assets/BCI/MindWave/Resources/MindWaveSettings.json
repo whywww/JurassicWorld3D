@@ -1,12 +1,12 @@
 {
-  "source": "Original",
-  "host": "127.0.0.1",
-  "simulatorPort": 13855,
-  "connectorPort": 13854,
-  "attentionThreshold": 40,
-  "sampleTimeout": 3.0,
-  "showDiagnostics": true,
-  "requestAuthorization": false,
-  "appName": "JurassicWorld",
-  "appKey": "b789b7a7f21e29a3907b8d584af1e7455e894a56"
+    "source": "Connector",
+    "host": "127.0.0.1",
+    "simulatorPort": 13855,
+    "connectorPort": 13854,
+    "attentionThreshold": 40,
+    "sampleTimeout": 3.0,
+    "showDiagnostics": true,
+    "requestAuthorization": false,
+    "appName": "JurassicWorld",
+    "appKey": "b789b7a7f21e29a3907b8d584af1e7455e894a56"
 }

@@ -75,6 +75,30 @@ namespace JurassicWorld.Editor
             return (1.18f + 0.14f * Mathf.Sin(z * 0.31f)) * Mathf.Lerp(0.12f, 1f, taper);
         }
 
+        // Reuse the authored river curve; this mesh never changes terrain, vegetation or navigation.
+        internal static Mesh LowQualitySurface()
+        {
+            int count = Mathf.CeilToInt((EndZ - StartZ) * 2f);
+            var vertices = new Vector3[(count + 1) * 2];
+            var uv = new Vector2[vertices.Length];
+            var triangles = new int[count * 6];
+            for (int i = 0; i <= count; i++)
+            {
+                float z = Mathf.Lerp(StartZ, EndZ, i / (float)count);
+                float width = HalfWidth(z) + .6f;
+                vertices[i * 2] = new Vector3(Center(z) - width, WaterY, z);
+                vertices[i * 2 + 1] = new Vector3(Center(z) + width, WaterY, z);
+                uv[i * 2] = new Vector2(0, z / 3f); uv[i * 2 + 1] = new Vector2(1, z / 3f);
+                if (i == count) continue;
+                int t = i * 6, v = i * 2;
+                triangles[t] = v; triangles[t + 1] = v + 2; triangles[t + 2] = v + 1;
+                triangles[t + 3] = v + 1; triangles[t + 4] = v + 2; triangles[t + 5] = v + 3;
+            }
+            var mesh = new Mesh { name = "Low quality authored creek strip", vertices = vertices, uv = uv, triangles = triangles };
+            mesh.RecalculateNormals(); mesh.RecalculateBounds();
+            return mesh;
+        }
+
         static float Distance(float x, float z)
         {
             float best = float.MaxValue;

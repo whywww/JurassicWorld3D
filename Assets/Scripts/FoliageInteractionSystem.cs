@@ -24,6 +24,8 @@ namespace JurassicWorld
         private readonly List<InteractiveFoliage> candidates = new List<InteractiveFoliage>();
         private readonly HashSet<InteractiveFoliage> queried = new HashSet<InteractiveFoliage>();
         private bool wasEnabled = true;
+        private bool qualityAllowsInteractions = true;
+        internal bool ContactSamplingEnabled => interactionsEnabled && qualityAllowsInteractions && isActiveAndEnabled;
         private Camera interactionCamera;
         private float interactionDistanceSquared = float.PositiveInfinity, resetDistanceSquared = float.PositiveInfinity;
         internal int ActiveTreeCount => active.Count;
@@ -43,6 +45,12 @@ namespace JurassicWorld
 
         internal void ApplyQuality(int tier, Camera camera)
         {
+            bool allowed = tier != 0 || LowQualityRendering.Stage == LowQualityRendering.OptimizationStage.Baseline;
+            if (qualityAllowsInteractions != allowed)
+            {
+                ClearInteraction();
+                qualityAllowsInteractions = allowed;
+            }
             interactionCamera = camera;
             float distance = tier >= 2 ? 85f : tier == 1 ? 55f : 35f;
             interactionDistanceSquared = distance * distance;
@@ -66,7 +74,7 @@ namespace JurassicWorld
 
         internal void Step(float deltaTime)
         {
-            if (!interactionsEnabled || !enabled)
+            if (!interactionsEnabled || !qualityAllowsInteractions || !enabled)
             {
                 if (wasEnabled) ClearInteraction();
                 wasEnabled = false; return;

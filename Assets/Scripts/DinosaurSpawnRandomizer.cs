@@ -95,7 +95,8 @@ namespace JurassicWorld
                 : Vector2.zero;
 
             var settings = UnityEngine.Object.FindObjectOfType<DinosaurInteractionSettings>();
-            LastSpawnSeed = settings != null && settings.spawnSeed != 0 ? settings.spawnSeed : System.Environment.TickCount;
+            LastSpawnSeed = RuntimePerformanceBenchmark.Requested ? 73021 :
+                settings != null && settings.spawnSeed != 0 ? settings.spawnSeed : System.Environment.TickCount;
             Debug.Log($"[SpawnRandomizer] seed={LastSpawnSeed}");
             var random = new System.Random(LastSpawnSeed);
             var routeOrder = new int[MovementCorridor.RouteCount];
