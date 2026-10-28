@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace JurassicWorld.PlayerInputs
 {
-    // Optional modules register on the main thread before scene OnEnable callbacks.
+    // Selected scene components register on the main thread before movement Update.
     // Keeping this contract independent lets the project compile after a module is removed.
     public static class PlayerMovementInput
     {

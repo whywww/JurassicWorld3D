@@ -247,9 +247,9 @@ namespace JurassicWorld.BCI.MindWave.Tests
             {
                 if (state == PlayModeStateChange.EnteredPlayMode)
                 {
-                    var roots = UnityEngine.Object.FindObjectsOfType<MindWaveBootstrap>();
+                    var roots = UnityEngine.Object.FindObjectsOfType<MindWavePlayerInput>();
                     if (roots.Length != 1 || !PlayerMovementInput.HasProvider) { finish(false, "Missing/duplicate provider"); return; }
-                    capturedClient = (ThinkGearClient)typeof(MindWaveBootstrap).GetField("client", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(roots[0]);
+                    capturedClient = (ThinkGearClient)typeof(MindWavePlayerInput).GetField("client", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(roots[0]);
                     leaveAt = EditorApplication.timeSinceStartup + 1;
                 }
                 if (state == PlayModeStateChange.EnteredEditMode)

@@ -133,6 +133,10 @@ namespace JurassicWorld.Editor
             EmotivPlayerInput emotivInput = cameraObject.AddComponent<EmotivPlayerInput>();
             SetField(emotivInput, "controlSettings", AssetDatabase.LoadAssetAtPath<EmotivControlSettings>(
                 EmotivControlSettingsEditor.DefaultAssetPath));
+            emotivInput.enabled = false;
+            // Optional modules are discovered by name so either folder can be removed independently.
+            AddOptionalBrainInput(cameraObject, "JurassicWorld.BCI.MindWave.MindWavePlayerInput, JurassicWorld.MindWave", true);
+            AddOptionalBrainInput(cameraObject, "JurassicWorld.BCI.BrainLink.BrainLinkPlayerInput, JurassicWorld.BrainLink", false);
             SmoothExplorerCamera explorer = cameraObject.AddComponent<SmoothExplorerCamera>();
             SetField(explorer, "emotivInput", emotivInput);
             // 视高由 3m 降到 1.7m 后近地视觉流速加快，同步降速以保持原有观感与人的尺度感。
@@ -148,6 +152,14 @@ namespace JurassicWorld.Editor
         }
 
         // ---------------------------------------------------------------- 灯光 / 天空 / 风
+
+        private static void AddOptionalBrainInput(GameObject camera, string typeName, bool selected)
+        {
+            var type = Type.GetType(typeName, false);
+            if (type == null) return;
+            var component = (Behaviour)camera.AddComponent(type);
+            component.enabled = selected;
+        }
 
         private static void BuildLighting()
         {

@@ -1,0 +1,5 @@
+{
+  "name": "JurassicWorld.BrainLink.Editor",
+  "references": ["JurassicWorld.BrainLink", "JurassicWorld.PlayerInput", "JurassicWorld.PlayerInput.Editor"],
+  "includePlatforms": ["Editor"]
+}

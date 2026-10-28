@@ -23,6 +23,8 @@ public static class MindWaveRemovalBuild
         if (Camera.main == null || Camera.main.GetComponent<JurassicWorld.SmoothExplorerCamera>() == null
             || Camera.main.GetComponent<JurassicWorld.EmotivPlayerInput>() == null)
             throw new System.Exception("Original player inputs missing");
+        UnityEditor.GameObjectUtility.RemoveMonoBehavioursWithMissingScript(Camera.main.gameObject);
+        EditorSceneManager.SaveScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene());
         var report = BuildPipeline.BuildPlayer(new[] { "Assets/Scenes/Main.unity" },
             "Builds/Removal/JurassicWorld.exe", BuildTarget.StandaloneWindows64, BuildOptions.Development);
         bool ok = report.summary.result == UnityEditor.Build.Reporting.BuildResult.Succeeded;

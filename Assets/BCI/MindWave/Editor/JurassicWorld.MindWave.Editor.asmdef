@@ -1,6 +1,12 @@
 {
   "name": "JurassicWorld.MindWave.Editor",
   "rootNamespace": "JurassicWorld.BCI.MindWave.Editor",
-  "references": ["JurassicWorld.MindWave", "JurassicWorld.PlayerInput"],
-  "includePlatforms": ["Editor"]
+  "references": [
+    "JurassicWorld.MindWave",
+    "JurassicWorld.PlayerInput",
+    "JurassicWorld.PlayerInput.Editor"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ]
 }

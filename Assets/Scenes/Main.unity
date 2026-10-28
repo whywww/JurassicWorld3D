@@ -226237,8 +226237,10 @@ GameObject:
   - component: {fileID: 843010364}
   - component: {fileID: 843010363}
   - component: {fileID: 843010366}
-  - component: {fileID: 843010367}
   - component: {fileID: 843010368}
+  - component: {fileID: 843010367}
+  - component: {fileID: 843010369}
+  - component: {fileID: 843010370}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -226399,6 +226401,47 @@ MonoBehaviour:
   exposure: 1.05
   bloom: 0.045
   tier: 1
+--- !u!114 &843010369
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 843010361}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 84a017816df6cd54a8f5ca9265a57d96, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  settings:
+    source: Connector
+    host: 127.0.0.1
+    simulatorPort: 13855
+    connectorPort: 13854
+    attentionThreshold: 40
+    sampleTimeout: 3
+    showDiagnostics: 1
+    requestAuthorization: 0
+    appName: JurassicWorld
+    appKey: b789b7a7f21e29a3907b8d584af1e7455e894a56
+--- !u!114 &843010370
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 843010361}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 629d6a570de94743b48df9934df7e238, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  settings:
+    host: 127.0.0.1
+    port: 13856
+    attentionThreshold: 40
+    sampleTimeout: 3
+    showDiagnostics: 1
 --- !u!1001 &843459756
 PrefabInstance:
   m_ObjectHideFlags: 0

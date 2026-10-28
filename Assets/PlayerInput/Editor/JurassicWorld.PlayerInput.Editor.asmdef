@@ -1,0 +1,6 @@
+{
+  "name": "JurassicWorld.PlayerInput.Editor",
+  "references": ["JurassicWorld.PlayerInput"],
+  "includePlatforms": ["Editor"],
+  "autoReferenced": true
+}

@@ -38,6 +38,13 @@ namespace JurassicWorld.BCI.MindWave
             var result = new MindWaveSettings();
             var asset = Resources.Load<TextAsset>("MindWaveSettings");
             if (asset != null) JsonUtility.FromJsonOverwrite(asset.text, result);
+            ApplyArguments(result);
+            result.Validate();
+            return result;
+        }
+
+        public static void ApplyArguments(MindWaveSettings result)
+        {
             string[] args = Environment.GetCommandLineArgs();
             for (int i = 0; i + 1 < args.Length; i++)
             {
@@ -48,8 +55,6 @@ namespace JurassicWorld.BCI.MindWave
                     result.simulatorPort = result.connectorPort = port;
                 }
             }
-            result.Validate();
-            return result;
         }
     }
 }

@@ -9,7 +9,7 @@ using Stopwatch = System.Diagnostics.Stopwatch;
 namespace JurassicWorld
 {
     [DisallowMultipleComponent]
-    public sealed class EmotivPlayerInput : MonoBehaviour
+    public sealed class EmotivPlayerInput : MonoBehaviour, JurassicWorld.PlayerInputs.IBrainControlInput
     {
         private string appName;
         private string profileName;
@@ -83,6 +83,7 @@ namespace JurassicWorld
 
         private void OnEnable()
         {
+            if (!JurassicWorld.PlayerInputs.BrainInputSelection.CanStart(this)) return;
             if (Application.isPlaying && (runtimeSettings == null || runtimeSession != playSession)) CreateRuntimeSettings();
             if (JurassicWorld.PlayerInputs.PlayerMovementInput.HasProvider) return;
 #if USE_EMBEDDED_LIB || (!UNITY_EDITOR_WIN && !UNITY_STANDALONE_WIN)

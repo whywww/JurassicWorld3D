@@ -1,0 +1,5 @@
+{
+  "name": "JurassicWorld.BrainLink",
+  "references": ["JurassicWorld.PlayerInput"],
+  "autoReferenced": true
+}

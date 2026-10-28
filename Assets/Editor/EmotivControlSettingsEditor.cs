@@ -73,7 +73,7 @@ namespace JurassicWorld.Editor
     }
 
     [CustomEditor(typeof(EmotivPlayerInput))]
-    public sealed class EmotivPlayerInputEditor : UnityEditor.Editor
+    public sealed class EmotivPlayerInputEditor : JurassicWorld.PlayerInputs.Editor.BrainInputEditor
     {
         public override void OnInspectorGUI()
         {
