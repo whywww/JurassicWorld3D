@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Baurusuchus Gait
   m_EditorClassIdentifier: 
   clip: {fileID: 7400000, guid: 7fd7e4ff2f9c426448c75b2555777f5c, type: 2}
-  groundSpeed: 0.6022533
-  heightCorrection: -0.13882418
+  groundSpeed: 0.90338
+  heightCorrection: -0.20823628
   turnSpeed: 24
   loopStart: 0
   loopEnd: 1.35

@@ -649,6 +649,33 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   allowOffRouteInteraction: 1
+  spawnSeed: 0
+  spaceSearchInterval: 0.5
+  spaceFailureTimeout: 2
+  spaceSearchRadii:
+  - 4
+  - 8
+  - 12
+  - 16
+  spaceSearchDirections: 8
+  safeExitRetryInterval: 2
+  exitReviewInterval: 0.5
+  exitLookAhead: 8
+  exitSampleSpacing: 2
+  exitRouteDeviation: 1
+  exitHeadingChange: 15
+  exitPlanningBudgetMs: 0.5
+  exitPathQueriesPerFrame: 2
+  exitPoseChecksPerFrame: 32
+  exitAngles:
+  - 0
+  - 15
+  - 30
+  - 45
+  - 60
+  - 90
+  - 135
+  - 180
   navigationData: {fileID: 23800000, guid: 85c2c08d2bfc30441bb1bc641ea25eea, type: 2}
   solidObstacles: []
   navigationRadius: 10.47441
@@ -798,40 +825,49 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bb2f111e02c1d984689524b03f372298, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  continuousLookAheadDistance: 4.5
+  continuousMinTurnRadius: 3.75
+  continuousProbeDistance: 4.5
+  continuousYawAcceleration: 30
   playerInteractionEnabled: 1
   viewCamera: {fileID: 1028963904}
   displayName: "\u9738\u738B\u9F99"
   movementHeight: 0
-  collisionRadius: 5
-  viewFocusHeight: 3.5
+  collisionRadius: 7.5
+  viewFocusHeight: 5.25
   visualYaw: 0
-  walkSpeed: 2.3486404
-  approachSpeed: 3.1706645
-  moveAnimationGroundSpeed: 2.3486404
+  walkSpeed: 3.5229607
+  approachSpeed: 4.7559967
+  moveAnimationGroundSpeed: 3.5229607
+  gaitProfile: {fileID: 0}
   moveClipLoopStart: 2.7583084
   moveClipLoopEnd: 5.4169188
   description: "\u9738\u738B\u9F99  Tyrannosaurus Rex\n\n\u751F\u5B58\u5E74\u4EE3\uFF1A\u665A\u767D\u57A9\u4E16\n\u98DF\u6027\uFF1A\u8089\u98DF\u6027\n\u4F53\u578B\uFF1A\u7EA6
     15 \u7C73\n\n\u5F3A\u58EE\u7684\u9876\u7EA7\u63A0\u98DF\u8005\uFF0C\u62E5\u6709\u60CA\u4EBA\u7684\u54AC\u5408\u529B\u3002"
   groundObstacleAware: 1
   minimapPortrait: {fileID: 21300000, guid: 4026d6a91be6e2b46aa9ad7559d0c600, type: 3}
+  freezePoseWhenStopped: 0
   interactionProfile: {fileID: 11400000, guid: b7319b67299ce204da855202d1a8aa2b, type: 2}
   interactionBody: {fileID: 573798173}
   detectionDistance: 24
   detectionAngle: 100
   detectionHold: 0.3
-  followDistance: 10
-  interactionDuration: 15
   lostSightGrace: 3
   interactionCooldown: 10
   replanInterval: 0.5
   playerReplanDistance: 2
   blockedReplanDelay: 2
+  species: 0
+  safetyDistance: 15
+  safetyReleaseDistance: 20
   roamingMode: 1
+  traceFreeRoamTurns: 0
   frontDetectionDistance: 32
   frontNearDistance: 10
   frontResumeDistance: 15
   frontFollowDuration: 30
   frontReturnWalkTime: 3
+  sideRoarHandoffDuration: 0.4
 --- !u!4 &379201638
 Transform:
   m_ObjectHideFlags: 0
@@ -865,58 +901,58 @@ MonoBehaviour:
   - bone: {fileID: 169436186}
     start: {x: 0.0013786554, y: 0.34452924, z: -0.86839396}
     end: {x: 0.0013786554, y: 0.34452924, z: 1.8217738}
-    radius: 1.1156281
+    radius: 1.6734421
   - bone: {fileID: 2054687193}
     start: {x: 0.001378715, y: 0.48409355, z: -1.0502341}
     end: {x: 0.001378715, y: 0.48409355, z: 1.54656}
-    radius: 1.3326422
+    radius: 1.9989634
   - bone: {fileID: 264046187}
     start: {x: 0.0073767304, y: -0.026948273, z: -1.2088612}
     end: {x: 0.0073767304, y: -0.026948273, z: -0.1869905}
-    radius: 0.6581313
+    radius: 0.9871969
   - bone: {fileID: 854441034}
     start: {x: 0.01082617, y: 0.30215842, z: -1.0611756}
     end: {x: 0.01082617, y: 0.30215842, z: 0.7333015}
-    radius: 0.62898856
+    radius: 0.9434829
   - bone: {fileID: 541727614}
     start: {x: -0.4876366, y: 0.09965019, z: 0.23253915}
     end: {x: 0.56922996, y: 0.09965019, z: 0.23253915}
-    radius: 0.29310971
+    radius: 0.43966457
   - bone: {fileID: 1317496572}
     start: {x: 0.0023874044, y: -0.5198335, z: -0.2864322}
     end: {x: 0.0023874044, y: 2.1690974, z: -0.2864322}
-    radius: 0.9381969
+    radius: 1.4072953
   - bone: {fileID: 579043294}
     start: {x: 0.0045674443, y: 0.3021112, z: -2.1596859}
     end: {x: 0.0045674443, y: 0.3021112, z: 0.7483008}
-    radius: 1.4057063
+    radius: 2.1085594
   - bone: {fileID: 2045088701}
     start: {x: 0.006878257, y: 0.8656761, z: -1.2699813}
     end: {x: 0.006878257, y: 0.8656761, z: 0.8172165}
-    radius: 0.91919833
+    radius: 1.3787975
   - bone: {fileID: 477846504}
     start: {x: -0.005926132, y: -0.33633482, z: -0.06265193}
     end: {x: -0.005926132, y: 1.5367435, z: -0.06265193}
-    radius: 0.97757095
+    radius: 1.4663564
   - bone: {fileID: 1566198844}
     start: {x: -0.01603669, y: -0.37697712, z: -0.014917672}
     end: {x: -0.01603669, y: 1.3767464, z: -0.014917672}
-    radius: 0.70254314
+    radius: 1.0538146
   - bone: {fileID: 79300508}
     start: {x: -0.0009086728, y: -0.75940716, z: 0.06866279}
     end: {x: -0.0009086728, y: 1.4437894, z: 0.06866279}
-    radius: 0.5350919
+    radius: 0.8026378
   - bone: {fileID: 569938021}
     start: {x: -0.0007596463, y: -0.5145396, z: 0.033030808}
     end: {x: -0.0007596463, y: 1.8964559, z: 0.033030808}
-    radius: 0.36837587
+    radius: 0.5525638
   - bone: {fileID: 1615082652}
     start: {x: 0.02669181, y: -0.36058998, z: -0.005864322}
     end: {x: 0.02669181, y: 1.6750286, z: -0.005864322}
-    radius: 0.1853494
+    radius: 0.2780241
   animationEnvelope:
-    m_Center: {x: -0.17898846, y: 2.5909142, z: 0.28230762}
-    m_Extent: {x: 8.409677, y: 4.568212, z: 10.461809}
+    m_Center: {x: -0.26848269, y: 3.8863714, z: 0.42346144}
+    m_Extent: {x: 12.614515, y: 6.852318, z: 15.692714}
   teleportDistance: 3
 --- !u!114 &379201640
 MonoBehaviour:
@@ -935,30 +971,37 @@ MonoBehaviour:
     bounds:
       m_Center: {x: 0.16318017, y: 1.4284177, z: 2.3911977}
       m_Extent: {x: 0.76001114, y: 0.07158232, z: 1.3706183}
+    part: 0
   - layer: 3
     bounds:
       m_Center: {x: 0.030230522, y: 1.75, z: 2.210889}
       m_Extent: {x: 1.1543806, y: 0.25, z: 1.9328821}
+    part: 0
   - layer: 4
     bounds:
       m_Center: {x: 0.048137307, y: 2.25, z: 2.3278942}
       m_Extent: {x: 1.2471687, y: 0.25, z: 2.0088158}
+    part: 0
   - layer: 5
     bounds:
       m_Center: {x: 0.063254476, y: 2.75, z: 2.4388669}
       m_Extent: {x: 1.2444559, y: 0.25, z: 1.8848655}
+    part: 0
   - layer: 6
     bounds:
       m_Center: {x: 0.04514277, y: 3.25, z: 2.3597465}
       m_Extent: {x: 1.1953199, y: 0.25, z: 1.8523545}
+    part: 0
   - layer: 7
     bounds:
       m_Center: {x: 0.099248886, y: 3.75, z: 2.1191602}
       m_Extent: {x: 1.053579, y: 0.25, z: 1.8748918}
+    part: 0
   - layer: 8
     bounds:
       m_Center: {x: 0.13776666, y: 4.081012, z: 1.8157684}
       m_Extent: {x: 0.86350363, y: 0.08101177, z: 1.4358116}
+    part: 0
   coreBones:
   - jt_Spine1_C
   - jt_Spine2_C
@@ -999,8 +1042,8 @@ MonoBehaviour:
   - jt_ClawOutter_R
   footLockJointDepth: 3
   releaseFootLockOnRise: 1
-  footContactHeight: 0.27
-  footRiseThreshold: 0.001
+  footContactHeight: 0.40500003
+  footRiseThreshold: 0.0015
   footLockDistanceLimit: -1
 --- !u!1 &398873652
 GameObject:
@@ -1321,56 +1364,189 @@ MonoBehaviour:
   bands:
   - layer: -1
     bounds:
-      m_Center: {x: -0.18857455, y: -0.030491501, z: 1.3590525}
-      m_Extent: {x: 2.6642842, y: 0.1804915, z: 2.9410155}
+      m_Center: {x: -0.28286183, y: -0.04573725, z: 2.0385787}
+      m_Extent: {x: 3.9964263, y: 0.27073726, z: 4.4115233}
+    part: 0
   - layer: 0
     bounds:
-      m_Center: {x: -0.18857503, y: 0.24999997, z: 0.06532383}
-      m_Extent: {x: 2.6642838, y: 0.39999998, z: 6.279789}
+      m_Center: {x: -0.28286183, y: -0.04573725, z: 2.0385787}
+      m_Extent: {x: 3.9964263, y: 0.27073726, z: 4.4115233}
+    part: 0
+  - layer: -1
+    bounds:
+      m_Center: {x: -0.28286254, y: 0.37499994, z: 0.097985744}
+      m_Extent: {x: 3.9964256, y: 0.59999996, z: 9.419683}
+    part: 0
+  - layer: 0
+    bounds:
+      m_Center: {x: -0.28286254, y: 0.37499994, z: 0.097985744}
+      m_Extent: {x: 3.9964256, y: 0.59999996, z: 9.419683}
+    part: 0
   - layer: 1
     bounds:
-      m_Center: {x: 1.4081266, y: 0.74999994, z: -0.2786293}
-      m_Extent: {x: 4.4160953, y: 0.40000004, z: 7.180128}
+      m_Center: {x: -0.28286254, y: 0.37499994, z: 0.097985744}
+      m_Extent: {x: 3.9964256, y: 0.59999996, z: 9.419683}
+    part: 0
+  - layer: 1
+    bounds:
+      m_Center: {x: 2.1121898, y: 1.1249999, z: -0.41794395}
+      m_Extent: {x: 6.6241426, y: 0.6, z: 10.770192}
+    part: 0
   - layer: 2
     bounds:
-      m_Center: {x: 1.3101358, y: 1.25, z: -0.22509003}
-      m_Extent: {x: 4.8039875, y: 0.4000001, z: 7.3671637}
+      m_Center: {x: 2.1121898, y: 1.1249999, z: -0.41794395}
+      m_Extent: {x: 6.6241426, y: 0.6, z: 10.770192}
+    part: 0
   - layer: 3
     bounds:
-      m_Center: {x: 1.017122, y: 1.75, z: -0.2453947}
-      m_Extent: {x: 4.7251043, y: 0.4000001, z: 7.4375296}
+      m_Center: {x: 2.1121898, y: 1.1249999, z: -0.41794395}
+      m_Extent: {x: 6.6241426, y: 0.6, z: 10.770192}
+    part: 0
+  - layer: 2
+    bounds:
+      m_Center: {x: 1.9652038, y: 1.875, z: -0.33763504}
+      m_Extent: {x: 7.2059813, y: 0.60000014, z: 11.050745}
+    part: 0
+  - layer: 3
+    bounds:
+      m_Center: {x: 1.9652038, y: 1.875, z: -0.33763504}
+      m_Extent: {x: 7.2059813, y: 0.60000014, z: 11.050745}
+    part: 0
   - layer: 4
     bounds:
-      m_Center: {x: 0.31133056, y: 2.25, z: -0.2752142}
-      m_Extent: {x: 4.041839, y: 0.4000001, z: 7.5204916}
+      m_Center: {x: 1.9652038, y: 1.875, z: -0.33763504}
+      m_Extent: {x: 7.2059813, y: 0.60000014, z: 11.050745}
+    part: 0
+  - layer: 4
+    bounds:
+      m_Center: {x: 1.525683, y: 2.625, z: -0.36809206}
+      m_Extent: {x: 7.0876565, y: 0.60000014, z: 11.156294}
+    part: 0
   - layer: 5
     bounds:
-      m_Center: {x: 0.10998154, y: 2.75, z: -0.46236134}
-      m_Extent: {x: 3.8162742, y: 0.4000001, z: 7.707638}
+      m_Center: {x: 1.525683, y: 2.625, z: -0.36809206}
+      m_Extent: {x: 7.0876565, y: 0.60000014, z: 11.156294}
+    part: 0
   - layer: 6
     bounds:
-      m_Center: {x: 0.09630585, y: 3.25, z: -0.5085149}
-      m_Extent: {x: 3.3864393, y: 0.4000001, z: 7.6614842}
+      m_Center: {x: 1.525683, y: 2.625, z: -0.36809206}
+      m_Extent: {x: 7.0876565, y: 0.60000014, z: 11.156294}
+    part: 0
+  - layer: 5
+    bounds:
+      m_Center: {x: 0.46699584, y: 3.375, z: -0.4128213}
+      m_Extent: {x: 6.0627584, y: 0.60000014, z: 11.280737}
+    part: 0
+  - layer: 6
+    bounds:
+      m_Center: {x: 0.46699584, y: 3.375, z: -0.4128213}
+      m_Extent: {x: 6.0627584, y: 0.60000014, z: 11.280737}
+    part: 0
   - layer: 7
     bounds:
-      m_Center: {x: -0.3780377, y: 3.75, z: -0.38310575}
-      m_Extent: {x: 2.8373666, y: 0.4000001, z: 6.7988}
+      m_Center: {x: 0.46699584, y: 3.375, z: -0.4128213}
+      m_Extent: {x: 6.0627584, y: 0.60000014, z: 11.280737}
+    part: 0
+  - layer: 7
+    bounds:
+      m_Center: {x: 0.1649723, y: 4.125, z: -0.693542}
+      m_Extent: {x: 5.724411, y: 0.60000014, z: 11.561457}
+    part: 0
   - layer: 8
     bounds:
-      m_Center: {x: -0.3286345, y: 4.25, z: -0.5309677}
-      m_Extent: {x: 2.7879632, y: 0.40000057, z: 6.7519035}
+      m_Center: {x: 0.1649723, y: 4.125, z: -0.693542}
+      m_Extent: {x: 5.724411, y: 0.60000014, z: 11.561457}
+    part: 0
   - layer: 9
     bounds:
-      m_Center: {x: -1.4627471, y: 4.75, z: -1.0887184}
-      m_Extent: {x: 1.6538506, y: 0.40000057, z: 6.194153}
+      m_Center: {x: 0.1649723, y: 4.125, z: -0.693542}
+      m_Extent: {x: 5.724411, y: 0.60000014, z: 11.561457}
+    part: 0
+  - layer: 8
+    bounds:
+      m_Center: {x: 0.14445877, y: 4.875, z: -0.7627723}
+      m_Extent: {x: 5.079659, y: 0.60000014, z: 11.492227}
+    part: 0
+  - layer: 9
+    bounds:
+      m_Center: {x: 0.14445877, y: 4.875, z: -0.7627723}
+      m_Extent: {x: 5.079659, y: 0.60000014, z: 11.492227}
+    part: 0
   - layer: 10
     bounds:
-      m_Center: {x: -1.4337724, y: 5.25, z: -6.118281}
-      m_Extent: {x: 1.0684997, y: 0.39999986, z: 0.32585096}
+      m_Center: {x: 0.14445877, y: 4.875, z: -0.7627723}
+      m_Extent: {x: 5.079659, y: 0.60000014, z: 11.492227}
+    part: 0
+  - layer: 10
+    bounds:
+      m_Center: {x: -0.56705654, y: 5.625, z: -0.57465863}
+      m_Extent: {x: 4.25605, y: 0.60000014, z: 10.1982}
+    part: 0
   - layer: 11
     bounds:
-      m_Center: {x: -1.2340056, y: 5.540169, z: -6.1782475}
-      m_Extent: {x: 0.10057986, y: 0.19016862, z: 0.2368021}
+      m_Center: {x: -0.56705654, y: 5.625, z: -0.57465863}
+      m_Extent: {x: 4.25605, y: 0.60000014, z: 10.1982}
+    part: 0
+  - layer: 12
+    bounds:
+      m_Center: {x: -0.56705654, y: 5.625, z: -0.57465863}
+      m_Extent: {x: 4.25605, y: 0.60000014, z: 10.1982}
+    part: 0
+  - layer: 11
+    bounds:
+      m_Center: {x: -0.49295175, y: 6.375, z: -0.79645157}
+      m_Extent: {x: 4.181945, y: 0.60000086, z: 10.127855}
+    part: 0
+  - layer: 12
+    bounds:
+      m_Center: {x: -0.49295175, y: 6.375, z: -0.79645157}
+      m_Extent: {x: 4.181945, y: 0.60000086, z: 10.127855}
+    part: 0
+  - layer: 13
+    bounds:
+      m_Center: {x: -0.49295175, y: 6.375, z: -0.79645157}
+      m_Extent: {x: 4.181945, y: 0.60000086, z: 10.127855}
+    part: 0
+  - layer: 13
+    bounds:
+      m_Center: {x: -2.1941206, y: 7.125, z: -1.6330776}
+      m_Extent: {x: 2.4807758, y: 0.60000086, z: 9.291229}
+    part: 0
+  - layer: 14
+    bounds:
+      m_Center: {x: -2.1941206, y: 7.125, z: -1.6330776}
+      m_Extent: {x: 2.4807758, y: 0.60000086, z: 9.291229}
+    part: 0
+  - layer: 15
+    bounds:
+      m_Center: {x: -2.1941206, y: 7.125, z: -1.6330776}
+      m_Extent: {x: 2.4807758, y: 0.60000086, z: 9.291229}
+    part: 0
+  - layer: 14
+    bounds:
+      m_Center: {x: -2.1506586, y: 7.875, z: -9.177422}
+      m_Extent: {x: 1.6027496, y: 0.5999998, z: 0.48877645}
+    part: 0
+  - layer: 15
+    bounds:
+      m_Center: {x: -2.1506586, y: 7.875, z: -9.177422}
+      m_Extent: {x: 1.6027496, y: 0.5999998, z: 0.48877645}
+    part: 0
+  - layer: 16
+    bounds:
+      m_Center: {x: -2.1506586, y: 7.875, z: -9.177422}
+      m_Extent: {x: 1.6027496, y: 0.5999998, z: 0.48877645}
+    part: 0
+  - layer: 16
+    bounds:
+      m_Center: {x: -1.8510084, y: 8.310253, z: -9.267371}
+      m_Extent: {x: 0.15086979, y: 0.28525293, z: 0.35520315}
+    part: 0
+  - layer: 17
+    bounds:
+      m_Center: {x: -1.8510084, y: 8.310253, z: -9.267371}
+      m_Extent: {x: 0.15086979, y: 0.28525293, z: 0.35520315}
+    part: 0
   coreBones:
   - jt_Spine1_C
   - jt_Spine2_C
@@ -2623,24 +2799,6 @@ MonoBehaviour:
   initialSide: 2
   sideAngle: 42.4
   approachLayout: {fileID: 1900000001}
---- !u!114 &1154906967
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1154906964}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 19f4522d353f4e3d8fa5c99c5f21fc31, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
-  dinosaur: {fileID: 379201637}
-  playerCamera: {fileID: 1028963904}
-  visibleOnStart: 1
-  toggleKey: 285
-  anchorBottom: 0
-  showResetHint: 1
 --- !u!4 &1154906966
 Transform:
   m_ObjectHideFlags: 0
@@ -2656,6 +2814,24 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1154906967
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1154906964}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 19f4522d353f4e3d8fa5c99c5f21fc31, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  dinosaur: {fileID: 379201637}
+  playerCamera: {fileID: 1028963904}
+  visibleOnStart: 1
+  toggleKey: 285
+  anchorBottom: 0
+  showResetHint: 1
 --- !u!1 &1177881948
 GameObject:
   m_ObjectHideFlags: 0
@@ -3269,8 +3445,8 @@ Transform:
   m_GameObject: {fileID: 1610622428}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.04049605, y: 0.04282117, z: 1.817503}
-  m_LocalScale: {x: 0.94952387, y: 0.94952387, z: 0.94952387}
+  m_LocalPosition: {x: 0.060744077, y: 0.06423175, z: 2.7262545}
+  m_LocalScale: {x: 1.4242858, y: 1.4242858, z: 1.4242858}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1358110957}

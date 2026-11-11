@@ -1,0 +1,89 @@
+{
+  "entries": [
+    {
+      "path": "Assets/Scenes/Main.unity/Tyrannosaurus Rex",
+      "json": "{\"MonoBehaviour\": {\"walkSpeed\": 2.3486404418945312, \"approachSpeed\": 3.1706645488739014, \"moveAnimationGroundSpeed\": 2.3486404418945312, \"collisionRadius\": 5.0, \"viewFocusHeight\": 3.5}}"
+    },
+    {
+      "path": "Assets/Scenes/Main.unity/Tyrannosaurus Rex/visual",
+      "json": "{\"Transform\":{\"serializedVersion\":\"2\",\"m_LocalRotation\":{\"x\":0.0,\"y\":0.0,\"z\":0.0,\"w\":1.0},\"m_LocalPosition\":{\"x\":0.04049605131149292,\"y\":0.04282116889953613,\"z\":1.8175029754638672},\"m_LocalScale\":{\"x\":0.9495238661766052,\"y\":0.9495238661766052,\"z\":0.9495238661766052},\"m_ConstrainProportionsScale\":false,\"m_LocalEulerAnglesHint\":{\"x\":0.0,\"y\":0.0,\"z\":0.0}}}"
+    },
+    {
+      "path": "Assets/Scenes/Main.unity/Stegosaurus",
+      "json": "{\"MonoBehaviour\": {\"walkSpeed\": 2.338535785675049, \"approachSpeed\": 3.1570234298706055, \"moveAnimationGroundSpeed\": 2.338535785675049, \"collisionRadius\": 3.0, \"viewFocusHeight\": 2.5}}"
+    },
+    {
+      "path": "Assets/Scenes/Main.unity/Stegosaurus/visual",
+      "json": "{\"Transform\":{\"serializedVersion\":\"2\",\"m_LocalRotation\":{\"x\":0.0,\"y\":0.0,\"z\":0.0,\"w\":1.0},\"m_LocalPosition\":{\"x\":0.23803329467773438,\"y\":0.021698996424674989,\"z\":1.792449951171875},\"m_LocalScale\":{\"x\":1.1052181720733643,\"y\":1.1052181720733643,\"z\":1.1052181720733643},\"m_ConstrainProportionsScale\":false,\"m_LocalEulerAnglesHint\":{\"x\":0.0,\"y\":0.0,\"z\":0.0}}}"
+    },
+    {
+      "path": "Assets/Scenes/Main.unity/Pachycephalosaurus",
+      "json": "{\"MonoBehaviour\": {\"walkSpeed\": 1.1259841918945312, \"approachSpeed\": 1.6259841918945312, \"moveAnimationGroundSpeed\": 1.1259841918945312, \"collisionRadius\": 2.0, \"viewFocusHeight\": 1.5}}"
+    },
+    {
+      "path": "Assets/Scenes/Main.unity/Pachycephalosaurus/visual",
+      "json": "{\"Transform\":{\"serializedVersion\":\"2\",\"m_LocalRotation\":{\"x\":0.0,\"y\":0.0,\"z\":0.0,\"w\":1.0},\"m_LocalPosition\":{\"x\":-0.030775070190429689,\"y\":0.015803232789039613,\"z\":0.4812583923339844},\"m_LocalScale\":{\"x\":1.1840752363204957,\"y\":1.1840752363204957,\"z\":1.1840752363204957},\"m_ConstrainProportionsScale\":false,\"m_LocalEulerAnglesHint\":{\"x\":0.0,\"y\":0.0,\"z\":0.0}}}"
+    },
+    {
+      "path": "Assets/Scenes/Main.unity/Velociraptor",
+      "json": "{\"MonoBehaviour\": {\"walkSpeed\": 3.0, \"approachSpeed\": 4.050000190734863, \"moveAnimationGroundSpeed\": 1.6336750984191895, \"collisionRadius\": 1.5, \"viewFocusHeight\": 1.2999999523162842}}"
+    },
+    {
+      "path": "Assets/Scenes/Main.unity/Velociraptor/visual",
+      "json": "{\"Transform\":{\"serializedVersion\":\"2\",\"m_LocalRotation\":{\"x\":0.0,\"y\":0.0,\"z\":0.0,\"w\":1.0},\"m_LocalPosition\":{\"x\":-0.03872489929199219,\"y\":0.014776408672332764,\"z\":-0.27692604064941409},\"m_LocalScale\":{\"x\":0.7377876043319702,\"y\":0.7377876043319702,\"z\":0.7377876043319702},\"m_ConstrainProportionsScale\":false,\"m_LocalEulerAnglesHint\":{\"x\":0.0,\"y\":0.0,\"z\":0.0}}}"
+    },
+    {
+      "path": "Assets/Scenes/Main.unity/Protoceratops",
+      "json": "{\"MonoBehaviour\": {\"walkSpeed\": 0.28149065375328064, \"approachSpeed\": 0.781490683555603, \"moveAnimationGroundSpeed\": 0.28149065375328064, \"collisionRadius\": 1.0, \"viewFocusHeight\": 0.6000000238418579}}"
+    },
+    {
+      "path": "Assets/Scenes/Main.unity/Protoceratops/visual",
+      "json": "{\"Transform\":{\"serializedVersion\":\"2\",\"m_LocalRotation\":{\"x\":0.0,\"y\":0.0,\"z\":0.0,\"w\":1.0},\"m_LocalPosition\":{\"x\":0.0061397552490234379,\"y\":0.06340686976909638,\"z\":0.7042160034179688},\"m_LocalScale\":{\"x\":0.021933376789093019,\"y\":0.021933376789093019,\"z\":0.021933376789093019},\"m_ConstrainProportionsScale\":false,\"m_LocalEulerAnglesHint\":{\"x\":0.0,\"y\":0.0,\"z\":0.0}}}"
+    },
+    {
+      "path": "Assets/Scenes/Main.unity/Sauropelta",
+      "json": "{\"MonoBehaviour\": {\"walkSpeed\": 0.4401397407054901, \"approachSpeed\": 0.7200698852539062, \"moveAnimationGroundSpeed\": 0.22006987035274506, \"collisionRadius\": 2.0, \"viewFocusHeight\": 1.2000000476837158}}"
+    },
+    {
+      "path": "Assets/Scenes/Main.unity/Sauropelta/visual",
+      "json": "{\"Transform\":{\"serializedVersion\":\"2\",\"m_LocalRotation\":{\"x\":0.0,\"y\":0.0,\"z\":0.0,\"w\":1.0},\"m_LocalPosition\":{\"x\":0.0004177093505859375,\"y\":-0.06921330839395523,\"z\":0.6537380218505859},\"m_LocalScale\":{\"x\":0.3600500822067261,\"y\":0.3600500822067261,\"z\":0.3600500822067261},\"m_ConstrainProportionsScale\":false,\"m_LocalEulerAnglesHint\":{\"x\":0.0,\"y\":0.0,\"z\":0.0}}}"
+    },
+    {
+      "path": "Assets/Scenes/Main.unity/Baurusuchus",
+      "json": "{\"MonoBehaviour\": {\"walkSpeed\": 0.6022533178329468, \"approachSpeed\": 1.1022533178329468, \"moveAnimationGroundSpeed\": 0.6022533178329468, \"collisionRadius\": 1.5, \"viewFocusHeight\": 1.0}}"
+    },
+    {
+      "path": "Assets/Scenes/Main.unity/Baurusuchus/visual",
+      "json": "{\"Transform\":{\"serializedVersion\":\"2\",\"m_LocalRotation\":{\"x\":0.0,\"y\":0.0,\"z\":0.0,\"w\":1.0},\"m_LocalPosition\":{\"x\":0.23040771484375,\"y\":-0.12297099083662033,\"z\":0.026857376098632814},\"m_LocalScale\":{\"x\":0.4726903438568115,\"y\":0.4726903438568115,\"z\":0.4726903438568115},\"m_ConstrainProportionsScale\":false,\"m_LocalEulerAnglesHint\":{\"x\":0.0,\"y\":0.0,\"z\":0.0}}}"
+    },
+    {
+      "path": "Assets/Scenes/TRexFrontInteractionTest.unity/Tyrannosaurus Rex",
+      "json": "{\"MonoBehaviour\": {\"walkSpeed\": 2.3486404418945312, \"approachSpeed\": 3.1706645488739014, \"moveAnimationGroundSpeed\": 2.3486404418945312, \"collisionRadius\": 5.0, \"viewFocusHeight\": 3.5}}"
+    },
+    {
+      "path": "Assets/Scenes/TRexFrontInteractionTest.unity/Tyrannosaurus Rex/visual",
+      "json": "{\"Transform\":{\"serializedVersion\":\"2\",\"m_LocalRotation\":{\"x\":0.0,\"y\":0.0,\"z\":0.0,\"w\":1.0},\"m_LocalPosition\":{\"x\":0.04049605131149292,\"y\":0.04282116889953613,\"z\":1.8175029754638672},\"m_LocalScale\":{\"x\":0.9495238661766052,\"y\":0.9495238661766052,\"z\":0.9495238661766052},\"m_ConstrainProportionsScale\":false,\"m_LocalEulerAnglesHint\":{\"x\":0.0,\"y\":0.0,\"z\":0.0}}}"
+    },
+    {
+      "path": "Assets/Scenes/TRexFrontTestAssets/SideInteractionProfile.asset",
+      "json": "{\"MonoBehaviour\": {\"motions\": [{\"role\": 0, \"groundSpeed\": 0.08944450318813324, \"turnDegrees\": 0.0, \"blendDuration\": 0.15000000596046448, \"turnPlaybackSpeed\": 1.0}, {\"role\": 1, \"groundSpeed\": 0.06999946385622025, \"turnDegrees\": 0.0, \"blendDuration\": 0.11999999731779099, \"turnPlaybackSpeed\": 1.0}, {\"role\": 2, \"groundSpeed\": 0.06999946385622025, \"turnDegrees\": 0.0, \"blendDuration\": 0.11999999731779099, \"turnPlaybackSpeed\": 1.0}, {\"role\": 3, \"groundSpeed\": 4.459132194519043, \"turnDegrees\": 0.0, \"blendDuration\": 0.15000000596046448, \"turnPlaybackSpeed\": 1.0}, {\"role\": 4, \"groundSpeed\": 5.155155658721924, \"turnDegrees\": 0.0, \"blendDuration\": 0.15000000596046448, \"turnPlaybackSpeed\": 1.0}, {\"role\": 5, \"groundSpeed\": 2.8457353115081787, \"turnDegrees\": 0.0, \"blendDuration\": 0.15000000596046448, \"turnPlaybackSpeed\": 1.0}, {\"role\": 6, \"groundSpeed\": 0.41596347093582153, \"turnDegrees\": -90.0, \"blendDuration\": 0.11999999731779099, \"turnPlaybackSpeed\": 1.0}, {\"role\": 7, \"groundSpeed\": 0.5310821533203125, \"turnDegrees\": 90.0, \"blendDuration\": 0.11999999731779099, \"turnPlaybackSpeed\": 1.0}, {\"role\": 8, \"groundSpeed\": 2.237100601196289, \"turnDegrees\": 0.0, \"blendDuration\": 0.15000000596046448, \"turnPlaybackSpeed\": 1.0}, {\"role\": 9, \"groundSpeed\": 0.2559022903442383, \"turnDegrees\": 0.0, \"blendDuration\": 0.11999999731779099, \"turnPlaybackSpeed\": 1.0}, {\"role\": 10, \"groundSpeed\": 0.2986587882041931, \"turnDegrees\": 0.0, \"blendDuration\": 0.11999999731779099, \"turnPlaybackSpeed\": 1.0}, {\"role\": 11, \"groundSpeed\": 0.44530582427978516, \"turnDegrees\": 0.0, \"blendDuration\": 0.11999999731779099, \"turnPlaybackSpeed\": 1.0}, {\"role\": 12, \"groundSpeed\": 3.55692458152771, \"turnDegrees\": 0.0, \"blendDuration\": 0.15000000596046448, \"turnPlaybackSpeed\": 1.0}, {\"role\": 13, \"groundSpeed\": 0.11585588753223419, \"turnDegrees\": 0.0, \"blendDuration\": 0.11999999731779099, \"turnPlaybackSpeed\": 1.0}, {\"role\": 14, \"groundSpeed\": 0.9764509797096252, \"turnDegrees\": 0.0, \"blendDuration\": 0.11999999731779099, \"turnPlaybackSpeed\": 1.0}, {\"role\": 15, \"groundSpeed\": 1.0727251768112183, \"turnDegrees\": 0.0, \"blendDuration\": 0.11999999731779099, \"turnPlaybackSpeed\": 1.0}, {\"role\": 16, \"groundSpeed\": 1.4684734344482422, \"turnDegrees\": 170.0, \"blendDuration\": 0.11999999731779099, \"turnPlaybackSpeed\": 1.0}, {\"role\": 18, \"groundSpeed\": 0.3706079423427582, \"turnDegrees\": 0.0, \"blendDuration\": 0.11999999731779099, \"turnPlaybackSpeed\": 1.0}, {\"role\": 19, \"groundSpeed\": 1.2861707210540771, \"turnDegrees\": 0.0, \"blendDuration\": 0.11999999731779099, \"turnPlaybackSpeed\": 1.0}, {\"role\": 20, \"groundSpeed\": 0.12702661752700806, \"turnDegrees\": 0.0, \"blendDuration\": 0.11999999731779099, \"turnPlaybackSpeed\": 1.0}, {\"role\": 21, \"groundSpeed\": 0.06999946385622025, \"turnDegrees\": 0.0, \"blendDuration\": 0.11999999731779099, \"turnPlaybackSpeed\": 1.0}, {\"role\": 17, \"groundSpeed\": 3.0863988399505615, \"turnDegrees\": 0.0, \"blendDuration\": 0.15000000596046448, \"turnPlaybackSpeed\": 1.0}, {\"role\": 22, \"groundSpeed\": 0.11585483700037003, \"turnDegrees\": 0.0, \"blendDuration\": 0.11999999731779099, \"turnPlaybackSpeed\": 1.0}, {\"role\": 23, \"groundSpeed\": 0.11585483700037003, \"turnDegrees\": 0.0, \"blendDuration\": 0.11999999731779099, \"turnPlaybackSpeed\": 1.0}, {\"role\": 24, \"groundSpeed\": 4.4927897453308105, \"turnDegrees\": 0.0, \"blendDuration\": 0.15000000596046448, \"turnPlaybackSpeed\": 1.0}, {\"role\": 25, \"groundSpeed\": 4.3739166259765625, \"turnDegrees\": 0.0, \"blendDuration\": 0.15000000596046448, \"turnPlaybackSpeed\": 1.0}]}}"
+    },
+    {
+      "path": "Assets/Dinosaurs/Pachycephalosaurus/Prepared/Gait.asset",
+      "json": "{\"MonoBehaviour\": {\"groundSpeed\": 1.1259841918945312, \"heightCorrection\": 0.0}}",
+      "invariantHash": "4d08aa2d3b1844c9145c55a4dd40a501aa8cbbaf709353f75cb1e26f8132366c"
+    },
+    {
+      "path": "Assets/Dinosaurs/Sauropelta/Prepared/Gait.asset",
+      "json": "{\"MonoBehaviour\": {\"groundSpeed\": 0.22006987035274506, \"heightCorrection\": -0.09828968346118927}}",
+      "invariantHash": "ef3afb49ccc5a7d5fd05eed26fa13eae1be2d26a1b737e944d3abca213df5795"
+    },
+    {
+      "path": "Assets/Dinosaurs/Baurusuchus/Prepared/Gait.asset",
+      "json": "{\"MonoBehaviour\": {\"groundSpeed\": 0.6022533178329468, \"heightCorrection\": -0.13882417976856232}}",
+      "invariantHash": "69ca7faa9b56ba6410a650c25699e34d71ea6dd6537dfe5c1c7a1084d909fbc7"
+    }
+  ],
+  "complete": true,
+  "steeringScaled": true
+}

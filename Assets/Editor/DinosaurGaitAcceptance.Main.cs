@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -34,6 +34,8 @@ namespace JurassicWorld.Editor
             DinosaurGaitCalibration.Require(!EditorApplication.isPlayingOrWillChangePlaymode
                 && !EditorSceneManager.GetActiveScene().isDirty, "Save scene edits and stop Play first.");
             EditorSceneManager.OpenScene("Assets/Scenes/Main.unity");
+            // Replay the seed that exposed enlarged continuous-walk stance reach.
+            Object.FindObjectOfType<DinosaurInteractionSettings>().spawnSeed = 244401562;
             SessionState.SetBool(MainKey, true);
             EditorApplication.isPlaying = true;
         }
@@ -102,6 +104,27 @@ namespace JurassicWorld.Editor
             }
             catch (Exception error) { FinishMain(error); }
         }
+        public static void VerifyEnlargedIdleRules()
+        {
+            EditorSceneManager.OpenScene("Assets/Scenes/Main.unity");
+            var clones = Object.FindObjectsOfType<DinosaurAgent>().Where(a => a.GaitProfile != null)
+                .Select(a => { var clone = Object.Instantiate(a.gameObject); clone.name = a.name; return clone; }).ToArray();
+            try
+            {
+                mainAgents = clones.Select(c => c.GetComponent<DinosaurAgent>()).ToArray();
+                foreach (var agent in mainAgents)
+                {
+                    var loader = new UnityEditor.SerializedObject(agent.GetComponent<DinosaurFbxLoader>());
+                    agent.BindAnimation(agent.GetComponentInChildren<Animation>(),
+                        loader.FindProperty("idleAnimationHint").stringValue, loader.FindProperty("moveAnimationHint").stringValue);
+                }
+                VerifyIdleRules();
+                Directory.CreateDirectory("Reports/DinosaurSize");
+                File.WriteAllText("Reports/DinosaurSize/IdleRules.md", "PASS: Sauropelta and Baurusuchus hold stopped poses; Pachycephalosaurus plays Idle.\n");
+                Debug.Log("PASS ENLARGED_IDLE_RULES");
+            }
+            finally { foreach (var clone in clones) Object.DestroyImmediate(clone); }
+        }
         private static void VerifyIdleRules()
         {
             foreach (var agent in mainAgents.Where(a => a.GaitProfile != null))
@@ -110,10 +133,10 @@ namespace JurassicWorld.Editor
                 var idle = (string)typeof(DinosaurAgent).GetField("idleClip", Flags).GetValue(agent);
                 typeof(DinosaurAgent).GetMethod("PlayClip", Flags).Invoke(agent, new object[] { idle, 1f, false });
                 var state = agent.GetComponentInChildren<Animation>()[idle];
-                DinosaurGaitCalibration.Require(agent.name == "Sauropelta" ? state.speed == 0f : state.speed == 1f,
+                DinosaurGaitCalibration.Require(agent.name == "Sauropelta" || agent.name == "Baurusuchus" ? state.speed == 0f : state.speed == 1f,
                     "Idle animation rule changed: " + agent.name);
             }
-            MainReport.AppendLine("\nPASS idle rules: Sauropelta frozen; Pachycephalosaurus Idle; Baurusuchus Run continues.\n");
+            MainReport.AppendLine("\nPASS idle rules: Sauropelta frozen; Pachycephalosaurus Idle; Baurusuchus holds its stopped walking pose.\n");
         }
         private static void FinishMain(Exception error)
         {

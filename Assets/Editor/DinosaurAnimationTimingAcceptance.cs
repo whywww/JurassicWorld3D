@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -138,7 +138,9 @@ namespace JurassicWorld.Editor
                 previousTravel = rex.AnimationRootTravel; previousRoot = rex.transform.position;
                 error = Mathf.Max(error, feet.LeftPlanted ? feet.LeftPlantError : 0f, feet.RightPlanted ? feet.RightPlantError : 0f);
                 Require(!rex.FrontActionWaitingForSpace, "Unobstructed timing action entered space wait: " + rex.FrontBlockingReason);
-                var body = (DinosaurCoreBody)Get("interactionBody");
+                // Check the current animated torso/head envelope, as production motion does.
+                // The neutral walking envelope can overlap trees during a safe turn.
+                var body = (DinosaurCoreBody)Get("frontProbeBody") ?? (DinosaurCoreBody)Get("interactionBody");
                 Vector3 forward = rex.transform.rotation * Quaternion.Euler(0f, rex.VisualYaw, 0f) * Vector3.forward;
                 Require(!settings.PoseBlocked(new Vector2(rex.transform.position.x, rex.transform.position.z), new Vector2(forward.x, forward.z), body), "Timing action penetrated hard obstacle.");
                 if (encoder != null)

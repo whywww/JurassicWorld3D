@@ -313,7 +313,7 @@ namespace JurassicWorld.Editor
             var explorer = holder.AddComponent<SmoothExplorerCamera>();
             Set(input, "controlSettings", settings);
             Set(explorer, "emotivInput", input);
-            string path = "Assets/Settings/EmotivAcceptance-" + Guid.NewGuid().ToString("N") + ".asset";
+            string path = "Assets/BCI/Emotiv/Settings/EmotivAcceptance-" + Guid.NewGuid().ToString("N") + ".asset";
             try
             {
                 settings.push = EmotivMovementAction.ForwardLeft;
@@ -453,50 +453,204 @@ namespace JurassicWorld.Editor
             Set(explorer, "groundTerrain", terrain);
             float eyeHeight = (float)typeof(SmoothExplorerCamera).GetField("eyeHeight",
                 BindingFlags.NonPublic | BindingFlags.Instance).GetValue(explorer);
+            float radius = SmoothExplorerCamera.PlayerRadius;
+            var settings = UnityEngine.Object.FindObjectOfType<DinosaurInteractionSettings>();
+            Require(settings != null, "Dinosaur behavior settings missing");
+            Rect[] rocks = PlayerSolidObstacleSolver.BuildBlockingXZ(settings.solidObstacles);
+            Require(rocks.Length > 0, "No blocking rocks baked in scene");
             try
             {
                 TerrainTreeObstacleRegistry.EnsureInitialized();
                 Require(TerrainTreeObstacleRegistry.ObstacleCount > 0, "Dinosaur obstacles missing");
-                Rect bounds = WorldBounds.PlayerExplorationXZ;
-                foreach (Vector2 desired in new[] {
-                    new Vector2(bounds.xMin - 1, 0), new Vector2(bounds.xMax + 1, 0),
-                    new Vector2(0, bounds.yMin - 1), new Vector2(0, bounds.yMax + 1) })
-                {
-                    Invoke(explorer, "MoveTo", desired);
-                    Vector2 expected = WorldBounds.ClampToPlayerExploration(desired);
-                    Equal(new Vector2(camera.transform.position.x, camera.transform.position.z), expected,
-                        "Player remains inside exploration bounds");
-                    float ground = terrain.SampleHeight(camera.transform.position) + terrain.transform.position.y;
-                    Require(Mathf.Abs(camera.transform.position.y - ground - eyeHeight) < 0.001f,
-                        "Player retains terrain-relative eye height");
-                }
 
-                int crossedTrees = 0;
-                Vector3 origin = terrain.transform.position;
-                Vector3 size = terrain.terrainData.size;
-                foreach (var tree in terrain.terrainData.treeInstances)
-                {
-                    Vector3 point = origin + Vector3.Scale(tree.position, size);
-                    Vector2 center = new Vector2(point.x, point.z);
-                    if (!WorldBounds.ContainsPlayer(center)
-                        || !TerrainTreeObstacleRegistry.IsBlocked(center, 0.45f)) continue;
-                    // Traverse in both directions with normal frame-sized steps, including through the tree center.
-                    foreach (float direction in new[] { 1f, -1f })
-                        for (int frame = -30; frame <= 30; frame++)
-                        {
-                            Vector2 desired = center + Vector2.right * (direction * frame * 4f / 60f);
-                            Invoke(explorer, "MoveTo", desired);
-                            Equal(new Vector2(camera.transform.position.x, camera.transform.position.z),
-                                WorldBounds.ClampToPlayerExploration(desired), "Player passes through trees without displacement");
-                        }
-                    Require(TerrainTreeObstacleRegistry.IsBlocked(center, 0.45f),
-                        "Player movement must preserve shared tree obstacles for dinosaurs");
-                    crossedTrees++;
-                }
-                Require(crossedTrees > 0, "No explorable tree tested");
+                Vector2 spawn = new Vector2(originalPosition.x, originalPosition.z);
+                Require(!TerrainTreeObstacleRegistry.IsBlocked(spawn, radius), "Camera spawns inside a tree trunk");
+                Require(!PlayerSolidObstacleSolver.Overlaps(spawn, radius, rocks), "Camera spawns inside a solid rock");
+
+                VerifyExplorationBounds(camera, terrain, explorer, eyeHeight, radius, rocks);
+                VerifyTreeSliding(camera, terrain, explorer, eyeHeight, radius, rocks);
+                VerifyRockSliding(camera, terrain, explorer, eyeHeight, radius, rocks);
             }
             finally { camera.transform.position = originalPosition; }
         }
+
+        private static void VerifyExplorationBounds(Camera camera, Terrain terrain, SmoothExplorerCamera explorer,
+            float eyeHeight, float radius, Rect[] rocks)
+        {
+            Rect bounds = WorldBounds.PlayerExplorationXZ;
+            Vector2 center = bounds.center;
+            var edges = new[] {
+                new Vector2(bounds.xMin - 1f, center.y), new Vector2(bounds.xMax + 1f, center.y),
+                new Vector2(center.x, bounds.yMin - 1f), new Vector2(center.x, bounds.yMax + 1f) };
+            int tested = 0;
+            foreach (Vector2 desired in edges)
+            {
+                Vector2 expected = WorldBounds.ClampToPlayerExploration(desired);
+                Vector2 start = expected + (center - expected).normalized * 2f;
+                if (!IsClear(start, radius, rocks)) continue;
+                PlaceCamera(camera, terrain, start, eyeHeight);
+                Invoke(explorer, "MoveTo", desired);
+                Vector2 now = PlayerXZ(camera);
+                Require(WorldBounds.ContainsPlayer(now), "Player remains inside exploration bounds");
+                Require(!TerrainTreeObstacleRegistry.IsBlocked(now, radius), "Boundary move enters a tree trunk");
+                Require(!PlayerSolidObstacleSolver.Overlaps(now, radius, rocks), "Boundary move enters a solid rock");
+                Require((now - start).magnitude > 0.5f, "Boundary move should advance into the clamp");
+                float ground = terrain.SampleHeight(camera.transform.position) + terrain.transform.position.y;
+                Require(Mathf.Abs(camera.transform.position.y - ground - eyeHeight) < 0.001f,
+                    "Player retains terrain-relative eye height");
+                tested++;
+            }
+            Require(tested > 0, "No clear boundary lane tested");
+        }
+
+        private static void VerifyTreeSliding(Camera camera, Terrain terrain, SmoothExplorerCamera explorer,
+            float eyeHeight, float radius, Rect[] rocks)
+        {
+            var candidates = new List<Vector2>();
+            foreach (SceneTreeObstacle marker in UnityEngine.Object.FindObjectsOfType<SceneTreeObstacle>())
+            {
+                if (!marker.isActiveAndEnabled || marker.Radius <= 0f) continue;
+                AddTreeCandidate(candidates, new Vector2(marker.transform.position.x, marker.transform.position.z), radius);
+                if (candidates.Count >= 12) break;
+            }
+            // Unity marks erased Terrain trees with a negative width scale; they are not obstacles.
+            TreeInstance[] instances = terrain.terrainData.treeInstances;
+            for (int i = 0; i < instances.Length && candidates.Count < 24; i++)
+            {
+                if (instances[i].widthScale <= 0f) continue;
+                Vector3 point = terrain.transform.position + Vector3.Scale(instances[i].position, terrain.terrainData.size);
+                AddTreeCandidate(candidates, new Vector2(point.x, point.z), radius);
+            }
+            Require(candidates.Count > 0, "No explorable tree tested");
+
+            int headOnTested = 0;
+            foreach (Vector2 center in candidates)
+            {
+                Vector2 start = center + Vector2.left * 2f;
+                if (!IsClear(start, radius, rocks)) continue;
+                PlaceCamera(camera, terrain, start, eyeHeight);
+                for (int frame = 0; frame <= 60; frame++)
+                {
+                    Invoke(explorer, "MoveTo", start + Vector2.right * (frame * 4f / 60f));
+                    Vector2 now = PlayerXZ(camera);
+                    Require(!TerrainTreeObstacleRegistry.IsBlocked(now, radius), "Player entered a tree trunk");
+                    Require(!PlayerSolidObstacleSolver.Overlaps(now, radius, rocks), "Player entered a solid rock");
+                    Require(WorldBounds.ContainsPlayer(now), "Player left exploration bounds at a tree");
+                }
+                Vector2 end = PlayerXZ(camera);
+                // 允许贴树滑过去，但任何一帧都不得进入树干（上面的逐帧断言）。
+                Require((end - start).magnitude > 0.05f, "Tree traversal should advance instead of freezing");
+                headOnTested++;
+            }
+            Require(headOnTested > 0, "No head-on tree candidate tested");
+
+            int slid = 0;
+            foreach (Vector2 center in candidates)
+            {
+                if (slid >= 2) break;
+                // Offset lane must actually intersect the expanded trunk, otherwise there is nothing to slide around.
+                if (!TerrainTreeObstacleRegistry.IsBlocked(center + Vector2.up * 0.5f, radius)) continue;
+                Vector2 start = center + new Vector2(-2f, 0.5f);
+                if (!IsClear(start, radius, rocks)) continue;
+                PlaceCamera(camera, terrain, start, eyeHeight);
+                for (int frame = 0; frame <= 60; frame++)
+                {
+                    Invoke(explorer, "MoveTo", start + Vector2.right * (frame * 4f / 60f));
+                    Vector2 now = PlayerXZ(camera);
+                    Require(!TerrainTreeObstacleRegistry.IsBlocked(now, radius), "Player entered a tree trunk while sliding");
+                    Require(!PlayerSolidObstacleSolver.Overlaps(now, radius, rocks), "Player entered a solid rock while sliding");
+                    Require(WorldBounds.ContainsPlayer(now), "Player left exploration bounds while sliding");
+                }
+                if (PlayerXZ(camera).x > center.x + 0.3f) slid++;
+            }
+            Require(slid > 0, "Player could not slide around any tree");
+        }
+
+        private static void VerifyRockSliding(Camera camera, Terrain terrain, SmoothExplorerCamera explorer,
+            float eyeHeight, float radius, Rect[] rocks)
+        {
+            Rect bounds = WorldBounds.PlayerExplorationXZ;
+            Vector2 direction = new Vector2(1f, 1f).normalized;
+            int chosen = -1;
+            Vector2 headOnStart = Vector2.zero, diagonalStart = Vector2.zero;
+            for (int i = 0; i < rocks.Length && chosen < 0; i++)
+            {
+                Rect rock = rocks[i];
+                if (rock.xMin - radius - 2f < bounds.xMin || rock.xMax + radius + 2f > bounds.xMax) continue;
+                if (rock.yMin - radius - 2f < bounds.yMin || rock.yMax + radius + 2f > bounds.yMax) continue;
+                headOnStart = new Vector2(rock.xMin - radius - 2f, rock.center.y);
+                diagonalStart = new Vector2(rock.xMin - radius - 1.5f, rock.yMin - radius - 1.5f);
+                if (!IsClear(headOnStart, radius, rocks) || !IsClear(diagonalStart, radius, rocks)) continue;
+                if (!DiagonalLaneClear(rock, diagonalStart, direction, radius, rocks, i)) continue;
+                chosen = i;
+            }
+            Require(chosen >= 0, "No isolated blocking rock available for sliding");
+            Rect block = rocks[chosen];
+
+            PlaceCamera(camera, terrain, headOnStart, eyeHeight);
+            for (int frame = 0; frame <= 60; frame++)
+            {
+                Invoke(explorer, "MoveTo", headOnStart + Vector2.right * (frame * 4f / 60f));
+                Require(!PlayerSolidObstacleSolver.Overlaps(PlayerXZ(camera), radius, rocks), "Player entered a solid rock");
+            }
+            Require(PlayerXZ(camera).x < block.xMin, "Head-on rock traversal must not pass through");
+
+            PlaceCamera(camera, terrain, diagonalStart, eyeHeight);
+            for (int frame = 0; frame <= 240; frame++)
+            {
+                Invoke(explorer, "MoveTo", diagonalStart + direction * (frame * 4f / 60f));
+                Vector2 now = PlayerXZ(camera);
+                Require(!PlayerSolidObstacleSolver.Overlaps(now, radius, rocks), "Player entered a solid rock while sliding");
+                Require(WorldBounds.ContainsPlayer(now), "Player left exploration bounds while sliding around a rock");
+            }
+            Vector2 end = PlayerXZ(camera);
+            Require(end.x > block.xMax + radius - 0.5f || end.y > block.yMax + radius - 0.5f,
+                "Diagonal rock traversal must slide around a side");
+        }
+
+        private static void AddTreeCandidate(List<Vector2> candidates, Vector2 center, float radius)
+        {
+            if (!WorldBounds.ContainsPlayer(center) || !TerrainTreeObstacleRegistry.IsBlocked(center, radius)) return;
+            foreach (Vector2 existing in candidates)
+                if ((existing - center).sqrMagnitude < 0.25f) return;
+            candidates.Add(center);
+        }
+
+        private static bool IsClear(Vector2 xz, float radius, Rect[] rocks)
+            => WorldBounds.ContainsPlayer(xz)
+               && !TerrainTreeObstacleRegistry.IsBlocked(xz, radius)
+               && !PlayerSolidObstacleSolver.Overlaps(xz, radius, rocks);
+
+        // The diagonal lane is expected to cross the chosen rock; only other obstacles may reject the sample.
+        private static bool DiagonalLaneClear(Rect block, Vector2 start, Vector2 direction, float radius,
+            Rect[] rocks, int ignored)
+        {
+            for (int i = 0; i <= 24; i++)
+            {
+                Vector2 point = start + direction * (i * 0.8f);
+                if (!WorldBounds.ContainsPlayer(point)) return false;
+                if (point.x > block.xMin - radius && point.x < block.xMax + radius
+                    && point.y > block.yMin - radius && point.y < block.yMax + radius) continue;
+                if (TerrainTreeObstacleRegistry.IsBlocked(point, radius)) return false;
+                for (int j = 0; j < rocks.Length; j++)
+                {
+                    if (j == ignored) continue;
+                    Rect other = rocks[j];
+                    if (point.x > other.xMin - radius && point.x < other.xMax + radius
+                        && point.y > other.yMin - radius && point.y < other.yMax + radius) return false;
+                }
+            }
+            return true;
+        }
+
+        private static void PlaceCamera(Camera camera, Terrain terrain, Vector2 xz, float eyeHeight)
+        {
+            float y = terrain.SampleHeight(new Vector3(xz.x, 0f, xz.y)) + terrain.transform.position.y + eyeHeight;
+            camera.transform.position = new Vector3(xz.x, y, xz.y);
+        }
+
+        private static Vector2 PlayerXZ(Camera camera)
+            => new Vector2(camera.transform.position.x, camera.transform.position.z);
 
         private static void VerifyScene()
         {

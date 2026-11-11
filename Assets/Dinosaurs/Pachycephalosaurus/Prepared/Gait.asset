@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Pachycephalosaurus Gait
   m_EditorClassIdentifier: 
   clip: {fileID: 7400000, guid: 949c2635d1707984395f5c4f32ca5a4c, type: 2}
-  groundSpeed: 1.1259842
+  groundSpeed: 1.6889763
   heightCorrection: 0
   turnSpeed: 2
   loopStart: 0

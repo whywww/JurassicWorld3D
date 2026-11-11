@@ -4,6 +4,9 @@ namespace JurassicWorld
 {
     public sealed class SmoothExplorerCamera : MonoBehaviour
     {
+        /// <summary>玩家碰撞半径（米）：与 TerrainTreeObstacleRegistry 文档口径一致，验收夹具共用。</summary>
+        internal const float PlayerRadius = 0.45f;
+
         [SerializeField] private float moveSpeed = 6f;
         [SerializeField] private float acceleration = 6f;
         [SerializeField] private float turnSpeed = 60f;
@@ -25,6 +28,8 @@ namespace JurassicWorld
         private float pitch;
         private Terrain groundTerrain;          // Start 缓存（Terrain.activeTerrain）；null 时回退固定眼高
         private bool warnedMissingTerrain;      // 「无地形」警告只输出一次
+        private Rect[] solidBlocks;             // 齐腰以上挡人石头的 XZ 矩形（世界 X/Z）
+        private bool solidBlocksResolved;       // 只解析一次：无 settings 的场景不做逐帧查找
 
         private void Start()
         {
@@ -33,6 +38,8 @@ namespace JurassicWorld
             travelYaw = yaw;
             pitch = initialPitch;
             groundTerrain = Terrain.activeTerrain;
+            TerrainTreeObstacleRegistry.EnsureInitialized();
+            EnsureSolidBlocks();
         }
 
         private void Update()
@@ -58,7 +65,7 @@ namespace JurassicWorld
             Vector3 desired = travelDirection * forward * speeds.x;
             velocity = Vector3.Lerp(velocity, desired, 1f - Mathf.Exp(-acceleration * Time.deltaTime));
 
-            // 玩家可穿过树木；仅限制探索边界，并保持地形采样眼高。
+            // 树干与齐腰以上大石会挡住玩家并沿表面滑行；矮石/倒木可跨过，探索边界仍是硬钳制。
             Vector3 desiredPosition = transform.position + velocity * Time.deltaTime;
             MoveTo(new Vector2(desiredPosition.x, desiredPosition.z));
 
@@ -101,10 +108,43 @@ namespace JurassicWorld
             return new Vector2(moveSpeed, turnSpeed);
         }
 
+        /// <summary>
+        /// 移动流水线：先钳进凸矩形 → 整片树林扫掠滑行 → 大石头 AABB 推出 → 树干去穿透 → 再钳边界。
+        /// 石头数据在 Start 一次性缓存；编辑态夹具会临时改写 dinosaur solidObstacles，本相机不跟随。
+        /// </summary>
         private void MoveTo(Vector2 desiredXZ)
         {
+            Vector2 current = new Vector2(transform.position.x, transform.position.z);
             Vector2 target = WorldBounds.ClampToPlayerExploration(desiredXZ);
-            transform.position = new Vector3(target.x, SampleGroundHeight(target) + eyeHeight, target.y);
+
+            // 一次查询覆盖 Terrain 树与全部场景树标记，整片树林共享同一份 4m 网格。
+            Vector2 resolved = TerrainTreeObstacleRegistry.SlideMove(
+                current, target, PlayerRadius, Time.deltaTime);
+
+            if (EnsureSolidBlocks())
+            {
+                resolved = PlayerSolidObstacleSolver.PushOut(resolved, PlayerRadius, solidBlocks);
+                // desired == current：只走去穿透分支，处理被石头推回树内的边缘情况。
+                resolved = TerrainTreeObstacleRegistry.SlideMove(
+                    resolved, resolved, PlayerRadius, Time.deltaTime);
+            }
+
+            // 贴面外推与盒子推出都可能外溢几毫米，凸集收尾。
+            resolved = WorldBounds.ClampToPlayerExploration(resolved);
+            transform.position = new Vector3(resolved.x, SampleGroundHeight(resolved) + eyeHeight, resolved.y);
+        }
+
+        private bool EnsureSolidBlocks()
+        {
+            if (!solidBlocksResolved)
+            {
+                solidBlocksResolved = true;
+                DinosaurInteractionSettings settings = FindObjectOfType<DinosaurInteractionSettings>();
+                solidBlocks = settings != null
+                    ? PlayerSolidObstacleSolver.BuildBlockingXZ(settings.solidObstacles)
+                    : System.Array.Empty<Rect>();
+            }
+            return solidBlocks.Length > 0;
         }
 
         internal static Vector2 ResolveMovementInput(bool keyboardActive, float turn, float forward, Vector2 mental)

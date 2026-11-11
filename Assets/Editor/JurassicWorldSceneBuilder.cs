@@ -1173,6 +1173,13 @@ namespace JurassicWorld.Editor
 
         private static DinosaurAgent BuildDinosaur(DinosaurTemplate t, Camera camera, Font font)
         {
+            t.targetLength *= DinosaurSizeAdjustment.Factor;
+            t.walkSpeed *= DinosaurSizeAdjustment.Factor;
+            t.focusHeight *= DinosaurSizeAdjustment.Factor;
+            t.collisionRadius *= DinosaurSizeAdjustment.Factor;
+            if (t.footContactHeight > 0f) t.footContactHeight *= DinosaurSizeAdjustment.Factor;
+            if (t.footRiseThreshold > 0f) t.footRiseThreshold *= DinosaurSizeAdjustment.Factor;
+            if (t.footLockDistanceLimit > 0f) t.footLockDistanceLimit *= DinosaurSizeAdjustment.Factor;
             var root = new GameObject(t.objectName);
             root.transform.position = t.position;
 
@@ -1235,6 +1242,7 @@ namespace JurassicWorld.Editor
             SetField(loader, "footRiseThreshold", t.footRiseThreshold);
             SetField(loader, "footLockDistanceLimit", t.footLockDistanceLimit);
             EditorUtility.SetDirty(loader);
+            DinosaurSizeAdjustment.ScaleSteering(agent);
             if (t.objectName == "Pachycephalosaurus") PachycephalosaurusSceneIntegration.Configure(agent);
             if (t.objectName == "Protoceratops") ProtoceratopsSceneIntegration.Configure(agent);
             if (t.objectName == "Sauropelta") SauropeltaSceneIntegration.Configure(agent);

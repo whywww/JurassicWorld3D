@@ -186,7 +186,16 @@ namespace JurassicWorld
                 float distance = FlatDistance(before, next);
                 if (distance > .00001f)
                 {
-                    Quaternion rotation = Quaternion.RotateTowards(transform.rotation, desired, 120f * deltaTime);
+                    float turnRate = gaitProfile != null ? (IsContinuousWalker ? ContinuousMaximumYawRate : gaitProfile.turnSpeed) : 120f;
+                    Quaternion rotation = Quaternion.RotateTowards(transform.rotation, desired, turnRate * deltaTime);
+                    if (gaitProfile != null)
+                    {
+                        // The escape connector must keep the same forward stride and
+                        // turn limit as normal continuous walking; sideways translation
+                        // at 120 degrees/second stretches an already planted leg.
+                        Vector3 forward = rotation * Quaternion.Euler(0f, VisualYaw, 0f) * Vector3.forward;
+                        next = before + forward * distance;
+                    }
                     transform.SetPositionAndRotation(next, rotation);
                     unchecked { EmergencyEscapeMoveCount++; }
                     actualInteractionSpeed = distance / deltaTime;
@@ -196,8 +205,11 @@ namespace JurassicWorld
                 else { actualInteractionSpeed = 0f; interactionMoved = false; PlayClip(idleClip); }
             }
             RoamingBlockReason = EmergencyEscapeStatus;
-            if (FlatDistance(transform.position, emergencyGoal) > .05f
-                || !EmergencyOpenPoint(transform.position, transform.rotation)) return;
+            // A calibrated curved walker can reach safe ground before its sampled
+            // destination. Exit there rather than orbiting a goal inside its turn radius.
+            bool reached = FlatDistance(transform.position, emergencyGoal) <= .05f
+                || gaitProfile != null && FlatDistance(transform.position, emergencyOrigin) >= .5f;
+            if (!reached || !EmergencyOpenPoint(transform.position, transform.rotation)) return;
             emergencyEscapeActive = emergencyHasGoal = emergencyMonitoring = false;
             emergencyStuckTime = 0f;
             emergencyAnchor = transform.position;

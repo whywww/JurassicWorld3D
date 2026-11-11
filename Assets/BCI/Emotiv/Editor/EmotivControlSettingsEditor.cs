@@ -6,7 +6,7 @@ namespace JurassicWorld.Editor
     [CustomEditor(typeof(EmotivControlSettings))]
     public sealed class EmotivControlSettingsEditor : UnityEditor.Editor
     {
-        public const string DefaultAssetPath = "Assets/Settings/EmotivControlSettings.asset";
+        public const string DefaultAssetPath = "Assets/BCI/Emotiv/Settings/EmotivControlSettings.asset";
         internal static bool CanEditSettings => !EditorApplication.isPlayingOrWillChangePlaymode && !Application.isPlaying;
 
         public override void OnInspectorGUI()

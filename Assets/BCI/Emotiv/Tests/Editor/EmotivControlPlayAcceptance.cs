@@ -24,8 +24,8 @@ namespace JurassicWorld.Editor
             SessionState.SetString(Key + "originalScene", UnityEngine.SceneManagement.SceneManager.GetActiveScene().path);
             SessionState.SetBool(Key + "optionsEnabled", EditorSettings.enterPlayModeOptionsEnabled);
             SessionState.SetInt(Key + "options", (int)EditorSettings.enterPlayModeOptions);
-            string assetPath = AssetDatabase.GenerateUniqueAssetPath("Assets/Settings/EmotivPlayAcceptance.asset");
-            string scenePath = AssetDatabase.GenerateUniqueAssetPath("Assets/Settings/EmotivPlayAcceptance.unity");
+            string assetPath = AssetDatabase.GenerateUniqueAssetPath("Assets/BCI/Emotiv/Settings/EmotivPlayAcceptance.asset");
+            string scenePath = AssetDatabase.GenerateUniqueAssetPath("Assets/BCI/Emotiv/Settings/EmotivPlayAcceptance.unity");
             SessionState.SetString(Key + "asset", assetPath);
             SessionState.SetString(Key + "scene", scenePath);
             try

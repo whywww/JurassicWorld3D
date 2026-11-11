@@ -72,7 +72,7 @@ namespace JurassicWorld.Editor
                     Require(renderer.sharedMaterial != null && renderer.sharedMaterial.shader.isSupported && renderer.sharedMaterial.mainTexture != null, "Missing material/texture or unsupported shader.");
                 Require(!ShaderUtil.ShaderHasError(controller.GetComponentInChildren<Renderer>().sharedMaterial.shader), "Shader compile error.");
                 Bounds b = PteradactalSceneIntegration.SampleBounds(animation.gameObject, animation.clip);
-                Require(Mathf.Abs(b.size.x - 5f) < .15f, "Wingspan is not five meters: " + b.size);
+                Require(Mathf.Abs(b.size.x - 5f * DinosaurSizeAdjustment.Factor) < .15f, "Wingspan does not match enlarged target: " + b.size);
                 float seam = CheckAnimation(animation);
                 CaptureModel(controller, 0f, "model-start.png");
                 CaptureModel(controller, animation.clip.length * .25f, "model-quarter.png");

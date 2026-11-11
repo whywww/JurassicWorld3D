@@ -105,7 +105,7 @@ namespace JurassicWorld.Editor
                     if (renderer is SkinnedMeshRenderer skin) skin.updateWhenOffscreen = true;
                 }
                 Bounds bounds = SampleBounds(model, clip);
-                float scale = 5f / bounds.size.x;
+                float scale = (5f * DinosaurSizeAdjustment.Factor) / bounds.size.x;
                 model.transform.localScale *= scale;
                 bounds = SampleBounds(model, clip);
                 model.transform.localPosition -= bounds.center;

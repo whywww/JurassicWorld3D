@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Sauropelta Gait
   m_EditorClassIdentifier: 
   clip: {fileID: 7400000, guid: 74c42b95e77d9484884b7dd35056372d, type: 2}
-  groundSpeed: 0.22006987
-  heightCorrection: -0.09828968
+  groundSpeed: 0.3301048
+  heightCorrection: -0.16743453
   turnSpeed: 8
   loopStart: 0
   loopEnd: 5
