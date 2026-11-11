@@ -44,6 +44,10 @@ Shader "Jurassic World/Forest Impostor"
             }
             float2 atlasUV(float2 uv,float frame)
             {
+                // Frame IDs pass through rasterizer interpolation. Snap them back to integers
+                // before floor/fmod: tiny errors at atlas row boundaries otherwise select
+                // different tiles per pixel and corrupt implicit mip derivatives.
+                frame = floor(frame + 0.5);
                 // Padding stays within each 512px tile, including its mip levels.
                 return (float2(fmod(frame,4),floor(frame/4))+clamp(uv,0.004,0.996))*0.25;
             }
