@@ -6,6 +6,8 @@ The edit-mode migration is `JurassicWorld.Editor.DinosaurSizeAdjustment.Apply` (
 
 Generators use the same factor. World-space interaction trajectories, plant-contact radii and collision/focus dimensions are updated. T-Rex torso/head obstacle bands are re-sampled at the new size. The flyer uses a unit visual pivot, with scaling inside it, so pivot-local bounds used by the airspace baker include the new wingspan.
 
+Player collision pose bands use encoded bone/group IDs (`bone * 1000 + originalHeightLayer + 100`), unlike obstacle bands' world-height layers. Scale each player's bound once while preserving its ID; never expand it into one copy per new height layer. The player pose cache was repaired from commit `d371764` at 1.5x, retaining its original 114,275 bounds and 983 pose times. Obstacle envelopes and foot/root samples were preserved.
+
 Sauropelta needs an additional 0.02 m downward body correction after scaling to keep turn stance error below the existing 0.02 m limit. Its contact phase, speed and turn rate remain unchanged.
 
 Dinosaurs with calibrated gait profiles also retain their calibrated turn-rate limit and forward stride during emergency escape. The legacy escape connector turned at 120 degrees/second while translating directly toward the goal; that sideways motion could exceed a planted leg's reach at the enlarged size. They restore normal obstacle checks as soon as they reach verified safe ground, avoiding circles around a nearby target. Main Play regression replays spawn seed 244401562, which exposed this case.

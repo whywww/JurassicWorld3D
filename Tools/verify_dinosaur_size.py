@@ -34,3 +34,15 @@ for entry in baseline["entries"]:
     invariant = "\n".join(line for line in new.splitlines() if not line.startswith(("  groundSpeed:", "  heightCorrection:")))
     assert hashlib.sha256(invariant.encode()).hexdigest() == entry["invariantHash"], path
 print("PASS: 3 gait profiles preserve clips, contact phases, loop timing and bone-local offsets")
+
+# Player layers are bone/group IDs, not the obstacle envelope's height layers.
+profile = Path("Assets/Scenes/TRexFrontTestAssets/SideInteractionProfile.asset").read_text(encoding="utf-8-sig")
+player_bands = 0
+for section in re.findall(r"^    playerPoses:.*?(?=^    [a-zA-Z]\w*:|^  - role:|\Z)", profile, re.M | re.S):
+    for pose in re.split(r"^    - time: ", section, flags=re.M)[1:]:
+        groups = [int(value) for value in re.findall(r"^\s+- layer: (-?\d+)", pose, re.M)]
+        assert groups and all(group >= 100 for group in groups), "Player bone IDs replaced by obstacle height layers"
+        assert len(groups) == len(set(groups)), "Duplicate player bone groups"
+        player_bands += len(groups)
+assert player_bands > 0, "Missing player pose cache"
+print(f"PASS: {player_bands} player bounds retain distinct bone/group IDs per pose")

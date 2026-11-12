@@ -15,6 +15,7 @@ namespace JurassicWorld.Editor
         [MenuItem("Jurassic World/Acceptance/Verify T-Rex Body and Head Envelopes")]
         public static void Run()
         {
+            VerifyPlayerPoseScaling();
             if (EditorApplication.isPlayingOrWillChangePlaymode || EditorSceneManager.GetActiveScene().isDirty)
                 throw new InvalidOperationException("Stop Play and save the scene before envelope acceptance.");
             EditorSceneManager.OpenScene("Assets/Scenes/Main.unity");
@@ -32,6 +33,13 @@ namespace JurassicWorld.Editor
                 settings.activityBoundsOverride = new Rect(400, 400, 200, 200); settings.solidObstacles = Array.Empty<Bounds>();
                 foreach (var motion in profile.motions)
                 {
+                    foreach (var pose in motion.playerPoses)
+                    {
+                        Require(pose.bands.Select(b => b.layer).Distinct().Count() == pose.bands.Length,
+                            "Duplicate player bone groups: " + motion.sourceName);
+                        Require(pose.bands.All(b => b.layer >= 100 && b.layer / 1000 < skin.bones.Length),
+                            "Player bone IDs replaced by obstacle height layers: " + motion.sourceName);
+                    }
                     Require(motion.obstaclePoses.Length > 1, "Missing pose cache: " + motion.sourceName);
                     for (int i = 0; i < motion.obstaclePoses.Length; i++)
                     {
@@ -104,6 +112,30 @@ namespace JurassicWorld.Editor
                 Object.DestroyImmediate(holder); Object.DestroyImmediate(trunkObject); TerrainTreeObstacleRegistry.Invalidate();
                 EditorSceneManager.OpenScene("Assets/Scenes/Main.unity");
             }
+        }
+
+        public static void VerifyPlayerPoseScaling()
+        {
+            var source = new[] {
+                new DinosaurCoreBody.Band { layer = 3102, part = 7,
+                    bounds = new Bounds(new Vector3(1f, 1.25f, -2f), new Vector3(2f, 1.5f, 3f)) },
+                new DinosaurCoreBody.Band { layer = 4102, part = 8,
+                    bounds = new Bounds(new Vector3(-1f, 1.25f, 2f), new Vector3(2f, 1.5f, 3f)) }
+            };
+            var scaled = DinosaurSizeAdjustment.ScalePlayerBands(source);
+            Require(scaled.Length == source.Length, "Player scaling duplicated height-spanning bounds.");
+            for (int i = 0; i < source.Length; i++)
+            {
+                Require(scaled[i].layer == source[i].layer && scaled[i].part == source[i].part,
+                    "Player scaling lost bone/group identity.");
+                Require(scaled[i].bounds.center == source[i].bounds.center * DinosaurSizeAdjustment.Factor
+                    && scaled[i].bounds.size == source[i].bounds.size * DinosaurSizeAdjustment.Factor,
+                    "Player bounds were not scaled exactly once.");
+            }
+            Require(source[0].bounds.size.y == 1.5f, "Player scaling modified its source data.");
+            Require(DinosaurSizeAdjustment.ScalePlayerBands(Array.Empty<DinosaurCoreBody.Band>()).Length == 0,
+                "Empty player cache changed.");
+            Debug.Log("PASS PLAYER_POSE_SCALING");
         }
 
         private static void Place(SceneTreeObstacle trunk, Vector2 point)

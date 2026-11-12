@@ -68,6 +68,18 @@ namespace JurassicWorld.Editor
         }
         internal static void ScaleSteering(DinosaurAgent agent)
             => Multiply(agent, "continuousMinTurnRadius", "continuousLookAheadDistance", "continuousProbeDistance");
+        internal static DinosaurCoreBody.Band[] ScalePlayerBands(DinosaurCoreBody.Band[] source)
+        {
+            // Player layers encode bone identity as well as the original height bin.
+            // Keep those grouping IDs: only obstacle bands use world-height layers.
+            var result = new DinosaurCoreBody.Band[source.Length];
+            for (int i = 0; i < source.Length; i++)
+            {
+                result[i] = source[i];
+                result[i].bounds = new Bounds(source[i].bounds.center * Factor, source[i].bounds.size * Factor);
+            }
+            return result;
+        }
         public static void RepairSteeringAndVerify()
         {
             var saved = JsonUtility.FromJson<Baseline>(File.ReadAllText(Done));
@@ -178,8 +190,10 @@ namespace JurassicWorld.Editor
                             f.leftGroundHeight *= Factor; f.rightGroundHeight *= Factor; motion.footFrames[i] = f;
                         }
                         motion.bodyBands = Bands(motion.bodyBands);
-                        foreach (var poses in new[] { motion.playerPoses, motion.obstaclePoses })
-                            for (int i = 0; i < poses.Length; i++) poses[i].bands = Bands(poses[i].bands);
+                        for (int i = 0; i < motion.playerPoses.Length; i++)
+                            motion.playerPoses[i].bands = ScalePlayerBands(motion.playerPoses[i].bands);
+                        for (int i = 0; i < motion.obstaclePoses.Length; i++)
+                            motion.obstaclePoses[i].bands = Bands(motion.obstaclePoses[i].bands);
                     }
                 EditorUtility.SetDirty(asset);
             }
