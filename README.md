@@ -177,7 +177,7 @@ git lfs pull
 项目以 **Windows 平台 + Unity Editor** 演示为主要验证目标，Windows 独立程序通过现有菜单构建并另行验收；未验证 macOS、Linux、移动端或主机。
 
 - **玩法**：发布入口为主场景 `Assets/Scenes/Main.unity`，单场景、单人森林观察演示。包含键鼠漫游、HUD／小地图／指南针、画质档位、恐龙自由漫游与避让、霸王龙互动。`TRexFrontInteractionTest` 仅为开发调试场景，不属于发布内容。
-- **输入**：使用标准单相机和键鼠。Emotiv 脑控为可选输入，仅在 Windows 下通过本机蓝牙 Cortex 服务连接，需要 Launcher、应用凭据和已训练的 Mental Command profile；控制参数可在 Inspector 中配置并随项目共享；不提供训练或独立程序内配置界面，连接配置失败时键鼠仍可用。
+- **输入**：使用标准单相机和键鼠。Emotiv、MindWave、BrainLink 三种脑控输入均为可选，Editor 中三个组件互斥勾选，全部取消时仅使用键盘；各自连接与排查见 `Assets/BCI/` 下对应说明。Emotiv 仅在 Windows 下通过本机蓝牙 Cortex 服务连接，需要 Launcher、应用凭据和已训练的 Mental Command profile；控制参数可在 Inspector 中配置并随项目共享；不提供训练或独立程序内配置界面，连接配置失败时键鼠仍可用。
 - **导航与场景**：恐龙导航使用烘焙好的 NavMesh 数据加项目内避让／通行规则，不在运行期重新烘焙；场景内容由编辑态 Bake 菜单维护，不做运行期程序化生成。可探索范围为固定的 200m × 200m Terrain。
 - **恐龙**：主场景当前启用霸王龙、伶盗龙、厚头龙、蜥结龙、包鲁鳄、原角龙与翼龙。召唤关闭。
 - **资产**：运行模型使用已导入的 FBX／Prefab 和准备后的资源；模型缺失应检查 Console 和资源引用，不以占位模型替代。

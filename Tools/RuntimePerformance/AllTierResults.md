@@ -4,10 +4,8 @@
 
 ## 交付程序与配置
 
-- 优化前对照：`Builds/AllTierBaseline/JurassicWorld.exe`，2026-11-11 从本项目构建，已修正可见 Player 测量路径。
-- 优化程序：`Builds/AllTierOptimized/JurassicWorld.exe`，非 Development，Built-in、Unity 2022.3.62f3c1、D3D11。
-- 诊断程序：`Builds/AllTierDiagnostic/JurassicWorld.exe`，已用最终原生绘制源码重新构建，供 CPU/GPU 分析；Development 短测不混入正式帧率对照。
-- 代码版本、工作区文件和四个程序的运行程序集 SHA-256：`Logs/RuntimePerformance/all-tier-delivery-provenance.json`；测量前记录保留为 `all-tier-provenance.json`。Unity 启动 exe 相同不代表游戏代码相同，应检查 `Assembly-CSharp.dll`。早期对照包没有保留完整脏源码快照，无法精确重建当时全部未提交文件；保留二进制及构建日志作为对照依据。
+- 优化前对照、优化程序和诊断程序原位于 `Builds/AllTierBaseline`、`Builds/AllTierOptimized`、`Builds/AllTierDiagnostic`；这些历史构建已随 2026-11-12 清理删除。
+- 代码版本、工作区文件和运行程序集 SHA-256 记录已随本机 `Logs/` 清理；Unity 启动 exe 相同不代表游戏代码相同，应检查 `Assembly-CSharp.dll`。早期对照包没有保留完整脏源码快照，无法精确重建当时全部未提交文件。
 - 硬件：i5-11600KF、RTX 3080、约 16 GB RAM；实际硬件、API、构建类型、人口和预算均写入各组元数据。
 
 ## 保留的改动
@@ -29,18 +27,18 @@ CPU 诊断发现溪流附近恐龙预测碰撞查询产生较大尖峰，因此�
 
 ## 未保留的实验
 
-显式空间块 `DrawMeshInstanced` 实验在深度对照中出现 30,883 / 2,073,600 像素（1.489%）差异；原生重复绘制对照为 0。因不满足信息卡/水面深度要求，实验已从产品代码移除。相关短测不能作为最终优化收益。记录和实验源代码留在 `Logs/RuntimePerformance/RejectedInstancing/`。原生 Renderer 的共享材质与 GPU instancing 仍保留。
+显式空间块 `DrawMeshInstanced` 实验在深度对照中出现 30,883 / 2,073,600 像素（1.489%）差异；原生重复绘制对照为 0。因不满足信息卡/水面深度要求，实验已从产品代码移除。相关短测不能作为最终优化收益。记录和实验源代码已随本机 `Logs/` 清理。原生 Renderer 的共享材质与 GPU instancing 仍保留。
 
 脚部/相关动画工作在诊断中约为 0.1～0.2 ms，未证明是瓶颈，故未引入远处恐龙动画降频调度。
 
 ## 功能验证与限制
 
-- Player 渲染 smoke：三档切换、原生/缩放目标、深度重复稳定性、1600×900 窗口调整、场景重载、原生 UI 截图、恐龙数量通过。`Logs/RuntimePerformance/all-tier-play-smoke/result.txt`。
+- Player 渲染 smoke：三档切换、原生/缩放目标、深度重复稳定性、1600×900 窗口调整、场景重载、原生 UI 截图、恐龙数量通过；原始日志已随本机 `Logs/` 清理。
 - Budgets：反复切档、精确植株数量、交互复位后材质共享、树干数据和恐龙数量、随机几何等价通过。
 - 信息卡：68 项通过。该次 Editor 在测试成功后停于退出清理阶段，被结束；不能将退出过程记作正常通过。
 - 导航：原有地图、朝向、缩略图、河道节点、HUD 两种尺寸与重载验证通过，没有保存修改 Main。
 - Emotiv 5442、MindWave 54、BrainLink 141 项软件检查通过。BrainLink fixture 已适配合法的全关闭键盘模式，不改变场景当前输入选择；未连接物理脑控设备验收。
-- 交通：14 项中正常完成 2、紧急退让 9、失败 3（移除阻挡后恢复、原目标恢复、退到宽处）。将碰撞文件换回优化前 HEAD 后完全复现相同三项失败，因此作为现有交通问题记录。本轮不宣称完整交通验收通过。详见 `Logs/RuntimePerformance/traffic-reference-comparison.txt`。
+- 交通：14 项中正常完成 2、紧急退让 9、失败 3（移除阻挡后恢复、原目标恢复、退到宽处）。将碰撞文件换回优化前 HEAD 后完全复现相同三项失败，因此作为现有交通问题记录。本轮不宣称完整交通验收通过。历史对照日志已随本机 `Logs/` 清理。
 - 正式报告校验器 11 项测试通过，拒绝离屏、Development、未完成、采样不足、人口变化、机位变化等数据。
 
 当前低档编辑器 3/10/1 短测：森林 12.55 / 35.01 ms、溪流 23.89 / 62.68 ms、恐龙近景 12.92 / 38.73 ms、漫游 9.41 / 25.63 ms（中位数 / P95）。编辑器渲染与等待比脚本查询更重；没有相同源码/布局的编辑器优化前正式对照，不能给出编辑器提升百分比。该次完成采样后同样停于 Editor 退出阶段，已结束测试进程。
@@ -66,7 +64,7 @@ CPU 诊断发现溪流附近恐龙预测碰撞查询产生较大尖峰，因此�
 
 中档优化前第一组在 11:42 因锁屏中断，已标 INVALID 并归档为 `alltiers-formal-20261112-before-Medium-interrupted-1142`，未混入结果。用户解锁后重跑完整中档；新增采样期间唤醒请求，结束后恢复。全部纳入报告的组均有完成标记、有效画面、1080p 输出、15/60/3 时长、固定机位、六只恐龙和 775 个硬树阻挡匹配，近景恐龙提交覆盖率满足校验。
 
-正式测量程序原样保留在 `Builds/AllTierMeasured/JurassicWorld.exe`。最终 `Builds/AllTierOptimized/JurassicWorld.exe` 在测量后重建，产品代码只调整默认内部比例为 100%；CLI 显式比例及各项渲染/AI 优化路径不变。最终选用的 native 组均显式传入比例 1，与交付预算一致。新 smoke 同时测试原生默认与显式 75% 缩放的窗口调整。
+正式测量程序与最终优化包已随历史构建清理；当前交付包为 `Builds/AllTierClean/JurassicWorld.exe`。最终优化包在测量后重建时，产品代码只调整默认内部比例为 100%；CLI 显式比例及各项渲染/AI 优化路径不变。最终选用的 native 组均显式传入比例 1，与交付预算一致。新 smoke 同时测试原生默认与显式 75% 缩放的窗口调整。
 
 
 ## 最终诊断与剩余瓶颈
@@ -78,11 +76,11 @@ CPU 诊断发现溪流附近恐龙预测碰撞查询产生较大尖峰，因此�
 - 脚部中位数多数约 0.08～0.10 ms，高档近景约 0.43 ms；植物交互中位数约 0～0.72 ms，均不是优先大幅降频的依据。
 - Development GC 分配中位数约 1.9～4.2 KB/帧，尚有少量分配。正式 Release 的 GC 与部分脚本计数器不可用，原始报告明确标注 unavailable，未以零冒充，也未证明每个长帧均由 GC 导致。
 
-最终 Runtime/Editor 编译均 CSC EXIT 0，报告校验器 11 项通过，Release/Development 构建均退出 0。最终 Release smoke 正常退出并通过；吼叫/跟随、返回等待和 30/60/144 FPS 模拟动作/足部时序通过。测试输出单独归档至 `Logs/RuntimePerformance/alltier-final-*`，历史动画报告已还原，未覆盖原始素材。五个已有尺寸修改文件与测量前 SHA-256 一致。
+最终 Runtime/Editor 编译均 CSC EXIT 0，报告校验器 11 项通过，Release/Development 构建均退出 0。最终 Release smoke 正常退出并通过；吼叫/跟随、返回等待和 30/60/144 FPS 模拟动作/足部时序通过。测试输出已随本机 `Logs/` 清理，历史动画报告已还原，未覆盖原始素材。五个已有尺寸修改文件与测量前 SHA-256 一致。
 
 本轮交付保留上述性能提升与已知限制。交通脱困/目标恢复的三个旧失败和物理脑控设备验收仍未解决；没有承诺所有场景稳定 60 FPS。
 
 
 ## 后续源码清理
 
-按用户确认，仅清理本轮性能相关旧代码和测试。当前三档优化预算保留，原交付包与正式测量包未覆盖；清理后程序另存为 `Builds/AllTierClean/JurassicWorld.exe`。上文验收为清理前完成的历史记录，已删除夹具不再提供调用入口。清理清单与短时验证见 [Cleanup.md](Cleanup.md)。
+按用户确认，仅清理本轮性能相关旧代码和测试。当前三档优化预算保留；原交付包与正式测量包已随历史构建清理，清理后程序另存为 `Builds/AllTierClean/JurassicWorld.exe`。上文验收为清理前完成的历史记录，已删除夹具不再提供调用入口。清理清单与短时验证见 [Cleanup.md](Cleanup.md)。

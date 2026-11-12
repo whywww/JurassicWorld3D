@@ -42,7 +42,7 @@
 ## LFS 与验收
 
 - Git LFS 跟踪 `Terrain/Prepared/JurassicTerrainData.asset`、`Terrain/Prepared/MainInteractionTerrain.asset` 及 `ThirdParty/NatureStarterKit2/` 内的地形与部分贴图。`MainCreekTerrain.asset` 与 `LocalForestRepairBaseline.asset` 仍是普通 Git 文件。
-- 只读验收入口：`JurassicWorld.Editor.EnvironmentAssetOrganizationAcceptance.Verify`，结果写入 `Logs/environment-asset-organization.txt`。批处理方式见根 [README](../../README.md)。
+- 只读验收入口：`JurassicWorld.Editor.EnvironmentAssetOrganizationAcceptance.Verify`，结果写入 `Logs/environment-asset-organization.txt`（历史日志已随本机清理，运行后重新生成）。批处理方式见根 [README](../../README.md)。
 - 验收检查旧目录未回潮、资产数量、Main 的丢失引用、地形原型与 layer，以及代码/JSON 中是否残留旧路径。
 
 ## 维护注意

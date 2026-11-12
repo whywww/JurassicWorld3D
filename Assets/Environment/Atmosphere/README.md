@@ -25,12 +25,8 @@
 
 ## 基线与恢复
 
-本地 `Reports/Atmosphere/StageOne/` 保存本阶段应用前的完整场景快照、全局环境参数、原溪流材质和五个固定机位的编辑态前后截图。
-截图用于静态对照，不代表已完成用户手动 Play 查收。
-
-恢复时先备份后续人工改动；以该目录的 `Main.Before.unity` 恢复主场景、以 `CrestCreekWater.Before.mat` 恢复原溪流材质内容，保留目标文件原 `.meta`。
-完成树木暗部修正后，如需完全恢复实施前的环境，还应使用 `Reports/Atmosphere/VegetationLighting/Terrain.BeforeMaterialVariants.asset` 恢复原地形数据文件（只为还原原型材质引用），保留其 `.meta`。
-这会恢复到阶段一实施前的场景，因此不要在已有后续改动时直接覆盖。
+历史场景快照、原材质备份和固定机位对照截图原本保存在本机 `Reports/Atmosphere/`，已随 2026-11-12 清理删除。
+恢复时先备份后续人工改动，并按 git 历史恢复对应场景或材质文件。
 仅临时比较画面时，可禁用主相机的 `RainforestImageFinish`；这只关闭色调映射和 Bloom，不会还原天空与光照。
 
 ## 素材来源
@@ -44,14 +40,14 @@
 
 ## 下一阶段
 
-阶段二已实施，查收方法、参数与回退说明见 `Tools/AtmosphereStageTwo.md`。阶段三已经用户授权实施，资源与查收说明见 `Assets/Environment/Backdrop/README.md`。
+阶段二已实施，参数与回退说明已并入本 README。阶段三已经用户授权实施，资源与查收说明见 `Assets/Environment/Backdrop/README.md`。
 阶段四湿润材质已实施。下一阶段为风动、滴水和环境声，下载清单见 Tools/AfterRainStageFiveDownloads.md；等待用户查收同意且素材准备完成后再进行。
 
 以下补光与树干修正段落保留阶段一期间的历史查收记录；阶段二保留这些已经完成的材质与补光配置。
 
 ## 极弱天空补光对照
 
-`Reports/Atmosphere/WeakSkyFill/` 保存森林与恐龙机位的 00、05、10、15 四档历史对照图。当前默认 03，重新进入 Play 后生效；原截图机位 X=14.7、Z=11.5、朝向 175°。检查恐龙背光皮肤、树干和灌木细节，同时确认裸地不过亮、阴影仍有深度。仅停用新增补光可将 `skyFillStrength` 设为 0 并 Apply；不影响植被材质修正。仍等待手动 Play 查收，不进入阶段二。
+当前默认 `skyFillStrength` 为 3%，重新进入 Play 后生效。原 00、05、10、15 四档历史对照图保存在本机 `Reports/Atmosphere/WeakSkyFill/`，已随清理删除。检查恐龙背光皮肤、树干和灌木细节，同时确认裸地不过亮、阴影仍有深度。仅停用新增补光可将 `skyFillStrength` 设为 0 并 Apply；不影响植被材质修正。
 
 ## 指定树干与灌木局部修正
 
@@ -59,7 +55,7 @@
 
 旧打包法线的 G/A 通道是数值数据。`PackedNormals/` 保存关闭 sRGB 的独立副本，仅指定树干及灌木引用；第三方源贴图不变。实例颜色隔离对照未显示主要压暗贡献，因此保留其强度为 1。NSK 树干遮蔽强度为 0.15、反射增益 2（受光面偏黄修正后）；灌木遮蔽强度为 0.35，叶片增益 1.6、枝干增益 2；香蕉树干增益 1.6，其叶片材质保持原值。后续环境材质应用会保留并应用此逐类配置。
 
-`Reports/Atmosphere/TargetVegetation/` 保存各类近景、全景、遮蔽/实例颜色/法线隔离对照，以及运行态查收证据。原截图全景的两处固定地面取样区修正前后像素一致，环境配置和森林布局保持不变。重点手动检查树皮暗面是否保留纹理、反射是否过亮、灌木是否仍有深绿层次，并观察恐龙碰触前后和远近切换。完成后仍停留阶段一，无需新素材。
+各类近景、全景、遮蔽/实例颜色/法线隔离对照原本保存在本机 `Reports/Atmosphere/TargetVegetation/`，已随清理删除。原截图全景的两处固定地面取样区修正前后像素一致，环境配置和森林布局保持不变。重点检查树皮暗面是否保留纹理、反射是否过亮、灌木是否仍有深绿层次，并观察恐龙碰触前后和远近切换。
 
 ## 当前树皮配置
 NSK tree01–04 树干已全场采用 Trees/Prepared/Materials/PineBark_Global.mat。旧 TargetLighting.asset 的 NSK 树干条目保留为历史配置；当前 Pine Bark 以全局树皮材质参数为准。叶片、香蕉及其他树种保持原状。

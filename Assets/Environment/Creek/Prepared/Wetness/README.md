@@ -34,9 +34,9 @@ Jurassic World > Environment > Creek > Apply Stage 4 - Wet Surfaces。
 精确撤回本阶段可使用：
 Jurassic World > Environment > Creek > Restore Stage 4 Original Surfaces。
 该菜单恢复原渲染器材质、原溪岸层及遮罩范围内的原地表权重，移除本阶段反射，并关闭后续自动应用。
-必须保留 Reports/Creek/StageFour/OriginalControls-*.bin；若后续修改了溪岸涂层，撤回会还原这一区域的绘制，请先备份。
+撤销菜单使用场景节点保存的原材质、地形层引用和局部涂层备份；历史 `Reports/Creek/StageFour` 控制文件已随 2026-11-12 清理删除。若后续修改了溪岸涂层，撤回会还原这一区域的绘制，请先用 git 或菜单保存的备份。
 
-Reports/Creek/StageFour 同时保存本阶段开始前的完整主场景与地形资产。
+本阶段开始前的场景与地形资产原本保存在本机 `Reports/Creek/StageFour`，已删除。
 直接覆盖检查点会丢弃其后的相应人工改动，因此优先使用局部恢复菜单。
 
 ## 检查结果
@@ -44,7 +44,7 @@ Reports/Creek/StageFour 同时保存本阶段开始前的完整主场景与地�
 Unity 编译、着色器、保存后引用与低/中/高档短暂 Play 渲染通过。
 地形高度、树实例、草地细节与导航指纹保持一致；实际记录的湿润遮罩外涂层变化为零。
 原岩石/蕨叶材质、原 JungleCreekBank、Crest 水面均未改写；Play 退出后相关源文件不漂移。
-截图在 Reports/Creek/StageFour，日志在 Logs/creek-stage4.log 和 Logs/creek-stage4-smoke.log。
+历史截图与日志原本在 `Reports/Creek/StageFour` 和 `Logs/`，已随本机清理删除。
 以上不替代用户手动视觉查收，不含固定路线性能采样或演示机测试。
 
 ## 下一阶段

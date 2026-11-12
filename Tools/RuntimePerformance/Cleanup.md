@@ -13,16 +13,16 @@
 
 ## 保留与验证
 
-- 原优化包 `Builds/AllTierOptimized`、优化前包 `Builds/AllTierBaseline` 和正式测量包 `Builds/AllTierMeasured` 保持原样。原优化包 exe / 游戏程序集 SHA-256 与交付记录一致。
+- 原优化包 `Builds/AllTierOptimized`、优化前包 `Builds/AllTierBaseline` 和正式测量包 `Builds/AllTierMeasured` 已随 2026-11-12 全局清理删除；仅保留 `Builds/AllTierClean`。
 - 清理后 Release 程序：`Builds/AllTierClean/JurassicWorld.exe`，构建退出 0。三档默认仍为原生 1920×1080，当前阴影、LOD、接触弯折和软植被预算均保留。
 - Runtime / Editor 独立编译均 CSC EXIT 0。修正独立编译工具读取未刷新 csproj 时仍包含已删除源文件的问题。实际 Unity 导入与 Release 构建同时通过。
 - 三档分别对森林、溪流、活动恐龙近景和漫游完成 2 秒预热 / 3 秒采样短时检查，均有完成标记和有效可见帧；未用短测重新声明正式 FPS 提升。
 - 三档均保持 6 只恐龙、775 个硬树阻挡；1757 株安全软植被中隐藏数分别为 878 / 527 / 175。五个原有尺寸修改文件的 SHA-256 未改变。
 - 核对溪流截图，水面、叶片轮廓、原生 UI 及森林显示正常。正式前后数据仍以 `AllTierComparison.md` 为准。
-- 详细校验值：`Logs/RuntimePerformance/performance-cleanup-verification.json`；短测目录 `Logs/RuntimePerformance/cleanup-{Low,Medium,High}`。
+- 清理时的校验记录与短测目录原本在 `Logs/RuntimePerformance`，已随本机 `Logs/` 清理。
 
 ## 缓存例外
 
-自动审批拦截了旧 `Tools/RuntimePerformance/__pycache__/compare_results.cpython-312.pyc` 文件的删除，仅返回 `blocked by policy`，未提供更具体原因。该缓存保留；对应源代码、测试与运行入口已删除。当前报告生成器的缓存也保留。
+旧 `Tools/RuntimePerformance/__pycache__` 缓存已随 2026-11-12 全局清理删除；对应源代码、测试与运行入口此前已删除。
 
 历史验收报告记录清理前完成的检查；其中旧测试命令已退役。现有尺寸修改、原始素材、场景及核心玩法数据未覆盖。

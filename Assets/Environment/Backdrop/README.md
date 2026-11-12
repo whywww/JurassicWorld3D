@@ -29,11 +29,8 @@
 外围地面采样地形边沿高度，向外缓降；额外起伏仅为断续的小土包，最高 0.65 米，禁止整圈连续抬高形成土墙。树根使用同一高度函数。
 地面深浅及土色变化由编辑态顶点色生成，仅外围地面材质启用，不增加纹理采样或运行时脚本。
 Prepared/LightForest 保存图集、代理网格、材质及本轮独立的过渡地面，不改旧版加工地面。
-Reports/Backdrop/LightForest 保存本轮场景与远景 Prefab 备份、分布数据、16 处边界前后截图及性能对照。
-Reports/Backdrop/BoundaryTransition 保留上一轮 384 棵真树方案的旧记录，不作为本轮验收结果。
-Reports/Backdrop/GreenWallFix 保存绿色土墙修正的独立场景、Prefab、被覆盖地面/合批网格/材质备份，以及用户截图位置和 16 处边界的对照图。
-仅回退土墙修正时，先备份后续人工改动，再恢复该目录 Main.Before.unity、Backdrop.Before.prefab，并按 Resources 下的原相对路径恢复网格和材质，保留项目原有 meta。
-只回退本轮修改时，同时恢复 LightForest 报告目录的 Main.Before.unity 和 Backdrop.Before.prefab 到原路径，保留各自 meta；先备份后续人工修改。
+历史场景/Prefab、网格材质备份与边界对照截图原本保存在本机 `Reports/Backdrop/`，已随 2026-11-12 清理删除。
+回退时先备份后续人工改动，再按 git 历史恢复对应场景、Prefab 或材质文件；当前布局以 `Prepared/LightForest` 和场景中的 `Rainforest Backdrop` 节点为准。
 
 打开 Assets/Scenes/Main.unity 直接 Play，无需 Bake。先以中档检查：
 
@@ -62,17 +59,14 @@ RainforestBackdrop 进入 Play 时将主相机远裁剪设为 600 米，Backdrop
 
 ## 报告与回退
 
-Reports/Backdrop/StageThree 保存实施前场景、原相机参数、八方向和两处边界的编辑态前后截图、运行态截图与 Checks.txt。
-Logs/backdrop-stage3.log 和 Logs/backdrop-stage3-smoke.log 保存 Unity 应用与基础检查记录。
+实施前场景、相机参数、边界对照截图、性能 JSON 与应用日志原本保存在本机 `Reports/Backdrop/` 和 `Logs/`，已随 2026-11-12 清理删除。
 短暂 Play 检查不替代用户手动查收，不包含固定路线性能验收或演示机测试。
-LightForest/Performance.Before.json 与 Performance.After.json 记录相同 16 个静态视点、中档、1280×720 的短暂诊断。
-为隔离本轮变化，性能相机只绘制 Backdrop，临时关闭其他相机、反射和相机脚本；CPU 探针额外调用一次 Camera.Render。
-Profiler 计数含编辑器帧工作；visibleMeshTriangles 是保守视锥网格预算，不是 GPU 实测计数。
+性能相机只绘制 Backdrop，临时关闭其他相机、反射和相机脚本；Profiler 计数含编辑器帧工作，visibleMeshTriangles 是保守视锥网格预算，不是 GPU 实测计数。
 GPU 无有效样本时标记为不可用；不把零值解释为零开销，也不据此承诺完整场景帧率。
 
 临时隐藏远景可在编辑态禁用 Rainforest Backdrop 根节点。
-完全回退时先备份后续人工改动，再用 Main.Before.unity 的内容恢复主场景，保留 Main.unity.meta；原地形、导航和材质无需恢复。
-原相机远裁剪为 150 米，每层剔除参数记录于 Camera.Before.json。
+完全回退时先备份后续人工改动，再按 git 历史恢复主场景；原地形、导航和材质无需恢复。
+原相机远裁剪为 150 米，每层剔除参数需按当前相机配置复核。
 
 ## 来源与许可
 
@@ -83,5 +77,5 @@ Coastal Cliff 01：https://polyhaven.com/a/coastal_cliff_01
 
 ## 下一阶段
 
-阶段四湿润材质可复用已有 RockMossSet01、溪岸地形层和植被贴图，无需新下载。
-等待用户完成阶段三手动查收并明确同意后，才实施阶段四。
+阶段四湿润材质已实施，见 `Assets/Environment/Creek/Prepared/Wetness/README.md`。
+阶段五声音素材仍未接入，下载清单见 `Tools/AfterRainStageFiveDownloads.md`。

@@ -1,6 +1,6 @@
 # Runtime performance: three quality tiers
 
-Current acceptance uses visible, non-Development Windows D3D11 Players at 1920×1080. There is no mandatory 60 FPS gate. The earlier Editor-only 60 FPS experiment is historical; see `LowQualityResults.md` and `Results.md` for its dated results, not current defaults.
+Current acceptance uses visible, non-Development Windows D3D11 Players at 1920×1080. There is no mandatory 60 FPS gate. The earlier Editor-only 60 FPS experiment is historical; its dated records were removed in the 2026-11-12 cleanup and are not current defaults.
 
 ## Current defaults
 
@@ -45,11 +45,11 @@ The performance-only acceptance classes, opt-in Player smoke fixture, depth-capt
 
 Editor menus now offer Diagnostic (3/10/1) and Capture (15/60/3) for Low/Medium/High. They all use native resolution and the current tier plant budget. The old Low stage menus and Budgets runner mode are retired. Unrelated navigation, brain input and dinosaur behavior fixtures remain outside this cleanup scope.
 
-Prior test results in the reports describe validation completed before cleanup; their removed commands are historical. Current sampling/report generation remain supported. Original optimized, baseline and measured Players are preserved. The cleaned source builds a separate non-Development Player at `Builds/AllTierClean/JurassicWorld.exe`; short post-cleanup captures are diagnostic checks, not a new formal performance claim.
+Prior test results in the reports describe validation completed before cleanup; their removed commands are historical. Current sampling/report generation remain supported. Only the current delivery and acceptance Players are kept locally (`Builds/AllTierClean`, `Builds/JurassicWorld`, and BCI/Pteradactal acceptance builds); the historical baseline, optimized and measured Player folders were removed on 2026-11-12. The cleaned source builds a separate non-Development Player at `Builds/AllTierClean/JurassicWorld.exe`; short post-cleanup captures are diagnostic checks, not a new formal performance claim.
 
 Final Development diagnostics: [AllTierDiagnostic.md](AllTierDiagnostic.md).
 
-Formal results and limitations: [AllTierResults.md](AllTierResults.md), [AllTierComparison.md](AllTierComparison.md). The exact measured optimized package is retained at `Builds/AllTierMeasured`; the rebuilt shipped package at `Builds/AllTierOptimized` changes only the default resolution choice and its smoke fixture. Timed captures explicitly set render scale, so the selected native captures match the shipped defaults.
+Formal results and limitations: [AllTierResults.md](AllTierResults.md), [AllTierComparison.md](AllTierComparison.md). The historical measured and optimized packages were removed on 2026-11-12; their record is kept in the reports, not as local binaries. Timed captures explicitly set render scale, so the selected native captures match the shipped defaults.
 
 `-StartTier Medium|High` resumes the remaining matrix tiers under the same prefix after completed captures are retained and the failed directory/log are separately archived. A previous INVALID marker must never be silently cleared. The runner requests display/system wakefulness while its own visible Player runs and restores that request afterward; it does not change lock-screen policy.
 

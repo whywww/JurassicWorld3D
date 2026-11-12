@@ -19,12 +19,10 @@ The shipped final defaults use native 1080p in every tier. Native optimization a
 |High|dinosaur-close|117.27|12.80|12.80|7.6 / 63.8|63.8|300.83 / 41.50|63.79|
 |High|route|75.18|8.08|8.08|12.1 / 78.4|78.4|233.80 / 48.82|76.08|
 
-Low sources: [before](E:/Unity/JurassicWorld/Logs/RuntimePerformance/alltiers-formal-20261112-before-Low/results.md), [native](E:/Unity/JurassicWorld/Logs/RuntimePerformance/alltiers-formal-20261112-native-Low/results.md), [scaled](E:/Unity/JurassicWorld/Logs/RuntimePerformance/alltiers-formal-20261112-scaled-Low/results.md)
+Low sources: before / native / scaled — 原始采样日志已随本机 `Logs/` 清理。
 
+Medium sources: before / native / scaled — 原始采样日志已随本机 `Logs/` 清理。
 
-Medium sources: [before](E:/Unity/JurassicWorld/Logs/RuntimePerformance/alltiers-formal-20261112-before-Medium/results.md), [native](E:/Unity/JurassicWorld/Logs/RuntimePerformance/alltiers-formal-20261112-native-Medium/results.md), [scaled](E:/Unity/JurassicWorld/Logs/RuntimePerformance/alltiers-formal-20261112-scaled-Medium/results.md)
-
-
-High sources: [before](E:/Unity/JurassicWorld/Logs/RuntimePerformance/alltiers-formal-20261112-before-High/results.md), [native](E:/Unity/JurassicWorld/Logs/RuntimePerformance/alltiers-formal-20261112-native-High/results.md), [scaled](E:/Unity/JurassicWorld/Logs/RuntimePerformance/alltiers-formal-20261112-native-High/results.md)
+High sources: before / native / scaled — 原始采样日志已随本机 `Logs/` 清理。
 
 No fixed FPS target was imposed. Frame-time regressions and unsupported counters must be reviewed in the raw reports.
