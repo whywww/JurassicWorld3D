@@ -205,14 +205,15 @@ namespace JurassicWorld.Editor
             if (importer == null) throw new InvalidOperationException("HDR texture importer missing.");
             if (importer.textureShape != TextureImporterShape.Texture2D || importer.maxTextureSize != 8192 ||
                 importer.isReadable || importer.wrapMode != TextureWrapMode.Repeat || importer.sRGBTexture ||
-                !importer.mipmapEnabled || importer.textureCompression != TextureImporterCompression.CompressedHQ)
+                importer.mipmapEnabled || importer.textureCompression != TextureImporterCompression.CompressedHQ)
             {
                 importer.textureShape = TextureImporterShape.Texture2D;
                 importer.textureType = TextureImporterType.Default;
                 importer.maxTextureSize = 8192;
                 importer.isReadable = false;
                 importer.sRGBTexture = false;
-                importer.mipmapEnabled = true;
+                // Disable mipmaps to avoid a visible seam in the panoramic sky.
+                importer.mipmapEnabled = false;
                 importer.wrapMode = TextureWrapMode.Repeat;
                 importer.textureCompression = TextureImporterCompression.CompressedHQ;
                 importer.SaveAndReimport();
