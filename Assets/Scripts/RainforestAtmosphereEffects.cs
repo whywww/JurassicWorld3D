@@ -44,8 +44,8 @@ namespace JurassicWorld
                 main.startColor = new Color(0.74f, 0.80f, 0.78f, profile.mistOpacity);
                 var emission = system.emission;
                 emission.rateOverTime = tier == 2 ? 0.48f : 0.24f;
-                system.gameObject.SetActive(tier > 0);
-                if (Application.isPlaying && tier > 0 && !system.isPlaying) system.Play();
+                system.gameObject.SetActive(false);
+
             }
             if (properties == null) properties = new MaterialPropertyBlock();
             properties.SetColor("_Tint", new Color(1f, 0.96f, 0.84f, profile.shaftOpacity));
@@ -54,23 +54,10 @@ namespace JurassicWorld
             UpdateVisibility();
         }
 
-        private void LateUpdate() => UpdateVisibility();
-
         private void UpdateVisibility()
         {
-            if (viewCamera == null) return;
-            Vector3 position = viewCamera.transform.position;
-            foreach (ParticleSystem system in mist)
-            {
-                if (system == null || !system.gameObject.activeSelf) continue;
-                float distance = (system.transform.position - position).sqrMagnitude;
-                if (distance > 75f * 75f && system.isPlaying) system.Pause();
-                else if (distance < 68f * 68f && system.isPaused) system.Play();
-            }
-            for (int i = 0; i < shafts.Length; i++)
-                if (shafts[i] != null)
-                    shafts[i].enabled = tier > 0 && (tier == 2 || i < 2) &&
-                        (shafts[i].bounds.center - position).sqrMagnitude < 65f * 65f;
+            // Volumetric decorations are disabled by the shared performance budget.
+            foreach (Renderer shaft in shafts) if (shaft != null) shaft.enabled = false;
         }
 
         private void OnDisable()

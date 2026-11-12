@@ -98,12 +98,19 @@ namespace JurassicWorld
             foreach (var plant in FindObjectsByType<CenterGapGroundPlant>(FindObjectsSortMode.None))
                 plant.ApplyQuality(selectedTier);
             foreach (var system in FindObjectsByType<FoliageInteractionSystem>(FindObjectsSortMode.None))
-                system.ApplyQuality(selectedTier, camera);
+                { system.ClearInteraction(); system.ApplyQuality(selectedTier, camera); }
             foreach (RainforestAtmosphereController atmosphere in FindObjectsOfType<RainforestAtmosphereController>())
                 atmosphere.ApplyQuality(selectedTier);
             var rendering = GetComponent<LowQualityRendering>();
             if (rendering == null) rendering = gameObject.AddComponent<LowQualityRendering>();
             rendering.ApplyQuality(selectedTier);
+            var presentation = GetComponent<WorldRenderScale>();
+            if (presentation == null) presentation = gameObject.AddComponent<WorldRenderScale>();
+            presentation.Configure(camera, 1f);
+            QualitySettings.shadowDistance = selectedTier == High ? 60f : selectedTier == Medium ? 30f : 0f;
+            QualitySettings.shadowCascades = selectedTier == High ? 2 : 0;
+            QualitySettings.lodBias = selectedTier == High ? 1f : selectedTier == Medium ? .75f : .5f;
+
 
             float detailDistanceScale = selectedTier == High ? 1f : selectedTier == Medium ? 0.75f : 0.5f;
             float detailDensityScale = selectedTier == High ? 1f : selectedTier == Medium ? 0.75f : 0.4f;

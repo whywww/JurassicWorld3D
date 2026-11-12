@@ -99,6 +99,11 @@ namespace JurassicWorld
 
         private static bool CoreIntersectsSolid(Vector2 position, Vector2 forward, DinosaurCoreBody body, Bounds obstacle)
         {
+            // A conservative XZ broad phase avoids scanning every height band for distant rocks.
+            // BroadRadius encloses every band, including off-centre head/tail envelopes.
+            float reach = body.BroadRadius * forward.magnitude;
+            if (Mathf.Abs(obstacle.center.x - position.x) >= reach + obstacle.extents.x ||
+                Mathf.Abs(obstacle.center.z - position.y) >= reach + obstacle.extents.z) return false;
             Vector2 right = new Vector2(forward.y, -forward.x);
             foreach (var band in body.bands)
             {

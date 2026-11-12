@@ -394,10 +394,10 @@ namespace JurassicWorld
             RestoreSideHeadPose();
             // This must precede traffic/interaction early returns: their own retry
             // clocks cannot provide a bound on the total time without movement.
-            if (UpdateEmergencyEscape(Time.deltaTime)) return;
+            if (ProfiledEmergency(Time.deltaTime)) return;
             if (frontTestWaiting)
             {
-                if (!UpdatePlayerInteraction()) PlayClip(idleClip);
+                if (!ProfiledInteraction()) PlayClip(idleClip);
                 return;
             }
             if (SummonEnabled && Input.GetKeyDown(KeyCode.Space))
@@ -407,13 +407,13 @@ namespace JurassicWorld
             // 放在 Update：动画采样在本帧 Update 之后发生，此帧修正即时生效。
             if (gaitProfile == null) ApplyMoveLoopWindow();
 
-            if (UpdateGroundTraffic()) return;
+            if (ProfiledTraffic()) return;
 
             if (UpdateRouteStepping()) return;
             if (IsSteppingTurn && stepTurnUse == TurnUse.Wander) { TickSteppingTurn(); return; }
-            if (freeRecoveryActive && InteractionPhase == PlayerInteractionPhase.Inactive && UpdateFreeRoaming()) return;
-            if (UpdatePlayerInteraction()) return;
-            if (UpdateFreeRoaming()) return;
+            if (freeRecoveryActive && InteractionPhase == PlayerInteractionPhase.Inactive && ProfiledRoaming()) return;
+            if (ProfiledInteraction()) return;
+            if (ProfiledRoaming()) return;
 
             switch (CurrentState)
             {

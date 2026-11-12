@@ -41,11 +41,12 @@ foreach ($n in $xml.SelectNodes('//ProjectReference[@Include]')) {
 foreach ($n in $xml.SelectNodes('//Compile[@Include]')) {
     $f = $n.GetAttribute('Include')
     $p = Join-Path $projDir $f
+    if (-not (Test-Path -LiteralPath $p)) { continue }
     [void]$runtimeSourcePaths.Add($p)
     [void]$sb.AppendLine('"' + $p + '"')
 }
 
-# Unity-generated project files can lag behind newly added runtime components.
+# Unity-generated project files can lag behind runtime source additions/deletions.
 foreach ($source in Get-ChildItem -LiteralPath (Join-Path $projDir 'Assets\Scripts') -Filter '*.cs' -Recurse) {
     if ($runtimeSourcePaths.Add($source.FullName)) { [void]$sb.AppendLine('"' + $source.FullName + '"') }
 }

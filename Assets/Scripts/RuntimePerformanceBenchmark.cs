@@ -35,13 +35,13 @@ namespace JurassicWorld
         private readonly string[] counters = { "Main Thread", "CPU Render Thread Frame Time", "GC Allocated In Frame", "Draw Calls Count", "Triangles Count", "Batches Count", "SetPass Calls Count",
             "JurassicWorld.FoliageInteraction", "JurassicWorld.DinosaurBehaviour", "JurassicWorld.DinosaurFootLock", "JurassicWorld.NavigationHud", "JurassicWorld.Visibility.Capture", "JurassicWorld.Visibility.SceneRender", "JurassicWorld.Visibility.ReadResults",
             "Camera.Render", "Gfx.WaitForPresentOnGfxThread", "Gfx.WaitForGfxCommandsFromMainThread", "Gfx.WaitForRenderThread",
-            "Instanced Batches Count", "Instanced Batched Draw Calls Count", "EditorLoop", "PlayerLoop", "EditorApplication.update" };
+            "Instanced Batches Count", "Instanced Batched Draw Calls Count", "EditorLoop", "PlayerLoop", "EditorApplication.update", "JurassicWorld.AI.Emergency", "JurassicWorld.AI.Traffic", "JurassicWorld.AI.Interaction", "JurassicWorld.AI.Roaming" };
         private readonly FrameTiming[] timing = new FrameTiming[1];
         private new Camera camera;
         private RenderTexture output, previousTarget;
         private Vector3 originalPosition;
         private Quaternion originalRotation;
-        private Vector3 dinosaurEye, dinosaurLook, creekEye = new Vector3(12, 0, 12), creekLook = new Vector3(35, 2, 30);
+        private Vector3 creekEye = new Vector3(12, 0, 12), creekLook = new Vector3(35, 2, 30);
         private Vector3 forestEye = new Vector3(-45, 0, -20), forestLook;
         private Vector3[] route;
         private readonly List<Behaviour> disabled = new List<Behaviour>();
@@ -113,10 +113,6 @@ namespace JurassicWorld
             Directory.CreateDirectory(directory);
             savedVsync = QualitySettings.vSyncCount; savedTarget = Application.targetFrameRate;
             originalPosition = camera.transform.position; originalRotation = camera.transform.rotation;
-            // Retained baseline's initial dinosaur viewpoint. Actor startup order can change
-            // its initial position despite Random.InitState; do not move the test camera with it.
-            dinosaurEye = new Vector3(59.4972f, 1.6999f, 43.1379f);
-            dinosaurLook = dinosaurEye + Quaternion.Euler(351.4688f, 0f, 0f) * Vector3.forward * 20f;
             foreach (var point in FindObjectsOfType<Transform>())
                 if (point.name == "Creek Ground View 1") { creekEye = point.position; creekLook = creekEye + point.forward * 20; break; }
             var layout = FindObjectOfType<RainforestSampleLayout>();
@@ -147,11 +143,11 @@ namespace JurassicWorld
             int height = int.Parse(Argument("-jwPerfHeight", "1080"));
             capturedQuality = QualitySettings.GetQualityLevel(); capturedWidth = width; capturedHeight = height;
             previousTarget = camera.targetTexture;
-            if (Application.isEditor && !Application.isBatchMode)
+            if (!Application.isBatchMode)
             {
-                camera.targetTexture = null;
+                if (WorldRenderScale.CurrentScale >= .999f) camera.targetTexture = null;
                 if (Screen.width != width || Screen.height != height)
-                    throw new InvalidOperationException($"Game View must be {width}x{height}, got {Screen.width}x{Screen.height}.");
+                    throw new InvalidOperationException($"Visible output must be {width}x{height}, got {Screen.width}x{Screen.height}.");
             }
             else
             {
@@ -184,12 +180,12 @@ namespace JurassicWorld
             if (!Application.isBatchMode)
                 gameViewLayout = UnityEditor.EditorWindow.GetWindow(typeof(UnityEditor.Editor).Assembly.GetType("UnityEditor.GameView")).maximized ? "maximized" : "docked";
 #endif
-            string metadata = $"# Runtime performance: {label}\n\n" +
+            string metadata = $"World render scale: {WorldRenderScale.CurrentScale}\n" + $"# Runtime performance: {label}\n\n" +
                 $"UTC: {DateTime.UtcNow:O}\nUnity: {Application.unityVersion}\nEditor: {Application.isEditor}\nBatchmode: {Application.isBatchMode}\nDevelopment: {Debug.isDebugBuild}\n" +
                 $"CPU: {SystemInfo.processorType} ({SystemInfo.processorCount})\nGPU: {SystemInfo.graphicsDeviceName}\nAPI: {SystemInfo.graphicsDeviceType}\n" +
                 $"RAM / VRAM MB: {SystemInfo.systemMemorySize} / {SystemInfo.graphicsMemorySize}\n" +
                 $"Automatic camera target: {width}x{height}\nQuality: {QualitySettings.names[QualitySettings.GetQualityLevel()]}\n" +
-                $"Output mode: {(output == null ? "visible Game View" : "automatic camera texture")}\nLow optimization stage: {LowQualityRendering.Stage}\n" +
+                $"Output mode: {(output == null ? (Application.isEditor ? "visible Game View" : "visible Player window") : "automatic camera texture")}\n" +
                 $"Game View layout: {gameViewLayout}\n" +
                 $"Population: mesh renderers={FindObjectsOfType<MeshRenderer>().Length}, interactive plants={FindObjectsOfType<InteractiveFoliage>().Length}, hard trees={FindObjectsOfType<SceneTreeObstacle>().Length}, dinosaurs={FindObjectsOfType<DinosaurAgent>().Length}\n" +
                 $"Close dinosaur: {(closeDinosaur != null ? closeDinosaur.name : "unavailable")}\n" +
@@ -200,9 +196,23 @@ namespace JurassicWorld
                 "Render thread timing: ProfilerRecorder, with valid FrameTimingManager CPU render-thread time as fallback.\n" +
                 "Seed: 73021. VSync off, uncapped during capture; restored at completion. Animals remain active.\n" +
                 "No extra measurement renders. CPU counters include waits; GPU unavailable unless FrameTiming supplies valid values.\n\n" +
-                "|Case|View|Repeat|Frames|Frame median ms|Frame P95 ms|Main median ms|Render median ms|GPU median ms|GC median bytes|Draws median|Triangles median|Batches median|SetPass median|Foliage ms|AI ms|Feet ms|HUD ms|Visibility ms|Probe ms|Decode ms|Camera render ms|Present wait ms|Command wait ms|Render wait ms|Instanced batches|Instanced draw calls|Editor loop ms|Player loop ms|Editor update ms|\n" +
+                "|Case|View|Repeat|Frames|Frame median ms|Frame P95 ms|Main median ms|Render median ms|GPU median ms|GC median bytes|Draws median|Triangles median|Batches median|SetPass median|Foliage ms|AI ms|Feet ms|HUD ms|Visibility ms|Probe ms|Decode ms|Camera render ms|Present wait ms|Command wait ms|Render wait ms|Instanced batches|Instanced draw calls|Editor loop ms|Player loop ms|Editor update ms|Emergency ms|Traffic ms|Interaction ms|Roaming ms|\n" +
                 "|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|\n";
+            metadata = metadata.Replace("|---|---|", "|---|---|---:|---:|---:|---:|");
             File.WriteAllText(Path.Combine(directory, "results.md"), metadata);
+            var terrainDetails = new StringBuilder("terrain,layer,map_units,effective_density,visible_distance\n");
+            foreach (var terrain in Terrain.activeTerrains)
+            {
+                var data = terrain.terrainData;
+                for (int layer = 0; layer < data.detailPrototypes.Length; layer++)
+                {
+                    long units = 0;
+                    foreach (int value in data.GetDetailLayer(0, 0, data.detailWidth, data.detailHeight, layer)) units += value;
+                    terrainDetails.AppendLine($"{terrain.name},{layer},{units},{terrain.detailObjectDensity.ToString(CultureInfo.InvariantCulture)},{terrain.detailObjectDistance.ToString(CultureInfo.InvariantCulture)}");
+                }
+            }
+            File.WriteAllText(Path.Combine(directory, "terrain-details.csv"), terrainDetails.ToString());
+
             var audit = new StringBuilder("root,mesh,shader,streams,static_batch,property_block,instancing,material_id,mesh_id,lightmap,pass_count\n");
             foreach (var renderer in FindObjectsOfType<MeshRenderer>())
             {
@@ -251,7 +261,9 @@ namespace JurassicWorld
                             Position(view, (float)(Time.realtimeSinceStartupAsDouble - start) / duration);
                             yield return null;
                             double now = Time.realtimeSinceStartupAsDouble;
-                            if (QualitySettings.GetQualityLevel() != capturedQuality || camera.pixelWidth != capturedWidth || camera.pixelHeight != capturedHeight)
+                            if (QualitySettings.GetQualityLevel() != capturedQuality || Screen.width != capturedWidth || Screen.height != capturedHeight ||
+                                camera.pixelWidth != Mathf.RoundToInt(capturedWidth * WorldRenderScale.CurrentScale) ||
+                                camera.pixelHeight != Mathf.RoundToInt(capturedHeight * WorldRenderScale.CurrentScale))
                                 throw new InvalidOperationException("Quality or camera resolution changed during capture.");
                             // A simulation tick without a main-camera draw is not a rendered frame.
                             if (automaticRenders == previousRender) continue;
@@ -350,7 +362,6 @@ namespace JurassicWorld
             {
                 case "forest": eye = forestEye; look = forestLook; break;
                 case "creek": eye = creekEye; look = creekLook; break;
-                case "dinosaur": eye = dinosaurEye; look = dinosaurLook; break;
                 case "dinosaur-close":
                     if (closeDinosaur == null || closeRenderers.Length == 0) throw new InvalidOperationException("No active dinosaur for the close-up test.");
                     Bounds bounds = closeRenderers[0].bounds;

@@ -34,6 +34,9 @@ namespace JurassicWorld
         private bool hasRootMatrices;
         private bool initialized;
         private bool fieldActive;
+        private readonly System.Collections.Generic.Dictionary<Renderer, Material[]> optimizedRest = new System.Collections.Generic.Dictionary<Renderer, Material[]>();
+        internal void SetOptimizedRest(Renderer renderer, Material[] materials)
+        { if (materials == null) optimizedRest.Remove(renderer); else optimizedRest[renderer] = materials; }
         private Bounds[] restBounds;
         private Mesh[] interactionMeshes;
         private Material[][] interactionMaterials;
@@ -95,7 +98,7 @@ namespace JurassicWorld
                 {
                     filters[i].sharedMesh = originals[i].mesh;
                     ((MeshRenderer)renderer).additionalVertexStreams = originals[i].additionalStreams;
-                    renderer.sharedMaterials = originals[i].materials;
+                    renderer.sharedMaterials = optimizedRest.TryGetValue(renderer, out var optimized) ? optimized : originals[i].materials;
                 }
                 restBounds[i] = renderer.localBounds;
             }
@@ -153,6 +156,7 @@ namespace JurassicWorld
                 bounds.Expand(FoliageInteractionSystem.MaximumDisplacement * 2f / minScale);
                 renderer.localBounds = bounds;
                 renderer.GetPropertyBlock(block);
+                if (convertedTerrainTree) { block.SetColor("_TreeInstanceColor", instanceColor); block.SetColor("_TreeInstanceLightmapColor", instanceLightmapColor); }
                 block.SetTexture(FieldId, field);
                 block.SetMatrix(WorldToRootId, transform.worldToLocalMatrix);
                 block.SetVector(MinId, localBounds.min);
@@ -275,7 +279,7 @@ namespace JurassicWorld
                 {
                     filters[i].sharedMesh = originals[i].mesh;
                     ((MeshRenderer)renderer).additionalVertexStreams = originals[i].additionalStreams;
-                    renderer.sharedMaterials = originals[i].materials;
+                    renderer.sharedMaterials = optimizedRest.TryGetValue(renderer, out var optimized) ? optimized : originals[i].materials;
                 }
                 renderer.localBounds = restBounds[i];
             }

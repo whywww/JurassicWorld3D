@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace JurassicWorld
 {
-    // Low-only shared variants. Every renderer, mesh, transform and authored LOD stays in place.
+    // Shared quality variants; soft-plant thinning uses reversible whole-owner rendering flags.
     internal sealed class LowQualityVegetation
     {
         private sealed class Binding
@@ -18,12 +18,10 @@ namespace JurassicWorld
         internal int EligiblePlants { get; private set; }
         internal int HiddenPlants { get; private set; }
         internal int SkippedPlants { get; private set; }
-        internal const int DefaultReduction = 0;
 
-        internal void Apply(bool enabled, bool simplify, int reduction)
+        internal void Apply(int reduction)
         {
             Restore();
-            if (!enabled) return;
             foreach (var renderer in Object.FindObjectsByType<MeshRenderer>(FindObjectsSortMode.None))
             {
                 Material[] originals = renderer.sharedMaterials;
@@ -31,7 +29,7 @@ namespace JurassicWorld
                 bool changed = false, allMapped = originals.Length > 0;
                 for (int i = 0; i < originals.Length; i++)
                 {
-                    string resource = Resource(originals[i], simplify);
+                    string resource = Resource(originals[i]);
                     if (resource == null) { allMapped = false; continue; }
                     if (!variants.TryGetValue(originals[i], out var variant))
                     {
@@ -55,6 +53,7 @@ namespace JurassicWorld
                     var block = new MaterialPropertyBlock(); block.SetColor("_JWInstanceColor", plant.instanceColor);
                     renderer.SetPropertyBlock(block);
                 }
+                if (plant != null) plant.SetOptimizedRest(renderer, replacements);
                 renderer.sharedMaterials = replacements;
                 bindings.Add(binding);
             }
@@ -70,10 +69,26 @@ namespace JurassicWorld
             EligiblePlants = manifest.entries.Length;
             int count = EligiblePlants * reduction / 100;
             GameObject[] roots = UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects();
+            var candidates = new Dictionary<string, List<Transform>>();
+            foreach (var root in roots) foreach (var node in root.GetComponentsInChildren<Transform>(true))
+            {
+                if (!candidates.TryGetValue(node.name, out var nodes)) candidates.Add(node.name, nodes = new List<Transform>());
+                nodes.Add(node);
+            }
             for (int i = 0; i < count; i++)
             {
                 var entry = manifest.entries[i];
                 Transform owner = Resolve(roots, entry.hierarchy);
+                if (owner == null || owner.name != entry.name || (owner.position-entry.position).sqrMagnitude > .0001f)
+                {
+                    owner = null;
+                    if (candidates.TryGetValue(entry.name, out var nodes)) foreach (var node in nodes)
+                    {
+                        if ((node.position-entry.position).sqrMagnitude > .0001f) continue;
+                        if (owner != null) { owner = null; break; }
+                        owner = node;
+                    }
+                }
                 if (owner == null || owner.name != entry.name || (owner.position-entry.position).sqrMagnitude > .0001f ||
                     owner.GetComponentInParent<SceneTreeObstacle>() != null || owner.GetComponentInParent<DinosaurAgent>() != null ||
                     owner.GetComponentsInChildren<SceneTreeObstacle>(true).Length > 0 || owner.GetComponentsInChildren<Collider>(true).Length > 0 ||
@@ -104,16 +119,16 @@ namespace JurassicWorld
             return current;
         }
 
-        private static string Resource(Material material, bool simplify)
+        private static string Resource(Material material)
         {
             if (material == null) return null;
             switch (material.shader.name)
             {
-                case "Jurassic World/Interactive Tree Leaves": return "LowQuality/" + (simplify ? "Cheap" : "Batch") + "TreeLeaves";
-                case "Jurassic World/Interactive Tree Physical Bark": return "LowQuality/" + (simplify ? "Cheap" : "Batch") + "PhysicalBark";
-                case "Jurassic World/Interactive Bark Sample": return "LowQuality/" + (simplify ? "Cheap" : "Batch") + "BarkSample";
+                case "Jurassic World/Interactive Tree Leaves": return "LowQuality/CheapTreeLeaves";
+                case "Jurassic World/Interactive Tree Physical Bark": return "LowQuality/CheapPhysicalBark";
+                case "Jurassic World/Interactive Bark Sample": return "LowQuality/CheapBarkSample";
                 case "Jurassic World/Foliage Cutout Double Sided":
-                case "Jurassic World/Vegetation Prototype Cutout": return simplify ? "LowQuality/CheapFoliage" : null;
+                case "Jurassic World/Vegetation Prototype Cutout": return "LowQuality/CheapFoliage";
                 default: return null;
             }
         }
@@ -125,6 +140,7 @@ namespace JurassicWorld
             foreach (var binding in bindings)
             {
                 if (binding.renderer == null) continue;
+                binding.renderer.GetComponentInParent<InteractiveFoliage>()?.SetOptimizedRest(binding.renderer, null);
                 binding.renderer.sharedMaterials = binding.materials;
                 if (binding.properties != null)
                     binding.renderer.SetPropertyBlock(binding.properties.isEmpty ? null : binding.properties);

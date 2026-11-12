@@ -45,14 +45,14 @@ namespace JurassicWorld
 
         internal void ApplyQuality(int tier, Camera camera)
         {
-            bool allowed = tier != 0 || LowQualityRendering.Stage == LowQualityRendering.OptimizationStage.Baseline;
+            bool allowed = tier != 0;
             if (qualityAllowsInteractions != allowed)
             {
                 ClearInteraction();
                 qualityAllowsInteractions = allowed;
             }
             interactionCamera = camera;
-            float distance = tier >= 2 ? 85f : tier == 1 ? 55f : 35f;
+            float distance = tier >= 2 ? 15f : tier == 1 ? 8f : 0f;
             interactionDistanceSquared = distance * distance;
             resetDistanceSquared = (distance + 10f) * (distance + 10f);
         }

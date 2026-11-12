@@ -72,6 +72,7 @@ namespace JurassicWorld
         private static int obstacleCount;             // 有效障碍圆数量
         private static float maxTreeRadius;           // 最大树半径，用于按查询半径推导邻域跨度
         private static float maxSectionReach;
+        private static int lastCheckedFrame = -1;
         private static bool initialized;              // 是否已完成首次构建
         private static bool warnedMissingTerrain;     // 「无地形」警告只输出一次
         private static bool warnedMissingTerrainData; // 「无 TerrainData」警告只输出一次
@@ -94,6 +95,8 @@ namespace JurassicWorld
         {
             Terrain activeTerrain = Terrain.activeTerrain;
             int activeInstanceId = activeTerrain != null ? activeTerrain.GetInstanceID() : 0;
+            if (Application.isPlaying && initialized && lastCheckedFrame == Time.frameCount && activeInstanceId == cachedTerrainInstanceId) return;
+            lastCheckedFrame = Time.frameCount;
             // 缓存失效增强：除 Terrain InstanceID 外同时比对 treeInstanceCount，
             // 防 InstanceID 复用极端情形与同 Terrain 树数据被修改的情形。
             int activeTreeCount = 0;
@@ -111,7 +114,7 @@ namespace JurassicWorld
         public static int GeometryRevision { get; private set; }
         public static void Invalidate()
         {
-            initialized = false; GeometryRevision++;
+            initialized = false; lastCheckedFrame = -1; GeometryRevision++;
         }
 
         /// <summary>

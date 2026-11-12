@@ -56,57 +56,32 @@ namespace JurassicWorld.Editor
             };
         }
 
-        [MenuItem("Jurassic World/Performance/Low/Baseline Diagnostic %&#1")]
-        public static void LowBaselineDiagnostic() => RunInteractive("Baseline", false);
-        [MenuItem("Jurassic World/Performance/Low/Contact Diagnostic %&#2")]
-        public static void LowContactDiagnostic() => RunInteractive("Contact", false);
-        [MenuItem("Jurassic World/Performance/Low/Reflection Diagnostic %&#3")]
-        public static void LowReflectionDiagnostic() => RunInteractive("Reflection", false);
-        [MenuItem("Jurassic World/Performance/Low/Baseline Acceptance %&#4")]
-        public static void LowBaselineAcceptance() => RunInteractive("Baseline", true);
-        [MenuItem("Jurassic World/Performance/Low/Reflection Acceptance %&#5")]
-        public static void LowReflectionAcceptance() => RunInteractive("Reflection", true);
-        [MenuItem("Jurassic World/Performance/Low/Water Diagnostic %&#7")]
-        public static void LowWaterDiagnostic() => RunInteractive("Water", false);
-        [MenuItem("Jurassic World/Performance/Low/Batching Diagnostic %&#8")]
-        public static void LowBatchingDiagnostic() => RunInteractive("Batching", false);
-        [MenuItem("Jurassic World/Performance/Low/Materials Diagnostic %&#9")]
-        public static void LowMaterialsDiagnostic() => RunInteractive("Materials", false);
-        [MenuItem("Jurassic World/Performance/Low/Materials Acceptance %&#0")]
-        public static void LowMaterialsAcceptance() => RunInteractive("Materials", true);
-        [MenuItem("Jurassic World/Performance/Low/Soft Plants 10 Diagnostic %&#F1")]
-        public static void LowPlants10Diagnostic() => RunInteractive("Materials", false, 10);
-        [MenuItem("Jurassic World/Performance/Low/Soft Plants 20 Diagnostic %&#F2")]
-        public static void LowPlants20Diagnostic() => RunInteractive("Materials", false, 20);
-        [MenuItem("Jurassic World/Performance/Low/Soft Plants 30 Diagnostic %&#F3")]
-        public static void LowPlants30Diagnostic() => RunInteractive("Materials", false, 30);
-        [MenuItem("Jurassic World/Performance/Low/Soft Plants 30 Acceptance %&#F5")]
-        public static void LowPlants30Acceptance() => RunInteractive("Materials", true, 30);
-        [MenuItem("Jurassic World/Performance/Low/Verify Optimized Budgets %&#F6")]
-        public static void VerifyOptimizedBudgets() => RuntimePerformanceAcceptance.Run();
-        [MenuItem("Jurassic World/Performance/Low/Probe Terrain Details %&#F7")]
-        public static void ProbeTerrainDetails() => LowQualityTerrainProbe.Run();
-        [MenuItem("Jurassic World/Performance/Low/Verify Existing Navigation %&#F9")]
-        public static void VerifyLowNavigation() => NavigationAcceptance.VerifyExistingLow();
-        [MenuItem("Jurassic World/Performance/Low/Verify Information Card %&#F10")]
-        public static void VerifyInformationCard() => DinosaurInfoCardAcceptance.Run();
-        [MenuItem("Jurassic World/Performance/Low/Isolate Terrain Details %&#F8")]
-        public static void IsolateTerrainDetails() => RunInteractive("Materials", false, 0, "creek", "normal,no-terrain-details");
+        [MenuItem("Jurassic World/Performance/Diagnostic/Low")]
+        public static void LowDiagnostic() => RunInteractive("Low", false);
+        [MenuItem("Jurassic World/Performance/Diagnostic/Medium")]
+        public static void MediumDiagnostic() => RunInteractive("Medium", false);
+        [MenuItem("Jurassic World/Performance/Diagnostic/High")]
+        public static void HighDiagnostic() => RunInteractive("High", false);
+        [MenuItem("Jurassic World/Performance/Capture/Low")]
+        public static void LowCapture() => RunInteractive("Low", true);
+        [MenuItem("Jurassic World/Performance/Capture/Medium")]
+        public static void MediumCapture() => RunInteractive("Medium", true);
+        [MenuItem("Jurassic World/Performance/Capture/High")]
+        public static void HighCapture() => RunInteractive("High", true);
 
-        private static void RunInteractive(string stage, bool acceptance, int reduction = 0,
-            string views = "forest,creek,dinosaur-close,route", string cases = "normal")
+        private static void RunInteractive(string quality, bool fullCapture)
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode || EditorSceneManager.GetActiveScene().isDirty)
                 throw new InvalidOperationException("Stop Play and save before starting a performance capture.");
             SessionState.SetInt(Key + ".PreviousQuality", QualitySettings.GetQualityLevel());
             foreach (var pair in new Dictionary<string, string>
             {
-                { "-jwPerfQuality", "Low" }, { "-jwLowStage", stage },
-                { "-jwPerfLabel", "low-" + stage.ToLowerInvariant() + (reduction > 0 ? "-thin" + reduction : "") + (acceptance ? "-acceptance-" : "-diagnostic-") + DateTime.Now.ToString("yyyyMMdd-HHmmss") },
-                { "-jwLowVegetationReduction", reduction.ToString() },
-                { "-jwPerfViews", views }, { "-jwPerfCases", cases },
-                { "-jwPerfWarmup", acceptance ? "15" : "3" }, { "-jwPerfSeconds", acceptance ? "60" : "10" },
-                { "-jwPerfRepeats", acceptance ? "3" : "1" }
+                { "-jwPerfQuality", quality },
+                { "-jwPerfLabel", quality.ToLowerInvariant() + (fullCapture ? "-capture-" : "-diagnostic-") + DateTime.Now.ToString("yyyyMMdd-HHmmss") },
+                { "-jwLowVegetationReduction", "-1" }, { "-jwRenderScale", "1" },
+                { "-jwPerfViews", "forest,creek,dinosaur-close,route" }, { "-jwPerfCases", "normal" },
+                { "-jwPerfWarmup", fullCapture ? "15" : "3" }, { "-jwPerfSeconds", fullCapture ? "60" : "10" },
+                { "-jwPerfRepeats", fullCapture ? "3" : "1" }
             }) SessionState.SetString("JurassicWorld.Performance.Argument." + pair.Key, pair.Value);
             SessionState.SetBool("JurassicWorld.Performance.Interactive", true);
             try { Run(); }
@@ -163,7 +138,7 @@ namespace JurassicWorld.Editor
             var report = BuildPipeline.BuildPlayer(new BuildPlayerOptions
             {
                 scenes = new[] { "Assets/Scenes/Main.unity" }, locationPathName = path,
-                target = BuildTarget.StandaloneWindows64, options = BuildOptions.Development
+                target = BuildTarget.StandaloneWindows64, options = Array.IndexOf(args, "-jwPerfDevelopment") >= 0 ? BuildOptions.Development : BuildOptions.None
             });
             if (report.summary.result != BuildResult.Succeeded) throw new InvalidOperationException("Performance build failed: " + report.summary.result);
         }

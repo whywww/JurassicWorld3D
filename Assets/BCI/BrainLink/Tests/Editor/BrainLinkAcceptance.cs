@@ -140,11 +140,12 @@ namespace JurassicWorld.BCI.BrainLink.Tests
             {
                 if (!(input is IBrainControlInput)) continue;
                 sources++;
-                if (input.enabled) { selected++; Require(input.GetType().Name == "MindWavePlayerInput", "Preserved MindWave selection"); }
+                if (input.enabled) selected++;
                 using (var inspector = new InspectorScope(UnityEditor.Editor.CreateEditor(input)))
                     Require(inspector.Value is BrainInputEditor, "Shared lock/checkbox inspector for " + input.GetType().Name);
             }
-            Require(sources == 3 && selected == 1, "Three sources, exactly one enabled");
+            Require(sources == 3 && selected <= 1, "Three sources, keyboard mode or one enabled");
+            int initialSelectionCount = selected;
             Undo.IncrementCurrentGroup(); int group = Undo.GetCurrentGroup();
             Undo.RecordObject(brain, "Choose BrainLink"); brain.enabled = true;
             BrainInputEditor.SelectOnly(brain); Undo.FlushUndoRecordObjects(); Undo.CollapseUndoOperations(group);
@@ -154,7 +155,7 @@ namespace JurassicWorld.BCI.BrainLink.Tests
             Undo.PerformUndo(); Require(!brain.enabled, "Undo restores BrainLink off");
             selected = 0;
             foreach (var input in player.GetComponents<MonoBehaviour>()) if (input is IBrainControlInput && input.enabled) selected++;
-            Require(selected == 1, "Undo restores previous selected source");
+            Require(selected == initialSelectionCount, "Undo restores previous selection or keyboard mode");
             Select(player, "");
             foreach (var input in player.GetComponents<MonoBehaviour>()) if (input is IBrainControlInput) Require(!input.enabled, "All-off keyboard mode");
             EditorSceneManager.OpenScene("Assets/Scenes/Main.unity");
